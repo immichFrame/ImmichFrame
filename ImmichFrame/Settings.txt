@@ -1,0 +1,4 @@
+ImmichServerUrl=http://YourUrlOrIpAddress:2283
+Email=
+Password=
+Interval(seconds)=8
