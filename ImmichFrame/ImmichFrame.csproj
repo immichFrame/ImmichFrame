@@ -9,13 +9,13 @@
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
-
-<ItemGroup>
-    <None Remove="Settings.txt" />
+  
+  <ItemGroup>
+    <None Remove="Settings.xml" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Settings.txt">
+    <Content Include="Settings.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

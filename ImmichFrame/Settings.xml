@@ -1,0 +1,11 @@
+
+<Settings>
+  <ImmichServerUrl>http://192.168.0.101:2283</ImmichServerUrl>
+  <Email>robrogers@zoominternet.net</Email>
+  <Password>Emily11Mia14</Password>
+  <Interval>8</Interval>
+  <ShowClock>true</ShowClock>
+  <ClockFontSize>48</ClockFontSize>
+  <ShowPhotoDate>true</ShowPhotoDate>
+  <PhotoDateFontSize>36</PhotoDateFontSize>
+</Settings>
