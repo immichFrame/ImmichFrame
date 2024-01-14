@@ -2,15 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
-using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Avalonia.Controls;
-using Avalonia.Controls.Shapes;
 using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
-using Avalonia.Threading;
 using ImmichFrame.ViewModels;
 
 namespace ImmichFrame.Views;
@@ -25,6 +23,7 @@ public partial class MainView : UserControl
     private string AccessToken = "";
     private AssetInfo? LastAsset;
     private AssetInfo? CurrentAsset;
+
     public class LoginData
     {
         public string? accessToken { get; set; }
@@ -32,10 +31,14 @@ public partial class MainView : UserControl
     private Settings? AppSettings;
     private class Settings
     {
-        public string? immichUrl { get; set; }
-        public string? email { get; set; }
-        public string? password { get; set; }
-        public int interval { get; set; }
+        public string? ImmichServerUrl { get; set; }
+        public string? Email { get; set; }
+        public string? Password { get; set; }
+        public int Interval { get; set; }
+        public bool ShowClock { get; set; }
+        public int ClockFontSize { get; set; }
+        public bool ShowPhotoDate { get; set; }
+        public int PhotoDateFontSize { get; set; }
     }
     public class AssetInfo
     {
@@ -53,13 +56,29 @@ public partial class MainView : UserControl
     {
         ShowSplash();
         AppSettings = ParseSettings();
-        //image switcher timer
-        timerImageSwitcher = new System.Threading.Timer(timerImageSwitcherTick, null, 0, AppSettings.interval * 1000);
-        //Clock timer
-        timerLiveTime = new System.Threading.Timer(LiveTimeTick, null, 0, 1000);
-        AccessToken = await Login();
-        timerImageSwitcher_Enabled = true;
-        //ShowNextImage();
+        if (AppSettings == null)
+        {
+            ExitApp();
+        }
+        else
+        {
+            //image switcher timer
+            timerImageSwitcher = new System.Threading.Timer(timerImageSwitcherTick, null, 0, AppSettings.Interval * 1000);
+            //Clock timer
+            if (AppSettings.ShowClock!)
+            {
+                timerLiveTime = new System.Threading.Timer(LiveTimeTick, null, 0, 1000);
+            }
+            AccessToken = await Login();
+            if (AccessToken == "")
+            {
+                ExitApp();
+            }
+            else
+            {
+                timerImageSwitcher_Enabled = true;
+            }
+        }
     }
 
     private void timerImageSwitcherTick(object? state)
@@ -78,12 +97,12 @@ public partial class MainView : UserControl
     {
         string ret = "";
         HttpClient client = new HttpClient();
-        string url = AppSettings!.immichUrl + "/api/auth/login";
+        string url = AppSettings!.ImmichServerUrl + "/api/auth/login";
 
         var payload = new
         {
-            AppSettings.email,
-            AppSettings.password
+            email = AppSettings.Email,
+            password = AppSettings.Password
         };
 
         var jsonPayload = JsonSerializer.Serialize(payload);
@@ -106,7 +125,7 @@ public partial class MainView : UserControl
     }
     private AssetInfo? GetRandomAsset()
     {
-        string url = AppSettings!.immichUrl + "/api/asset/random";
+        string url = AppSettings!.ImmichServerUrl + "/api/asset/random";
         using (var client = new HttpClient())
         {
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", AccessToken);
@@ -137,7 +156,7 @@ public partial class MainView : UserControl
             CurrentAsset = GetRandomAsset();
             if (CurrentAsset != null)
             {
-                string ImageURL = AppSettings!.immichUrl + "/api/asset/thumbnail/" + CurrentAsset.id + "?format=JPEG";
+                string ImageURL = AppSettings!.ImmichServerUrl + "/api/asset/thumbnail/" + CurrentAsset.id + "?format=JPEG";
                 byte[] imageData = await DownloadImage(ImageURL);
                 using (MemoryStream stream = new MemoryStream(imageData))
                 {
@@ -153,7 +172,7 @@ public partial class MainView : UserControl
         if (LastAsset != null)
         {
             timerImageSwitcher_Enabled = false;
-            string ImageURL = AppSettings!.immichUrl + "/api/asset/thumbnail/" + LastAsset.id + "?format=JPEG";
+            string ImageURL = AppSettings!.ImmichServerUrl + "/api/asset/thumbnail/" + LastAsset.id + "?format=JPEG";
             byte[] imageData = await DownloadImage(ImageURL);
             using (MemoryStream stream = new MemoryStream(imageData))
             {
@@ -166,13 +185,13 @@ public partial class MainView : UserControl
     }
     public void btnBack_Click(object? sender, RoutedEventArgs args)
     {
-        timerImageSwitcher!.Change(AppSettings!.interval * 1000, AppSettings.interval * 1000);
+        timerImageSwitcher!.Change(AppSettings!.Interval * 1000, AppSettings.Interval * 1000);
         ShowPreviousImage();
     }
 
     public void btnNext_Click(object? sender, RoutedEventArgs args)
     {
-        timerImageSwitcher!.Change(AppSettings!.interval * 1000, AppSettings.interval * 1000);
+        timerImageSwitcher!.Change(AppSettings!.Interval * 1000, AppSettings.Interval * 1000);
         ShowNextImage();
     }
 
@@ -196,19 +215,25 @@ public partial class MainView : UserControl
         timerImageSwitcher_Enabled = false;
         Environment.Exit(0);
     }
-    private Settings ParseSettings()
+    private Settings? ParseSettings()
     {
-        Settings pss = new Settings();
-        string[] FileContents = File.ReadAllLines(AppDomain.CurrentDomain.BaseDirectory + @"Settings.txt");
-        string[] Line1 = FileContents[0].Split('=');
-        string[] Line2 = FileContents[1].Split('=');
-        string[] Line3 = FileContents[2].Split('=');
-        string[] Line4 = FileContents[3].Split('=');
-        pss.immichUrl = Line1[1];
-        pss.email = Line2[1];
-        pss.password = Line3[1];
-        pss.interval = int.Parse(Line4[1]);
-        return pss;
+        var xml = File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + @"Settings.xml");
+        var settings = new Settings
+        {
+            ImmichServerUrl = XElement.Parse(xml).Element("ImmichServerUrl")!.Value,
+            Email = XElement.Parse(xml).Element("Email")!.Value,
+            Password = XElement.Parse(xml).Element("Password")!.Value,
+            Interval = int.Parse(XElement.Parse(xml).Element("Interval")!.Value),
+            ShowClock = bool.Parse(XElement.Parse(xml).Element("ShowClock")!.Value),
+            ClockFontSize = int.Parse(XElement.Parse(xml).Element("ClockFontSize")!.Value),
+            ShowPhotoDate = bool.Parse(XElement.Parse(xml).Element("ShowPhotoDate")!.Value),
+            PhotoDateFontSize = int.Parse(XElement.Parse(xml).Element("PhotoDateFontSize")!.Value)
+        };
+        viewModel.ShowClock = settings.ShowClock;
+        viewModel.ClockFontSize = settings.ClockFontSize;
+        viewModel.ShowPhotoDate = settings.ShowPhotoDate;
+        viewModel.PhotoDateFontSize = settings.PhotoDateFontSize;
+        return settings;
     }
 
 }

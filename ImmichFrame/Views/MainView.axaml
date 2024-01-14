@@ -33,10 +33,10 @@
           </DataTemplate>
         </TransitioningContentControl.ContentTemplate>
       </TransitioningContentControl>
-      <TextBlock x:Name="txtLiveTime" Grid.Column="0" Grid.Row="2" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Bottom" Opacity="0.85" Text="{Binding LiveTime}" FontSize="48"/>
-      <TextBlock x:Name="txtImageDate" Grid.Column="2" Grid.Row="2" Foreground="White" HorizontalAlignment="Right" VerticalAlignment="Bottom"  Opacity="0.85" Text="{Binding ImageDate}" FontSize="36"/>
+      <TextBlock x:Name="txtLiveTime" Grid.Column="0" Grid.Row="2" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Bottom" Opacity="0.85" IsVisible = "{Binding ShowClock}" Text="{Binding LiveTime}" FontSize="{Binding ClockFontSize}"/>
+      <TextBlock x:Name="txtImageDate" Grid.Column="2" Grid.Row="2" Foreground="White" HorizontalAlignment="Right" VerticalAlignment="Bottom"  Opacity="0.85" IsVisible = "{Binding ShowPhotoDate}" Text="{Binding ImageDate}" FontSize="{Binding PhotoDateFontSize}"/>
       <Button x:Name="btnBack" Opacity="0" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="btnBack_Click"/>
       <Button x:Name="btnNext" Opacity="0" Grid.Column="2" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="btnNext_Click"/>
-      <Button x:Name="btnQuit" Opacity="0" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="btnQuit_Click"/>
+      <Button x:Name="btnQuit" Opacity="0" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="btnQuit_Click"/>      
     </Grid>
   </UserControl>
