@@ -3,13 +3,18 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using Avalonia.Threading;
 using ImmichFrame.ViewModels;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Enums;
+using MsBox.Avalonia.Models;
 
 namespace ImmichFrame.Views;
 
@@ -37,8 +42,10 @@ public partial class MainView : UserControl
         public int Interval { get; set; }
         public bool ShowClock { get; set; }
         public int ClockFontSize { get; set; }
+        public string? ClockFormat { get; set; }
         public bool ShowPhotoDate { get; set; }
         public int PhotoDateFontSize { get; set; }
+        public string? PhotoDateFormat { get; set; }
     }
     public class AssetInfo
     {
@@ -54,30 +61,38 @@ public partial class MainView : UserControl
 
     private async void OnLoaded(object? sender, RoutedEventArgs e)
     {
-        ShowSplash();
-        AppSettings = ParseSettings();
-        if (AppSettings == null)
+        try
         {
-            ExitApp();
-        }
-        else
-        {
-            //image switcher timer
-            timerImageSwitcher = new System.Threading.Timer(timerImageSwitcherTick, null, 0, AppSettings.Interval * 1000);
-            //Clock timer
-            if (AppSettings.ShowClock!)
+            ShowSplash();
+            AppSettings = ParseSettings();
+            if (AppSettings == null)
             {
-                timerLiveTime = new System.Threading.Timer(LiveTimeTick, null, 0, 1000);
-            }
-            AccessToken = await Login();
-            if (AccessToken == "")
-            {
+                await ShowMessageBox("Error parsing Settings.xml. Check formatting.");
                 ExitApp();
             }
             else
             {
-                timerImageSwitcher_Enabled = true;
+                AccessToken = await Login();
+                if (AccessToken == "")
+                {
+                    ExitApp();
+                }
+                else
+                {
+                    timerImageSwitcher_Enabled = true;
+                    timerImageSwitcher = new System.Threading.Timer(timerImageSwitcherTick, null, 0, AppSettings.Interval * 1000);
+                    if (AppSettings.ShowClock!)
+                    {
+                        timerLiveTime = new System.Threading.Timer(LiveTimeTick, null, 0, 1000);
+                    }
+
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            await ShowMessageBox(ex.Message);
+            ExitApp();
         }
     }
 
@@ -90,12 +105,12 @@ public partial class MainView : UserControl
     {
         if (timerLiveTime_Enabled)
         {
-            viewModel.LiveTime = DateTime.Now.ToString("h:mm tt");
+            viewModel.LiveTime = DateTime.Now.ToString(AppSettings!.ClockFormat);
         }
     }
     private async Task<string> Login()
     {
-        string ret = "";
+        //string ret = "";
         HttpClient client = new HttpClient();
         string url = AppSettings!.ImmichServerUrl + "/api/auth/login";
 
@@ -118,29 +133,38 @@ public partial class MainView : UserControl
             var loginData = JsonSerializer.Deserialize<LoginData>(responseContent);
             if (loginData != null)
             {
-                ret = loginData.accessToken!;
+                return loginData!.accessToken!;
+            }
+            else
+            {
+                throw new Exception("Unable to login to Immich server");
             }
         }
-        return ret;
+        else
+        {
+            throw new Exception(response.ToString());
+        }
+        //return ret;
     }
     private AssetInfo? GetRandomAsset()
     {
+        AssetInfo returnAsset = new AssetInfo();
         string url = AppSettings!.ImmichServerUrl + "/api/asset/random";
         using (var client = new HttpClient())
         {
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", AccessToken);
             var response = client.GetAsync(url).Result;
-            var responseContent = response.Content.ReadAsStringAsync().Result;
-            var Asset = JsonSerializer.Deserialize<List<AssetInfo>>(responseContent);
-            if (Asset != null)
+            if (response.IsSuccessStatusCode)
             {
-                return Asset[0];
-            }
-            else
-            {
-                return null;
+                var responseContent = response.Content.ReadAsStringAsync().Result;
+                var Asset = JsonSerializer.Deserialize<List<AssetInfo>>(responseContent);
+                if (Asset != null)
+                {
+                    returnAsset = Asset[0];
+                }
             }
         }
+        return returnAsset;
     }
     private void ShowSplash()
     {
@@ -150,37 +174,53 @@ public partial class MainView : UserControl
     }
     private async void ShowNextImage()
     {
-        if (timerImageSwitcher_Enabled)
+        try
         {
-            LastAsset = CurrentAsset;
-            CurrentAsset = GetRandomAsset();
-            if (CurrentAsset != null)
+            if (timerImageSwitcher_Enabled)
             {
-                string ImageURL = AppSettings!.ImmichServerUrl + "/api/asset/thumbnail/" + CurrentAsset.id + "?format=JPEG";
+                LastAsset = CurrentAsset;
+                CurrentAsset = GetRandomAsset();
+                if (CurrentAsset != null)
+                {
+                    string ImageURL = AppSettings!.ImmichServerUrl + "/api/asset/thumbnail/" + CurrentAsset.id + "?format=JPEG";
+                    byte[] imageData = await DownloadImage(ImageURL);
+                    using (MemoryStream stream = new MemoryStream(imageData))
+                    {
+                        Bitmap bitmap = new Bitmap(stream);
+                        viewModel.Image = bitmap;
+                        viewModel.ImageDate = CurrentAsset.fileCreatedAt.ToString(AppSettings.PhotoDateFormat);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            await ShowMessageBoxFromThread(ex.Message);
+            ExitApp();
+        }
+    }
+    private async void ShowPreviousImage()
+    {
+        try
+        {
+            if (LastAsset != null)
+            {
+                timerImageSwitcher_Enabled = false;
+                string ImageURL = AppSettings!.ImmichServerUrl + "/api/asset/thumbnail/" + LastAsset.id + "?format=JPEG";
                 byte[] imageData = await DownloadImage(ImageURL);
                 using (MemoryStream stream = new MemoryStream(imageData))
                 {
                     Bitmap bitmap = new Bitmap(stream);
                     viewModel.Image = bitmap;
-                    viewModel.ImageDate = CurrentAsset.fileCreatedAt.ToString("MM/dd/yyyy");
+                    viewModel.ImageDate = LastAsset.fileCreatedAt.ToString(AppSettings.PhotoDateFormat);
                 }
+                timerImageSwitcher_Enabled = true;
             }
         }
-    }
-    private async void ShowPreviousImage()
-    {
-        if (LastAsset != null)
+        catch (Exception ex)
         {
-            timerImageSwitcher_Enabled = false;
-            string ImageURL = AppSettings!.ImmichServerUrl + "/api/asset/thumbnail/" + LastAsset.id + "?format=JPEG";
-            byte[] imageData = await DownloadImage(ImageURL);
-            using (MemoryStream stream = new MemoryStream(imageData))
-            {
-                Bitmap bitmap = new Bitmap(stream);
-                viewModel.Image = bitmap;
-                viewModel.ImageDate = LastAsset.fileCreatedAt.ToString("MM/dd/yyyy");
-            }
-            timerImageSwitcher_Enabled = true;
+            await ShowMessageBoxFromThread(ex.Message);
+            ExitApp();
         }
     }
     public void btnBack_Click(object? sender, RoutedEventArgs args)
@@ -226,8 +266,10 @@ public partial class MainView : UserControl
             Interval = int.Parse(XElement.Parse(xml).Element("Interval")!.Value),
             ShowClock = bool.Parse(XElement.Parse(xml).Element("ShowClock")!.Value),
             ClockFontSize = int.Parse(XElement.Parse(xml).Element("ClockFontSize")!.Value),
+            ClockFormat = XElement.Parse(xml).Element("ClockFormat")!.Value,
             ShowPhotoDate = bool.Parse(XElement.Parse(xml).Element("ShowPhotoDate")!.Value),
-            PhotoDateFontSize = int.Parse(XElement.Parse(xml).Element("PhotoDateFontSize")!.Value)
+            PhotoDateFontSize = int.Parse(XElement.Parse(xml).Element("PhotoDateFontSize")!.Value),
+            PhotoDateFormat = XElement.Parse(xml).Element("PhotoDateFormat")!.Value,
         };
         viewModel.ShowClock = settings.ShowClock;
         viewModel.ClockFontSize = settings.ClockFontSize;
@@ -235,5 +277,21 @@ public partial class MainView : UserControl
         viewModel.PhotoDateFontSize = settings.PhotoDateFontSize;
         return settings;
     }
+    private Task ShowMessageBoxFromThread(string message)
+    {
+        var tcs = new TaskCompletionSource<bool>();
+        Dispatcher.UIThread.Post(async () =>
+            {
+                await ShowMessageBox(message);
+                tcs.SetResult(true);
+            });
+        return tcs.Task;
+    }
 
+    private async Task ShowMessageBox(string message)
+    {
+        var box = MessageBoxManager.GetMessageBoxStandard("", message, ButtonEnum.Ok);
+
+        var result = await box.ShowAsPopupAsync(this);
+    }
 }
