@@ -1,11 +1,13 @@
 
 <Settings>
-  <ImmichServerUrl>http://YourIpOrUrl:2283</ImmichServerUrl>
+   <ImmichServerUrl>http://YourIpOrUrl:2283</ImmichServerUrl>
   <Email>name@email.com</Email>
   <Password>password</Password>
   <Interval>8</Interval>
   <ShowClock>true</ShowClock>
   <ClockFontSize>48</ClockFontSize>
+  <ClockFormat>h:mm tt</ClockFormat>
   <ShowPhotoDate>true</ShowPhotoDate>
   <PhotoDateFontSize>36</PhotoDateFontSize>
+  <PhotoDateFormat>MM/dd/yyyy</PhotoDateFormat>
 </Settings>
