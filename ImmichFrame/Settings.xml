@@ -1,6 +1,5 @@
-
 <Settings>
-  <ImmichServerUrl>http://YourIpOrUrl:2283</ImmichServerUrl>
+  <ImmichServerUrl>http://192.168.0.101:2283</ImmichServerUrl>
   <Email>name@email.com</Email>
   <Password>password</Password>
   <Interval>8</Interval>
