@@ -17,3 +17,4 @@ ShowWeather - Show the current weather. Boolean (ex. true)
 WeatherFontSize - The font size for the weather data (ex. 12)
 WeatherUnits - The temperature units. either celcius or fahrenheit
 WeatherLatLong - Your latitude/longitude coordinates (ex. 40.7128,74.0060)
+
