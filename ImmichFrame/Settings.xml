@@ -1,8 +1,8 @@
 
 <Settings>
   <ImmichServerUrl>http://192.168.0.101:2283</ImmichServerUrl>
-  <Email>robrogers@zoominternet.net</Email>
-  <Password>Emily11Mia14</Password>
+  <Email>name@email.com</Email>
+  <Password>password</Password>
   <Interval>8</Interval>
   <ShowClock>true</ShowClock>
   <ClockFontSize>48</ClockFontSize>
@@ -13,5 +13,5 @@
   <ShowWeather>true</ShowWeather>
   <WeatherFontSize>12</WeatherFontSize>
   <WeatherUnits>fahrenheit</WeatherUnits>
-  <WeatherLatLong>41.13380,-81.85507</WeatherLatLong>
+  <WeatherLatLong>40.7128,74.0060</WeatherLatLong>
 </Settings>
