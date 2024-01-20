@@ -13,6 +13,10 @@ public partial class MainViewModel : INotifyPropertyChanged
     private int _clockFontSize;
     private bool _showPhotoDate;
     private int _photoDateFontSizeSize;
+    private bool _showWeather;
+    private int _weatherFontSize;
+    private string _weatherCurrent = "";
+    private string _weatherTemperature = "";
     public Bitmap? Image
     {
         get { return _image; }
@@ -76,7 +80,42 @@ public partial class MainViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(PhotoDateFontSize));
         }
     }
-
+    public bool ShowWeather
+    {
+        get { return _showWeather; }
+        set
+        {
+            _showWeather = value;
+            OnPropertyChanged(nameof(ShowWeather));
+        }
+    }
+    public int WeatherFontSize
+    {
+        get { return _weatherFontSize; }
+        set
+        {
+            _weatherFontSize = value;
+            OnPropertyChanged(nameof(WeatherFontSize));
+        }
+    }
+    public string WeatherCurrent
+    {
+        get { return _weatherCurrent; }
+        set
+        {
+            _weatherCurrent = value;
+            OnPropertyChanged(nameof(WeatherCurrent));
+        }
+    }
+    public string WeatherTemperature
+    {
+        get { return _weatherTemperature; }
+        set
+        {
+            _weatherTemperature = value;
+            OnPropertyChanged(nameof(WeatherTemperature));
+        }
+    }
     public event PropertyChangedEventHandler? PropertyChanged;
 
     protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
