@@ -22,8 +22,8 @@ public partial class MainView : UserControl
 {
     System.Threading.Timer? timerImageSwitcher;
     System.Threading.Timer? timerLiveTime;
+    System.Threading.Timer? timerWeather;
     private bool timerImageSwitcher_Enabled = false;
-    private bool timerLiveTime_Enabled = true;
     MainViewModel viewModel = new MainViewModel();
     private string AccessToken = "";
     private AssetInfo? LastAsset;
@@ -46,6 +46,11 @@ public partial class MainView : UserControl
         public bool ShowPhotoDate { get; set; }
         public int PhotoDateFontSize { get; set; }
         public string? PhotoDateFormat { get; set; }
+        public bool ShowWeather { get; set; }
+        public int WeatherFontSize { get; set; }
+        public string? WeatherUnits { get; set; }
+        public string? WeatherLatLong { get; set; }
+
     }
     public class AssetInfo
     {
@@ -83,9 +88,12 @@ public partial class MainView : UserControl
                     timerImageSwitcher = new System.Threading.Timer(timerImageSwitcherTick, null, 0, AppSettings.Interval * 1000);
                     if (AppSettings.ShowClock!)
                     {
-                        timerLiveTime = new System.Threading.Timer(LiveTimeTick, null, 0, 1000);
+                        timerLiveTime = new System.Threading.Timer(timerLiveTimeTick, null, 0, 1000); //every second
                     }
-
+                    if (AppSettings.ShowWeather!)
+                    {
+                        timerWeather = new System.Threading.Timer(timerWeatherTick, null, 0, 600000); //every 10 minutes
+                    }
                 }
             }
         }
@@ -101,16 +109,24 @@ public partial class MainView : UserControl
         ShowNextImage();
     }
 
-    private void LiveTimeTick(object? state)
+    private void timerLiveTimeTick(object? state)
     {
-        if (timerLiveTime_Enabled)
+        viewModel.LiveTime = DateTime.Now.ToString(AppSettings!.ClockFormat);
+    }
+    private void timerWeatherTick(object? state)
+    {
+        string latitude = AppSettings!.WeatherLatLong!.Split(',')[0];
+        string longitude = AppSettings!.WeatherLatLong!.Split(',')[1];
+        OpenMeteoResponse? openMeteoResponse = Task.Run(() => Weather.GetWeather(latitude, longitude, AppSettings.WeatherUnits!)).Result;
+        if (openMeteoResponse != null)
         {
-            viewModel.LiveTime = DateTime.Now.ToString(AppSettings!.ClockFormat);
+            viewModel.WeatherTemperature = openMeteoResponse.current_weather!.temperature.ToString() + openMeteoResponse.current_weather_units!.temperature;
+            string description = WmoWeatherInterpreter.GetWeatherDescription(openMeteoResponse.current_weather.weathercode, Convert.ToBoolean(openMeteoResponse.current_weather.is_day));
+            viewModel.WeatherCurrent = description;
         }
     }
     private async Task<string> Login()
     {
-        //string ret = "";
         HttpClient client = new HttpClient();
         string url = AppSettings!.ImmichServerUrl + "/api/auth/login";
 
@@ -196,7 +212,6 @@ public partial class MainView : UserControl
         catch (Exception ex)
         {
             await ShowMessageBoxFromThread(ex.Message);
-            ExitApp();
         }
     }
     private async void ShowPreviousImage()
@@ -220,7 +235,6 @@ public partial class MainView : UserControl
         catch (Exception ex)
         {
             await ShowMessageBoxFromThread(ex.Message);
-            ExitApp();
         }
     }
     public void btnBack_Click(object? sender, RoutedEventArgs args)
@@ -251,7 +265,6 @@ public partial class MainView : UserControl
     }
     private void ExitApp()
     {
-        timerLiveTime_Enabled = false;
         timerImageSwitcher_Enabled = false;
         Environment.Exit(0);
     }
@@ -270,11 +283,17 @@ public partial class MainView : UserControl
             ShowPhotoDate = bool.Parse(XElement.Parse(xml).Element("ShowPhotoDate")!.Value),
             PhotoDateFontSize = int.Parse(XElement.Parse(xml).Element("PhotoDateFontSize")!.Value),
             PhotoDateFormat = XElement.Parse(xml).Element("PhotoDateFormat")!.Value,
+            ShowWeather = bool.Parse(XElement.Parse(xml).Element("ShowWeather")!.Value),
+            WeatherFontSize = int.Parse(XElement.Parse(xml).Element("WeatherFontSize")!.Value),
+            WeatherUnits = XElement.Parse(xml).Element("WeatherUnits")!.Value,
+            WeatherLatLong = XElement.Parse(xml).Element("WeatherLatLong")!.Value,
         };
         viewModel.ShowClock = settings.ShowClock;
         viewModel.ClockFontSize = settings.ClockFontSize;
         viewModel.ShowPhotoDate = settings.ShowPhotoDate;
         viewModel.PhotoDateFontSize = settings.PhotoDateFontSize;
+        viewModel.ShowWeather = settings.ShowWeather;
+        viewModel.WeatherFontSize = settings.WeatherFontSize;
         return settings;
     }
     private Task ShowMessageBoxFromThread(string message)
