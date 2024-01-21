@@ -9,7 +9,7 @@ Settings field descriptions:
 - Interval: Interval for photo cycling in seconds (ex. 8)
 - ShowClock: Show clock in lower left bottom. Boolean (ex. true)
 - ClockFontSize: The font size for the clock (ex. 48)
-- ClockFormat: The format of the clock (ex. MM/dd/yyyy). See here for options https://www.c-sharpcorner.com/blogs/date-and-time-format-in-c-sharp-programming1
+- ClockFormat: The format of the clock (ex. h:mm tt). See here for options https://www.c-sharpcorner.com/blogs/date-and-time-format-in-c-sharp-programming1
 - ShowPhotoDate: Show the date photo was taken. Boolean (ex. true)
 - PhotoDateFontSize: The font size for the photo date (ex. 36)
 - PhotoDateFormat: The format of the clock (ex. MM/dd/yyyy). See here for options https://www.c-sharpcorner.com/blogs/date-and-time-format-in-c-sharp-programming1
