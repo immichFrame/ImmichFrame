@@ -12,7 +12,7 @@ Settings field descriptions:
 - ClockFormat: The format of the clock (ex. h:mm tt). See here for options https://www.c-sharpcorner.com/blogs/date-and-time-format-in-c-sharp-programming1
 - ShowPhotoDate: Show the date photo was taken. Boolean (ex. true)
 - PhotoDateFontSize: The font size for the photo date (ex. 36)
-- PhotoDateFormat: The format of the clock (ex. MM/dd/yyyy). See here for options https://www.c-sharpcorner.com/blogs/date-and-time-format-in-c-sharp-programming1
+- PhotoDateFormat: The format of the date (ex. MM/dd/yyyy). See here for options https://www.c-sharpcorner.com/blogs/date-and-time-format-in-c-sharp-programming1
 - ShowWeather: Show the current weather. Boolean (ex. true)
 - WeatherFontSize: The font size for the weather data (ex. 12)
 - WeatherUnits: The temperature units. either celcius or fahrenheit
