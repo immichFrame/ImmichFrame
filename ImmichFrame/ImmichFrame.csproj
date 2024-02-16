@@ -11,10 +11,14 @@
   </ItemGroup>
   
   <ItemGroup>
+    <None Remove="Settings.example.xml" />
     <None Remove="Settings.xml" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Settings.example.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Settings.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
