@@ -25,7 +25,6 @@ public partial class MainView : UserControl
     System.Threading.Timer? timerWeather;
     private bool timerImageSwitcher_Enabled = false;
     MainViewModel viewModel = new MainViewModel();
-    private string AccessToken = "";
     private AssetInfo? LastAsset;
     private AssetInfo? CurrentAsset;
 
@@ -213,7 +212,7 @@ public partial class MainView : UserControl
     {
         using (var client = new HttpClient())
         {
-            client.DefaultRequestHeaders.Add("X-API-KEY", AppSettings.ApiKey);
+            client.DefaultRequestHeaders.Add("X-API-KEY", AppSettings!.ApiKey);
             var data = await client.GetByteArrayAsync(ImageURL);
             return data;
         }

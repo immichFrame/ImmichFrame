@@ -18,10 +18,7 @@
   <ItemGroup>
     <Content Include="Settings.example.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Settings.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </Content>    
   </ItemGroup>
 
   <ItemGroup>
