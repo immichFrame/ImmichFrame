@@ -37,8 +37,7 @@ public partial class MainView : UserControl
     private class Settings
     {
         public string? ImmichServerUrl { get; set; }
-        public string? Email { get; set; }
-        public string? Password { get; set; }
+        public string? ApiKey { get; set; }
         public int Interval { get; set; }
         public bool ShowClock { get; set; }
         public int ClockFontSize { get; set; }
@@ -77,23 +76,15 @@ public partial class MainView : UserControl
             }
             else
             {
-                AccessToken = await Login();
-                if (AccessToken == "")
+                timerImageSwitcher_Enabled = true;
+                timerImageSwitcher = new System.Threading.Timer(timerImageSwitcherTick, null, 0, AppSettings.Interval * 1000);
+                if (AppSettings.ShowClock!)
                 {
-                    ExitApp();
+                    timerLiveTime = new System.Threading.Timer(timerLiveTimeTick, null, 0, 1000); //every second
                 }
-                else
+                if (AppSettings.ShowWeather!)
                 {
-                    timerImageSwitcher_Enabled = true;
-                    timerImageSwitcher = new System.Threading.Timer(timerImageSwitcherTick, null, 0, AppSettings.Interval * 1000);
-                    if (AppSettings.ShowClock!)
-                    {
-                        timerLiveTime = new System.Threading.Timer(timerLiveTimeTick, null, 0, 1000); //every second
-                    }
-                    if (AppSettings.ShowWeather!)
-                    {
-                        timerWeather = new System.Threading.Timer(timerWeatherTick, null, 0, 600000); //every 10 minutes
-                    }
+                    timerWeather = new System.Threading.Timer(timerWeatherTick, null, 0, 600000); //every 10 minutes
                 }
             }
         }
@@ -125,50 +116,14 @@ public partial class MainView : UserControl
             viewModel.WeatherCurrent = description;
         }
     }
-    private async Task<string> Login()
-    {
-        HttpClient client = new HttpClient();
-        string url = AppSettings!.ImmichServerUrl + "/api/auth/login";
 
-        var payload = new
-        {
-            email = AppSettings.Email,
-            password = AppSettings.Password
-        };
-
-        var jsonPayload = JsonSerializer.Serialize(payload);
-
-        var content = new StringContent(jsonPayload, System.Text.Encoding.UTF8, "application/json");
-
-        client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-
-        var response = await client.PostAsync(url, content);
-        if (response.IsSuccessStatusCode)
-        {
-            var responseContent = await response.Content.ReadAsStringAsync();
-            var loginData = JsonSerializer.Deserialize<LoginData>(responseContent);
-            if (loginData != null)
-            {
-                return loginData!.accessToken!;
-            }
-            else
-            {
-                throw new Exception("Unable to login to Immich server");
-            }
-        }
-        else
-        {
-            throw new Exception(response.ToString());
-        }
-        //return ret;
-    }
     private AssetInfo? GetRandomAsset()
     {
         AssetInfo returnAsset = new AssetInfo();
         string url = AppSettings!.ImmichServerUrl + "/api/asset/random";
         using (var client = new HttpClient())
         {
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", AccessToken);
+            client.DefaultRequestHeaders.Add("X-API-KEY", AppSettings.ApiKey);
             var response = client.GetAsync(url).Result;
             if (response.IsSuccessStatusCode)
             {
@@ -258,7 +213,7 @@ public partial class MainView : UserControl
     {
         using (var client = new HttpClient())
         {
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", AccessToken);
+            client.DefaultRequestHeaders.Add("X-API-KEY", AppSettings.ApiKey);
             var data = await client.GetByteArrayAsync(ImageURL);
             return data;
         }
@@ -274,8 +229,7 @@ public partial class MainView : UserControl
         var settings = new Settings
         {
             ImmichServerUrl = XElement.Parse(xml).Element("ImmichServerUrl")!.Value,
-            Email = XElement.Parse(xml).Element("Email")!.Value,
-            Password = XElement.Parse(xml).Element("Password")!.Value,
+            ApiKey = XElement.Parse(xml).Element("ApiKey")!.Value,
             Interval = int.Parse(XElement.Parse(xml).Element("Interval")!.Value),
             ShowClock = bool.Parse(XElement.Parse(xml).Element("ShowClock")!.Value),
             ClockFontSize = int.Parse(XElement.Parse(xml).Element("ClockFontSize")!.Value),

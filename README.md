@@ -2,10 +2,12 @@ This project was created in VS Code using the Avalonia extension. It is a C# .NE
 https://avaloniaui.net/
 This connects to a running Immich server using their API, and makes getRandom calls to randomly show images in your collection and fileCreatedAt date. Configure your server URL, account credentials, and more in the Settings.xml file. The screen is configured in quadrants, click or touch middle/right to skip forward, middle/left to go back to last image, and middle/bottom to quit.
 
+> [!IMPORTANT]  
+> Make sure to copy the **Settings.example.xml** and name it **Settings.xml**
+
 Settings field descriptions:
 - ImmichServerUrl: The IP address or URL of your Immich server (ex. http://192.168.0.100:2283)
-- Email: Your Immich user email address
-- Password: Your Immich user password
+- ApiKey: Your Immich ApiKey created on ImmichServerUrl/user-settings
 - Interval: Interval for photo cycling in seconds (ex. 8)
 - ShowClock: Show clock in lower left bottom. Boolean (ex. true)
 - ClockFontSize: The font size for the clock (ex. 48)
