@@ -8,6 +8,8 @@ This connects to a running Immich server using their API, and makes getRandom ca
 Settings field descriptions:
 - ImmichServerUrl: The IP address or URL of your Immich server (ex. http://192.168.0.100:2283)
 - ApiKey: Your Immich ApiKey created on ImmichServerUrl/user-settings
+- *Albums\**: Choose one or multiple Albums to have in the rotation
+  - *AlbumId\**: Immich Album UID, (ex. http://192.168.0.100:2283/albums/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
 - Interval: Interval for photo cycling in seconds (ex. 8)
 - ShowClock: Show clock in lower left bottom. Boolean (ex. true)
 - ClockFontSize: The font size for the clock (ex. 48)
@@ -19,3 +21,5 @@ Settings field descriptions:
 - WeatherFontSize: The font size for the weather data (ex. 12)
 - WeatherUnits: The temperature units. either celcius or fahrenheit
 - WeatherLatLong: Your latitude/longitude coordinates (ex. 40.7128,74.0060)
+
+\* *Optional parameters*
