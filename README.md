@@ -1,6 +1,5 @@
-This project was created in VS Code using the Avalonia extension. It is a C# .NET 7 cross platform project and currently supports Linux, MacOS, and Windows. I am running it on a Raspberry Pi 5. You can learn more about Avalonia here:
-https://avaloniaui.net/
-This connects to a running Immich server using their API, and makes getRandom calls to randomly show images in your collection and fileCreatedAt date. Configure your server URL, account credentials, and more in the Settings.xml file. The screen is configured in quadrants, click or touch middle/right to skip forward, middle/left to go back to last image, and middle/bottom to quit.
+This project was created in VS Code using the Avalonia extension. It is a C# .NET 7 cross platform project and currently supports Linux, MacOS, and Windows. I am running it on a Raspberry Pi 5.
+Configure your server URL, API key, and more in the Settings.xml file. The screen is configured in quadrants, click or touch middle/right to skip forward, middle/left to go back to last image, and middle/bottom to quit.
 
 > [!IMPORTANT]  
 > Make sure to copy the **Settings.example.xml** and name it **Settings.xml**
@@ -9,7 +8,7 @@ Settings field descriptions:
 - ImmichServerUrl: The IP address or URL of your Immich server (ex. http://192.168.0.100:2283)
 - ApiKey: Your Immich ApiKey created on ImmichServerUrl/user-settings
 - *Albums\**: Choose one or multiple Albums to have in the rotation
-  - *AlbumId\**: Immich Album UID, (ex. http://192.168.0.100:2283/albums/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
+  - *AlbumId\**: Immich Album UID, (ex. ImmichServerUrl/albums/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
 - Interval: Interval for photo cycling in seconds (ex. 8)
 - ShowClock: Show clock in lower left bottom. Boolean (ex. true)
 - ClockFontSize: The font size for the clock (ex. 48)
