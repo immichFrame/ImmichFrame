@@ -43,7 +43,7 @@ namespace ImmichFrame.Helpers
         {
             using (var client = new HttpClient())
             {
-                var bigList = new List<AssetInfo>();
+                var allAssets = new List<AssetInfo>();
 
                 client.UseApiKey(_settings.ApiKey);
                 foreach (var albumId in _settings.Albums!)
@@ -61,10 +61,10 @@ namespace ImmichFrame.Helpers
 
                         var assetList = JsonSerializer.Deserialize<IEnumerable<AssetInfo>>(assets) ?? new List<AssetInfo>();
 
-                        bigList.AddRange(assetList);
+                        allAssets.AddRange(assetList);
                     }
                 }
-                return bigList;
+                return allAssets;
             }
         }
 
