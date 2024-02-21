@@ -21,14 +21,10 @@ static class Weather
                     string json = await response.Content.ReadAsStringAsync();
                     openMeteoResponse = JsonSerializer.Deserialize<OpenMeteoResponse>(json);
                 }
-                //else
-                //{
-                //    throw new Exception($"Error: {response.StatusCode} - {response.ReasonPhrase}");
-                //}
             }
             catch 
             {
-                //throw new Exception($"Exception: {ex.Message}");
+                //do nothing and return null
             }
             return openMeteoResponse;
         }
