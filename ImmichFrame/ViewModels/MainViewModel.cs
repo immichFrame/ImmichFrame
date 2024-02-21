@@ -1,6 +1,7 @@
 ﻿using Avalonia.Media.Imaging;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using ImmichFrame.Models;
 
 namespace ImmichFrame.ViewModels;
 
@@ -121,5 +122,19 @@ public partial class MainViewModel : INotifyPropertyChanged
     protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    public MainViewModel()
+    {
+        
+    }
+    public MainViewModel(Settings settings)
+    {
+        this.ShowClock = settings.ShowClock;
+        this.ClockFontSize = settings.ClockFontSize;
+        this.ShowPhotoDate = settings.ShowPhotoDate;
+        this.PhotoDateFontSize = settings.PhotoDateFontSize;
+        this.ShowWeather = settings.ShowWeather;
+        this.WeatherFontSize = settings.WeatherFontSize;
     }
 }

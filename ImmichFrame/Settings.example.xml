@@ -1,6 +1,11 @@
 <Settings>
 	<ImmichServerUrl>http://YourIpOrUrl:2283</ImmichServerUrl>
 	<ApiKey>YourApiKey</ApiKey>
+	<Albums>
+		<!--Optional-->
+		<Album>First Album UID</Album>
+		<Album>Second Album UID</Album>
+	</Albums>
 	<Interval>8</Interval>
 	<ShowClock>true</ShowClock>
 	<ClockFontSize>48</ClockFontSize>

@@ -5,20 +5,19 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
-  
+
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <None Remove="Settings.example.xml" />
-    <None Remove="Settings.xml" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="Settings.example.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>    
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
@@ -30,5 +29,11 @@
     <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)" />
     <PackageReference Include="MessageBox.Avalonia" Version="3.1.5.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Settings.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
