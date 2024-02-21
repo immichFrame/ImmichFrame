@@ -9,7 +9,7 @@ Settings field descriptions:
 - ImmichServerUrl: The IP address or URL of your Immich server (ex. http://192.168.0.100:2283)
 - ApiKey: Your Immich ApiKey created on ImmichServerUrl/user-settings
 - *Albums\**: Choose one or multiple Albums to have in the rotation
-  - *AlbumId\**: Immich Album UID, (ex. http://192.168.0.100:2283/albums/**xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx**)
+  - *AlbumId\**: Immich Album UID, (ex. http://192.168.0.100:2283/albums/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
 - Interval: Interval for photo cycling in seconds (ex. 8)
 - ShowClock: Show clock in lower left bottom. Boolean (ex. true)
 - ClockFontSize: The font size for the clock (ex. 48)
