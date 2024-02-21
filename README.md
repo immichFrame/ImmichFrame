@@ -22,3 +22,8 @@ Settings field descriptions:
 - WeatherLatLong: Your latitude/longitude coordinates (ex. 40.7128,74.0060)
 
 \* *Optional parameters*
+
+
+![pope](https://github.com/3rob3/ImmichFrame/assets/156599986/9b8a899c-c012-4262-b02c-59d5e011dbd7)
+
+![beach](https://github.com/3rob3/ImmichFrame/assets/156599986/a21a28d3-1111-4f35-8d4b-9d6ece84aac1)
