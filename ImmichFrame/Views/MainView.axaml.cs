@@ -113,7 +113,9 @@ public partial class MainView : UserControl
         }
         catch (Exception ex)
         {
+            timerImageSwitcher_Enabled = false;
             await ShowMessageBoxFromThread(ex.Message);
+            timerImageSwitcher_Enabled = true;
         }
     }
 
