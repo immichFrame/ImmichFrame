@@ -7,6 +7,8 @@
 		<Album>Second Album UID</Album>
 	</Albums>
 	<Interval>8</Interval>
+	<DownloadImages>false</DownloadImages>
+	<RenewImagesDuration>5</RenewImagesDuration>
 	<ShowClock>true</ShowClock>
 	<ClockFontSize>48</ClockFontSize>
 	<ClockFormat>h:mm tt</ClockFormat>

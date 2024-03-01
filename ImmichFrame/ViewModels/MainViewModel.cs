@@ -126,10 +126,8 @@ public partial class MainViewModel : INotifyPropertyChanged
 
     public MainViewModel()
     {
-        
-    }
-    public MainViewModel(Settings settings)
-    {
+        var settings = Settings.CurrentSettings;
+
         this.ShowClock = settings.ShowClock;
         this.ClockFontSize = settings.ClockFontSize;
         this.ShowPhotoDate = settings.ShowPhotoDate;
