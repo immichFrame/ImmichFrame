@@ -10,6 +10,8 @@ Settings field descriptions:
 - *Albums\**: Choose one or multiple Albums to have in the rotation
   - *AlbumId\**: Immich Album UID, (ex. ImmichServerUrl/albums/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
 - Interval: Interval for photo cycling in seconds (ex. 8)
+- DownloadImages: Determines if images should be saved locally (ex. false)
+- RenewImagesDuration: Duration for images to keep if existing, renews the image if older than the duration. Duration in Days (ex. 20)
 - ShowClock: Show clock in lower left bottom. Boolean (ex. true)
 - ClockFontSize: The font size for the clock (ex. 48)
 - ClockFormat: The format of the clock (ex. h:mm tt). See here for options https://www.c-sharpcorner.com/blogs/date-and-time-format-in-c-sharp-programming1

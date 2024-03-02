@@ -9,11 +9,9 @@ namespace ImmichFrame.Helpers
 {
     public class AssetHelper
     {
-        private Settings _settings;
-
-        private List<AssetInfo> _albumAssetInfos;
+        private Dictionary<Guid, AssetInfo> _albumAssetInfos;
         private DateTime lastAlbumAssetRefesh;
-        public List<AssetInfo> AlbumAssetInfos
+        public Dictionary<Guid, AssetInfo> AlbumAssetInfos
         {
             get
             {
@@ -22,21 +20,16 @@ namespace ImmichFrame.Helpers
                 if (_albumAssetInfos == null || lastAlbumAssetRefesh.AddDays(1) < DateTime.Now)
                 {
                     lastAlbumAssetRefesh = DateTime.Now;
-                    _albumAssetInfos = GetAlbumAssetIds().ToList();
+                    _albumAssetInfos = GetAlbumAssetIds().ToDictionary(x=> Guid.Parse(x.Id));
                 }
 
                 return _albumAssetInfos;
             }
         }
 
-        public AssetHelper(Settings settings)
-        {
-            _settings = settings;
-        }
-
         public AssetInfo? GetNextAsset()
         {
-            return _settings.Albums!.Any() ? GetRandomAlbumAsset() : GetRandomAsset();
+            return Settings.CurrentSettings.Albums.Any() ? GetRandomAlbumAsset() : GetRandomAsset();
         }
 
         private IEnumerable<AssetInfo> GetAlbumAssetIds()
@@ -44,11 +37,12 @@ namespace ImmichFrame.Helpers
             using (var client = new HttpClient())
             {
                 var allAssets = new List<AssetInfo>();
+                var settings = Settings.CurrentSettings;
 
-                client.UseApiKey(_settings.ApiKey);
-                foreach (var albumId in _settings.Albums!)
+                client.UseApiKey(settings.ApiKey);
+                foreach (var albumId in settings.Albums!)
                 {
-                    string url = $"{_settings.ImmichServerUrl}/api/album/{albumId}";
+                    string url = $"{settings.ImmichServerUrl}/api/album/{albumId}";
 
                     var response = client.GetAsync(url).Result;
                     if (response.IsSuccessStatusCode)
@@ -73,18 +67,19 @@ namespace ImmichFrame.Helpers
         {
             var x = AlbumAssetInfos;
 
-            var rnd = _random.Next(x.Count());
+            var rnd = _random.Next(x.Count);
 
-            return AlbumAssetInfos[rnd];
+            return AlbumAssetInfos.ElementAt(rnd).Value;
         }
         private AssetInfo? GetRandomAsset()
         {
             AssetInfo? returnAsset = null;
+            var settings = Settings.CurrentSettings;
 
-            string url = $"{_settings.ImmichServerUrl}/api/asset/random";
+            string url = $"{settings.ImmichServerUrl}/api/asset/random";
             using (var client = new HttpClient())
             {
-                client.UseApiKey(_settings.ApiKey);
+                client.UseApiKey(settings.ApiKey);
                 var response = client.GetAsync(url).Result;
                 if (response.IsSuccessStatusCode)
                 {

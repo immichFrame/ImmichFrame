@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
@@ -29,9 +28,9 @@ public partial class MainView : UserControl
     public MainView()
     {
         InitializeComponent();
-        _appSettings = Settings.Parse();
-        _viewModel = new MainViewModel(_appSettings);
-        _assetHelper = new AssetHelper(_appSettings);
+        _appSettings = Settings.CurrentSettings;
+        _viewModel = new MainViewModel();
+        _assetHelper = new AssetHelper();
         DataContext = _viewModel;
         this.Loaded += OnLoaded;
     }
@@ -138,9 +137,7 @@ public partial class MainView : UserControl
 
     private async Task SetNewImage(AssetInfo asset)
     {
-        string ImageURL = _appSettings.ImmichServerUrl + asset.ImageUrl;
-        byte[] imageData = await DownloadImage(ImageURL);
-        using (MemoryStream stream = new MemoryStream(imageData))
+        using (Stream stream = await asset.AssetImage)
         {
             Bitmap bitmap = new Bitmap(stream);
             _viewModel.Image = bitmap;
@@ -165,15 +162,6 @@ public partial class MainView : UserControl
         ExitApp();
     }
 
-    private async Task<byte[]> DownloadImage(string ImageURL)
-    {
-        using (var client = new HttpClient())
-        {
-            client.UseApiKey(_appSettings.ApiKey);
-            var data = await client.GetByteArrayAsync(ImageURL);
-            return data;
-        }
-    }
     private void ExitApp()
     {
         timerImageSwitcher_Enabled = false;
