@@ -1,4 +1,7 @@
-This project was created in VS Code using the Avalonia extension. It is a C# .NET 7 cross platform project and currently supports Linux, MacOS, and Windows. I am running it on a Raspberry Pi 5.
+Immich is a high performance self-hosted photo and video backup solution:
+https://github.com/immich-app/immich
+
+This project is a digital photo frame application which interfaces with your Immich server. It is a C# .NET 7 cross platform project and currently supports Linux, MacOS, and Windows. I am running it on a Raspberry Pi 5.
 Configure your server URL, API key, and more in the Settings.xml file. The screen is configured in quadrants, click or touch middle/right to skip forward, middle/left to go back to last image, and middle/bottom to quit.
 
 > [!IMPORTANT]  
