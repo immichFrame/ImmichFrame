@@ -16,7 +16,7 @@
   <h3 align="center">ImmichFrame</h3>
 
   <p align="center">
-    An awesome README template to jumpstart your projects!
+    An awesome way to display your photos as an digital photo frame
     <br />
     <a href="https://github.com/immich-app/immich"><strong>Explore immich »</strong></a>
     <br />
