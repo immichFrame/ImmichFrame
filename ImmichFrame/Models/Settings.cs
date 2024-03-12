@@ -13,6 +13,7 @@ public class Settings
     public string ApiKey { get; set; }
     public int Interval { get; set; }
     public bool DownloadImages { get; set; }
+    public bool OnlyMemories { get; set; }
     public int RenewImagesDuration { get; set; }
     public List<Guid> Albums { get; set; }
     public bool ShowClock { get; set; }
@@ -21,6 +22,8 @@ public class Settings
     public bool ShowPhotoDate { get; set; }
     public int PhotoDateFontSize { get; set; }
     public string? PhotoDateFormat { get; set; }
+    public bool ShowImageDesc { get; set; }
+    public int ImageDescFontSize { get; set; }
     public bool ShowWeather { get; set; }
     public int WeatherFontSize { get; set; }
     public string? WeatherUnits { get; set; }
@@ -52,6 +55,7 @@ public class Settings
             Albums = doc.Element("Albums")?.DescendantNodes().OfType<XElement>().Select(x => Guid.Parse(x.Value)).Distinct().ToList() ?? new(),
             Interval = int.Parse(doc.Element("Interval")!.Value),
             DownloadImages = Convert.ToBoolean(doc.Element("DownloadImages")?.Value),
+            OnlyMemories = Convert.ToBoolean(doc.Element("OnlyMemories")?.Value),
             RenewImagesDuration = int.Parse(doc.Element("RenewImagesDuration")!.Value),
             ShowClock = Convert.ToBoolean(doc.Element("ShowClock")?.Value),
             ClockFontSize = int.Parse(doc.Element("ClockFontSize")!.Value),
@@ -59,6 +63,8 @@ public class Settings
             ShowPhotoDate = Convert.ToBoolean(doc.Element("ShowPhotoDate")?.Value),
             PhotoDateFontSize = int.Parse(doc.Element("PhotoDateFontSize")!.Value),
             PhotoDateFormat = doc.Element("PhotoDateFormat")!.Value,
+            ShowImageDesc = Convert.ToBoolean(doc.Element("ShowImageDesc")?.Value),
+            ImageDescFontSize = int.Parse(doc.Element("ImageDescFontSize")!.Value),
             ShowWeather = Convert.ToBoolean(doc.Element("ShowWeather")?.Value),
             WeatherFontSize = int.Parse(doc.Element("WeatherFontSize")!.Value),
             WeatherUnits = doc.Element("WeatherUnits")!.Value,

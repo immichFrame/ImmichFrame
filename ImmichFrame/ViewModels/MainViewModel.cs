@@ -9,15 +9,11 @@ public partial class MainViewModel : INotifyPropertyChanged
 {
     private Bitmap? _image;
     private string _imageDate = "";
+    private string _imageDesc = "";
     private string _liveTime = "";
-    private bool _showClock;
-    private int _clockFontSize;
-    private bool _showPhotoDate;
-    private int _photoDateFontSizeSize;
-    private bool _showWeather;
-    private int _weatherFontSize;
     private string _weatherCurrent = "";
     private string _weatherTemperature = "";
+    public Settings Settings => Settings.CurrentSettings;
     public Bitmap? Image
     {
         get { return _image; }
@@ -45,58 +41,13 @@ public partial class MainViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(LiveTime));
         }
     }
-    public bool ShowClock
+    public string ImageDesc
     {
-        get { return _showClock; }
+        get { return _imageDesc; }
         set
         {
-            _showClock = value;
-            OnPropertyChanged(nameof(ShowClock));
-        }
-    }
-    public int ClockFontSize
-    {
-        get { return _clockFontSize; }
-        set
-        {
-            _clockFontSize = value;
-            OnPropertyChanged(nameof(ClockFontSize));
-        }
-    }
-    public bool ShowPhotoDate
-    {
-        get { return _showPhotoDate; }
-        set
-        {
-            _showPhotoDate = value;
-            OnPropertyChanged(nameof(ShowPhotoDate));
-        }
-    }
-    public int PhotoDateFontSize
-    {
-        get { return _photoDateFontSizeSize; }
-        set
-        {
-            _photoDateFontSizeSize = value;
-            OnPropertyChanged(nameof(PhotoDateFontSize));
-        }
-    }
-    public bool ShowWeather
-    {
-        get { return _showWeather; }
-        set
-        {
-            _showWeather = value;
-            OnPropertyChanged(nameof(ShowWeather));
-        }
-    }
-    public int WeatherFontSize
-    {
-        get { return _weatherFontSize; }
-        set
-        {
-            _weatherFontSize = value;
-            OnPropertyChanged(nameof(WeatherFontSize));
+            _imageDesc = value;
+            OnPropertyChanged(nameof(ImageDesc));
         }
     }
     public string WeatherCurrent
@@ -126,13 +77,5 @@ public partial class MainViewModel : INotifyPropertyChanged
 
     public MainViewModel()
     {
-        var settings = Settings.CurrentSettings;
-
-        this.ShowClock = settings.ShowClock;
-        this.ClockFontSize = settings.ClockFontSize;
-        this.ShowPhotoDate = settings.ShowPhotoDate;
-        this.PhotoDateFontSize = settings.PhotoDateFontSize;
-        this.ShowWeather = settings.ShowWeather;
-        this.WeatherFontSize = settings.WeatherFontSize;
     }
 }

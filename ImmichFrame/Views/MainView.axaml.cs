@@ -142,6 +142,7 @@ public partial class MainView : UserControl
             Bitmap bitmap = new Bitmap(stream);
             _viewModel.Image = bitmap;
             _viewModel.ImageDate = asset.FileCreatedAt.ToString(_appSettings.PhotoDateFormat);
+            _viewModel.ImageDesc = asset.ImageDesc;
         }
     }
 

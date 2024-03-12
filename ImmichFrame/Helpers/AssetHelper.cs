@@ -9,6 +9,22 @@ namespace ImmichFrame.Helpers
 {
     public class AssetHelper
     {
+        private Dictionary<Guid, AssetInfo> _memoryAssetInfos;
+        private DateTime lastMemoryAssetRefesh;
+        public Dictionary<Guid, AssetInfo> MemoryAssetInfos
+        {
+            get
+            {
+                if (_memoryAssetInfos == null || lastMemoryAssetRefesh.DayOfYear != DateTime.Today.DayOfYear)
+                {
+                    lastMemoryAssetRefesh = DateTime.Now;
+                    _memoryAssetInfos = GetMemoryAssetIds().ToDictionary(x => Guid.Parse(x.Id));
+                }
+
+                return _memoryAssetInfos;
+            }
+        }
+
         private Dictionary<Guid, AssetInfo> _albumAssetInfos;
         private DateTime lastAlbumAssetRefesh;
         public Dictionary<Guid, AssetInfo> AlbumAssetInfos
@@ -20,7 +36,7 @@ namespace ImmichFrame.Helpers
                 if (_albumAssetInfos == null || lastAlbumAssetRefesh.AddDays(1) < DateTime.Now)
                 {
                     lastAlbumAssetRefesh = DateTime.Now;
-                    _albumAssetInfos = GetAlbumAssetIds().ToDictionary(x=> Guid.Parse(x.Id));
+                    _albumAssetInfos = GetAlbumAssetIds().ToDictionary(x => Guid.Parse(x.Id));
                 }
 
                 return _albumAssetInfos;
@@ -29,7 +45,51 @@ namespace ImmichFrame.Helpers
 
         public AssetInfo? GetNextAsset()
         {
+            if (Settings.CurrentSettings.OnlyMemories)
+            {
+                return GetRandomMemoryAsset();
+            }
+
             return Settings.CurrentSettings.Albums.Any() ? GetRandomAlbumAsset() : GetRandomAsset();
+        }
+
+        private IEnumerable<AssetInfo> GetMemoryAssetIds()
+        {
+            using (var client = new HttpClient())
+            {
+                var settings = Settings.CurrentSettings;
+                var allAssets = new List<AssetInfo>();
+
+                client.UseApiKey(settings.ApiKey);
+
+                var date = DateTime.Today;
+
+                string url = $"{settings.ImmichServerUrl}/api/asset/memory-lane?day={date.Day}&month={date.Month}";
+
+                var response = client.GetAsync(url).Result;
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = response.Content.ReadAsStringAsync().Result;
+
+                    var albumInfo = JsonDocument.Parse(responseContent);
+
+                    var years = albumInfo.RootElement.EnumerateArray().Cast<JsonElement>().ToList();
+
+                    foreach (var year in years)
+                    {
+                        var assets = year.GetProperty("assets").ToString() ?? string.Empty;
+                        var assetList = JsonSerializer.Deserialize<IEnumerable<AssetInfo>>(assets) ?? new List<AssetInfo>();
+
+                        var title = year.GetProperty("title").ToString() ?? string.Empty;
+
+                        assetList.ToList().ForEach(asset => asset.ImageDesc = title);
+
+                        allAssets.AddRange(assetList);
+                    }
+                }
+
+                return allAssets;
+            }
         }
 
         private IEnumerable<AssetInfo> GetAlbumAssetIds()
@@ -65,11 +125,15 @@ namespace ImmichFrame.Helpers
         private Random _random = new Random();
         private AssetInfo? GetRandomAlbumAsset()
         {
-            var x = AlbumAssetInfos;
-
-            var rnd = _random.Next(x.Count);
+            var rnd = _random.Next(AlbumAssetInfos.Count);
 
             return AlbumAssetInfos.ElementAt(rnd).Value;
+        }
+        private AssetInfo? GetRandomMemoryAsset()
+        {
+            var rnd = _random.Next(MemoryAssetInfos.Count);
+
+            return MemoryAssetInfos.ElementAt(rnd).Value;
         }
         private AssetInfo? GetRandomAsset()
         {
