@@ -1,4 +1,5 @@
-﻿using ImmichFrame.Models;
+﻿using ImmichFrame.Exceptions;
+using ImmichFrame.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -67,25 +68,26 @@ namespace ImmichFrame.Helpers
                 string url = $"{settings.ImmichServerUrl}/api/asset/memory-lane?day={date.Day}&month={date.Month}";
 
                 var response = client.GetAsync(url).Result;
-                if (response.IsSuccessStatusCode)
+
+                if (!response.IsSuccessStatusCode)
+                    throw new AlbumNotFoundException($"Memories could not be loaded, check your settings file");
+
+                var responseContent = response.Content.ReadAsStringAsync().Result;
+
+                var albumInfo = JsonDocument.Parse(responseContent);
+
+                var years = albumInfo.RootElement.EnumerateArray().Cast<JsonElement>().ToList();
+
+                foreach (var year in years)
                 {
-                    var responseContent = response.Content.ReadAsStringAsync().Result;
+                    var assets = year.GetProperty("assets").ToString() ?? string.Empty;
+                    var assetList = JsonSerializer.Deserialize<IEnumerable<AssetInfo>>(assets) ?? new List<AssetInfo>();
 
-                    var albumInfo = JsonDocument.Parse(responseContent);
+                    var title = year.GetProperty("title").ToString() ?? string.Empty;
 
-                    var years = albumInfo.RootElement.EnumerateArray().Cast<JsonElement>().ToList();
+                    assetList.ToList().ForEach(asset => asset.ImageDesc = title);
 
-                    foreach (var year in years)
-                    {
-                        var assets = year.GetProperty("assets").ToString() ?? string.Empty;
-                        var assetList = JsonSerializer.Deserialize<IEnumerable<AssetInfo>>(assets) ?? new List<AssetInfo>();
-
-                        var title = year.GetProperty("title").ToString() ?? string.Empty;
-
-                        assetList.ToList().ForEach(asset => asset.ImageDesc = title);
-
-                        allAssets.AddRange(assetList);
-                    }
+                    allAssets.AddRange(assetList);
                 }
 
                 return allAssets;
@@ -105,19 +107,21 @@ namespace ImmichFrame.Helpers
                     string url = $"{settings.ImmichServerUrl}/api/album/{albumId}";
 
                     var response = client.GetAsync(url).Result;
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var responseContent = response.Content.ReadAsStringAsync().Result;
 
-                        var albumInfo = JsonDocument.Parse(responseContent);
+                    if (!response.IsSuccessStatusCode)
+                        throw new AlbumNotFoundException($"Album '{albumId}' was not found, check your settings file");
 
-                        var assets = albumInfo.RootElement.GetProperty("assets").ToString() ?? string.Empty;
+                    var responseContent = response.Content.ReadAsStringAsync().Result;
 
-                        var assetList = JsonSerializer.Deserialize<IEnumerable<AssetInfo>>(assets) ?? new List<AssetInfo>();
+                    var albumInfo = JsonDocument.Parse(responseContent);
 
-                        allAssets.AddRange(assetList);
-                    }
+                    var assets = albumInfo.RootElement.GetProperty("assets").ToString() ?? string.Empty;
+
+                    var assetList = JsonSerializer.Deserialize<IEnumerable<AssetInfo>>(assets) ?? new List<AssetInfo>();
+
+                    allAssets.AddRange(assetList);
                 }
+
                 return allAssets;
             }
         }
@@ -125,12 +129,18 @@ namespace ImmichFrame.Helpers
         private Random _random = new Random();
         private AssetInfo? GetRandomAlbumAsset()
         {
+            if (!AlbumAssetInfos.Any())
+                throw new AssetNotFoundException();
+
             var rnd = _random.Next(AlbumAssetInfos.Count);
 
             return AlbumAssetInfos.ElementAt(rnd).Value;
         }
         private AssetInfo? GetRandomMemoryAsset()
         {
+            if (!MemoryAssetInfos.Any())
+                throw new AssetNotFoundException();
+
             var rnd = _random.Next(MemoryAssetInfos.Count);
 
             return MemoryAssetInfos.ElementAt(rnd).Value;
@@ -145,16 +155,18 @@ namespace ImmichFrame.Helpers
             {
                 client.UseApiKey(settings.ApiKey);
                 var response = client.GetAsync(url).Result;
-                if (response.IsSuccessStatusCode)
+
+                if (!response.IsSuccessStatusCode)
+                    throw new AssetNotFoundException();
+
+                var responseContent = response.Content.ReadAsStringAsync().Result;
+                var assetList = JsonSerializer.Deserialize<List<AssetInfo>>(responseContent);
+                if (assetList != null)
                 {
-                    var responseContent = response.Content.ReadAsStringAsync().Result;
-                    var assetList = JsonSerializer.Deserialize<List<AssetInfo>>(responseContent);
-                    if (assetList != null)
-                    {
-                        returnAsset = assetList.FirstOrDefault();
-                    }
+                    returnAsset = assetList.FirstOrDefault();
                 }
             }
+
             return returnAsset;
         }
     }

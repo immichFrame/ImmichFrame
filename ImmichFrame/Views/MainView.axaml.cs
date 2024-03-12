@@ -6,6 +6,7 @@ using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Threading;
+using ImmichFrame.Exceptions;
 using ImmichFrame.Helpers;
 using ImmichFrame.Models;
 using ImmichFrame.ViewModels;
@@ -109,6 +110,10 @@ public partial class MainView : UserControl
                     await SetNewImage(CurrentAsset);
                 }
             }
+        }
+        catch (AssetNotFoundException)
+        {
+            // Do not show message
         }
         catch (Exception ex)
         {
