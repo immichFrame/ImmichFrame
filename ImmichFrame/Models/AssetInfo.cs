@@ -27,6 +27,9 @@ public partial class AssetInfo
     public string ImageExt => "JPEG";
 
     [JsonIgnore]
+    public string ImageDesc { get; set;}
+
+    [JsonIgnore]
     public Task<Stream> AssetImage => ServeImage();
 
     private async Task<Stream> ServeImage()

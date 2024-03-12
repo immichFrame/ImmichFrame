@@ -14,6 +14,7 @@ Settings field descriptions:
   - *AlbumId\**: Immich Album UID, (ex. ImmichServerUrl/albums/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
 - Interval: Interval for photo cycling in seconds (ex. 8)
 - DownloadImages: Determines if images should be saved locally (ex. false)
+- OnlyMemories: Only show todays memories (ex. false)
 - RenewImagesDuration: Duration for images to keep if existing, renews the image if older than the duration. Duration in Days (ex. 20)
 - ShowClock: Show clock in lower left bottom. Boolean (ex. true)
 - ClockFontSize: The font size for the clock (ex. 48)
@@ -21,6 +22,8 @@ Settings field descriptions:
 - ShowPhotoDate: Show the date photo was taken. Boolean (ex. true)
 - PhotoDateFontSize: The font size for the photo date (ex. 36)
 - PhotoDateFormat: The format of the date (ex. MM/dd/yyyy). See here for options https://www.c-sharpcorner.com/blogs/date-and-time-format-in-c-sharp-programming1
+- ShowImageDesc: Show the description. Boolean (ex. true)
+- ImageDescFontSize: The font size for the description (ex. 36)
 - ShowWeather: Show the current weather. Boolean (ex. true)
 - WeatherFontSize: The font size for the weather data (ex. 12)
 - WeatherUnits: The temperature units. either celcius or fahrenheit

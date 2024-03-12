@@ -6,6 +6,7 @@ using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Threading;
+using ImmichFrame.Exceptions;
 using ImmichFrame.Helpers;
 using ImmichFrame.Models;
 using ImmichFrame.ViewModels;
@@ -110,6 +111,10 @@ public partial class MainView : UserControl
                 }
             }
         }
+        catch (AssetNotFoundException)
+        {
+            // Do not show message
+        }
         catch (Exception ex)
         {
             timerImageSwitcher_Enabled = false;
@@ -142,6 +147,7 @@ public partial class MainView : UserControl
             Bitmap bitmap = new Bitmap(stream);
             _viewModel.Image = bitmap;
             _viewModel.ImageDate = asset.FileCreatedAt.ToString(_appSettings.PhotoDateFormat);
+            _viewModel.ImageDesc = asset.ImageDesc;
         }
     }
 
