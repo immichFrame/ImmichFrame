@@ -120,7 +120,7 @@ TODO
 <!-- CONTACT -->
 ## Contact
 
-TODO, add info or remove it :)
+TODO
 
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
