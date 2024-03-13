@@ -20,9 +20,21 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
-    - name: Restore dependencies
+    - name: Restore ImmichFrame dependencies
       run: dotnet restore
+      working-directory: ImmichFrame
+    - name: Restore ImmichFrame.Desktop dependencies
+      run: dotnet restore
+      working-directory: ImmichFrame.Desktop
     - name: Build
       run: dotnet build --no-restore
+      working-directory: ImmichFrame
+    - name: Build
+      run: dotnet build --no-restore
+      working-directory: ImmichFrame.Desktop
     - name: Test
       run: dotnet test --no-build --verbosity normal
+      working-directory: ImmichFrame
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
+      working-directory: ImmichFrame.Desktop
