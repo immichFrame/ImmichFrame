@@ -24,8 +24,8 @@ public partial class MainView : UserControl
     private MainViewModel _viewModel;
     private Settings _appSettings;
     private AssetHelper _assetHelper;
-    private AssetInfo? LastAsset;
-    private AssetInfo? CurrentAsset;
+    private AssetResponseDto? LastAsset;
+    private AssetResponseDto? CurrentAsset;
     public MainView()
     {
         InitializeComponent();
@@ -104,7 +104,7 @@ public partial class MainView : UserControl
             if (timerImageSwitcher_Enabled)
             {
                 LastAsset = CurrentAsset;
-                CurrentAsset = _assetHelper.GetNextAsset();
+                CurrentAsset = await _assetHelper.GetNextAsset();
                 if (CurrentAsset != null)
                 {
                     await SetNewImage(CurrentAsset);
@@ -140,7 +140,7 @@ public partial class MainView : UserControl
         }
     }
 
-    private async Task SetNewImage(AssetInfo asset)
+    private async Task SetNewImage(AssetResponseDto asset)
     {
         using (Stream stream = await asset.AssetImage)
         {

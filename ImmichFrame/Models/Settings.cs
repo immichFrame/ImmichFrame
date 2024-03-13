@@ -9,7 +9,7 @@ namespace ImmichFrame.Models;
 
 public class Settings
 {
-    public string? ImmichServerUrl { get; set; }
+    public string ImmichServerUrl { get; set; }
     public string ApiKey { get; set; }
     public int Interval { get; set; }
     public bool DownloadImages { get; set; }
