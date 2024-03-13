@@ -1,37 +1,156 @@
-Immich is a high performance self-hosted photo and video backup solution:
-https://github.com/immich-app/immich
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![MIT License][license-shield]][license-url]
 
-This project is a digital photo frame application which interfaces with your Immich server. It is a C# .NET 7 cross platform project and currently supports Linux, MacOS, and Windows. I am running it on a Raspberry Pi 5.
-Configure your server URL, API key, and more in the Settings.xml file. The screen is configured in quadrants, click or touch middle/right to skip forward, middle/left to go back to last image, and middle/bottom to quit.
+
+
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
+  <a href="https://github.com/3rob3/ImmichFrame">
+    <img src="https://raw.githubusercontent.com/immich-app/immich/main/design/immich-logo.svg" alt="Logo" width="200" height="200">
+  </a>
+
+  <h3 align="center">ImmichFrame</h3>
+
+  <p align="center">
+    An awesome way to display your photos as an digital photo frame
+    <br />
+    <a href="https://github.com/immich-app/immich"><strong>Explore immich »</strong></a>
+    <br />
+    <br />
+    <a href="https://github.com/3rob3/ImmichFrame/issues">Report Bug</a>
+    ·
+    <a href="https://github.com/3rob3/ImmichFrame/issues">Request Feature</a>
+  </p>
+</div>
+
+## ⚠️ Disclaimer
+
+**This project is not affiliated with [immich][immich-github-url]!**
+
+<!-- ABOUT THE PROJECT -->
+## About The Project
+
+This project is a digital photo frame application that interfaces with your [immich][immich-github-url] server. It is a cross-platform C# .NET 7 project that currently supports Linux, macOS, and Windows.
+
+### Built With
+
+* [![Avalonia][Avalonia]][Avalonia-url]
+
+## ✨ Demo
+
+![Product Name Screen Shot][pope-screenshot]
+
+![Product Name Screen Shot][beach-screenshot]
+
+<!-- GETTING STARTED -->
+## Getting Started
+
+ImmichFrame is easy to run on your desired plattform.
+
+### Prerequisites
+
+
+- Set up your immich server
+- Install .NET 7 SDK
+
+
+### Installation
 
 > [!IMPORTANT]  
 > Make sure to copy the **Settings.example.xml** and name it **Settings.xml**
 
-Settings field descriptions:
-- ImmichServerUrl: The IP address or URL of your Immich server (ex. http://192.168.0.100:2283)
-- ApiKey: Your Immich ApiKey created on ImmichServerUrl/user-settings
-- *Albums\**: Choose one or multiple Albums to have in the rotation
-  - *AlbumId\**: Immich Album UID, (ex. ImmichServerUrl/albums/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
-- Interval: Interval for photo cycling in seconds (ex. 8)
-- DownloadImages: Determines if images should be saved locally (ex. false)
-- OnlyMemories: Only show todays memories (ex. false)
-- RenewImagesDuration: Duration for images to keep if existing, renews the image if older than the duration. Duration in Days (ex. 20)
-- ShowClock: Show clock in lower left bottom. Boolean (ex. true)
-- ClockFontSize: The font size for the clock (ex. 48)
-- ClockFormat: The format of the clock (ex. h:mm tt). See here for options https://www.c-sharpcorner.com/blogs/date-and-time-format-in-c-sharp-programming1
-- ShowPhotoDate: Show the date photo was taken. Boolean (ex. true)
-- PhotoDateFontSize: The font size for the photo date (ex. 36)
-- PhotoDateFormat: The format of the date (ex. MM/dd/yyyy). See here for options https://www.c-sharpcorner.com/blogs/date-and-time-format-in-c-sharp-programming1
-- ShowImageDesc: Show the description. Boolean (ex. true)
-- ImageDescFontSize: The font size for the description (ex. 36)
-- ShowWeather: Show the current weather. Boolean (ex. true)
-- WeatherFontSize: The font size for the weather data (ex. 12)
-- WeatherUnits: The temperature units. either celcius or fahrenheit
-- WeatherLatLong: Your latitude/longitude coordinates (ex. 40.7128,74.0060)
+1. Get the latest release from the [release page][releases-url]
+2. Rename the `Settings.example.xml` file to `Settings.xml`
+3. Change `<ImmichServerUrl>` to your domain or local ip
+   ```xml
+    <ImmichServerUrl>http://yourdomain.com</ImmichServerUrl>
+   ```
+4. Change `<ApiKey>`. Read more about immich ApiKey here: https://immich.app/docs/features/command-line-interface#obtain-the-api-key
+   ```xml
+    <ApiKey>YourApiKey</ApiKey>
+   ```
+5. *Optional:* Choose albums you would like to display
+   ```xml
+    <Albums>
+	    <Album>First Album UID</Album>
+	    <Album>Second Album UID</Album>
+    </Albums>
+   ```
+6. Adjust other settings to your needs
 
-\* *Optional parameters*
+<!-- USAGE EXAMPLES -->
+## Usage
+
+Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+
+_For more examples, please refer to the [Documentation](https://example.com)_
+
+<!-- ROADMAP -->
+## Roadmap
+
+- [x] Display random assets
+- [x] Display Albums
+- [x] Display Memories
+- [ ] Add Additional Templates w/ Examples
+- [ ] Add License
+
+See the [open issues](https://github.com/3rob3/ImmichFrame/issues) for a full list of proposed features (and known issues).
+
+<!-- CONTRIBUTING -->
+## Contributing
+
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+Don't forget to give the project a star! Thanks again!
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+<!-- LICENSE -->
+## License
+
+TODO
+
+<!-- CONTACT -->
+## Contact
+
+TODO, add info or remove it :)
+
+<!-- ACKNOWLEDGMENTS -->
+## Acknowledgments
+
+BIG thanks to the [immich][immich-github-url]-team for creating an awesome tool
+
+* [immich][immich-github-url]
+* [Img Shields](https://shields.io)
+* [GitHub Pages](https://pages.github.com)
 
 
-![pope](https://github.com/3rob3/ImmichFrame/assets/156599986/9b8a899c-c012-4262-b02c-59d5e011dbd7)
 
-![beach](https://github.com/3rob3/ImmichFrame/assets/156599986/a21a28d3-1111-4f35-8d4b-9d6ece84aac1)
+
+<!-- MARKDOWN LINKS & IMAGES -->
+<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+[contributors-shield]: https://img.shields.io/github/contributors/3rob3/ImmichFrame.svg?style=for-the-badge
+[contributors-url]: https://github.com/3rob3/ImmichFrame/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/3rob3/ImmichFrame.svg?style=for-the-badge
+[forks-url]: https://github.com/3rob3/ImmichFrame/network/members
+[stars-shield]: https://img.shields.io/github/stars/3rob3/ImmichFrame.svg?style=for-the-badge
+[stars-url]: https://github.com/3rob3/ImmichFrame/stargazers
+[issues-shield]: https://img.shields.io/github/issues/3rob3/ImmichFrame.svg?style=for-the-badge
+[issues-url]: https://github.com/3rob3/ImmichFrame/issues
+[license-shield]: https://img.shields.io/github/license/3rob3/ImmichFrame.svg?style=for-the-badge
+[license-url]: https://github.com/3rob3/ImmichFrame/blob/master/LICENSE.txt
+[releases-url]: https://github.com/3rob3/ImmichFrame/releases
+[immich-github-url]: https://github.com/immich-app/immich
+[pope-screenshot]: https://github.com/3rob3/ImmichFrame/assets/156599986/9b8a899c-c012-4262-b02c-59d5e011dbd7
+[beach-screenshot]: https://github.com/3rob3/ImmichFrame/assets/156599986/a21a28d3-1111-4f35-8d4b-9d6ece84aac1
+[Avalonia]: https://img.shields.io/badge/avalonia-purple?style=for-the-badge&logo=avalonia&logoColor=white
+[Avalonia-url]: https://docs.avaloniaui.net/docs/welcome

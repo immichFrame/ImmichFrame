@@ -1,25 +1,48 @@
 <Settings>
 	<ImmichServerUrl>http://YourIpOrUrl:2283</ImmichServerUrl>
+	<!--Your immich API-Key, see here https://immich.app/docs/features/command-line-interface#obtain-the-api-key-->
 	<ApiKey>YourApiKey</ApiKey>
+
+	<!--OPTIONAL: Choose one or multiple Albums to have in the rotation-->
+	<!--Remove this section if you want to show random images-->
 	<Albums>
-		<!--Optional-->
 		<Album>First Album UID</Album>
 		<Album>Second Album UID</Album>
 	</Albums>
+	
+	<!--Interval for photo cycling in seconds-->
 	<Interval>8</Interval>
+	
+	<!--Determines if images should be saved locally-->
 	<DownloadImages>false</DownloadImages>
+	
+	<!--Only show todays memories-->
 	<OnlyMemories>false</OnlyMemories>
-	<RenewImagesDuration>5</RenewImagesDuration>
+
+	<!--Duration for images to keep if existing, renews the image if older than the duration. Duration in Days-->
+	<RenewImagesDuration>20</RenewImagesDuration>
+
+	<!--Show clock in lower left bottom-->
 	<ShowClock>true</ShowClock>
 	<ClockFontSize>48</ClockFontSize>
+	<!--The format of the clock (ex. h:mm tt). See here for options https://www.c-sharpcorner.com/blogs/-->
 	<ClockFormat>h:mm tt</ClockFormat>
+
+	<!--Show the date photo was taken.-->
 	<ShowPhotoDate>true</ShowPhotoDate>
 	<PhotoDateFontSize>36</PhotoDateFontSize>
+	<!--The format of the date (ex. MM/dd/yyyy). See here for options https://www.c-sharpcorner.com/blogs/-->
 	<PhotoDateFormat>MM/dd/yyyy</PhotoDateFormat>
+
+	<!--Show the description-->
 	<ShowImageDesc>true</ShowImageDesc>
 	<ImageDescFontSize>36</ImageDescFontSize>
-	<ShowWeather>true</ShowWeather>
-	<WeatherFontSize>12</WeatherFontSize>
+
+	<!--Show the current weather-->
+	<ShowWeather>false</ShowWeather>
+	<WeatherFontSize>12</WeatherFontSize>	
+	<!--The temperature units. either celcius or fahrenheit-->
 	<WeatherUnits>fahrenheit</WeatherUnits>
+	<!--Your latitude/longitude coordinates (ex. 40.7128,74.0060)-->
 	<WeatherLatLong>40.7128,74.0060</WeatherLatLong>
 </Settings>
