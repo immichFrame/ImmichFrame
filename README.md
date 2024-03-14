@@ -63,7 +63,7 @@ ImmichFrame is easy to run on your desired plattform.
 > [!IMPORTANT]  
 > Make sure to copy the **Settings.example.xml** and name it **Settings.xml**
 
-1. Get the latest release from the [release page][releases-url]
+1. Get the latest release from the [release page][releases-url] and unzip
 2. Rename the `Settings.example.xml` file to `Settings.xml`
 3. Change `<ImmichServerUrl>` to your domain or local ip
    ```xml
@@ -84,8 +84,15 @@ ImmichFrame is easy to run on your desired plattform.
 
 <!-- USAGE EXAMPLES -->
 ## Usage
-
-TODO
+### Linux
+- GUI - Double-click Immich_Frame.
+- CLI - CD into folder, and launch with "./Immich_Frame".
+- SSH - CD into folder, and launch with "DISPLAY=:0.0 ./Immich_Frame".
+### Windows
+- Double-click Immich_Frame.
+- Screensaver - Rename Immich_Frame.exe to Immich_Frame.scr. Right-click-Install. Configure screensaver settings and apply. Note: you will still have to click middle/bottom in the app to exit screensaver.
+### MacOS
+- Double-click Immich_Frame. Note: If nothing happens, right-click-open with-Utilities-Terminal. Check Always Open With.
 
 <!-- ROADMAP -->
 ## Roadmap
