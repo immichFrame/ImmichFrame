@@ -54,8 +54,7 @@ ImmichFrame is easy to run on your desired plattform.
 ### Prerequisites
 
 
-- Set up your immich server
-- Install .NET 7 SDK
+- A set up and functioning immich server
 
 
 ### Installation
