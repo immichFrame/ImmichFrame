@@ -5,31 +5,30 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace ImmichFrame.Helpers
 {
     public class AssetHelper
     {
-        private Task<Dictionary<Guid, AssetResponseDto>> _memoryAssetInfos;
+        private Dictionary<Guid, AssetInfo> _memoryAssetInfos;
         private DateTime lastMemoryAssetRefesh;
-        public Task<Dictionary<Guid, AssetResponseDto>> MemoryAssetInfos
+        public Dictionary<Guid, AssetInfo> MemoryAssetInfos
         {
             get
             {
                 if (_memoryAssetInfos == null || lastMemoryAssetRefesh.DayOfYear != DateTime.Today.DayOfYear)
                 {
                     lastMemoryAssetRefesh = DateTime.Now;
-                    _memoryAssetInfos = GetMemoryAssetIds();
+                    _memoryAssetInfos = GetMemoryAssetIds().ToDictionary(x => Guid.Parse(x.Id));
                 }
 
                 return _memoryAssetInfos;
             }
         }
 
-        private Task<Dictionary<Guid, AssetResponseDto>> _albumAssetInfos;
+        private Dictionary<Guid, AssetInfo> _albumAssetInfos;
         private DateTime lastAlbumAssetRefesh;
-        public Task<Dictionary<Guid, AssetResponseDto>> AlbumAssetInfos
+        public Dictionary<Guid, AssetInfo> AlbumAssetInfos
         {
             get
             {
@@ -38,121 +37,137 @@ namespace ImmichFrame.Helpers
                 if (_albumAssetInfos == null || lastAlbumAssetRefesh.AddDays(1) < DateTime.Now)
                 {
                     lastAlbumAssetRefesh = DateTime.Now;
-                    _albumAssetInfos = GetAlbumAssetIds();
+                    _albumAssetInfos = GetAlbumAssetIds().ToDictionary(x => Guid.Parse(x.Id));
                 }
 
                 return _albumAssetInfos;
             }
         }
 
-        public async Task<AssetResponseDto?> GetNextAsset()
+        public AssetInfo? GetNextAsset()
         {
             if (Settings.CurrentSettings.OnlyMemories)
             {
-                return await GetRandomMemoryAsset();
+                return GetRandomMemoryAsset();
             }
 
-            return Settings.CurrentSettings.Albums.Any() ? await GetRandomAlbumAsset() : await GetRandomAsset();
+            return Settings.CurrentSettings.Albums.Any() ? GetRandomAlbumAsset() : GetRandomAsset();
         }
 
-        private async Task<Dictionary<Guid, AssetResponseDto>> GetMemoryAssetIds()
+        private IEnumerable<AssetInfo> GetMemoryAssetIds()
         {
             using (var client = new HttpClient())
             {
                 var settings = Settings.CurrentSettings;
+                var allAssets = new List<AssetInfo>();
+
                 client.UseApiKey(settings.ApiKey);
-
-                var immichApi = new ImmichApi(settings.ImmichServerUrl, client);
-
-                var allAssets = new List<AssetResponseDto>();
 
                 var date = DateTime.Today;
 
-                var memoryLane = await immichApi.GetMemoryLaneAsync(date.Day, date.Month);
+                string url = $"{settings.ImmichServerUrl}/api/asset/memory-lane?day={date.Day}&month={date.Month}";
 
-                foreach (var lane in memoryLane)
+                var response = client.GetAsync(url).Result;
+
+                if (!response.IsSuccessStatusCode)
+                    throw new AlbumNotFoundException($"Memories could not be loaded, check your settings file");
+
+                var responseContent = response.Content.ReadAsStringAsync().Result;
+
+                var albumInfo = JsonDocument.Parse(responseContent);
+
+                var years = albumInfo.RootElement.EnumerateArray().Cast<JsonElement>().ToList();
+
+                foreach (var year in years)
                 {
-                    var assets = lane.Assets.ToList();
-                    assets.ForEach(asset => asset.ImageDesc = lane.Title);
+                    var assets = year.GetProperty("assets").ToString() ?? string.Empty;
+                    var assetList = JsonSerializer.Deserialize<IEnumerable<AssetInfo>>(assets) ?? new List<AssetInfo>();
 
-                    allAssets.AddRange(assets);
+                    var title = year.GetProperty("title").ToString() ?? string.Empty;
+
+                    assetList.ToList().ForEach(asset => asset.ImageDesc = title);
+
+                    allAssets.AddRange(assetList);
                 }
 
-                return allAssets.ToDictionary(x => Guid.Parse(x.Id));
+                return allAssets;
             }
         }
 
-        private async Task<Dictionary<Guid, AssetResponseDto>> GetAlbumAssetIds()
+        private IEnumerable<AssetInfo> GetAlbumAssetIds()
         {
             using (var client = new HttpClient())
             {
-                var allAssets = new List<AssetResponseDto>();
+                var allAssets = new List<AssetInfo>();
                 var settings = Settings.CurrentSettings;
-
-
-                var x = new ImmichApi(settings.ImmichServerUrl, client);
-
 
                 client.UseApiKey(settings.ApiKey);
                 foreach (var albumId in settings.Albums!)
                 {
-                    try
-                    {
-                        var albumInfo = await x.GetAlbumInfoAsync(albumId, null, null);
+                    string url = $"{settings.ImmichServerUrl}/api/album/{albumId}";
 
-                        allAssets.AddRange(albumInfo.Assets);
-                    }
-                    catch (ApiException ex)
-                    {
-                        throw new AlbumNotFoundException($"Album '{albumId}' was not found, check your settings file", ex);
-                    }
+                    var response = client.GetAsync(url).Result;
+
+                    if (!response.IsSuccessStatusCode)
+                        throw new AlbumNotFoundException($"Album '{albumId}' was not found, check your settings file");
+
+                    var responseContent = response.Content.ReadAsStringAsync().Result;
+
+                    var albumInfo = JsonDocument.Parse(responseContent);
+
+                    var assets = albumInfo.RootElement.GetProperty("assets").ToString() ?? string.Empty;
+
+                    var assetList = JsonSerializer.Deserialize<IEnumerable<AssetInfo>>(assets) ?? new List<AssetInfo>();
+
+                    allAssets.AddRange(assetList);
                 }
 
-                return allAssets.ToDictionary(x => Guid.Parse(x.Id));
+                return allAssets;
             }
         }
 
         private Random _random = new Random();
-        private async Task<AssetResponseDto?> GetRandomAlbumAsset()
+        private AssetInfo? GetRandomAlbumAsset()
         {
-            var albumAssetInfos = await AlbumAssetInfos;
-            if (!albumAssetInfos.Any())
+            if (!AlbumAssetInfos.Any())
                 throw new AssetNotFoundException();
 
-            var rnd = _random.Next(albumAssetInfos.Count);
+            var rnd = _random.Next(AlbumAssetInfos.Count);
 
-            return albumAssetInfos.ElementAt(rnd).Value;
+            return AlbumAssetInfos.ElementAt(rnd).Value;
         }
-
-        private async Task<AssetResponseDto?> GetRandomMemoryAsset()
+        private AssetInfo? GetRandomMemoryAsset()
         {
-            var memoryAssetInfos = await MemoryAssetInfos;
-            if (!memoryAssetInfos.Any())
+            if (!MemoryAssetInfos.Any())
                 throw new AssetNotFoundException();
 
-            var rnd = _random.Next(memoryAssetInfos.Count);
+            var rnd = _random.Next(MemoryAssetInfos.Count);
 
-            return memoryAssetInfos.ElementAt(rnd).Value;
+            return MemoryAssetInfos.ElementAt(rnd).Value;
         }
-        private async Task<AssetResponseDto?> GetRandomAsset()
+        private AssetInfo? GetRandomAsset()
         {
+            AssetInfo? returnAsset = null;
             var settings = Settings.CurrentSettings;
 
+            string url = $"{settings.ImmichServerUrl}/api/asset/random";
             using (var client = new HttpClient())
             {
                 client.UseApiKey(settings.ApiKey);
+                var response = client.GetAsync(url).Result;
 
-                var immichApi = new ImmichApi(settings.ImmichServerUrl, client);
+                if (!response.IsSuccessStatusCode)
+                    throw new AssetNotFoundException();
 
-                var randomAssets = await immichApi.GetRandomAsync(null);
-
-                if (randomAssets.Any())
+                var responseContent = response.Content.ReadAsStringAsync().Result;
+                var assetList = JsonSerializer.Deserialize<List<AssetInfo>>(responseContent);
+                if (assetList != null)
                 {
-                    return randomAssets.First();
+                    returnAsset = assetList.FirstOrDefault();
                 }
             }
 
-            return null;
+            return returnAsset;
         }
     }
 }
