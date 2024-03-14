@@ -42,7 +42,7 @@ jobs:
           release_name="ImmichFrame-$tag-${{ matrix.target }}"
 
           # Build everything
-          dotnet publish ./ImmichFrame.Desktop/ImmichFrame.Desktop.csproj --runtime "${{ matrix.target }}" -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -c Release -o "$release_name" --self-contained true
+          dotnet publish ./ImmichFrame.Desktop/ImmichFrame.Desktop.csproj --runtime "${{ matrix.target }}" -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=None -c Release -o "$release_name" --self-contained true
 
           # Pack files
           if [ "${{ matrix.target }}" == "win-x64" ]; then
