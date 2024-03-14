@@ -4,18 +4,24 @@ on:
     tags:
       - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
 
-name: Create Release
+name: Release ImmichFrame
 
 jobs:
   release:
     name: Release
     strategy:
       matrix:
-        kind: ['linux', 'windows', 'macOS']
+        kind: ['linux-x64', 'linux-arm', 'linux-arm64', 'windows', 'macOS']
         include:
-          - kind: linux
+          - kind: linux-x64
             os: ubuntu-latest
             target: linux-x64
+          - kind: linux-arm
+            os: ubuntu-latest
+            target: linux-arm
+          - kind: linux-arm64
+            os: ubuntu-latest
+            target: linux-arm64
           - kind: windows
             os: windows-latest
             target: win-x64
@@ -36,7 +42,7 @@ jobs:
           release_name="ImmichFrame-$tag-${{ matrix.target }}"
 
           # Build everything
-          dotnet publish ./ImmichFrame.Desktop/ImmichFrame.Desktop.csproj --runtime "${{ matrix.target }}" -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -c Release -o "$release_name" --self-contained true
+          dotnet publish ./ImmichFrame.Desktop/ImmichFrame.Desktop.csproj --runtime "${{ matrix.target }}" -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=None -c Release -o "$release_name" --self-contained true
 
           # Pack files
           if [ "${{ matrix.target }}" == "win-x64" ]; then
