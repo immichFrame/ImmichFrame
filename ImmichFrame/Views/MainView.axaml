@@ -42,6 +42,6 @@
 			<TextBlock x:Name="txtLiveTime" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Bottom" Opacity="0.85" IsVisible = "{Binding Settings.ShowClock}" Text="{Binding LiveTime}" FontSize="{Binding Settings.ClockFontSize}"/>
 		</StackPanel>
 		<TextBlock x:Name="txtImageDate" Grid.Column="2" Grid.Row="2" Foreground="White" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10" Opacity="0.85" IsVisible = "{Binding Settings.ShowPhotoDate}" Text="{Binding ImageDate}" FontSize="{Binding Settings.PhotoDateFontSize}"/>
-		<TextBlock x:Name="txtImageDesc" Grid.Column="1" Grid.Row="2" Foreground="White" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10" Opacity="0.85" IsVisible = "{Binding Settings.ShowImageDesc}" Text="{Binding ImageDesc}" FontSize="{Binding Settings.ImageDescFontSize}"/>
+		<TextBlock x:Name="txtImageDesc" Grid.Column="1" Grid.Row="2" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="10" Opacity="0.85" IsVisible = "{Binding Settings.ShowImageDesc}" Text="{Binding ImageDesc}" FontSize="{Binding Settings.ImageDescFontSize}"/>
 	</Grid>
 </UserControl>
