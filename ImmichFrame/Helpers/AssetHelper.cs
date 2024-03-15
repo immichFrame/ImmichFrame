@@ -43,6 +43,27 @@ namespace ImmichFrame.Helpers
                 return _albumAssetInfos;
             }
         }
+        private Dictionary<Guid, AssetInfo> _peopleAssetInfos;
+        private DateTime lastPeopleAssetRefesh;
+        public Dictionary<Guid, AssetInfo> PeopleAssetInfos
+        {
+            get
+            {
+                // Refresh if no assets loaded or lastAlbumRefesh is older than one day
+                // TODO: Put refresh duration in config
+                if (_peopleAssetInfos == null || lastPeopleAssetRefesh.AddDays(1) < DateTime.Now)
+                {
+                    lastPeopleAssetRefesh = DateTime.Now;
+                    var peopleAssetIds = GetPeopleAssetIds();
+
+                    // Remove duplicate Ids
+                    var uniquePeopleAssetIds = peopleAssetIds.GroupBy(x => x.Id).Select(group => group.First());
+                    _peopleAssetInfos = uniquePeopleAssetIds.ToDictionary(x => Guid.Parse(x.Id));
+                }
+
+                return _peopleAssetInfos;
+            }
+        }
 
         public AssetInfo? GetNextAsset()
         {
@@ -51,7 +72,7 @@ namespace ImmichFrame.Helpers
                 return GetRandomMemoryAsset();
             }
 
-            return Settings.CurrentSettings.Albums.Any() ? GetRandomAlbumAsset() : GetRandomAsset();
+            return Settings.CurrentSettings.Albums.Any() ? GetRandomAlbumAsset() : Settings.CurrentSettings.People.Any() ? GetRandomPeopleAsset() : GetRandomAsset();
         }
 
         private IEnumerable<AssetInfo> GetMemoryAssetIds()
@@ -126,6 +147,36 @@ namespace ImmichFrame.Helpers
             }
         }
 
+        private IEnumerable<AssetInfo> GetPeopleAssetIds()
+        {
+            using (var client = new HttpClient())
+            {
+                var allAssets = new List<AssetInfo>();
+                var settings = Settings.CurrentSettings;
+
+                client.UseApiKey(settings.ApiKey);
+                foreach (var personId in settings.People!)
+                {
+                    string url = $"{settings.ImmichServerUrl}/api/person/{personId}/assets";
+
+                    var response = client.GetAsync(url).Result;
+
+                    if (!response.IsSuccessStatusCode)
+                        throw new AlbumNotFoundException($"Person '{personId}' was not found, check your settings file");
+
+                    var responseContent = response.Content.ReadAsStringAsync().Result;
+
+                    var peopleInfo = JsonDocument.Parse(responseContent);
+
+                    var assetList = JsonSerializer.Deserialize<IEnumerable<AssetInfo>>(peopleInfo) ?? new List<AssetInfo>();
+                    
+                    allAssets.AddRange(assetList);
+                }
+
+                return allAssets;
+            }
+        }
+
         private Random _random = new Random();
         private AssetInfo? GetRandomAlbumAsset()
         {
@@ -135,6 +186,15 @@ namespace ImmichFrame.Helpers
             var rnd = _random.Next(AlbumAssetInfos.Count);
 
             return AlbumAssetInfos.ElementAt(rnd).Value;
+        }
+        private AssetInfo? GetRandomPeopleAsset()
+        {
+            if (!PeopleAssetInfos.Any())
+                throw new AssetNotFoundException();
+
+            var rnd = _random.Next(PeopleAssetInfos.Count);
+
+            return PeopleAssetInfos.ElementAt(rnd).Value;
         }
         private AssetInfo? GetRandomMemoryAsset()
         {
