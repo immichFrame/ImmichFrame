@@ -45,16 +45,16 @@ namespace ImmichFrame.Helpers
             }
         }
         private Task<Dictionary<Guid, AssetResponseDto>> _peopleAssetInfos;
-        private DateTime lastPeopleAssetRefesh;
+        private DateTime lastPeopleAssetRefresh;
         public Task<Dictionary<Guid, AssetResponseDto>> PeopleAssetInfos
         {
             get
             {
-                // Refresh if no assets loaded or lastAlbumRefesh is older than one day
+                // Refresh if no assets loaded or lastPeopleAssetRefresh is older than one day
                 // TODO: Put refresh duration in config
-                if (_peopleAssetInfos == null || lastPeopleAssetRefesh.AddDays(1) < DateTime.Now)
+                if (_peopleAssetInfos == null || lastPeopleAssetRefresh.AddDays(1) < DateTime.Now)
                 {
-                    lastPeopleAssetRefesh = DateTime.Now;
+                    lastPeopleAssetRefresh = DateTime.Now;
                     _peopleAssetInfos = GetPeopleAssetIds();
                 }
 
@@ -69,7 +69,6 @@ namespace ImmichFrame.Helpers
                 return await GetRandomMemoryAsset();
             }
 
-            //return Settings.CurrentSettings.Albums.Any() ? await GetRandomAlbumAsset() : await GetRandomAsset();
             return Settings.CurrentSettings.Albums.Any() ? await GetRandomAlbumAsset() : Settings.CurrentSettings.People.Any() ? await GetRandomPeopleAsset() : await GetRandomAsset();
         }
 
@@ -107,14 +106,14 @@ namespace ImmichFrame.Helpers
                 var allAssets = new List<AssetResponseDto>();
                 var settings = Settings.CurrentSettings;
 
-                var x = new ImmichApi(settings.ImmichServerUrl, client);
+                var immichApi = new ImmichApi(settings.ImmichServerUrl, client);
 
                 client.UseApiKey(settings.ApiKey);
                 foreach (var albumId in settings.Albums!)
                 {
                     try
                     {
-                        var albumInfo = await x.GetAlbumInfoAsync(albumId, null, null);
+                        var albumInfo = await immichApi.GetAlbumInfoAsync(albumId, null, null);
 
                         allAssets.AddRange(albumInfo.Assets);
                     }
@@ -134,14 +133,14 @@ namespace ImmichFrame.Helpers
                 var allAssets = new List<AssetResponseDto>();
                 var settings = Settings.CurrentSettings;
 
-                var x = new ImmichApi(settings.ImmichServerUrl, client);
+                var immichApi = new ImmichApi(settings.ImmichServerUrl, client);
 
                 client.UseApiKey(settings.ApiKey);
                 foreach (var personId in settings.People!)
                 {
                     try
                     {
-                        var personInfo = await x.GetPersonAssetsAsync(personId);
+                        var personInfo = await immichApi.GetPersonAssetsAsync(personId);
 
                         allAssets.AddRange(personInfo);
                     }
