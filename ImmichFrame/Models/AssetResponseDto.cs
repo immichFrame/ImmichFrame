@@ -83,7 +83,6 @@ public partial class AssetResponseDto
             }
             else
             {
-                ms.Position = 0;
                 return ms;
             }
         }
