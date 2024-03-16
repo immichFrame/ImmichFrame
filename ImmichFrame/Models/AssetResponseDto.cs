@@ -70,12 +70,12 @@ public partial class AssetResponseDto
             var stream = data.Stream;
             var ms = new MemoryStream();
             stream.CopyTo(ms);
+            ms.Position = 0;
             if (Settings.CurrentSettings.DownloadImages)
             {
                 // save to folder
                 using (var fs = File.Create(localPath))
                 {
-                    ms.Position = 0;
                     ms.CopyTo(fs);
                     ms.Position = 0;
                     return ms;
