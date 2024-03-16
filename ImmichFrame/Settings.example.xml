@@ -9,6 +9,13 @@
 		<Album>First Album UID</Album>
 		<Album>Second Album UID</Album>
 	</Albums>
+
+	<!--OPTIONAL: Choose one or multiple People to have in the rotation-->
+	<!--Remove this section if you want to show random images-->
+	<People>
+		<Person>First Person UID</Person>
+		<Person>Second Person UID</Person>
+	</People>
 	
 	<!--Interval for photo cycling in seconds-->
 	<Interval>8</Interval>

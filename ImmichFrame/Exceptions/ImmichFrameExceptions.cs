@@ -26,7 +26,13 @@ namespace ImmichFrame.Exceptions
         public AlbumNotFoundException(string message, Exception innerException) : base(message, innerException) { }
         public AlbumNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
-
+public class PersonNotFoundException : ImmichFrameException
+    {
+        public PersonNotFoundException() : base() { }
+        public PersonNotFoundException(string message) : base(message) { }
+        public PersonNotFoundException(string message, Exception innerException) : base(message, innerException) { }
+        public PersonNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+    }
     public class MemoryNotFoundException : ImmichFrameException
     {
         public MemoryNotFoundException() : base() { }
