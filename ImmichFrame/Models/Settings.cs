@@ -16,6 +16,7 @@ public class Settings
     public bool OnlyMemories { get; set; }
     public int RenewImagesDuration { get; set; }
     public List<Guid> Albums { get; set; }
+    public List<Guid> People { get; set; }
     public bool ShowClock { get; set; }
     public int ClockFontSize { get; set; }
     public string? ClockFormat { get; set; }
@@ -53,6 +54,7 @@ public class Settings
             ImmichServerUrl = doc.Element("ImmichServerUrl")!.Value,
             ApiKey = doc.Element("ApiKey")?.Value ?? string.Empty,
             Albums = doc.Element("Albums")?.DescendantNodes().OfType<XElement>().Select(x => Guid.Parse(x.Value)).Distinct().ToList() ?? new(),
+            People = doc.Element("People")?.DescendantNodes().OfType<XElement>().Select(x => Guid.Parse(x.Value)).Distinct().ToList() ?? new(),
             Interval = int.Parse(doc.Element("Interval")!.Value),
             DownloadImages = Convert.ToBoolean(doc.Element("DownloadImages")?.Value),
             OnlyMemories = Convert.ToBoolean(doc.Element("OnlyMemories")?.Value),

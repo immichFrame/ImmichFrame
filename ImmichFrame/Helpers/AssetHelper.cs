@@ -44,6 +44,23 @@ namespace ImmichFrame.Helpers
                 return _albumAssetInfos;
             }
         }
+        private Task<Dictionary<Guid, AssetResponseDto>> _peopleAssetInfos;
+        private DateTime lastPeopleAssetRefresh;
+        public Task<Dictionary<Guid, AssetResponseDto>> PeopleAssetInfos
+        {
+            get
+            {
+                // Refresh if no assets loaded or lastPeopleAssetRefresh is older than one day
+                // TODO: Put refresh duration in config
+                if (_peopleAssetInfos == null || lastPeopleAssetRefresh.AddDays(1) < DateTime.Now)
+                {
+                    lastPeopleAssetRefresh = DateTime.Now;
+                    _peopleAssetInfos = GetPeopleAssetIds();
+                }
+
+                return _peopleAssetInfos;
+            }
+        }
 
         public async Task<AssetResponseDto?> GetNextAsset()
         {
@@ -52,7 +69,7 @@ namespace ImmichFrame.Helpers
                 return await GetRandomMemoryAsset();
             }
 
-            return Settings.CurrentSettings.Albums.Any() ? await GetRandomAlbumAsset() : await GetRandomAsset();
+            return Settings.CurrentSettings.Albums.Any() ? await GetRandomAlbumAsset() : Settings.CurrentSettings.People.Any() ? await GetRandomPeopleAsset() : await GetRandomAsset();
         }
 
         private async Task<Dictionary<Guid, AssetResponseDto>> GetMemoryAssetIds()
@@ -89,16 +106,14 @@ namespace ImmichFrame.Helpers
                 var allAssets = new List<AssetResponseDto>();
                 var settings = Settings.CurrentSettings;
 
-
-                var x = new ImmichApi(settings.ImmichServerUrl, client);
-
+                var immichApi = new ImmichApi(settings.ImmichServerUrl, client);
 
                 client.UseApiKey(settings.ApiKey);
                 foreach (var albumId in settings.Albums!)
                 {
                     try
                     {
-                        var albumInfo = await x.GetAlbumInfoAsync(albumId, null, null);
+                        var albumInfo = await immichApi.GetAlbumInfoAsync(albumId, null, null);
 
                         allAssets.AddRange(albumInfo.Assets);
                     }
@@ -109,6 +124,34 @@ namespace ImmichFrame.Helpers
                 }
 
                 return allAssets.ToDictionary(x => Guid.Parse(x.Id));
+            }
+        }
+        private async Task<Dictionary<Guid, AssetResponseDto>> GetPeopleAssetIds()
+        {
+            using (var client = new HttpClient())
+            {
+                var allAssets = new List<AssetResponseDto>();
+                var settings = Settings.CurrentSettings;
+
+                var immichApi = new ImmichApi(settings.ImmichServerUrl, client);
+
+                client.UseApiKey(settings.ApiKey);
+                foreach (var personId in settings.People!)
+                {
+                    try
+                    {
+                        var personInfo = await immichApi.GetPersonAssetsAsync(personId);
+
+                        allAssets.AddRange(personInfo);
+                    }
+                    catch (ApiException ex)
+                    {
+                        throw new PersonNotFoundException($"Person '{personId}' was not found, check your settings file", ex);
+                    }
+                }
+                // Remove duplicates
+                var uniqueAssets = allAssets.GroupBy(x => x.Id).Select(group => group.First());
+                return uniqueAssets.ToDictionary(x => Guid.Parse(x.Id));
             }
         }
 
@@ -122,6 +165,16 @@ namespace ImmichFrame.Helpers
             var rnd = _random.Next(albumAssetInfos.Count);
 
             return albumAssetInfos.ElementAt(rnd).Value;
+        }
+        private async Task<AssetResponseDto?> GetRandomPeopleAsset()
+        {
+            var peopleAssetInfos = await PeopleAssetInfos;
+            if (!peopleAssetInfos.Any())
+                throw new AssetNotFoundException();
+
+            var rnd = _random.Next(peopleAssetInfos.Count);
+
+            return peopleAssetInfos.ElementAt(rnd).Value;
         }
 
         private async Task<AssetResponseDto?> GetRandomMemoryAsset()
