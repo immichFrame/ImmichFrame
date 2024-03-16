@@ -19,7 +19,7 @@ public partial class AssetResponseDto
         get
         {
             if (string.IsNullOrWhiteSpace(_imageDesc))
-                return this.ExifInfo.Description;
+                return this.ExifInfo?.Description ?? string.Empty;
 
             return _imageDesc;
         }

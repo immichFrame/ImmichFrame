@@ -46,7 +46,7 @@ public class Settings
     {
         var xml = File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + @"Settings.xml");
 
-        var doc = XDocument.Parse(xml).Root;
+        var doc = XDocument.Parse(xml).Root!;
 
         var settings = new Settings
         {
