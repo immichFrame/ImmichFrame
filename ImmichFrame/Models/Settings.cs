@@ -9,7 +9,7 @@ namespace ImmichFrame.Models;
 
 public class Settings
 {
-    public string? ImmichServerUrl { get; set; }
+    public string ImmichServerUrl { get; set; }
     public string ApiKey { get; set; }
     public int Interval { get; set; }
     public bool DownloadImages { get; set; }
@@ -46,7 +46,7 @@ public class Settings
     {
         var xml = File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + @"Settings.xml");
 
-        var doc = XDocument.Parse(xml).Root;
+        var doc = XDocument.Parse(xml).Root!;
 
         var settings = new Settings
         {

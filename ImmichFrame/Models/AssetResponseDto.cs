@@ -7,34 +7,34 @@ using System.Threading.Tasks;
 
 namespace ImmichFrame.Models;
 
-// Data from JSON partial
-public partial class AssetInfo
-{
-    [JsonPropertyName("id")]
-    public string Id { get; set; }
-
-    [JsonPropertyName("fileCreatedAt")]
-    public DateTime FileCreatedAt { get; set; }
-}
-
 // Additional data partial
-public partial class AssetInfo
+public partial class AssetResponseDto
 {
     [JsonIgnore]
-    public string ImageUrl => $"{Settings.CurrentSettings.ImmichServerUrl}/api/asset/thumbnail/{Id}?format={ImageExt}";
+    private string _imageDesc;
 
     [JsonIgnore]
-    public string ImageExt => "JPEG";
+    public string ImageDesc
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(_imageDesc))
+                return this.ExifInfo?.Description ?? string.Empty;
 
-    [JsonIgnore]
-    public string ImageDesc { get; set;}
+            return _imageDesc;
+        }
+        set
+        {
+            _imageDesc = value;
+        }
+    }
 
     [JsonIgnore]
     public Task<Stream> AssetImage => ServeImage();
 
     private async Task<Stream> ServeImage()
     {
-        var localPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Immich_Assets", $"{Id}.{ImageExt}");
+        var localPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Immich_Assets", $"{Id}.{ThumbnailFormat.JPEG}");
         var localDir = Path.GetDirectoryName(localPath);
         if (!Directory.Exists(localDir))
         {
@@ -59,23 +59,31 @@ public partial class AssetInfo
     {
         using (var client = new HttpClient())
         {
-            client.UseApiKey(Settings.CurrentSettings.ApiKey);
-            var data = await client.GetByteArrayAsync(this.ImageUrl);
+            var settings = Settings.CurrentSettings;
 
-            var stream = new MemoryStream(data);
+            client.UseApiKey(settings.ApiKey);
+
+            var immichApi = new ImmichApi(settings.ImmichServerUrl, client);
+
+            var data = await immichApi.GetAssetThumbnailAsync(ThumbnailFormat.JPEG, Guid.Parse(this.Id), null);
+
+            var stream = data.Stream;
+            var ms = new MemoryStream();
+            stream.CopyTo(ms);
             if (Settings.CurrentSettings.DownloadImages)
             {
                 // save to folder
                 using (var fs = File.Create(localPath))
                 {
-                    stream.CopyTo(fs);
-                    stream.Position = 0;
-                    return stream;
+                    ms.Position = 0;
+                    ms.CopyTo(fs);
+                    ms.Position = 0;
+                    return ms;
                 }
             }
             else
             {
-                return stream;
+                return ms;
             }
         }
     }
