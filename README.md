@@ -79,7 +79,14 @@ ImmichFrame is easy to run on your desired plattform.
 	    <Album>Second Album UID</Album>
     </Albums>
    ```
-6. Adjust other settings to your needs
+6. *Optional:* Choose people you would like to display
+   ```xml
+    <People>
+	    <Album>First person UID</Album>
+	    <Album>Second person UID</Album>
+    </People>
+   ```
+7. Adjust other settings to your needs
 
 <!-- USAGE EXAMPLES -->
 ## Usage
