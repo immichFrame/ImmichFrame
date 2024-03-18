@@ -51,7 +51,7 @@ public class Settings
 
         var settings = new Settings
         {
-            ImmichServerUrl = doc.Element("ImmichServerUrl")!.Value,
+            ImmichServerUrl = doc.Element("ImmichServerUrl")!.Value.TrimEnd('/'),
             ApiKey = doc.Element("ApiKey")?.Value ?? string.Empty,
             Albums = doc.Element("Albums")?.DescendantNodes().OfType<XElement>().Select(x => Guid.Parse(x.Value)).Distinct().ToList() ?? new(),
             People = doc.Element("People")?.DescendantNodes().OfType<XElement>().Select(x => Guid.Parse(x.Value)).Distinct().ToList() ?? new(),
