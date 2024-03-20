@@ -37,7 +37,7 @@
 		<Button x:Name="btnNext" Opacity="0" Grid.Column="2" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="btnNext_Click"/>
 		<Button x:Name="btnQuit" Opacity="0" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="btnQuit_Click"/>
 		<StackPanel Grid.Column="0" Grid.Row="2" Margin="10" VerticalAlignment="Bottom" >
-			<TextBlock x:Name="txtWeatherTemperature" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Bottom" Opacity="0.85" IsVisible = "{Binding Settings.ShowWeather}" Text="{Binding WeatherTemperature}" FontSize="{Binding WeatherFontSize}"/>
+			<TextBlock x:Name="txtWeatherTemperature" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Bottom" Opacity="0.85" IsVisible = "{Binding Settings.ShowWeather}" Text="{Binding WeatherTemperature}" FontSize="{Binding Settings.WeatherFontSize}"/>
 			<TextBlock x:Name="txtWeatherCurrent" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Bottom" Opacity="0.85" IsVisible = "{Binding Settings.ShowWeather}" Text="{Binding WeatherCurrent}" FontSize="{Binding Settings.WeatherFontSize}"/>
 			<TextBlock x:Name="txtLiveTime" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Bottom" Opacity="0.85" IsVisible = "{Binding Settings.ShowClock}" Text="{Binding LiveTime}" FontSize="{Binding Settings.ClockFontSize}"/>
 		</StackPanel>
