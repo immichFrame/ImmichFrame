@@ -29,7 +29,7 @@ public partial class MainView : UserControl
     public MainView()
     {
         InitializeComponent();
-        _appSettings = Settings.CurrentSettings;
+        _appSettings = new Settings();
         _viewModel = new MainViewModel();
         _assetHelper = new AssetHelper();
         DataContext = _viewModel;
@@ -41,6 +41,7 @@ public partial class MainView : UserControl
         try
         {
             ShowSplash();
+            _appSettings = Settings.CurrentSettings;
 
             if (_appSettings == null)
             {
