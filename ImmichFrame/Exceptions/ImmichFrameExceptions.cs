@@ -40,4 +40,11 @@ public class PersonNotFoundException : ImmichFrameException
         public MemoryNotFoundException(string message, Exception innerException) : base(message, innerException) { }
         public MemoryNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
+    public class SettingsNotValidException : ImmichFrameException
+    {
+        public SettingsNotValidException() : base() { }
+        public SettingsNotValidException(string message) : base(message) { }
+        public SettingsNotValidException(string message, Exception innerException) : base(message, innerException) { }
+        public SettingsNotValidException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+    }
 }

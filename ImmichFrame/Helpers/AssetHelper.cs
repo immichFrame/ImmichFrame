@@ -1,5 +1,6 @@
 ﻿using ImmichFrame.Exceptions;
 using ImmichFrame.Models;
+using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,65 +12,58 @@ namespace ImmichFrame.Helpers
 {
     public class AssetHelper
     {
-        private Task<Dictionary<Guid, AssetResponseDto>> _memoryAssetInfos;
-        private DateTime lastMemoryAssetRefesh;
-        public Task<Dictionary<Guid, AssetResponseDto>> MemoryAssetInfos
+        private Task<Dictionary<Guid, AssetResponseDto>?> _filteredAssetInfos;
+        private DateTime lastFilteredAssetRefesh;
+        public Task<Dictionary<Guid, AssetResponseDto>?> FilteredAssetInfos
         {
             get
             {
-                if (_memoryAssetInfos == null || lastMemoryAssetRefesh.DayOfYear != DateTime.Today.DayOfYear)
+                if (_filteredAssetInfos == null || lastFilteredAssetRefesh.DayOfYear != DateTime.Today.DayOfYear)
                 {
-                    lastMemoryAssetRefesh = DateTime.Now;
-                    _memoryAssetInfos = GetMemoryAssetIds();
+                    lastFilteredAssetRefesh = DateTime.Now;
+                    _filteredAssetInfos = GetFilteredAssetIds();
                 }
 
-                return _memoryAssetInfos;
-            }
-        }
-
-        private Task<Dictionary<Guid, AssetResponseDto>> _albumAssetInfos;
-        private DateTime lastAlbumAssetRefesh;
-        public Task<Dictionary<Guid, AssetResponseDto>> AlbumAssetInfos
-        {
-            get
-            {
-                // Refresh if no assets loaded or lastAlbumRefesh is older than one day
-                // TODO: Put refresh duration in config
-                if (_albumAssetInfos == null || lastAlbumAssetRefesh.AddDays(1) < DateTime.Now)
-                {
-                    lastAlbumAssetRefesh = DateTime.Now;
-                    _albumAssetInfos = GetAlbumAssetIds();
-                }
-
-                return _albumAssetInfos;
-            }
-        }
-        private Task<Dictionary<Guid, AssetResponseDto>> _peopleAssetInfos;
-        private DateTime lastPeopleAssetRefresh;
-        public Task<Dictionary<Guid, AssetResponseDto>> PeopleAssetInfos
-        {
-            get
-            {
-                // Refresh if no assets loaded or lastPeopleAssetRefresh is older than one day
-                // TODO: Put refresh duration in config
-                if (_peopleAssetInfos == null || lastPeopleAssetRefresh.AddDays(1) < DateTime.Now)
-                {
-                    lastPeopleAssetRefresh = DateTime.Now;
-                    _peopleAssetInfos = GetPeopleAssetIds();
-                }
-
-                return _peopleAssetInfos;
+                return _filteredAssetInfos;
             }
         }
 
         public async Task<AssetResponseDto?> GetNextAsset()
         {
-            if (Settings.CurrentSettings.OnlyMemories)
+            if ((await FilteredAssetInfos) != null)
             {
-                return await GetRandomMemoryAsset();
+                return await GetRandomFilteredAsset();
             }
 
-            return Settings.CurrentSettings.Albums.Any() ? await GetRandomAlbumAsset() : Settings.CurrentSettings.People.Any() ? await GetRandomPeopleAsset() : await GetRandomAsset();
+            return await GetRandomAsset();
+        }
+
+        private async Task<Dictionary<Guid, AssetResponseDto>?> GetFilteredAssetIds()
+        {
+            bool assetsAdded = false;
+            var list = new Dictionary<Guid, AssetResponseDto>();
+            if (Settings.CurrentSettings.ShowMemories)
+            {
+                assetsAdded = true;
+                list = list.Union(await GetMemoryAssetIds()).ToDictionary(x => x.Key, x => x.Value);
+            }
+
+            if (Settings.CurrentSettings.Albums.Any())
+            {
+                assetsAdded = true;
+                list = list.Union(await GetAlbumAssetIds()).ToDictionary(x=>x.Key, x=>x.Value);
+            }
+
+            if (Settings.CurrentSettings.People.Any())
+            {
+                assetsAdded = true;
+                list = list.Union(await GetPeopleAssetIds()).ToDictionary(x => x.Key, x => x.Value);
+            }
+
+            if (assetsAdded)
+                return list;
+
+            return null;
         }
 
         private async Task<Dictionary<Guid, AssetResponseDto>> GetMemoryAssetIds()
@@ -98,7 +92,6 @@ namespace ImmichFrame.Helpers
                 return allAssets.ToDictionary(x => Guid.Parse(x.Id));
             }
         }
-
         private async Task<Dictionary<Guid, AssetResponseDto>> GetAlbumAssetIds()
         {
             using (var client = new HttpClient())
@@ -156,36 +149,15 @@ namespace ImmichFrame.Helpers
         }
 
         private Random _random = new Random();
-        private async Task<AssetResponseDto?> GetRandomAlbumAsset()
+        private async Task<AssetResponseDto?> GetRandomFilteredAsset()
         {
-            var albumAssetInfos = await AlbumAssetInfos;
-            if (!albumAssetInfos.Any())
+            var filteredAssetInfos = await FilteredAssetInfos;
+            if (filteredAssetInfos == null || !filteredAssetInfos.Any())
                 throw new AssetNotFoundException();
 
-            var rnd = _random.Next(albumAssetInfos.Count);
+            var rnd = _random.Next(filteredAssetInfos.Count);
 
-            return albumAssetInfos.ElementAt(rnd).Value;
-        }
-        private async Task<AssetResponseDto?> GetRandomPeopleAsset()
-        {
-            var peopleAssetInfos = await PeopleAssetInfos;
-            if (!peopleAssetInfos.Any())
-                throw new AssetNotFoundException();
-
-            var rnd = _random.Next(peopleAssetInfos.Count);
-
-            return peopleAssetInfos.ElementAt(rnd).Value;
-        }
-
-        private async Task<AssetResponseDto?> GetRandomMemoryAsset()
-        {
-            var memoryAssetInfos = await MemoryAssetInfos;
-            if (!memoryAssetInfos.Any())
-                throw new AssetNotFoundException();
-
-            var rnd = _random.Next(memoryAssetInfos.Count);
-
-            return memoryAssetInfos.ElementAt(rnd).Value;
+            return filteredAssetInfos.ElementAt(rnd).Value;
         }
         private async Task<AssetResponseDto?> GetRandomAsset()
         {

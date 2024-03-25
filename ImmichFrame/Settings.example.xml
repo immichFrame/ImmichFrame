@@ -23,8 +23,8 @@
 	<!--Determines if images should be saved locally-->
 	<DownloadImages>false</DownloadImages>
 	
-	<!--Only show todays memories-->
-	<OnlyMemories>false</OnlyMemories>
+	<!--Show todays memories-->
+	<ShowMemories>false</ShowMemories>
 
 	<!--Duration for images to keep if existing, renews the image if older than the duration. Duration in Days-->
 	<RenewImagesDuration>20</RenewImagesDuration>

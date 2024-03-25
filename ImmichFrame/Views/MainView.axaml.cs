@@ -62,6 +62,11 @@ public partial class MainView : UserControl
                 }
             }
         }
+        catch (SettingsNotValidException ex)
+        {
+            await ShowMessageBox(ex.Message, "There was a Problem loading the Settings");
+            ExitApp();
+        }
         catch (Exception ex)
         {
             await ShowMessageBox(ex.Message);
@@ -185,9 +190,9 @@ public partial class MainView : UserControl
         return tcs.Task;
     }
 
-    private async Task ShowMessageBox(string message)
+    private async Task ShowMessageBox(string message, string title = "")
     {
-        var box = MessageBoxManager.GetMessageBoxStandard("", message, ButtonEnum.Ok);
+        var box = MessageBoxManager.GetMessageBoxStandard(title, message, ButtonEnum.Ok);
         await box.ShowAsPopupAsync(this);
     }
 }
