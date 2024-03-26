@@ -42,6 +42,7 @@ public partial class MainView : UserControl
         {
             ShowSplash();
             _appSettings = Settings.CurrentSettings;
+            _viewModel.Settings = _appSettings;
 
             if (_appSettings == null)
             {
