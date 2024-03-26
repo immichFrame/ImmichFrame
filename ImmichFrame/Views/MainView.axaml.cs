@@ -42,6 +42,7 @@ public partial class MainView : UserControl
         {
             ShowSplash();
             _appSettings = Settings.CurrentSettings;
+            _viewModel.Settings = _appSettings;
 
             if (_appSettings == null)
             {
@@ -61,6 +62,11 @@ public partial class MainView : UserControl
                     timerWeather = new System.Threading.Timer(timerWeatherTick, null, 0, 600000); //every 10 minutes
                 }
             }
+        }
+        catch (SettingsNotValidException ex)
+        {
+            await ShowMessageBox(ex.Message, "There was a Problem loading the Settings");
+            ExitApp();
         }
         catch (Exception ex)
         {
@@ -185,9 +191,9 @@ public partial class MainView : UserControl
         return tcs.Task;
     }
 
-    private async Task ShowMessageBox(string message)
+    private async Task ShowMessageBox(string message, string title = "")
     {
-        var box = MessageBoxManager.GetMessageBoxStandard("", message, ButtonEnum.Ok);
+        var box = MessageBoxManager.GetMessageBoxStandard(title, message, ButtonEnum.Ok);
         await box.ShowAsPopupAsync(this);
     }
 }

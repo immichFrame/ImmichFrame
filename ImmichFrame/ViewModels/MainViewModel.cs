@@ -13,7 +13,16 @@ public partial class MainViewModel : INotifyPropertyChanged
     private string _liveTime = "";
     private string _weatherCurrent = "";
     private string _weatherTemperature = "";
-    public Settings Settings => Settings.CurrentSettings;
+    public Settings _settings;
+    public Settings Settings
+    {
+        get { return _settings; }
+        set
+        {
+            _settings = value;
+            OnPropertyChanged(nameof(Settings));
+        }
+    }
     public Bitmap? Image
     {
         get { return _image; }
