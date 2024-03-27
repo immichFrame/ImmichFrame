@@ -101,7 +101,7 @@ public partial class MainView : UserControl
     {
         var uri = new Uri("avares://ImmichFrame/Assets/Immich.png");
         var bitmap = new Bitmap(AssetLoader.Open(uri));
-        _viewModel.Image = bitmap;
+        _viewModel.SetImage(bitmap);
     }
 
     private async void ShowNextImage()
@@ -114,7 +114,7 @@ public partial class MainView : UserControl
                 CurrentAsset = await _assetHelper.GetNextAsset();
                 if (CurrentAsset != null)
                 {
-                    await SetNewImage(CurrentAsset);
+                    await _viewModel.SetImage(CurrentAsset);
                 }
             }
         }
@@ -137,24 +137,13 @@ public partial class MainView : UserControl
             if (LastAsset != null)
             {
                 timerImageSwitcher_Enabled = false;
-                await SetNewImage(LastAsset);
+                await _viewModel.SetImage(LastAsset);
                 timerImageSwitcher_Enabled = true;
             }
         }
         catch (Exception ex)
         {
             await ShowMessageBoxFromThread(ex.Message);
-        }
-    }
-
-    private async Task SetNewImage(AssetResponseDto asset)
-    {
-        using (Stream stream = await asset.AssetImage)
-        {
-            Bitmap bitmap = new Bitmap(stream);
-            _viewModel.Image = bitmap;
-            _viewModel.ImageDate = asset.FileCreatedAt.ToString(_appSettings.PhotoDateFormat);
-            _viewModel.ImageDesc = asset.ImageDesc;
         }
     }
 
