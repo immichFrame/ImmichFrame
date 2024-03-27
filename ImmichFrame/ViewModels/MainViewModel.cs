@@ -2,6 +2,14 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using ImmichFrame.Models;
+using System.IO;
+using Avalonia.Media;
+using Newtonsoft.Json.Linq;
+using System.Threading.Tasks;
+using ThumbHashes;
+using System;
+using System.Text.RegularExpressions;
+using ImmichFrame.Helpers;
 
 namespace ImmichFrame.ViewModels;
 
@@ -23,10 +31,42 @@ public partial class MainViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(Settings));
         }
     }
+
+    public void SetImage(Bitmap image)
+    {
+        Image = image;
+    }
+    public async Task SetImage(AssetResponseDto asset)
+    {
+        var hash = Convert.FromBase64String(asset.Thumbhash);
+        var thumbhash = new ThumbHash(hash);
+
+        using (Stream tmbStream = ImageHelper.SaveDataUrlToStream(thumbhash.ToDataUrl()))
+        using (Stream imgStream = await asset.AssetImage)
+        {
+            Image = new Bitmap(imgStream);
+
+            ThumbhashImage = new Bitmap(tmbStream);
+            ImageDate = asset?.FileCreatedAt.ToString(_settings.PhotoDateFormat) ?? string.Empty;
+            ImageDesc = asset?.ImageDesc ?? string.Empty;
+        }
+    }
+
+    private Bitmap _backgroundColor;
+    public Bitmap ThumbhashImage
+    {
+        get { return _backgroundColor; }
+        private set
+        {
+            _backgroundColor = value;
+            OnPropertyChanged(nameof(ThumbhashImage));
+        }
+    }
+
     public Bitmap? Image
     {
         get { return _image; }
-        set
+        private set
         {
             _image = value;
             OnPropertyChanged(nameof(Image));
@@ -35,12 +75,22 @@ public partial class MainViewModel : INotifyPropertyChanged
     public string ImageDate
     {
         get { return _imageDate; }
-        set
+        private set
         {
             _imageDate = value;
             OnPropertyChanged(nameof(ImageDate));
         }
     }
+    public string ImageDesc
+    {
+        get { return _imageDesc; }
+        private set
+        {
+            _imageDesc = value;
+            OnPropertyChanged(nameof(ImageDesc));
+        }
+    }
+
     public string LiveTime
     {
         get { return _liveTime; }
@@ -48,15 +98,6 @@ public partial class MainViewModel : INotifyPropertyChanged
         {
             _liveTime = value;
             OnPropertyChanged(nameof(LiveTime));
-        }
-    }
-    public string ImageDesc
-    {
-        get { return _imageDesc; }
-        set
-        {
-            _imageDesc = value;
-            OnPropertyChanged(nameof(ImageDesc));
         }
     }
     public string WeatherCurrent

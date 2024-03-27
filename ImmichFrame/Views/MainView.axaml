@@ -23,6 +23,16 @@
 			<RowDefinition Height="1*" />
 			<RowDefinition Height="1*" />
 		</Grid.RowDefinitions>
+		<TransitioningContentControl Content="{Binding ThumbhashImage}" Grid.ColumnSpan="3" Grid.RowSpan="3" >
+			<TransitioningContentControl.PageTransition>
+				<CrossFade  Duration="0:00:01.000" />
+			</TransitioningContentControl.PageTransition>
+			<TransitioningContentControl.ContentTemplate>
+				<DataTemplate DataType="Bitmap">
+					<Image Stretch="Fill" Source="{Binding}"  />
+				</DataTemplate>
+			</TransitioningContentControl.ContentTemplate>
+		</TransitioningContentControl>
 		<TransitioningContentControl Content="{Binding Image}" Grid.ColumnSpan="3" Grid.RowSpan="3" >
 			<TransitioningContentControl.PageTransition>
 				<CrossFade  Duration="0:00:01.000" />
