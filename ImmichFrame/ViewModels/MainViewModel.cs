@@ -38,10 +38,7 @@ public partial class MainViewModel : INotifyPropertyChanged
     }
     public async Task SetImage(AssetResponseDto asset)
     {
-        var hash = Convert.FromBase64String(asset.Thumbhash);
-        var thumbhash = new ThumbHash(hash);
-
-        using (Stream tmbStream = ImageHelper.SaveDataUrlToStream(thumbhash.ToDataUrl()))
+        using (Stream tmbStream = asset.ThumbhashImage)
         using (Stream imgStream = await asset.AssetImage)
         {
             Image = new Bitmap(imgStream);
