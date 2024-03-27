@@ -40,22 +40,48 @@ namespace ImmichFrame.Helpers
         {
             bool assetsAdded = false;
             var list = new Dictionary<Guid, AssetResponseDto>();
+            var addedAssetIds = new HashSet<Guid>();
+
             if (Settings.CurrentSettings.ShowMemories)
             {
                 assetsAdded = true;
-                list = list.Union(await GetMemoryAssetIds()).ToDictionary(x => x.Key, x => x.Value);
+                var memoryAssets = await GetMemoryAssetIds();
+                foreach (var asset in memoryAssets)
+                {
+                    if (!addedAssetIds.Contains(asset.Key))
+                    {
+                        list.Add(asset.Key, asset.Value);
+                        addedAssetIds.Add(asset.Key);
+                    }
+                }
             }
 
             if (Settings.CurrentSettings.Albums.Any())
             {
                 assetsAdded = true;
-                list = list.Union(await GetAlbumAssetIds()).ToDictionary(x=>x.Key, x=>x.Value);
+                var albumAssets = await GetAlbumAssetIds();
+                foreach (var asset in albumAssets)
+                {
+                    if (!addedAssetIds.Contains(asset.Key))
+                    {
+                        list.Add(asset.Key, asset.Value);
+                        addedAssetIds.Add(asset.Key);
+                    }
+                }
             }
 
             if (Settings.CurrentSettings.People.Any())
             {
                 assetsAdded = true;
-                list = list.Union(await GetPeopleAssetIds()).ToDictionary(x => x.Key, x => x.Value);
+                var peopleAssets = await GetPeopleAssetIds();
+                foreach (var asset in peopleAssets)
+                {
+                    if (!addedAssetIds.Contains(asset.Key))
+                    {
+                        list.Add(asset.Key, asset.Value);
+                        addedAssetIds.Add(asset.Key);
+                    }
+                }
             }
 
             if (assetsAdded)
