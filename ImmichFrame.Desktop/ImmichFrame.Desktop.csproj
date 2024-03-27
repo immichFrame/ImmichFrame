@@ -7,8 +7,8 @@
     <Nullable>enable</Nullable>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <AssemblyName>Immich_Frame</AssemblyName>
-    <AssemblyVersion>1.0.0.8</AssemblyVersion> <!-- Set the assembly version -->
-    <FileVersion>1.0.0.8</FileVersion>
+    <AssemblyVersion>1.0.0.9</AssemblyVersion> <!-- Set the assembly version -->
+    <FileVersion>1.0.0.9</FileVersion>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
