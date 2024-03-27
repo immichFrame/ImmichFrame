@@ -3,19 +3,12 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using ImmichFrame.Models;
 using System.IO;
-using Avalonia.Media;
-using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
-using ThumbHashes;
-using System;
-using System.Text.RegularExpressions;
-using ImmichFrame.Helpers;
 
 namespace ImmichFrame.ViewModels;
 
 public partial class MainViewModel : INotifyPropertyChanged
 {
-    private Bitmap? _image;
     private string _imageDate = "";
     private string _imageDesc = "";
     private string _liveTime = "";
@@ -34,42 +27,35 @@ public partial class MainViewModel : INotifyPropertyChanged
 
     public void SetImage(Bitmap image)
     {
-        Image = image;
+        Images = new UiImage
+        {
+            Image = image
+        };
     }
     public async Task SetImage(AssetResponseDto asset)
     {
-        var hash = Convert.FromBase64String(asset.Thumbhash);
-        var thumbhash = new ThumbHash(hash);
-
-        using (Stream tmbStream = ImageHelper.SaveDataUrlToStream(thumbhash.ToDataUrl()))
+        using (Stream tmbStream = asset.ThumbhashImage)
         using (Stream imgStream = await asset.AssetImage)
         {
-            Image = new Bitmap(imgStream);
+            Images = new UiImage
+            {
+                Image = new Bitmap(imgStream),
+                ThumbhashImage = new Bitmap(tmbStream)
+            };
 
-            ThumbhashImage = new Bitmap(tmbStream);
             ImageDate = asset?.FileCreatedAt.ToString(_settings.PhotoDateFormat) ?? string.Empty;
             ImageDesc = asset?.ImageDesc ?? string.Empty;
         }
     }
 
-    private Bitmap _backgroundColor;
-    public Bitmap ThumbhashImage
+    private UiImage? _images;
+    public UiImage? Images
     {
-        get { return _backgroundColor; }
+        get { return _images; }
         private set
         {
-            _backgroundColor = value;
-            OnPropertyChanged(nameof(ThumbhashImage));
-        }
-    }
-
-    public Bitmap? Image
-    {
-        get { return _image; }
-        private set
-        {
-            _image = value;
-            OnPropertyChanged(nameof(Image));
+            _images = value;
+            OnPropertyChanged(nameof(Images));
         }
     }
     public string ImageDate
@@ -123,9 +109,5 @@ public partial class MainViewModel : INotifyPropertyChanged
     protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-    public MainViewModel()
-    {
     }
 }

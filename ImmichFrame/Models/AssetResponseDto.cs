@@ -4,6 +4,7 @@ using System.IO;
 using System.Net.Http;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using ThumbHashes;
 
 namespace ImmichFrame.Models;
 
@@ -27,6 +28,16 @@ public partial class AssetResponseDto
         {
             _imageDesc = value;
         }
+    }
+
+    [JsonIgnore]
+    public Stream ThumbhashImage => GetThumbHashStream();
+
+    private Stream GetThumbHashStream()
+    {
+        var hash = Convert.FromBase64String(this.Thumbhash);
+        var thumbhash = new ThumbHash(hash);
+        return ImageHelper.SaveDataUrlToStream(thumbhash.ToDataUrl());
     }
 
     [JsonIgnore]
