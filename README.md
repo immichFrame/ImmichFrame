@@ -41,10 +41,7 @@ This project is a digital photo frame application that interfaces with your [imm
 * [![Avalonia][Avalonia]][Avalonia-url]
 
 ## ✨ Demo
-
-![Product Name Screen Shot][pope-screenshot]
-
-![Product Name Screen Shot][beach-screenshot]
+![Screenshot 2024-03-28 at 10 10 04 AM](https://github.com/3rob3/ImmichFrame/assets/156599986/75720456-4ccc-4323-af77-b72f34952f40)
 
 <!-- GETTING STARTED -->
 ## Getting Started
