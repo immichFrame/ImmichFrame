@@ -142,6 +142,9 @@ BIG thanks to the [immich][immich-github-url]-team for creating an awesome tool
 * [Img Shields](https://shields.io)
 * [GitHub Pages](https://pages.github.com)
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=3rob3/ImmichFrame&type=Date)](https://star-history.com/#3rob3/ImmichFrame&Date)
 
 
 
