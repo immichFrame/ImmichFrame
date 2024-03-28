@@ -103,6 +103,7 @@ ImmichFrame is easy to run on your desired plattform.
 - [x] Display random assets
 - [x] Display Albums
 - [x] Display Memories
+- [ ] Android build
 - [ ] Add Additional Templates w/ Examples
 - [ ] Add License
 
