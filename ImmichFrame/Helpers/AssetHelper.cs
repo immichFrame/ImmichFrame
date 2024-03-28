@@ -10,7 +10,7 @@ namespace ImmichFrame.Helpers
 {
     public class AssetHelper
     {
-        private Task<Dictionary<Guid, AssetResponseDto>?> _filteredAssetInfos;
+        private Task<Dictionary<Guid, AssetResponseDto>?>? _filteredAssetInfos;
         private DateTime lastFilteredAssetRefesh;
         public Task<Dictionary<Guid, AssetResponseDto>?> FilteredAssetInfos
         {
@@ -39,32 +39,33 @@ namespace ImmichFrame.Helpers
         private async Task<Dictionary<Guid, AssetResponseDto>?> GetFilteredAssetIds()
         {
             bool assetsAdded = false;
-            var list = new Dictionary<Guid, AssetResponseDto>();
+            IEnumerable<AssetResponseDto> list = new List<AssetResponseDto>();
             if (Settings.CurrentSettings.ShowMemories)
             {
                 assetsAdded = true;
-                list = list.Union(await GetMemoryAssetIds()).ToDictionary(x => x.Key, x => x.Value);
+                list = list.Union(await GetMemoryAssets());
             }
 
             if (Settings.CurrentSettings.Albums.Any())
             {
                 assetsAdded = true;
-                list = list.Union(await GetAlbumAssetIds()).ToDictionary(x=>x.Key, x=>x.Value);
+                list = list.Union(await GetAlbumAssets());
             }
 
             if (Settings.CurrentSettings.People.Any())
             {
                 assetsAdded = true;
-                list = list.Union(await GetPeopleAssetIds()).ToDictionary(x => x.Key, x => x.Value);
+                list = list.Union(await GetPeopleAssets());
             }
 
             if (assetsAdded)
-                return list;
+                // return only unique assets, no duplicates
+                return list.DistinctBy(x => x.Id).ToDictionary(x => Guid.Parse(x.Id));
 
             return null;
         }
 
-        private async Task<Dictionary<Guid, AssetResponseDto>> GetMemoryAssetIds()
+        private async Task<IEnumerable<AssetResponseDto>> GetMemoryAssets()
         {
             using (var client = new HttpClient())
             {
@@ -87,10 +88,10 @@ namespace ImmichFrame.Helpers
                     allAssets.AddRange(assets);
                 }
 
-                return allAssets.ToDictionary(x => Guid.Parse(x.Id));
+                return allAssets;
             }
         }
-        private async Task<Dictionary<Guid, AssetResponseDto>> GetAlbumAssetIds()
+        private async Task<IEnumerable<AssetResponseDto>> GetAlbumAssets()
         {
             using (var client = new HttpClient())
             {
@@ -114,10 +115,11 @@ namespace ImmichFrame.Helpers
                     }
                 }
 
-                return allAssets.ToDictionary(x => Guid.Parse(x.Id));
+                return allAssets;
             }
         }
-        private async Task<Dictionary<Guid, AssetResponseDto>> GetPeopleAssetIds()
+
+        private async Task<IEnumerable<AssetResponseDto>> GetPeopleAssets()
         {
             using (var client = new HttpClient())
             {
@@ -140,9 +142,11 @@ namespace ImmichFrame.Helpers
                         throw new PersonNotFoundException($"Person '{personId}' was not found, check your settings file", ex);
                     }
                 }
+
                 // Remove duplicates
-                var uniqueAssets = allAssets.GroupBy(x => x.Id).Select(group => group.First());
-                return uniqueAssets.ToDictionary(x => Guid.Parse(x.Id));
+                var uniqueAssets = allAssets.DistinctBy(x=>x.Id);
+
+                return uniqueAssets;
             }
         }
 
@@ -157,6 +161,7 @@ namespace ImmichFrame.Helpers
 
             return filteredAssetInfos.ElementAt(rnd).Value;
         }
+
         private async Task<AssetResponseDto?> GetRandomAsset()
         {
             var settings = Settings.CurrentSettings;
