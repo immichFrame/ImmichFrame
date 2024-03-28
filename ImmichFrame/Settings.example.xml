@@ -32,13 +32,13 @@
 	<!--Show clock in lower left bottom-->
 	<ShowClock>true</ShowClock>
 	<ClockFontSize>48</ClockFontSize>
-	<!--The format of the clock (ex. h:mm tt). See here for options https://www.c-sharpcorner.com/blogs/-->
+	<!--The format of the clock (ex. h:mm tt). See here for options https://www.c-sharpcorner.com/blogs/date-and-time-format-in-c-sharp-programming1-->
 	<ClockFormat>h:mm tt</ClockFormat>
 
 	<!--Show the date photo was taken.-->
 	<ShowPhotoDate>true</ShowPhotoDate>
 	<PhotoDateFontSize>36</PhotoDateFontSize>
-	<!--The format of the date (ex. MM/dd/yyyy). See here for options https://www.c-sharpcorner.com/blogs/-->
+	<!--The format of the date (ex. MM/dd/yyyy). See here for options https://www.c-sharpcorner.com/blogs/date-and-time-format-in-c-sharp-programming1-->
 	<PhotoDateFormat>MM/dd/yyyy</PhotoDateFormat>
 
 	<!--Show the description-->
