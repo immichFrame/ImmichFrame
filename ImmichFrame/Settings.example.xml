@@ -19,6 +19,9 @@
 	
 	<!--Interval for photo cycling in seconds-->
 	<Interval>8</Interval>
+
+	<!--Photo fade in/out time in seconds-->
+	<TransitionDuration>1.0</TransitionDuration>
 	
 	<!--Determines if images should be saved locally-->
 	<DownloadImages>false</DownloadImages>

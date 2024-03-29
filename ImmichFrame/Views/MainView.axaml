@@ -23,9 +23,9 @@
 			<RowDefinition Height="1*" />
 			<RowDefinition Height="1*" />
 		</Grid.RowDefinitions>
-		<TransitioningContentControl Content="{Binding Images}" Grid.ColumnSpan="3" Grid.RowSpan="3" >
+		<TransitioningContentControl x:Name="transitioningControl" Content="{Binding Images}" Grid.ColumnSpan="3" Grid.RowSpan="3" >
 			<TransitioningContentControl.PageTransition>
-				<CrossFade  Duration="0:00:01.000" />
+				<CrossFade Duration="0:00:01.000" />
 			</TransitioningContentControl.PageTransition>
 			<TransitioningContentControl.ContentTemplate>
 				<DataTemplate>

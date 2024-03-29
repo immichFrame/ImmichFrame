@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using Avalonia.Animation;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
@@ -43,24 +44,21 @@ public partial class MainView : UserControl
             ShowSplash();
             _appSettings = Settings.CurrentSettings;
             _viewModel.Settings = _appSettings;
-
-            if (_appSettings == null)
+            //couldn't get data binding on CrossFade Duration to work, had to do this
+            if (transitioningControl.PageTransition is CrossFade crossFade)
             {
-                await ShowMessageBox("Error parsing Settings.xml. Check formatting.");
-                ExitApp();
+                crossFade.Duration = _appSettings.TransitionDuration;
             }
-            else
+
+            timerImageSwitcher_Enabled = true;
+            timerImageSwitcher = new System.Threading.Timer(timerImageSwitcherTick, null, 0, _appSettings.Interval * 1000);
+            if (_appSettings.ShowClock)
             {
-                timerImageSwitcher_Enabled = true;
-                timerImageSwitcher = new System.Threading.Timer(timerImageSwitcherTick, null, 0, _appSettings.Interval * 1000);
-                if (_appSettings.ShowClock)
-                {
-                    timerLiveTime = new System.Threading.Timer(timerLiveTimeTick, null, 0, 1000); //every second
-                }
-                if (_appSettings.ShowWeather)
-                {
-                    timerWeather = new System.Threading.Timer(timerWeatherTick, null, 0, 600000); //every 10 minutes
-                }
+                timerLiveTime = new System.Threading.Timer(timerLiveTimeTick, null, 0, 1000); //every second
+            }
+            if (_appSettings.ShowWeather)
+            {
+                timerWeather = new System.Threading.Timer(timerWeatherTick, null, 0, 600000); //every 10 minutes
             }
         }
         catch (SettingsNotValidException ex)
