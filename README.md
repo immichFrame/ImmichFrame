@@ -97,6 +97,23 @@ ImmichFrame is easy to run on your desired plattform.
 ### MacOS
 - Double-click Immich_Frame. Note: If nothing happens, right-click-open with-Utilities-Terminal. Check Always Open With.
 
+<!-- INTERACTIONS -->
+## Interactions
+The screen is configured in a 3x3 gird
+
+|   -   |   -   |   -   |
+| :---: | :---: | :---: |
+| **A** |   -   | **B** |
+|   -   | **C** |   -   |
+
+Touch or click to:
+
+A. Go back to last image
+
+B. Next random image
+
+C. Quit
+
 <!-- ROADMAP -->
 ## Roadmap
 
