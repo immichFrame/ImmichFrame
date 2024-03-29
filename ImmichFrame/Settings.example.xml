@@ -48,7 +48,7 @@
 	<!--Show the current weather-->
 	<ShowWeather>false</ShowWeather>
 	<WeatherFontSize>12</WeatherFontSize>	
-	<!--The temperature units. either celcius or fahrenheit-->
+	<!--The temperature units. either celsius or fahrenheit-->
 	<WeatherUnits>fahrenheit</WeatherUnits>
 	<!--Your latitude/longitude coordinates (ex. 40.7128,74.0060)-->
 	<WeatherLatLong>40.7128,74.0060</WeatherLatLong>
