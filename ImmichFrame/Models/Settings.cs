@@ -14,6 +14,7 @@ public class Settings
     public string ImmichServerUrl { get; set; } = string.Empty;
     public string ApiKey { get; set; } = string.Empty;
     public int Interval { get; set; } = 8;
+    public TimeSpan TransitionDuration { get; set; } = TimeSpan.FromSeconds(1);
     public bool DownloadImages { get; set; } = false;
     public bool ShowMemories { get; set; } = false;
     public int RenewImagesDuration { get; set; } = 20;
@@ -76,10 +77,10 @@ public class Settings
         {
             var properties = settings.GetType().GetProperties();
 
-            if(!properties.Select(x => x.Name).Contains(element.Name.LocalName))
+            if (!properties.Select(x => x.Name).Contains(element.Name.LocalName))
                 throw new SettingsNotValidException($"Element '{element.Name.LocalName}' is unknown");
 
-            var property = properties.First(x=>x.Name == element.Name.LocalName);
+            var property = properties.First(x => x.Name == element.Name.LocalName);
 
             var value = element.Value.Trim();
 
@@ -106,8 +107,12 @@ public class Settings
 
                         list.Add(id);
                     }
-
                     property.SetValue(settings, list);
+                    break;
+                case "TransitionDuration":
+                    if (!double.TryParse(value, out var doubleDuration))
+                        throw new SettingsNotValidException($"Value of '{element.Name.LocalName}' is not valid. ('{value}')");
+                    property.SetValue(settings, TimeSpan.FromSeconds(doubleDuration));                    
                     break;
                 case "Interval":
                 case "RenewImagesDuration":
@@ -136,16 +141,14 @@ public class Settings
                     property.SetValue(settings, value);
                     break;
                 case "WeatherUnits":
-                    if(!Regex.IsMatch(value, @"^(?i)(celsius|fahrenheit)$"))
+                    if (!Regex.IsMatch(value, @"^(?i)(celsius|fahrenheit)$"))
                         throw new SettingsNotValidException($"Value of '{element.Name.LocalName}' is not valid. ('{value}')");
-
                     property.SetValue(settings, value);
                     break;
                 case "WeatherLatLong":
                     // Regex match Lat/Lon
-                    if(!Regex.IsMatch(value, @"^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$"))
+                    if (!Regex.IsMatch(value, @"^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$"))
                         throw new SettingsNotValidException($"Value of '{element.Name.LocalName}' is not valid. ('{value}')");
-
                     property.SetValue(settings, value);
                     break;
                 default:
