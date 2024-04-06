@@ -3,10 +3,10 @@
   <Profiles />
   <Settings>
     <Setting Name="ImmichServerUrl" Type="System.String" Scope="User">
-      <Value Profile="(Default)">http://192.168.0.101:2283</Value>
+      <Value Profile="(Default)" />
     </Setting>
     <Setting Name="ApiKey" Type="System.String" Scope="User">
-      <Value Profile="(Default)">21S5wdFdRXcV2s0zpISbH6uQHC5SZjoJT0qweAUpQ</Value>
+      <Value Profile="(Default)" />
     </Setting>
     <Setting Name="Interval" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">10</Value>

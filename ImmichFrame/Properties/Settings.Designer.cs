@@ -25,7 +25,7 @@ namespace ImmichFrame.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://192.168.0.101:2283")]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string ImmichServerUrl {
             get {
                 return ((string)(this["ImmichServerUrl"]));
@@ -37,7 +37,7 @@ namespace ImmichFrame.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("21S5wdFdRXcV2s0zpISbH6uQHC5SZjoJT0qweAUpQ")]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string ApiKey {
             get {
                 return ((string)(this["ApiKey"]));
