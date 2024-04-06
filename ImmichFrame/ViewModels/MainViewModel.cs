@@ -14,6 +14,26 @@ public partial class MainViewModel : INotifyPropertyChanged
     private string _liveTime = "";
     private string _weatherCurrent = "";
     private string _weatherTemperature = "";
+    private bool _settingsViewVisibile = false;
+    private bool _mainViewVisibile = true;
+    public bool SettingsViewVisible
+    {
+        get { return _settingsViewVisibile; }
+        set
+        {
+            _settingsViewVisibile = value;
+            OnPropertyChanged(nameof(SettingsViewVisible));
+        }
+    }
+    public bool MainViewVisible
+    {
+        get { return _mainViewVisibile; }
+        set
+        {
+            _mainViewVisibile = value;
+            OnPropertyChanged(nameof(MainViewVisible));
+        }
+    }
     public Settings _settings;
     public Settings Settings
     {

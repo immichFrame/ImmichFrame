@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Threading.Tasks;
-using Avalonia.Animation;
+﻿using Avalonia.Animation;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
@@ -13,6 +10,8 @@ using ImmichFrame.Models;
 using ImmichFrame.ViewModels;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
+using System;
+using System.Threading.Tasks;
 
 namespace ImmichFrame.Views;
 
@@ -36,15 +35,24 @@ public partial class MainView : UserControl
         DataContext = _viewModel;
         this.Loaded += OnLoaded;
     }
-
     private async void OnLoaded(object? sender, RoutedEventArgs e)
     {
         try
         {
+            if (PlatformDetector.IsAndroid())
+            {
+                var insetsManager = TopLevel.GetTopLevel(this)?.InsetsManager;
+                if (insetsManager != null)
+                {
+                    insetsManager.DisplayEdgeToEdge = true;
+                    insetsManager.IsSystemBarVisible = false;
+                }
+            }
             ShowSplash();
+
             _appSettings = Settings.CurrentSettings;
             _viewModel.Settings = _appSettings;
-            //couldn't get data binding on CrossFade Duration to work, had to do this
+
             if (transitioningControl.PageTransition is CrossFade crossFade)
             {
                 crossFade.Duration = _appSettings.TransitionDuration;
@@ -64,7 +72,15 @@ public partial class MainView : UserControl
         catch (SettingsNotValidException ex)
         {
             await ShowMessageBox(ex.Message, "There was a Problem loading the Settings");
-            ExitApp();
+            if (PlatformDetector.IsAndroid())
+            {
+                _viewModel.MainViewVisible = false;
+                _viewModel.SettingsViewVisible = true;
+            }
+            else
+            {
+                ExitApp();
+            }
         }
         catch (Exception ex)
         {
@@ -145,23 +161,33 @@ public partial class MainView : UserControl
         }
     }
 
-    public void btnBack_Click(object? sender, RoutedEventArgs args)
+    public async void btnBack_Click(object? sender, RoutedEventArgs args)
     {
         timerImageSwitcher!.Change(_appSettings.Interval * 1000, _appSettings.Interval * 1000);
-        ShowPreviousImage();
+        await Task.Run(() => ShowPreviousImage());
     }
 
-    public void btnNext_Click(object? sender, RoutedEventArgs args)
+    public async void btnNext_Click(object? sender, RoutedEventArgs args)
     {
         timerImageSwitcher!.Change(_appSettings.Interval * 1000, _appSettings.Interval * 1000);
-        ShowNextImage();
+        await Task.Run(() => ShowNextImage());
     }
 
     public void btnQuit_Click(object? sender, RoutedEventArgs args)
     {
         ExitApp();
     }
-
+    public void btnSettings_Click(object? sender, RoutedEventArgs args)
+    {
+        _viewModel.MainViewVisible = false;
+        _viewModel.SettingsViewVisible = true;
+    }
+    public async void btnSave_Click(object? sender, RoutedEventArgs args)
+    {
+        Properties.Settings.Default.Save();
+        await ShowMessageBox("Application will now close, restart it for changes to take effect");
+        ExitApp();
+    }
     private void ExitApp()
     {
         timerImageSwitcher_Enabled = false;

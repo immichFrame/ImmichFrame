@@ -1,4 +1,5 @@
 ﻿using ImmichFrame.Exceptions;
+using ImmichFrame.Helpers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -38,13 +39,27 @@ public class Settings
     {
         get
         {
-            if (_settings == null)
+            if(PlatformDetector.IsAndroid())
             {
-                _settings = Parse();
+                if (_settings == null)
+                {
+                    _settings = ParseFromAppSettings();
 
-                _settings.Validate();
+                    _settings.Validate();
+                }
+                return _settings;
             }
-            return _settings;
+            else
+            {
+                if (_settings == null)
+                {
+                    _settings = ParseFromXml();
+
+                    _settings.Validate();
+                }
+                return _settings;
+            }
+
         }
     }
 
@@ -57,7 +72,7 @@ public class Settings
             throw new SettingsNotValidException($"Settings element '{nameof(ApiKey)}' is required!");
     }
 
-    private static Settings Parse()
+    private static Settings ParseFromXml()
     {
         var xml = File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + @"Settings.xml");
 
@@ -156,6 +171,48 @@ public class Settings
             }
         }
 
+        return settings;
+    }
+	private static Settings ParseFromAppSettings()
+    {      
+        var settings = new Settings();
+        settings.ImmichServerUrl = Properties.Settings.Default.ImmichServerUrl;
+        settings.ApiKey = Properties.Settings.Default.ApiKey;
+        var albumList = new List<Guid>();
+        //foreach (var item in Properties.Settings.Default.Albums)
+        //{
+        //    if (!Guid.TryParse(item, out var id))
+        //        throw new SettingsNotValidException($"Value of 'Albums' is not valid. Element '{item}'");
+
+        //    albumList.Add(id);
+        //}
+        //settings.Albums = albumList;
+        //var peopleList = new List<Guid>();
+        //foreach (var item in Properties.Settings.Default.People)
+        //{
+        //    if (!Guid.TryParse(item, out var id))
+        //        throw new SettingsNotValidException($"Value of 'People' is not valid. Element '{item}'");
+
+        //    peopleList.Add(id);
+        //}
+        //settings.People = peopleList;
+        settings.Interval = Properties.Settings.Default.Interval;
+        settings.TransitionDuration = TimeSpan.FromSeconds(Properties.Settings.Default.TransitionDuration);
+        settings.RenewImagesDuration = Properties.Settings.Default.RenewImagesDuration;
+        settings.ClockFontSize = Properties.Settings.Default.ClockFontSize;
+        settings.PhotoDateFontSize = Properties.Settings.Default.PhotoDateFontSize;
+        settings.ImageDescFontSize = Properties.Settings.Default.ImageDescFontSize;
+        settings.WeatherFontSize = Properties.Settings.Default.WeatherFontSize;
+        settings.DownloadImages = Properties.Settings.Default.DownloadImages;
+        settings.ShowMemories = Properties.Settings.Default.ShowMemories;
+        settings.ShowClock = Properties.Settings.Default.ShowClock;
+        settings.ShowPhotoDate = Properties.Settings.Default.ShowPhotoDate;
+        settings.ShowImageDesc = Properties.Settings.Default.ShowImageDesc;
+        settings.ShowWeather = Properties.Settings.Default.ShowWeather;
+        settings.ClockFormat = Properties.Settings.Default.ClockFormat;
+        settings.PhotoDateFormat = Properties.Settings.Default.PhotoDateFormat;
+        settings.WeatherUnits = Properties.Settings.Default.WeatherUnits;
+        settings.WeatherLatLong = Properties.Settings.Default.WeatherLatLong;
         return settings;
     }
 }

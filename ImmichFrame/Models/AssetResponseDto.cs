@@ -45,7 +45,15 @@ public partial class AssetResponseDto
 
     private async Task<Stream> ServeImage()
     {
-        var localPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Immich_Assets", $"{Id}.{ThumbnailFormat.JPEG}");
+        string localPath;
+        if(PlatformDetector.IsDesktop())
+        {
+            localPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Immich_Assets", $"{Id}.{ThumbnailFormat.JPEG}");
+        }
+        else
+        {
+            localPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Immich_Assets", $"{Id}.{ThumbnailFormat.JPEG}");
+        }
         var localDir = Path.GetDirectoryName(localPath);
         if (!Directory.Exists(localDir))
         {

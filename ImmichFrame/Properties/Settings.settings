@@ -1,0 +1,69 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ImmichFrame.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="ImmichServerUrl" Type="System.String" Scope="User">
+      <Value Profile="(Default)">http://192.168.0.101:2283</Value>
+    </Setting>
+    <Setting Name="ApiKey" Type="System.String" Scope="User">
+      <Value Profile="(Default)">21S5wdFdRXcV2s0zpISbH6uQHC5SZjoJT0qweAUpQ</Value>
+    </Setting>
+    <Setting Name="Interval" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">10</Value>
+    </Setting>
+    <Setting Name="DownloadImages" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="ShowMemories" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="RenewImagesDuration" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">20</Value>
+    </Setting>
+    <Setting Name="ShowClock" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="ClockFontSize" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">48</Value>
+    </Setting>
+    <Setting Name="ClockFormat" Type="System.String" Scope="User">
+      <Value Profile="(Default)">h:mm tt</Value>
+    </Setting>
+    <Setting Name="ShowPhotoDate" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="PhotoDateFontSize" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">36</Value>
+    </Setting>
+    <Setting Name="PhotoDateFormat" Type="System.String" Scope="User">
+      <Value Profile="(Default)">MM/dd/yyyy</Value>
+    </Setting>
+    <Setting Name="ShowImageDesc" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="ImageDescFontSize" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">36</Value>
+    </Setting>
+    <Setting Name="ShowWeather" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="WeatherFontSize" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">12</Value>
+    </Setting>
+    <Setting Name="WeatherUnits" Type="System.String" Scope="User">
+      <Value Profile="(Default)">fahrenheit</Value>
+    </Setting>
+    <Setting Name="WeatherLatLong" Type="System.String" Scope="User">
+      <Value Profile="(Default)">41.186660,-81.800830</Value>
+    </Setting>
+    <Setting Name="Albums" Type="System.Collections.Specialized.StringCollection" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="People" Type="System.Collections.Specialized.StringCollection" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="TransitionDuration" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

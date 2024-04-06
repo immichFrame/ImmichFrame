@@ -5,46 +5,140 @@
              xmlns:vm="clr-namespace:ImmichFrame.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
              x:Class="ImmichFrame.Views.MainView"
-             Background="Black"
+             xmlns:properties="clr-namespace:ImmichFrame.Properties"
              x:DataType="vm:MainViewModel">
-	<Design.DataContext>
-		<!-- This only sets the DataContext for the previewer in an IDE,
+  <Design.DataContext>
+    <!-- This only sets the DataContext for the previewer in an IDE,
          to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-		<vm:MainViewModel />
-	</Design.DataContext>
-	<Grid>
-		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="1*" />
-			<ColumnDefinition Width="1*" />
-			<ColumnDefinition Width="1*" />
-		</Grid.ColumnDefinitions>
-		<Grid.RowDefinitions>
-			<RowDefinition Height="1*" />
-			<RowDefinition Height="1*" />
-			<RowDefinition Height="1*" />
-		</Grid.RowDefinitions>
-		<TransitioningContentControl x:Name="transitioningControl" Content="{Binding Images}" Grid.ColumnSpan="3" Grid.RowSpan="3" >
-			<TransitioningContentControl.PageTransition>
-				<CrossFade Duration="0:00:01.000" />
-			</TransitioningContentControl.PageTransition>
-			<TransitioningContentControl.ContentTemplate>
-				<DataTemplate>
-					<Grid>
-						<Image Stretch="Fill" Source="{Binding ThumbhashImage}"  />
-						<Image Source="{Binding Image}"  />
-					</Grid>
-				</DataTemplate>
-			</TransitioningContentControl.ContentTemplate>
-		</TransitioningContentControl>
-		<Button x:Name="btnBack" Opacity="0" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="btnBack_Click"/>
-		<Button x:Name="btnNext" Opacity="0" Grid.Column="2" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="btnNext_Click"/>
-		<Button x:Name="btnQuit" Opacity="0" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="btnQuit_Click"/>
-		<StackPanel Grid.Column="0" Grid.Row="2" Margin="10" VerticalAlignment="Bottom" >
-			<TextBlock x:Name="txtWeatherTemperature" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Bottom" Opacity="0.85" IsVisible = "{Binding Settings.ShowWeather}" Text="{Binding WeatherTemperature}" FontSize="{Binding Settings.WeatherFontSize}"/>
-			<TextBlock x:Name="txtWeatherCurrent" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Bottom" Opacity="0.85" IsVisible = "{Binding Settings.ShowWeather}" Text="{Binding WeatherCurrent}" FontSize="{Binding Settings.WeatherFontSize}"/>
-			<TextBlock x:Name="txtLiveTime" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Bottom" Opacity="0.85" IsVisible = "{Binding Settings.ShowClock}" Text="{Binding LiveTime}" FontSize="{Binding Settings.ClockFontSize}"/>
-		</StackPanel>
-		<TextBlock x:Name="txtImageDate" Grid.Column="2" Grid.Row="2" Foreground="White" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10" Opacity="0.85" IsVisible = "{Binding Settings.ShowPhotoDate}" Text="{Binding ImageDate}" FontSize="{Binding Settings.PhotoDateFontSize}"/>
-		<TextBlock x:Name="txtImageDesc" Grid.Column="1" Grid.Row="2" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="10" Opacity="0.85" IsVisible = "{Binding Settings.ShowImageDesc}" Text="{Binding ImageDesc}" FontSize="{Binding Settings.ImageDescFontSize}"/>
-	</Grid>
+    <vm:MainViewModel />
+  </Design.DataContext>
+  <Grid>
+    <Grid IsVisible="{Binding MainViewVisible}" >
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="1*" />
+        <ColumnDefinition Width="1*" />
+        <ColumnDefinition Width="1*" />
+      </Grid.ColumnDefinitions>
+      <Grid.RowDefinitions>
+        <RowDefinition Height="1*" />
+        <RowDefinition Height="1*" />
+        <RowDefinition Height="1*" />
+      </Grid.RowDefinitions>
+      <TransitioningContentControl x:Name="transitioningControl" Content="{Binding Images}" Grid.ColumnSpan="3" Grid.RowSpan="3" >
+        <TransitioningContentControl.PageTransition>
+          <CrossFade Duration="0:00:01.000" />
+        </TransitioningContentControl.PageTransition>
+        <TransitioningContentControl.ContentTemplate>
+          <DataTemplate>
+            <Grid>
+              <Image Stretch="Fill" Source="{Binding ThumbhashImage}"  />
+              <Image Source="{Binding Image}"  />
+            </Grid>
+          </DataTemplate>
+        </TransitioningContentControl.ContentTemplate>
+      </TransitioningContentControl>
+      <Button x:Name="btnBack" Opacity="0" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="btnBack_Click"/>
+      <Button x:Name="btnNext" Opacity="0" Grid.Column="2" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="btnNext_Click"/>
+      <Button x:Name="btnQuit" Opacity="0" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="btnQuit_Click"/>
+      <Button x:Name="btnSettings" Opacity="0" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="btnSettings_Click"/>
+      <StackPanel Grid.Column="0" Grid.Row="2" Margin="10" VerticalAlignment="Bottom" >
+        <TextBlock x:Name="txtWeatherTemperature" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Bottom" Opacity="0.85" IsVisible = "{Binding Settings.ShowWeather}" Text="{Binding WeatherTemperature}" FontSize="{Binding Settings.WeatherFontSize}"/>
+        <TextBlock x:Name="txtWeatherCurrent" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Bottom" Opacity="0.85" IsVisible = "{Binding Settings.ShowWeather}" Text="{Binding WeatherCurrent}" FontSize="{Binding Settings.WeatherFontSize}"/>
+        <TextBlock x:Name="txtLiveTime" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Bottom" Opacity="0.85" IsVisible = "{Binding Settings.ShowClock}" Text="{Binding LiveTime}" FontSize="{Binding Settings.ClockFontSize}"/>
+      </StackPanel>
+      <TextBlock x:Name="txtImageDate" Grid.Column="2" Grid.Row="2" Foreground="White" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10" Opacity="0.85" IsVisible = "{Binding Settings.ShowPhotoDate}" Text="{Binding ImageDate}" FontSize="{Binding Settings.PhotoDateFontSize}"/>
+      <TextBlock x:Name="txtImageDesc" Grid.Column="1" Grid.Row="2" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="10" Opacity="0.85" IsVisible = "{Binding Settings.ShowImageDesc}" Text="{Binding ImageDesc}" FontSize="{Binding Settings.ImageDescFontSize}"/>
+    </Grid>
+
+    <ScrollViewer IsVisible="{Binding SettingsViewVisible}">
+      <StackPanel Orientation="Vertical" Margin="10">
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="ImmichServerUrl" VerticalAlignment="Center" Margin="10"/>
+          <TextBox Text="{Binding Source={x:Static properties:Settings.Default}, Path=ImmichServerUrl, Mode=TwoWay}" VerticalAlignment="Center" Margin="10"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="ApiKey" VerticalAlignment="Center" Margin="10"/>
+          <TextBox Text="{Binding Source={x:Static properties:Settings.Default}, Path=ApiKey, Mode=TwoWay}" VerticalAlignment="Center" Margin="10"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="Albums" VerticalAlignment="Center" Margin="10"/>
+          <TextBox Text="{Binding Source={x:Static properties:Settings.Default}, Path=Albums, Mode=TwoWay}" VerticalAlignment="Center" Margin="10"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="People" VerticalAlignment="Center" Margin="10"/>
+          <TextBox Text="{Binding Source={x:Static properties:Settings.Default}, Path=People, Mode=TwoWay}" VerticalAlignment="Center" Margin="10"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="Interval" VerticalAlignment="Center" Margin="10"/>
+          <TextBox Text="{Binding Source={x:Static properties:Settings.Default}, Path=Interval, Mode=TwoWay}" VerticalAlignment="Center" Margin="10"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="TransitionDuration" VerticalAlignment="Center" Margin="10"/>
+          <TextBox Text="{Binding Source={x:Static properties:Settings.Default}, Path=TransitionDuration, Mode=TwoWay}" VerticalAlignment="Center" Margin="10"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="DownloadImages" VerticalAlignment="Center" Margin="10"/>
+          <CheckBox IsChecked="{Binding Source={x:Static properties:Settings.Default}, Path=DownloadImages, Mode=TwoWay}" VerticalAlignment="Center" Margin="10"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="ShowMemories" VerticalAlignment="Center" Margin="10"/>
+          <CheckBox IsChecked="{Binding Source={x:Static properties:Settings.Default}, Path=ShowMemories, Mode=TwoWay}" VerticalAlignment="Center" Margin="10"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="RenewImagesDuration" VerticalAlignment="Center" Margin="10"/>
+          <TextBox Text="{Binding Source={x:Static properties:Settings.Default}, Path=RenewImagesDuration, Mode=TwoWay}" VerticalAlignment="Center" Margin="10"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="ShowClock" VerticalAlignment="Center" Margin="10"/>
+          <CheckBox IsChecked="{Binding Source={x:Static properties:Settings.Default}, Path=ShowClock, Mode=TwoWay}" VerticalAlignment="Center" Margin="10"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="ClockFontSize" VerticalAlignment="Center" Margin="10"/>
+          <TextBox Text="{Binding Source={x:Static properties:Settings.Default}, Path=ClockFontSize, Mode=TwoWay}" VerticalAlignment="Center" Margin="10"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="ClockFormat" VerticalAlignment="Center" Margin="10"/>
+          <TextBox Text="{Binding Source={x:Static properties:Settings.Default}, Path=ClockFormat, Mode=TwoWay}" VerticalAlignment="Center" Margin="10"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="ShowPhotoDate" VerticalAlignment="Center" Margin="10"/>
+          <CheckBox IsChecked="{Binding Source={x:Static properties:Settings.Default}, Path=ShowPhotoDate, Mode=TwoWay}" VerticalAlignment="Center" Margin="10"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="PhotoDateFontSize" VerticalAlignment="Center" Margin="10"/>
+          <TextBox Text="{Binding Source={x:Static properties:Settings.Default}, Path=PhotoDateFontSize, Mode=TwoWay}" VerticalAlignment="Center" Margin="10"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="PhotoDateFormat" VerticalAlignment="Center" Margin="10"/>
+          <TextBox Text="{Binding Source={x:Static properties:Settings.Default}, Path=PhotoDateFormat, Mode=TwoWay}" VerticalAlignment="Center" Margin="10"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="ShowImageDesc" VerticalAlignment="Center" Margin="10"/>
+          <CheckBox IsChecked="{Binding Source={x:Static properties:Settings.Default}, Path=ShowImageDesc, Mode=TwoWay}" VerticalAlignment="Center" Margin="10"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="ImageDescFontSize" VerticalAlignment="Center" Margin="10"/>
+          <TextBox Text="{Binding Source={x:Static properties:Settings.Default}, Path=ImageDescFontSize, Mode=TwoWay}" VerticalAlignment="Center" Margin="10"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="ShowWeather" VerticalAlignment="Center" Margin="10"/>
+          <CheckBox IsChecked="{Binding Source={x:Static properties:Settings.Default}, Path=ShowWeather, Mode=TwoWay}" VerticalAlignment="Center" Margin="10"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="WeatherFontSize" VerticalAlignment="Center" Margin="10"/>
+          <TextBox Text="{Binding Source={x:Static properties:Settings.Default}, Path=WeatherFontSize, Mode=TwoWay}" VerticalAlignment="Center" Margin="10"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="WeatherUnits" VerticalAlignment="Center" Margin="10"/>
+          <TextBox Text="{Binding Source={x:Static properties:Settings.Default}, Path=WeatherUnits, Mode=TwoWay}" VerticalAlignment="Center" Margin="10"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="WeatherLatLong" VerticalAlignment="Center" Margin="10"/>
+          <TextBox Text="{Binding Source={x:Static properties:Settings.Default}, Path=WeatherLatLong, Mode=TwoWay}" VerticalAlignment="Center" Margin="10"/>
+        </StackPanel>        
+        <Button x:Name="btnSave" Content="Save" HorizontalAlignment="Center" Click="btnSave_Click" />
+      </StackPanel>      
+    </ScrollViewer>
+    
+  </Grid>
 </UserControl>
