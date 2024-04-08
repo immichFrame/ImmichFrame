@@ -1,0 +1,98 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ImmichFrame.Views.SettingsView">
+	<Grid>
+		<ScrollViewer IsVisible="{Binding SettingsViewVisible}">
+			<StackPanel Orientation="Vertical" Margin="10">
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Text="ImmichServerUrl" VerticalAlignment="Center" Margin="10"/>
+					<TextBox Text="{Binding Settings.ImmichServerUrl}" VerticalAlignment="Center" Margin="10"/>
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Text="ApiKey" VerticalAlignment="Center" Margin="10"/>
+					<TextBox Text="{Binding Settings.ApiKey}" VerticalAlignment="Center" Margin="10"/>
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Text="Albums (comma seperated)" VerticalAlignment="Center" Margin="10"/>
+					<TextBox Text="{Binding Settings.Albums}" VerticalAlignment="Center" Margin="10"/>
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Text="People (comma seperated)" VerticalAlignment="Center" Margin="10"/>
+					<TextBox Text="{Binding Settings.People}" VerticalAlignment="Center" Margin="10"/>
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Text="Interval" VerticalAlignment="Center" Margin="10"/>
+					<TextBox Text="{Binding Settings.Interval}" VerticalAlignment="Center" Margin="10"/>
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Text="TransitionDuration" VerticalAlignment="Center" Margin="10"/>
+					<TextBox Text="{Binding Settings.TransitionDuration}" VerticalAlignment="Center" Margin="10" />
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Text="DownloadImages" VerticalAlignment="Center" Margin="10"/>
+					<CheckBox IsChecked="{Binding Settings.DownloadImages}" VerticalAlignment="Center" Margin="10"/>
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Text="ShowMemories" VerticalAlignment="Center" Margin="10"/>
+					<CheckBox IsChecked="{Binding Settings.ShowMemories}" VerticalAlignment="Center" Margin="10"/>
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Text="RenewImagesDuration" VerticalAlignment="Center" Margin="10"/>
+					<TextBox Text="{Binding Settings.RenewImagesDuration}" VerticalAlignment="Center" Margin="10"/>
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Text="ShowClock" VerticalAlignment="Center" Margin="10"/>
+					<CheckBox IsChecked="{Binding Settings.ShowClock}" VerticalAlignment="Center" Margin="10"/>
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Text="ClockFontSize" VerticalAlignment="Center" Margin="10"/>
+					<TextBox Text="{Binding Settings.ClockFontSize}" VerticalAlignment="Center" Margin="10"/>
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Text="ClockFormat" VerticalAlignment="Center" Margin="10"/>
+					<TextBox Text="{Binding Settings.ClockFormat}" VerticalAlignment="Center" Margin="10"/>
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Text="ShowPhotoDate" VerticalAlignment="Center" Margin="10"/>
+					<CheckBox IsChecked="{Binding Settings.ShowPhotoDate}" VerticalAlignment="Center" Margin="10"/>
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Text="PhotoDateFontSize" VerticalAlignment="Center" Margin="10"/>
+					<TextBox Text="{Binding Settings.PhotoDateFontSize}" VerticalAlignment="Center" Margin="10"/>
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Text="PhotoDateFormat" VerticalAlignment="Center" Margin="10"/>
+					<TextBox Text="{Binding Settings.PhotoDateFormat}" VerticalAlignment="Center" Margin="10"/>
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Text="ShowImageDesc" VerticalAlignment="Center" Margin="10"/>
+					<CheckBox IsChecked="{Binding Settings.ShowImageDesc}" VerticalAlignment="Center" Margin="10"/>
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Text="ImageDescFontSize" VerticalAlignment="Center" Margin="10"/>
+					<TextBox Text="{Binding Settings.ImageDescFontSize}" VerticalAlignment="Center" Margin="10"/>
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Text="ShowWeather" VerticalAlignment="Center" Margin="10"/>
+					<CheckBox IsChecked="{Binding Settings.ShowWeather}" VerticalAlignment="Center" Margin="10"/>
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Text="WeatherFontSize" VerticalAlignment="Center" Margin="10"/>
+					<TextBox Text="{Binding Settings.ShowWeather}" VerticalAlignment="Center" Margin="10"/>
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Text="WeatherUnits" VerticalAlignment="Center" Margin="10"/>
+					<TextBox Text="{Binding Settings.WeatherUnits}" VerticalAlignment="Center" Margin="10"/>
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Text="WeatherLatLong" VerticalAlignment="Center" Margin="10"/>
+					<TextBox Text="{Binding Settings.WeatherLatLong}" VerticalAlignment="Center" Margin="10"/>
+				</StackPanel>
+				<Button x:Name="btnSave" Content="Save" HorizontalAlignment="Center" Click="btnSave_Click" />
+			</StackPanel>
+		</ScrollViewer>
+	</Grid>
+</UserControl>

@@ -55,7 +55,7 @@ public partial class MainView : UserControl
 
             if (transitioningControl.PageTransition is CrossFade crossFade)
             {
-                crossFade.Duration = _appSettings.TransitionDuration;
+                crossFade.Duration = TimeSpan.FromSeconds(_appSettings.TransitionDuration);
             }
 
             timerImageSwitcher_Enabled = true;
@@ -72,15 +72,7 @@ public partial class MainView : UserControl
         catch (SettingsNotValidException ex)
         {
             await ShowMessageBox(ex.Message, "There was a Problem loading the Settings");
-            if (PlatformDetector.IsAndroid())
-            {
-                _viewModel.MainViewVisible = false;
-                _viewModel.SettingsViewVisible = true;
-            }
-            else
-            {
-                ExitApp();
-            }
+            ExitApp();
         }
         catch (Exception ex)
         {
@@ -179,18 +171,20 @@ public partial class MainView : UserControl
     }
     public void btnSettings_Click(object? sender, RoutedEventArgs args)
     {
-        _viewModel.MainViewVisible = false;
-        _viewModel.SettingsViewVisible = true;
+        ExitView();
+        ((MainWindowViewModel)this.Parent.DataContext).Navigate(new SettingsView(Settings.CurrentSettings));
     }
-    public async void btnSave_Click(object? sender, RoutedEventArgs args)
+
+    private void ExitView()
     {
-        Properties.Settings.Default.Save();
-        await ShowMessageBox("Application will now close, restart it for changes to take effect");
-        ExitApp();
+        timerImageSwitcher_Enabled = false;
+        timerImageSwitcher?.Dispose();
+        timerLiveTime?.Dispose();
+        timerWeather?.Dispose();
     }
     private void ExitApp()
     {
-        timerImageSwitcher_Enabled = false;
+        ExitView();
         Environment.Exit(0);
     }
     private Task ShowMessageBoxFromThread(string message)

@@ -1,12 +1,15 @@
 ﻿using ImmichFrame.Exceptions;
 using ImmichFrame.Helpers;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Xml;
 using System.Xml.Linq;
+using System.Xml.Serialization;
 
 namespace ImmichFrame.Models;
 
@@ -16,7 +19,7 @@ public class Settings
     public string ImmichServerUrl { get; set; } = string.Empty;
     public string ApiKey { get; set; } = string.Empty;
     public int Interval { get; set; } = 8;
-    public TimeSpan TransitionDuration { get; set; } = TimeSpan.FromSeconds(1);
+    public double TransitionDuration { get; set; } = 1;
     public bool DownloadImages { get; set; } = false;
     public bool ShowMemories { get; set; } = false;
     public int RenewImagesDuration { get; set; } = 20;
@@ -40,7 +43,7 @@ public class Settings
     {
         get
         {
-            if(PlatformDetector.IsAndroid())
+            if (PlatformDetector.IsAndroid())
             {
                 if (_settings == null)
                 {
@@ -61,6 +64,67 @@ public class Settings
                 return _settings;
             }
 
+        }
+    }
+
+    public void Serialize()
+    {
+        this.Validate();
+
+        if (PlatformDetector.IsAndroid())
+        {
+            // settings
+            var defaultSettings = Properties.Settings.Default;
+
+            defaultSettings.ImmichServerUrl = this.ImmichServerUrl;
+            defaultSettings.ApiKey = this.ApiKey;
+            defaultSettings.Interval = this.Interval;
+            defaultSettings.DownloadImages = this.DownloadImages;
+            defaultSettings.ShowMemories = this.ShowMemories;
+            defaultSettings.RenewImagesDuration = this.RenewImagesDuration;
+            defaultSettings.ShowClock = this.ShowClock;
+            defaultSettings.ClockFontSize = this.ClockFontSize;
+            defaultSettings.ClockFormat = this.ClockFormat;
+            defaultSettings.ShowPhotoDate = this.ShowPhotoDate;
+            defaultSettings.PhotoDateFontSize = this.PhotoDateFontSize;
+            defaultSettings.PhotoDateFormat = this.PhotoDateFormat;
+            defaultSettings.ShowImageDesc = this.ShowImageDesc;
+            defaultSettings.ImageDescFontSize = this.ImageDescFontSize;
+            defaultSettings.ShowWeather = this.ShowWeather;
+            defaultSettings.WeatherFontSize = this.WeatherFontSize;
+            defaultSettings.WeatherUnits = this.WeatherUnits;
+            defaultSettings.WeatherLatLong = this.WeatherLatLong;
+
+            var albums = new StringCollection();
+            if(this.Albums?.Any() ?? false)
+                albums.AddRange(this.Albums.Select(x => x.ToString()).ToArray());
+            defaultSettings.Albums = albums;
+
+            var people = new StringCollection();
+            if (this.People?.Any() ?? false)
+                people.AddRange(this.People.Select(x => x.ToString()).ToArray());
+            defaultSettings.People = people;
+            defaultSettings.TransitionDuration = this.TransitionDuration;
+
+            defaultSettings.Save();
+        }
+        else
+        {
+            // xml
+            XmlSerializer xsSubmit = new XmlSerializer(typeof(Settings));
+            var xml = "";
+
+            using (var sww = new StringWriter())
+            {
+                using (XmlWriter writer = XmlWriter.Create(sww))
+                {
+                    xsSubmit.Serialize(writer, this);
+                    xml = sww.ToString();
+                }
+            }
+
+            // TODO: some error handling with try catch?
+            File.WriteAllText(AppDomain.CurrentDomain.BaseDirectory + @"Settings.xml", xml);
         }
     }
 
@@ -87,26 +151,80 @@ public class Settings
             throw new SettingsNotValidException($"Problem with parsing the settings: {ex.Message}", ex);
         }
 
-        var settings = new Settings();
+        var properties = typeof(Settings).GetProperties();
 
+        var SettingsValues = new Dictionary<string, object>();
         foreach (var element in doc.Elements())
         {
-            var properties = settings.GetType().GetProperties();
-
             if (!properties.Select(x => x.Name).Contains(element.Name.LocalName))
                 throw new SettingsNotValidException($"Element '{element.Name.LocalName}' is unknown");
 
-            var property = properties.First(x => x.Name == element.Name.LocalName);
+            object value = element.Value;
 
-            var value = element.Value.Trim();
+            if (element.HasElements)
+                value = element.DescendantNodes().OfType<XElement>().Select(x => x.Value).ToList();
 
-            switch (element.Name.LocalName)
+            if (SettingsValues.ContainsKey(element.Name.LocalName))
+            {
+                SettingsValues[element.Name.LocalName] = value;
+            }
+            else
+            {
+                SettingsValues.Add(element.Name.LocalName, value);
+            }
+        }
+
+        return ParseSettings(SettingsValues);
+    }
+
+    private static Settings ParseFromAppSettings()
+    {
+        var SettingsValues = new Dictionary<string, object>();
+        var settings = Properties.Settings.Default;
+        foreach (SettingsProperty property in Properties.Settings.Default.Properties)
+        {
+            var name = property.Name;
+            var value = settings[name];
+
+            if (property.PropertyType.Name.ToUpper() == "StringCollection".ToUpper())
+            {
+                value = (settings[name] as StringCollection)?.Cast<string>().ToList() ?? new List<string>();
+            }
+
+            if (SettingsValues.ContainsKey(name))
+            {
+                SettingsValues[name] = value;
+            }
+            else
+            {
+                SettingsValues.Add(name, value);
+            }
+        }
+
+        return ParseSettings(SettingsValues);
+    }
+
+    private static Settings ParseSettings(Dictionary<string, object> SettingsValues)
+    {
+        var settings = new Settings();
+        var properties = settings.GetType().GetProperties();
+
+        foreach (var SettingsValue in SettingsValues)
+        {
+            var property = properties.First(x => x.Name == SettingsValue.Key);
+
+            var value = SettingsValue.Value;
+
+            if (value == null)
+                throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid.");
+
+            switch (SettingsValue.Key)
             {
                 case "ImmichServerUrl":
-                    var url = value.TrimEnd('/');
+                    var url = value.ToString().TrimEnd('/');
                     // Match URL or IP
                     if (!Regex.IsMatch(url, @"^(https?:\/\/)?(([a-zA-Z0-9\.\-_]+(\.[a-zA-Z]{2,})+)|(\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b))(\:\d{1,5})?$"))
-                        throw new SettingsNotValidException($"Value of '{element.Name.LocalName}' is not valid. (' {value} ')");
+                        throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. (' {value} ')");
 
                     property.SetValue(settings, url);
                     break;
@@ -116,19 +234,19 @@ public class Settings
                 case "Albums":
                 case "People":
                     var list = new List<Guid>();
-                    foreach (var item in element.DescendantNodes().OfType<XElement>().ToList())
+                    foreach (var item in (List<string>)(SettingsValue.Value ?? new()))
                     {
-                        if (!Guid.TryParse(item.Value, out var id))
-                            throw new SettingsNotValidException($"Value of '{element.Name.LocalName}' is not valid. Element '{item.Name.LocalName}' with value '{item.Value}'");
+                        if (!Guid.TryParse(item, out var id))
+                            throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. Element with value '{item}'");
 
                         list.Add(id);
                     }
                     property.SetValue(settings, list);
                     break;
                 case "TransitionDuration":
-                    if (!double.TryParse(value, out var doubleDuration))
-                        throw new SettingsNotValidException($"Value of '{element.Name.LocalName}' is not valid. ('{value}')");
-                    property.SetValue(settings, TimeSpan.FromSeconds(doubleDuration));                    
+                    if (!double.TryParse(value.ToString(), out var doubleDuration))
+                        throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. ('{value}')");
+                    property.SetValue(settings, doubleDuration);
                     break;
                 case "Interval":
                 case "RenewImagesDuration":
@@ -136,8 +254,8 @@ public class Settings
                 case "PhotoDateFontSize":
                 case "ImageDescFontSize":
                 case "WeatherFontSize":
-                    if (!int.TryParse(value, out var intValue))
-                        throw new SettingsNotValidException($"Value of '{element.Name.LocalName}' is not valid. ('{value}')");
+                    if (!int.TryParse(value.ToString(), out var intValue))
+                        throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. ('{value}')");
                     property.SetValue(settings, intValue);
                     break;
                 case "DownloadImages":
@@ -146,8 +264,8 @@ public class Settings
                 case "ShowPhotoDate":
                 case "ShowImageDesc":
                 case "ShowWeather":
-                    if (!bool.TryParse(value, out var boolValue))
-                        throw new SettingsNotValidException($"Value of '{element.Name.LocalName}' is not valid. ('{value}')");
+                    if (!bool.TryParse(value.ToString(), out var boolValue))
+                        throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. ('{value}')");
                     property.SetValue(settings, boolValue);
                     break;
                 case "ClockFormat":
@@ -157,77 +275,21 @@ public class Settings
                     property.SetValue(settings, value);
                     break;
                 case "WeatherUnits":
-                    if (!Regex.IsMatch(value, @"^(?i)(celsius|fahrenheit)$"))
-                        throw new SettingsNotValidException($"Value of '{element.Name.LocalName}' is not valid. ('{value}')");
+                    if (!Regex.IsMatch(value.ToString(), @"^(?i)(celsius|fahrenheit)$"))
+                        throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. ('{value}')");
                     property.SetValue(settings, value);
                     break;
                 case "WeatherLatLong":
                     // Regex match Lat/Lon
-                    if (!Regex.IsMatch(value, @"^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$"))
-                        throw new SettingsNotValidException($"Value of '{element.Name.LocalName}' is not valid. ('{value}')");
+                    if (!Regex.IsMatch(value.ToString(), @"^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$"))
+                        throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. ('{value}')");
                     property.SetValue(settings, value);
                     break;
                 default:
-                    throw new SettingsNotValidException($"Element '{element.Name.LocalName}' is unknown. ('{value}')");
+                    throw new SettingsNotValidException($"Element '{SettingsValue.Key}' is unknown. ('{value}')");
             }
         }
 
-        return settings;
-    }
-	private static Settings ParseFromAppSettings()
-    {      
-        var settings = new Settings();
-        var url = Properties.Settings.Default.ImmichServerUrl.TrimEnd('/');
-        if (!Regex.IsMatch(url, @"^(https?:\/\/)?(([a-zA-Z0-9\.\-_]+(\.[a-zA-Z]{2,})+)|(\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b))(\:\d{1,5})?$"))
-            throw new SettingsNotValidException($"Value of 'ImmichServerUrl' is not valid. (' {url} ')");
-        settings.ImmichServerUrl = url;
-
-        settings.ApiKey = Properties.Settings.Default.ApiKey;
-
-        var albumList = new List<Guid>();
-        foreach (var item in Properties.Settings.Default.Albums.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
-        {
-            if (!Guid.TryParse(item, out var id))
-                throw new SettingsNotValidException($"Value of 'Albums' is not valid. Element '{item}'");
-
-            albumList.Add(id);
-        }
-        settings.Albums = albumList;
-
-        var peopleList = new List<Guid>();
-        foreach (var item in Properties.Settings.Default.People.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
-        {
-            if (!Guid.TryParse(item, out var id))
-                throw new SettingsNotValidException($"Value of 'People' is not valid. Element '{item}'");
-
-            peopleList.Add(id);
-        }
-        settings.People = peopleList;
-
-        settings.Interval = Properties.Settings.Default.Interval;
-        settings.TransitionDuration = TimeSpan.FromSeconds(Properties.Settings.Default.TransitionDuration);
-        settings.RenewImagesDuration = Properties.Settings.Default.RenewImagesDuration;
-        settings.ClockFontSize = Properties.Settings.Default.ClockFontSize;
-        settings.PhotoDateFontSize = Properties.Settings.Default.PhotoDateFontSize;
-        settings.ImageDescFontSize = Properties.Settings.Default.ImageDescFontSize;
-        settings.WeatherFontSize = Properties.Settings.Default.WeatherFontSize;
-        settings.DownloadImages = Properties.Settings.Default.DownloadImages;
-        settings.ShowMemories = Properties.Settings.Default.ShowMemories;
-        settings.ShowClock = Properties.Settings.Default.ShowClock;
-        settings.ShowPhotoDate = Properties.Settings.Default.ShowPhotoDate;
-        settings.ShowImageDesc = Properties.Settings.Default.ShowImageDesc;
-        settings.ShowWeather = Properties.Settings.Default.ShowWeather;
-        settings.ClockFormat = Properties.Settings.Default.ClockFormat;
-        settings.PhotoDateFormat = Properties.Settings.Default.PhotoDateFormat;
-        var weatherUnitValue = Properties.Settings.Default.WeatherUnits;
-        if (!Regex.IsMatch(weatherUnitValue, @"^(?i)(celsius|fahrenheit)$"))
-            throw new SettingsNotValidException($"Value of 'WeatherUnits' is not valid. ('{weatherUnitValue}')");
-        settings.WeatherUnits = weatherUnitValue;
-
-        var weatherLatLongValue = Properties.Settings.Default.WeatherLatLong;
-        if (!Regex.IsMatch(weatherLatLongValue, @"^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$"))
-            throw new SettingsNotValidException($"Value of 'WeatherLatLong' is not valid. ('{weatherLatLongValue}')");
-        settings.WeatherLatLong = weatherLatLongValue;
         return settings;
     }
 }
