@@ -12,7 +12,7 @@
          to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
 		<vm:MainViewModel />
 	</Design.DataContext>
-	<Grid IsVisible="{Binding MainViewVisible}" >
+	<Grid>
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="1*" />
 			<ColumnDefinition Width="1*" />
