@@ -1,5 +1,6 @@
 ﻿using ImmichFrame.Exceptions;
 using ImmichFrame.Helpers;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -176,26 +177,33 @@ public class Settings
 	private static Settings ParseFromAppSettings()
     {      
         var settings = new Settings();
-        settings.ImmichServerUrl = Properties.Settings.Default.ImmichServerUrl;
+        var url = Properties.Settings.Default.ImmichServerUrl.TrimEnd('/');
+        if (!Regex.IsMatch(url, @"^(https?:\/\/)?(([a-zA-Z0-9\.\-_]+(\.[a-zA-Z]{2,})+)|(\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b))(\:\d{1,5})?$"))
+            throw new SettingsNotValidException($"Value of 'ImmichServerUrl' is not valid. (' {url} ')");
+        settings.ImmichServerUrl = url;
+
         settings.ApiKey = Properties.Settings.Default.ApiKey;
+
         var albumList = new List<Guid>();
-        //foreach (var item in Properties.Settings.Default.Albums)
-        //{
-        //    if (!Guid.TryParse(item, out var id))
-        //        throw new SettingsNotValidException($"Value of 'Albums' is not valid. Element '{item}'");
+        foreach (var item in Properties.Settings.Default.Albums.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+        {
+            if (!Guid.TryParse(item, out var id))
+                throw new SettingsNotValidException($"Value of 'Albums' is not valid. Element '{item}'");
 
-        //    albumList.Add(id);
-        //}
-        //settings.Albums = albumList;
-        //var peopleList = new List<Guid>();
-        //foreach (var item in Properties.Settings.Default.People)
-        //{
-        //    if (!Guid.TryParse(item, out var id))
-        //        throw new SettingsNotValidException($"Value of 'People' is not valid. Element '{item}'");
+            albumList.Add(id);
+        }
+        settings.Albums = albumList;
 
-        //    peopleList.Add(id);
-        //}
-        //settings.People = peopleList;
+        var peopleList = new List<Guid>();
+        foreach (var item in Properties.Settings.Default.People.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+        {
+            if (!Guid.TryParse(item, out var id))
+                throw new SettingsNotValidException($"Value of 'People' is not valid. Element '{item}'");
+
+            peopleList.Add(id);
+        }
+        settings.People = peopleList;
+
         settings.Interval = Properties.Settings.Default.Interval;
         settings.TransitionDuration = TimeSpan.FromSeconds(Properties.Settings.Default.TransitionDuration);
         settings.RenewImagesDuration = Properties.Settings.Default.RenewImagesDuration;
@@ -211,8 +219,15 @@ public class Settings
         settings.ShowWeather = Properties.Settings.Default.ShowWeather;
         settings.ClockFormat = Properties.Settings.Default.ClockFormat;
         settings.PhotoDateFormat = Properties.Settings.Default.PhotoDateFormat;
-        settings.WeatherUnits = Properties.Settings.Default.WeatherUnits;
-        settings.WeatherLatLong = Properties.Settings.Default.WeatherLatLong;
+        var weatherUnitValue = Properties.Settings.Default.WeatherUnits;
+        if (!Regex.IsMatch(weatherUnitValue, @"^(?i)(celsius|fahrenheit)$"))
+            throw new SettingsNotValidException($"Value of 'WeatherUnits' is not valid. ('{weatherUnitValue}')");
+        settings.WeatherUnits = weatherUnitValue;
+
+        var weatherLatLongValue = Properties.Settings.Default.WeatherLatLong;
+        if (!Regex.IsMatch(weatherLatLongValue, @"^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$"))
+            throw new SettingsNotValidException($"Value of 'WeatherLatLong' is not valid. ('{weatherLatLongValue}')");
+        settings.WeatherLatLong = weatherLatLongValue;
         return settings;
     }
 }

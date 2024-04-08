@@ -56,10 +56,10 @@
     <Setting Name="WeatherLatLong" Type="System.String" Scope="User">
       <Value Profile="(Default)">41.186660,-81.800830</Value>
     </Setting>
-    <Setting Name="Albums" Type="System.Collections.Specialized.StringCollection" Scope="User">
+    <Setting Name="Albums" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="People" Type="System.Collections.Specialized.StringCollection" Scope="User">
+    <Setting Name="People" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="TransitionDuration" Type="System.Double" Scope="User">

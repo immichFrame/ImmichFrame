@@ -241,9 +241,10 @@ namespace ImmichFrame.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Collections.Specialized.StringCollection Albums {
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string Albums {
             get {
-                return ((global::System.Collections.Specialized.StringCollection)(this["Albums"]));
+                return ((string)(this["Albums"]));
             }
             set {
                 this["Albums"] = value;
@@ -252,9 +253,10 @@ namespace ImmichFrame.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Collections.Specialized.StringCollection People {
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string People {
             get {
-                return ((global::System.Collections.Specialized.StringCollection)(this["People"]));
+                return ((string)(this["People"]));
             }
             set {
                 this["People"] = value;

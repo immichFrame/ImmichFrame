@@ -61,11 +61,11 @@
           <TextBox Text="{Binding Source={x:Static properties:Settings.Default}, Path=ApiKey, Mode=TwoWay}" VerticalAlignment="Center" Margin="10"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal">
-          <TextBlock Text="Albums" VerticalAlignment="Center" Margin="10"/>
+          <TextBlock Text="Albums (comma seperated)" VerticalAlignment="Center" Margin="10"/>
           <TextBox Text="{Binding Source={x:Static properties:Settings.Default}, Path=Albums, Mode=TwoWay}" VerticalAlignment="Center" Margin="10"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal">
-          <TextBlock Text="People" VerticalAlignment="Center" Margin="10"/>
+          <TextBlock Text="People (comma seperated)" VerticalAlignment="Center" Margin="10"/>
           <TextBox Text="{Binding Source={x:Static properties:Settings.Default}, Path=People, Mode=TwoWay}" VerticalAlignment="Center" Margin="10"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal">
@@ -74,7 +74,7 @@
         </StackPanel>
         <StackPanel Orientation="Horizontal">
           <TextBlock Text="TransitionDuration" VerticalAlignment="Center" Margin="10"/>
-          <TextBox Text="{Binding Source={x:Static properties:Settings.Default}, Path=TransitionDuration, Mode=TwoWay}" VerticalAlignment="Center" Margin="10"/>
+          <TextBox Text="{Binding Source={x:Static properties:Settings.Default}, Path=TransitionDuration, Mode=TwoWay}" VerticalAlignment="Center" Margin="10" />
         </StackPanel>
         <StackPanel Orientation="Horizontal">
           <TextBlock Text="DownloadImages" VerticalAlignment="Center" Margin="10"/>
