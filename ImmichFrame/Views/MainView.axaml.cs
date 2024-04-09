@@ -30,9 +30,7 @@ public partial class MainView : UserControl
     {
         InitializeComponent();
         _appSettings = new Settings();
-        _viewModel = new MainViewModel();
         _assetHelper = new AssetHelper();
-        DataContext = _viewModel;
         this.Loaded += OnLoaded;
     }
     private async void OnLoaded(object? sender, RoutedEventArgs e)
@@ -48,10 +46,13 @@ public partial class MainView : UserControl
                     insetsManager.IsSystemBarVisible = false;
                 }
             }
+            _viewModel = this.DataContext as MainViewModel;
+
+            _appSettings = _viewModel.Settings;
+
             ShowSplash();
 
-            _appSettings = Settings.CurrentSettings;
-            _viewModel.Settings = _appSettings;
+            ShowNextImage();
 
             if (transitioningControl.PageTransition is CrossFade crossFade)
             {
@@ -172,7 +173,7 @@ public partial class MainView : UserControl
     public void btnSettings_Click(object? sender, RoutedEventArgs args)
     {
         ExitView();
-        ((MainWindowViewModel)this.Parent.DataContext).Navigate(new SettingsView(Settings.CurrentSettings));
+        ((NavigatableViewModelBase)this.DataContext).Navigate(new SettingsViewModel());
     }
 
     private void ExitView()

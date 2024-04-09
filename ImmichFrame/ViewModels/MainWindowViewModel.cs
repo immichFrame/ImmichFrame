@@ -1,11 +1,12 @@
-﻿using Avalonia.Controls;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using ImmichFrame.Exceptions;
 using ImmichFrame.Models;
-using ImmichFrame.Views;
+using System;
+using static ImmichFrame.ViewModels.NavigatableViewModelBase;
 
 namespace ImmichFrame.ViewModels
 {
-    public class MainWindowViewModel : ViewModelBase
+    public partial class MainWindowViewModel : ViewModelBase
     {
         public MainWindowViewModel()
         {
@@ -13,28 +14,24 @@ namespace ImmichFrame.ViewModels
             {
                 var settings = Settings.CurrentSettings;
 
-                _contentView = new MainView();
+                ContentViewModel = new MainViewModel();
             }
             catch (SettingsNotValidException ex)
             {
-                _contentView = new SettingsView(new Settings());
+                ContentViewModel = new SettingsViewModel();
             }
+
+            this.ContentViewModel.Navigated += Navigate;
         }
 
-        public UserControl _contentView;
-        public UserControl ContentView
-        {
-            get { return _contentView; }
-            set
-            {
-                _contentView = value;
-                OnPropertyChanged(nameof(ContentView));
-            }
-        }
+        [ObservableProperty]
+        private NavigatableViewModelBase contentViewModel;
 
-        public void Navigate(UserControl view)
+        public void Navigate(object sender, NavigatedEventArgs e)
         {
-            ContentView = view;
+            this.ContentViewModel.Navigated -= Navigate;
+            ContentViewModel = e.ViewModel;
+            this.ContentViewModel.Navigated += Navigate;
         }
     }
 }

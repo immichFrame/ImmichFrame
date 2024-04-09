@@ -204,6 +204,12 @@ public class Settings
         return ParseSettings(SettingsValues);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="SettingsValues"></param>
+    /// <returns></returns>
+    /// <exception cref="SettingsNotValidException"></exception>
     private static Settings ParseSettings(Dictionary<string, object> SettingsValues)
     {
         var settings = new Settings();

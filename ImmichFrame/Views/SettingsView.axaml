@@ -1,11 +1,22 @@
-<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl x:Class="ImmichFrame.Views.SettingsView"
+			 xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="ImmichFrame.Views.SettingsView">
-	<Grid>
-		<ScrollViewer IsVisible="{Binding SettingsViewVisible}">
+			 xmlns:vm="using:ImmichFrame.ViewModels"
+             x:DataType="vm:SettingsViewModel">
+
+	<DockPanel>
+		<Design.DataContext>
+			<vm:SettingsViewModel />
+		</Design.DataContext>
+		<Button DockPanel.Dock="Bottom"
+				Content="Save"
+				HorizontalAlignment="Stretch"
+				Command="{Binding SaveCommand}"
+				HorizontalContentAlignment="Center"/>
+		<ScrollViewer>
 			<StackPanel Orientation="Vertical" Margin="10">
 				<StackPanel Orientation="Horizontal">
 					<TextBlock Text="ImmichServerUrl" VerticalAlignment="Center" Margin="10"/>
@@ -15,13 +26,53 @@
 					<TextBlock Text="ApiKey" VerticalAlignment="Center" Margin="10"/>
 					<TextBox Text="{Binding Settings.ApiKey}" VerticalAlignment="Center" Margin="10"/>
 				</StackPanel>
-				<StackPanel Orientation="Horizontal">
-					<TextBlock Text="Albums (comma seperated)" VerticalAlignment="Center" Margin="10"/>
-					<TextBox Text="{Binding Settings.Albums}" VerticalAlignment="Center" Margin="10"/>
+				<StackPanel Orientation="Vertical">
+					<Grid>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="*"/>
+							<ColumnDefinition/>
+						</Grid.ColumnDefinitions>
+						<TextBlock Text="Albums" VerticalAlignment="Center" Margin="10"/>
+						<Button Grid.Column="1" HorizontalAlignment="Right" Content="+" Command="{Binding AddAlbumCommand}" />
+					</Grid>
+					<ListBox ItemsSource="{Binding AlbumList}">
+						<ListBox.ItemTemplate>
+							<DataTemplate>
+								<Grid>
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition Width="*"/>
+										<ColumnDefinition/>
+									</Grid.ColumnDefinitions>
+									<TextBox Text="{Binding Value}" VerticalAlignment="Center"/>
+									<Button Grid.Column="1" HorizontalAlignment="Right" Content="-" Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}, Path=DataContext.RemoveAlbumCommand}" CommandParameter="{Binding Id}" />
+								</Grid>
+							</DataTemplate>
+						</ListBox.ItemTemplate>
+					</ListBox>
 				</StackPanel>
-				<StackPanel Orientation="Horizontal">
-					<TextBlock Text="People (comma seperated)" VerticalAlignment="Center" Margin="10"/>
-					<TextBox Text="{Binding Settings.People}" VerticalAlignment="Center" Margin="10"/>
+				<StackPanel Orientation="Vertical">
+					<Grid>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="*"/>
+							<ColumnDefinition/>
+						</Grid.ColumnDefinitions>
+						<TextBlock Text="People" VerticalAlignment="Center" Margin="10"/>
+						<Button Grid.Column="1" HorizontalAlignment="Right" Content="+" Command="{Binding AddPersonCommand}" />
+					</Grid>
+					<ListBox ItemsSource="{Binding PeopleList}">
+						<ListBox.ItemTemplate>
+							<DataTemplate>
+								<Grid>
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition Width="*"/>
+										<ColumnDefinition/>
+									</Grid.ColumnDefinitions>
+									<TextBox Text="{Binding Value}" VerticalAlignment="Center"/>
+									<Button Grid.Column="1" HorizontalAlignment="Right" Content="-" Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}, Path=DataContext.RemovePersonCommand}" CommandParameter="{Binding Id}" />
+								</Grid>
+							</DataTemplate>
+						</ListBox.ItemTemplate>
+					</ListBox>
 				</StackPanel>
 				<StackPanel Orientation="Horizontal">
 					<TextBlock Text="Interval" VerticalAlignment="Center" Margin="10"/>
@@ -91,8 +142,7 @@
 					<TextBlock Text="WeatherLatLong" VerticalAlignment="Center" Margin="10"/>
 					<TextBox Text="{Binding Settings.WeatherLatLong}" VerticalAlignment="Center" Margin="10"/>
 				</StackPanel>
-				<Button x:Name="btnSave" Content="Save" HorizontalAlignment="Center" Click="btnSave_Click" />
 			</StackPanel>
 		</ScrollViewer>
-	</Grid>
+	</DockPanel>
 </UserControl>
