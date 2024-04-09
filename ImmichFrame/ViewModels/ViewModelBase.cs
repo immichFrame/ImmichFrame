@@ -16,7 +16,7 @@ public class NavigatableViewModelBase : ViewModelBase
     }
 
     public delegate void NavigatedEventHandler(object sender, NavigatedEventArgs e);
-    public event NavigatedEventHandler Navigated;
+    public event NavigatedEventHandler? Navigated;
 }
 public class NavigatedEventArgs : EventArgs
 {

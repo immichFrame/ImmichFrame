@@ -32,7 +32,7 @@ public partial class MainViewModel : NavigatableViewModelBase
                 ThumbhashImage = new Bitmap(tmbStream)
             };
 
-            ImageDate = asset?.FileCreatedAt.ToString(settings.PhotoDateFormat) ?? string.Empty;
+            ImageDate = asset?.FileCreatedAt.ToString(Settings.PhotoDateFormat) ?? string.Empty;
             ImageDesc = asset?.ImageDesc ?? string.Empty;
         }
     }
@@ -42,13 +42,13 @@ public partial class MainViewModel : NavigatableViewModelBase
     [ObservableProperty]
     private UiImage? images;
     [ObservableProperty]
-    private string imageDate;
+    private string? imageDate;
     [ObservableProperty]
-    private string imageDesc;
+    private string? imageDesc;
     [ObservableProperty]
-    private string liveTime;
+    private string? liveTime;
     [ObservableProperty]
-    private string weatherCurrent;
+    private string? weatherCurrent;
     [ObservableProperty]
-    private string weatherTemperature;
+    private string? weatherTemperature;
 }

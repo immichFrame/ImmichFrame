@@ -47,7 +47,7 @@ public partial class MainView : UserControl
                     insetsManager.IsSystemBarVisible = false;
                 }
             }
-            _viewModel = this.DataContext as MainViewModel;
+            _viewModel = (this.DataContext as MainViewModel)!;
 
             _appSettings = _viewModel.Settings;
 
