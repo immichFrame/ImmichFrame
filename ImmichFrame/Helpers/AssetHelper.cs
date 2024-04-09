@@ -46,13 +46,13 @@ namespace ImmichFrame.Helpers
                 list = list.Union(await GetMemoryAssets());
             }
 
-            if (Settings.CurrentSettings.Albums.Any())
+            if (Settings.CurrentSettings.Albums?.Any() ?? false)
             {
                 assetsAdded = true;
                 list = list.Union(await GetAlbumAssets());
             }
 
-            if (Settings.CurrentSettings.People.Any())
+            if (Settings.CurrentSettings.People?.Any() ?? false)
             {
                 assetsAdded = true;
                 list = list.Union(await GetPeopleAssets());

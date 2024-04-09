@@ -8,5 +8,5 @@
         x:Class="ImmichFrame.Views.MainWindow"
         Icon="/Assets/Immich.ico"
         Title="ImmichFrame">
-        <views:MainView />
+	<views:WindowView />
 </Window>

@@ -1,28 +1,17 @@
 ﻿using Avalonia.Media.Imaging;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
+using CommunityToolkit.Mvvm.ComponentModel;
+using ImmichFrame.Exceptions;
 using ImmichFrame.Models;
 using System.IO;
 using System.Threading.Tasks;
 
 namespace ImmichFrame.ViewModels;
 
-public partial class MainViewModel : INotifyPropertyChanged
+public partial class MainViewModel : NavigatableViewModelBase
 {
-    private string _imageDate = "";
-    private string _imageDesc = "";
-    private string _liveTime = "";
-    private string _weatherCurrent = "";
-    private string _weatherTemperature = "";
-    public Settings _settings;
-    public Settings Settings
+    public MainViewModel()
     {
-        get { return _settings; }
-        set
-        {
-            _settings = value;
-            OnPropertyChanged(nameof(Settings));
-        }
+        settings = Settings.CurrentSettings;
     }
 
     public void SetImage(Bitmap image)
@@ -43,71 +32,23 @@ public partial class MainViewModel : INotifyPropertyChanged
                 ThumbhashImage = new Bitmap(tmbStream)
             };
 
-            ImageDate = asset?.FileCreatedAt.ToString(_settings.PhotoDateFormat) ?? string.Empty;
+            ImageDate = asset?.FileCreatedAt.ToString(settings.PhotoDateFormat) ?? string.Empty;
             ImageDesc = asset?.ImageDesc ?? string.Empty;
         }
     }
 
-    private UiImage? _images;
-    public UiImage? Images
-    {
-        get { return _images; }
-        private set
-        {
-            _images = value;
-            OnPropertyChanged(nameof(Images));
-        }
-    }
-    public string ImageDate
-    {
-        get { return _imageDate; }
-        private set
-        {
-            _imageDate = value;
-            OnPropertyChanged(nameof(ImageDate));
-        }
-    }
-    public string ImageDesc
-    {
-        get { return _imageDesc; }
-        private set
-        {
-            _imageDesc = value;
-            OnPropertyChanged(nameof(ImageDesc));
-        }
-    }
-
-    public string LiveTime
-    {
-        get { return _liveTime; }
-        set
-        {
-            _liveTime = value;
-            OnPropertyChanged(nameof(LiveTime));
-        }
-    }
-    public string WeatherCurrent
-    {
-        get { return _weatherCurrent; }
-        set
-        {
-            _weatherCurrent = value;
-            OnPropertyChanged(nameof(WeatherCurrent));
-        }
-    }
-    public string WeatherTemperature
-    {
-        get { return _weatherTemperature; }
-        set
-        {
-            _weatherTemperature = value;
-            OnPropertyChanged(nameof(WeatherTemperature));
-        }
-    }
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
+    [ObservableProperty]
+    public Settings settings;
+    [ObservableProperty]
+    private UiImage? images;
+    [ObservableProperty]
+    private string imageDate;
+    [ObservableProperty]
+    private string imageDesc;
+    [ObservableProperty]
+    private string liveTime;
+    [ObservableProperty]
+    private string weatherCurrent;
+    [ObservableProperty]
+    private string weatherTemperature;
 }

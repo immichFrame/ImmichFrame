@@ -1,0 +1,96 @@
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using ImmichFrame.Exceptions;
+using ImmichFrame.Helpers;
+using ImmichFrame.Models;
+using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Windows.Input;
+
+namespace ImmichFrame.ViewModels
+{
+    public partial class SettingsViewModel : NavigatableViewModelBase
+    {
+        [ObservableProperty]
+        private ObservableCollection<ListItem> peopleList;
+
+        [ObservableProperty]
+        private ObservableCollection<ListItem> albumList;
+
+        [ObservableProperty]
+        public Settings settings;
+        public ICommand SaveCommand { get; set; }
+        public ICommand AddPersonCommand { get; set; }
+        public ICommand RemovePersonCommand { get; set; }
+        public ICommand AddAlbumCommand { get; set; }
+        public ICommand RemoveAlbumCommand { get; set; }
+
+        public SettingsViewModel()
+        {
+            try
+            {
+                Settings = Settings.CurrentSettings;
+            }
+            catch (SettingsNotValidException)
+            {
+                Settings = new Settings();
+            }
+
+            SaveCommand = new RelayCommand(SaveAction);
+            AddPersonCommand = new RelayCommand(AddPersonAction);
+            RemovePersonCommand = new RelayCommandParams(RemovePersonAction);
+            AddAlbumCommand = new RelayCommand(AddAlbumAction);
+            RemoveAlbumCommand = new RelayCommandParams(RemoveAlbumAction);
+
+            PeopleList = new ObservableCollection<ListItem>(Settings.People.Select(x => new ListItem(x.ToString())));
+            AlbumList = new ObservableCollection<ListItem>(Settings.Albums.Select(x => new ListItem(x.ToString())));
+        }
+
+
+        public void AddPersonAction()
+        {
+            PeopleList.Add(new ListItem());
+        }
+
+        public void RemovePersonAction(object param)
+        {
+            var item = PeopleList.First(x => x.Id == Guid.Parse(param.ToString()));
+            PeopleList?.Remove(item);
+        }
+
+        public void AddAlbumAction()
+        {
+            AlbumList.Add(new ListItem());
+        }
+
+        public void RemoveAlbumAction(object param)
+        {
+            var item = AlbumList.First(x => x.Id == Guid.Parse(param.ToString()));
+            AlbumList?.Remove(item);
+        }
+
+        public void SaveAction()
+        {
+            // TODO: Validation
+
+            Settings.People = PeopleList.Select(x=>Guid.Parse(x.Value)).ToList();
+            Settings.Albums = AlbumList.Select(x=> Guid.Parse(x.Value)).ToList();
+
+            Settings.Serialize();
+
+            Navigate(new MainViewModel());
+        }
+    }
+
+    public class ListItem
+    {
+        public ListItem(string value = "")
+        {
+            Id = Guid.NewGuid();
+            Value = value;
+        }
+
+        public Guid Id { get; set; }
+        public string Value { get; set; }
+    }
+}

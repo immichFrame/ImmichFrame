@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Threading.Tasks;
-using Avalonia.Animation;
+﻿using Avalonia.Animation;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
@@ -13,6 +10,8 @@ using ImmichFrame.Models;
 using ImmichFrame.ViewModels;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
+using System;
+using System.Threading.Tasks;
 
 namespace ImmichFrame.Views;
 
@@ -31,23 +30,33 @@ public partial class MainView : UserControl
     {
         InitializeComponent();
         _appSettings = new Settings();
-        _viewModel = new MainViewModel();
         _assetHelper = new AssetHelper();
-        DataContext = _viewModel;
         this.Loaded += OnLoaded;
     }
-
     private async void OnLoaded(object? sender, RoutedEventArgs e)
     {
         try
         {
+            if (PlatformDetector.IsAndroid())
+            {
+                var insetsManager = TopLevel.GetTopLevel(this)?.InsetsManager;
+                if (insetsManager != null)
+                {
+                    insetsManager.DisplayEdgeToEdge = true;
+                    insetsManager.IsSystemBarVisible = false;
+                }
+            }
+            _viewModel = this.DataContext as MainViewModel;
+
+            _appSettings = _viewModel.Settings;
+
             ShowSplash();
-            _appSettings = Settings.CurrentSettings;
-            _viewModel.Settings = _appSettings;
-            //couldn't get data binding on CrossFade Duration to work, had to do this
+
+            ShowNextImage();
+
             if (transitioningControl.PageTransition is CrossFade crossFade)
             {
-                crossFade.Duration = _appSettings.TransitionDuration;
+                crossFade.Duration = TimeSpan.FromSeconds(_appSettings.TransitionDuration);
             }
 
             timerImageSwitcher_Enabled = true;
@@ -145,26 +154,38 @@ public partial class MainView : UserControl
         }
     }
 
-    public void btnBack_Click(object? sender, RoutedEventArgs args)
+    public async void btnBack_Click(object? sender, RoutedEventArgs args)
     {
         timerImageSwitcher!.Change(_appSettings.Interval * 1000, _appSettings.Interval * 1000);
-        ShowPreviousImage();
+        await Task.Run(() => ShowPreviousImage());
     }
 
-    public void btnNext_Click(object? sender, RoutedEventArgs args)
+    public async void btnNext_Click(object? sender, RoutedEventArgs args)
     {
         timerImageSwitcher!.Change(_appSettings.Interval * 1000, _appSettings.Interval * 1000);
-        ShowNextImage();
+        await Task.Run(() => ShowNextImage());
     }
 
     public void btnQuit_Click(object? sender, RoutedEventArgs args)
     {
         ExitApp();
     }
+    public void btnSettings_Click(object? sender, RoutedEventArgs args)
+    {
+        ExitView();
+        ((NavigatableViewModelBase)this.DataContext).Navigate(new SettingsViewModel());
+    }
 
-    private void ExitApp()
+    private void ExitView()
     {
         timerImageSwitcher_Enabled = false;
+        timerImageSwitcher?.Dispose();
+        timerLiveTime?.Dispose();
+        timerWeather?.Dispose();
+    }
+    private void ExitApp()
+    {
+        ExitView();
         Environment.Exit(0);
     }
     private Task ShowMessageBoxFromThread(string message)
