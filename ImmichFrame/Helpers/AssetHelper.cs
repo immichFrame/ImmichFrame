@@ -77,8 +77,15 @@ namespace ImmichFrame.Helpers
                 var allAssets = new List<AssetResponseDto>();
 
                 var date = DateTime.Today;
-
-                var memoryLane = await immichApi.GetMemoryLaneAsync(date.Day, date.Month);
+                ICollection<MemoryLaneResponseDto> memoryLane;
+                try
+                {
+                    memoryLane = await immichApi.GetMemoryLaneAsync(date.Day, date.Month);
+                }
+                catch (ApiException ex)
+                {
+                    throw new AlbumNotFoundException($"Memories were not found, check your settings file!{Environment.NewLine}{Environment.NewLine}{ex.Message}", ex);
+                }
 
                 foreach (var lane in memoryLane)
                 {
@@ -111,7 +118,7 @@ namespace ImmichFrame.Helpers
                     }
                     catch (ApiException ex)
                     {
-                        throw new AlbumNotFoundException($"Album '{albumId}' was not found, check your settings file", ex);
+                        throw new AlbumNotFoundException($"Album '{albumId}' was not found, check your settings file!{Environment.NewLine}{Environment.NewLine}{ex.Message}", ex);
                     }
                 }
 
@@ -139,12 +146,12 @@ namespace ImmichFrame.Helpers
                     }
                     catch (ApiException ex)
                     {
-                        throw new PersonNotFoundException($"Person '{personId}' was not found, check your settings file", ex);
+                        throw new PersonNotFoundException($"Person '{personId}' was not found, check your settings file!{Environment.NewLine}{Environment.NewLine}{ex.Message}", ex);
                     }
                 }
 
                 // Remove duplicates
-                var uniqueAssets = allAssets.DistinctBy(x=>x.Id);
+                var uniqueAssets = allAssets.DistinctBy(x => x.Id);
 
                 return uniqueAssets;
             }
@@ -171,12 +178,18 @@ namespace ImmichFrame.Helpers
                 client.UseApiKey(settings.ApiKey);
 
                 var immichApi = new ImmichApi(settings.ImmichServerUrl, client);
-
-                var randomAssets = await immichApi.GetRandomAsync(null);
-
-                if (randomAssets.Any())
+                try
                 {
-                    return randomAssets.First();
+                    var randomAssets = await immichApi.GetRandomAsync(null);
+
+                    if (randomAssets.Any())
+                    {
+                        return randomAssets.First();
+                    }
+                }
+                catch (ApiException ex)
+                {
+                    throw new PersonNotFoundException($"Asset was not found, check your settings file!{Environment.NewLine}{Environment.NewLine}{ex.Message}", ex);
                 }
             }
 
