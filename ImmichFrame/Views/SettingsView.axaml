@@ -27,22 +27,14 @@
 					<TextBox Text="{Binding Settings.ApiKey}" VerticalAlignment="Center" Margin="10"/>
 				</StackPanel>
 				<StackPanel Orientation="Vertical">
-					<Grid>
-						<Grid.ColumnDefinitions>
-							<ColumnDefinition Width="*"/>
-							<ColumnDefinition/>
-						</Grid.ColumnDefinitions>
+					<Grid ColumnDefinitions="*, Auto">
 						<TextBlock Text="Albums" VerticalAlignment="Center" Margin="10"/>
 						<Button Grid.Column="1" HorizontalAlignment="Right" Content="+" Command="{Binding AddAlbumCommand}" />
 					</Grid>
 					<ListBox ItemsSource="{Binding AlbumList}">
 						<ListBox.ItemTemplate>
 							<DataTemplate>
-								<Grid>
-									<Grid.ColumnDefinitions>
-										<ColumnDefinition Width="*"/>
-										<ColumnDefinition/>
-									</Grid.ColumnDefinitions>
+								<Grid ColumnDefinitions="*, Auto">
 									<TextBox Text="{Binding Value}" VerticalAlignment="Center"/>
 									<Button Grid.Column="1" HorizontalAlignment="Right" Content="-" Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}, Path=DataContext.RemoveAlbumCommand}" CommandParameter="{Binding Id}" />
 								</Grid>
@@ -51,22 +43,14 @@
 					</ListBox>
 				</StackPanel>
 				<StackPanel Orientation="Vertical">
-					<Grid>
-						<Grid.ColumnDefinitions>
-							<ColumnDefinition Width="*"/>
-							<ColumnDefinition/>
-						</Grid.ColumnDefinitions>
+								<Grid ColumnDefinitions="*, Auto">
 						<TextBlock Text="People" VerticalAlignment="Center" Margin="10"/>
 						<Button Grid.Column="1" HorizontalAlignment="Right" Content="+" Command="{Binding AddPersonCommand}" />
 					</Grid>
 					<ListBox ItemsSource="{Binding PeopleList}">
 						<ListBox.ItemTemplate>
 							<DataTemplate>
-								<Grid>
-									<Grid.ColumnDefinitions>
-										<ColumnDefinition Width="*"/>
-										<ColumnDefinition/>
-									</Grid.ColumnDefinitions>
+								<Grid ColumnDefinitions="*, Auto">
 									<TextBox Text="{Binding Value}" VerticalAlignment="Center"/>
 									<Button Grid.Column="1" HorizontalAlignment="Right" Content="-" Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}, Path=DataContext.RemovePersonCommand}" CommandParameter="{Binding Id}" />
 								</Grid>
