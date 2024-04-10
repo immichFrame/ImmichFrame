@@ -11,6 +11,7 @@ using ImmichFrame.ViewModels;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -170,8 +171,11 @@ public partial class MainView : UserControl
     }
     public void btnSettings_Click(object? sender, RoutedEventArgs args)
     {
-        ExitView();
-        ((NavigatableViewModelBase)this.DataContext).Navigate(new SettingsViewModel());
+        if (!File.Exists(AppDomain.CurrentDomain.BaseDirectory + @"Settings.xml"))
+        {
+            ExitView();
+            ((NavigatableViewModelBase)this.DataContext).Navigate(new SettingsViewModel());
+        }
     }
 
     private void ExitView()

@@ -47,27 +47,24 @@ public class Settings
     {
         get
         {
-            if (PlatformDetector.IsAndroid())
+            if (_settings == null)
             {
-                if (_settings == null)
-                {
-                    _settings = ParseFromAppSettings();
-
-                    _settings.Validate();
-                }
-                return _settings;
-            }
-            else
-            {
-                if (_settings == null)
+                if (File.Exists(AppDomain.CurrentDomain.BaseDirectory + @"Settings.xml"))
                 {
                     _settings = ParseFromXml();
 
                     _settings.Validate();
-                }
-                return _settings;
-            }
 
+                }
+                else
+                {
+                    _settings = ParseFromAppSettings();
+
+                    _settings.Validate();
+
+                }
+            }
+            return _settings;
         }
     }
 
@@ -75,10 +72,8 @@ public class Settings
     {
         this.Validate();
 
-        if (PlatformDetector.IsAndroid())
-        {
-            // settings
-            var defaultSettings = Properties.Settings.Default;
+        // settings
+        var defaultSettings = Properties.Settings.Default;
 
             defaultSettings.ImmichServerUrl = this.ImmichServerUrl;
             defaultSettings.ApiKey = this.ApiKey;
@@ -99,37 +94,18 @@ public class Settings
             defaultSettings.WeatherLatLong = this.WeatherLatLong;
             defaultSettings.WeatherApiKey = this.WeatherApiKey;
 
-            var albums = new StringCollection();
-            if(this.Albums?.Any() ?? false)
-                albums.AddRange(this.Albums.Select(x => x.ToString()).ToArray());
-            defaultSettings.Albums = albums;
+        var albums = new StringCollection();
+        if (this.Albums?.Any() ?? false)
+            albums.AddRange(this.Albums.Select(x => x.ToString()).ToArray());
+        defaultSettings.Albums = albums;
 
-            var people = new StringCollection();
-            if (this.People?.Any() ?? false)
-                people.AddRange(this.People.Select(x => x.ToString()).ToArray());
-            defaultSettings.People = people;
-            defaultSettings.TransitionDuration = this.TransitionDuration;
+        var people = new StringCollection();
+        if (this.People?.Any() ?? false)
+            people.AddRange(this.People.Select(x => x.ToString()).ToArray());
+        defaultSettings.People = people;
+        defaultSettings.TransitionDuration = this.TransitionDuration;
 
-            defaultSettings.Save();
-        }
-        else
-        {
-            // xml
-            XmlSerializer xsSubmit = new XmlSerializer(typeof(Settings));
-            var xml = "";
-
-            using (var sww = new StringWriter())
-            {
-                using (XmlWriter writer = XmlWriter.Create(sww))
-                {
-                    xsSubmit.Serialize(writer, this);
-                    xml = sww.ToString();
-                }
-            }
-
-            // TODO: some error handling with try catch?
-            File.WriteAllText(AppDomain.CurrentDomain.BaseDirectory + @"Settings.xml", xml);
-        }
+        defaultSettings.Save();
     }
 
     private void Validate()
