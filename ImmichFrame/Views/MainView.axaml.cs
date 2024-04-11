@@ -171,7 +171,7 @@ public partial class MainView : UserControl
     }
     public void btnSettings_Click(object? sender, RoutedEventArgs args)
     {
-        if (!File.Exists(AppDomain.CurrentDomain.BaseDirectory + @"Settings.xml"))
+        if (!Settings.IsFromXmlFile())
         {
             ExitView();
             ((NavigatableViewModelBase)this.DataContext).Navigate(new SettingsViewModel());

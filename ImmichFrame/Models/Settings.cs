@@ -49,7 +49,7 @@ public class Settings
         {
             if (_settings == null)
             {
-                if (File.Exists(AppDomain.CurrentDomain.BaseDirectory + @"Settings.xml"))
+                if (IsFromXmlFile())
                 {
                     _settings = ParseFromXml();
 
@@ -281,6 +281,10 @@ public class Settings
         }
 
         return settings;
+    }
+    public static bool IsFromXmlFile()
+    {
+        return File.Exists(AppDomain.CurrentDomain.BaseDirectory + @"Settings.xml");
     }
 }
 
