@@ -12,7 +12,7 @@ namespace ImmichFrame.Helpers
         private static readonly OpenWeatherMapOptions Options = new OpenWeatherMapOptions
         {
             ApiKey = Settings.CurrentSettings.WeatherApiKey,
-            UnitSystem = UnitSystem.Metric,
+            UnitSystem = Settings.CurrentSettings.UnitSystem,
             Language = Settings.CurrentSettings.Language,
         };
         public static Task<WeatherInfo?> GetWeather()

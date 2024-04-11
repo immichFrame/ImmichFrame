@@ -1,7 +1,5 @@
 ﻿using ImmichFrame.Exceptions;
 using ImmichFrame.Helpers;
-using ImmichFrame.Properties;
-using OpenWeatherMap;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -12,7 +10,6 @@ using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
-using UnitsNet;
 
 namespace ImmichFrame.Models;
 

@@ -11,6 +11,7 @@ using ImmichFrame.ViewModels;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ImmichFrame.Views;
@@ -96,7 +97,8 @@ public partial class MainView : UserControl
         var weatherInfo = WeatherHelper.GetWeather().Result;
         if (weatherInfo != null)
         {
-            _viewModel.WeatherCurrent = $"{weatherInfo.Main.Temperature}{Environment.NewLine}{weatherInfo.CityName}";
+            _viewModel.WeatherTemperature = $"{weatherInfo.Main.Temperature}{Environment.NewLine}{weatherInfo.CityName}";
+            _viewModel.WeatherCurrent = $"{string.Join(',', weatherInfo.Weather.Select(x=>x.Description))}";
         }
     }
 
