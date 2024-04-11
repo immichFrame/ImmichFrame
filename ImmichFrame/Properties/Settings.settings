@@ -44,14 +44,8 @@
     <Setting Name="ImageDescFontSize" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">36</Value>
     </Setting>
-    <Setting Name="ShowWeather" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
-    </Setting>
     <Setting Name="WeatherFontSize" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">12</Value>
-    </Setting>
-    <Setting Name="WeatherUnits" Type="System.String" Scope="User">
-      <Value Profile="(Default)">fahrenheit</Value>
     </Setting>
     <Setting Name="WeatherLatLong" Type="System.String" Scope="User">
       <Value Profile="(Default)">41.186660,-81.800830</Value>
@@ -64,6 +58,12 @@
     </Setting>
     <Setting Name="TransitionDuration" Type="System.Double" Scope="User">
       <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="UnitSystem" Type="System.String" Scope="User">
+      <Value Profile="(Default)">imperial</Value>
+    </Setting>
+    <Setting Name="WeatherApiKey" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
     </Setting>
   </Settings>
 </SettingsFile>
