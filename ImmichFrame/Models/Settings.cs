@@ -41,6 +41,8 @@ public class Settings
     public float WeatherLat => !string.IsNullOrWhiteSpace(WeatherLatLong) ? float.Parse(WeatherLatLong!.Split(',')[0]) : 0f;
     public float WeatherLong => !string.IsNullOrWhiteSpace(WeatherLatLong) ? float.Parse(WeatherLatLong!.Split(',')[1]) : 0f;
     public string Language { get; set; } = "en";
+    public static string XmlSettingsPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Settings.xml");
+    public static bool IsFromXmlFile => File.Exists(XmlSettingsPath);
 
     private static Settings? _settings;
     public static Settings CurrentSettings
@@ -49,7 +51,7 @@ public class Settings
         {
             if (_settings == null)
             {
-                if (IsFromXmlFile())
+                if (Settings.IsFromXmlFile)
                 {
                     _settings = ParseFromXml();
 
@@ -119,7 +121,7 @@ public class Settings
 
     private static Settings ParseFromXml()
     {
-        var xml = File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + @"Settings.xml");
+        var xml = File.ReadAllText(Settings.XmlSettingsPath);
 
         XElement doc;
         try
@@ -281,10 +283,6 @@ public class Settings
         }
 
         return settings;
-    }
-    public static bool IsFromXmlFile()
-    {
-        return File.Exists(AppDomain.CurrentDomain.BaseDirectory + @"Settings.xml");
     }
 }
 
