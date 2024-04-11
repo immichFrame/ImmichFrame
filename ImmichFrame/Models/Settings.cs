@@ -33,10 +33,14 @@ public class Settings
     public string? PhotoDateFormat { get; set; } = "MM/dd/yyyy";
     public bool ShowImageDesc { get; set; } = true;
     public int ImageDescFontSize { get; set; } = 36;
-    public bool ShowWeather { get; set; } = false;
+    public bool ShowWeather => !string.IsNullOrWhiteSpace(WeatherApiKey);
     public int WeatherFontSize { get; set; } = 36;
-    public string? WeatherUnits { get; set; } = "fahrenheit";
+    public string? UnitSystem { get; set; } = OpenWeatherMap.UnitSystem.Imperial;
     public string? WeatherLatLong { get; set; } = "40.7128,74.0060";
+    public string? WeatherApiKey { get; set; } = string.Empty;
+    public float WeatherLat => !string.IsNullOrWhiteSpace(WeatherLatLong) ? float.Parse(WeatherLatLong!.Split(',')[0]) : 0f;
+    public float WeatherLong => !string.IsNullOrWhiteSpace(WeatherLatLong) ? float.Parse(WeatherLatLong!.Split(',')[1]) : 0f;
+    public string Language { get; set; } = "en";
 
     private static Settings? _settings;
     public static Settings CurrentSettings
@@ -90,10 +94,10 @@ public class Settings
             defaultSettings.PhotoDateFormat = this.PhotoDateFormat;
             defaultSettings.ShowImageDesc = this.ShowImageDesc;
             defaultSettings.ImageDescFontSize = this.ImageDescFontSize;
-            defaultSettings.ShowWeather = this.ShowWeather;
             defaultSettings.WeatherFontSize = this.WeatherFontSize;
-            defaultSettings.WeatherUnits = this.WeatherUnits;
+            defaultSettings.UnitSystem = this.UnitSystem?.ToString() ?? OpenWeatherMap.UnitSystem.Imperial;
             defaultSettings.WeatherLatLong = this.WeatherLatLong;
+            defaultSettings.WeatherApiKey = this.WeatherApiKey;
 
             var albums = new StringCollection();
             if(this.Albums?.Any() ?? false)
@@ -235,6 +239,7 @@ public class Settings
                     property.SetValue(settings, url);
                     break;
                 case "ApiKey":
+                case "WeatherApiKey":
                     property.SetValue(settings, value);
                     break;
                 case "Albums":
@@ -269,7 +274,6 @@ public class Settings
                 case "ShowClock":
                 case "ShowPhotoDate":
                 case "ShowImageDesc":
-                case "ShowWeather":
                     if (!bool.TryParse(value.ToString(), out var boolValue))
                         throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. ('{value}')");
                     property.SetValue(settings, boolValue);
@@ -280,15 +284,19 @@ public class Settings
                 case "PhotoDateFormat":
                     property.SetValue(settings, value);
                     break;
-                case "WeatherUnits":
-                    if (!Regex.IsMatch(value.ToString(), @"^(?i)(celsius|fahrenheit)$"))
+                case "UnitSystem":
+                    if (!Regex.IsMatch(value.ToString(), @"^(?i)(metric|imperial)$"))
                         throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. ('{value}')");
+                    value = value.ToString().ToLower() == "metric" ? OpenWeatherMap.UnitSystem.Metric : OpenWeatherMap.UnitSystem.Imperial;
                     property.SetValue(settings, value);
                     break;
                 case "WeatherLatLong":
                     // Regex match Lat/Lon
                     if (!Regex.IsMatch(value.ToString(), @"^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$"))
                         throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. ('{value}')");
+                    property.SetValue(settings, value);
+                    break;
+                case "Language":
                     property.SetValue(settings, value);
                     break;
                 default:

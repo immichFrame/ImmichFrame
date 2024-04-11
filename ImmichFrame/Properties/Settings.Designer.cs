@@ -193,18 +193,6 @@ namespace ImmichFrame.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool ShowWeather {
-            get {
-                return ((bool)(this["ShowWeather"]));
-            }
-            set {
-                this["ShowWeather"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("12")]
         public int WeatherFontSize {
             get {
@@ -212,18 +200,6 @@ namespace ImmichFrame.Properties {
             }
             set {
                 this["WeatherFontSize"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("fahrenheit")]
-        public string WeatherUnits {
-            get {
-                return ((string)(this["WeatherUnits"]));
-            }
-            set {
-                this["WeatherUnits"] = value;
             }
         }
         
@@ -270,6 +246,30 @@ namespace ImmichFrame.Properties {
             }
             set {
                 this["TransitionDuration"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("imperial")]
+        public string UnitSystem {
+            get {
+                return ((string)(this["UnitSystem"]));
+            }
+            set {
+                this["UnitSystem"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string WeatherApiKey {
+            get {
+                return ((string)(this["WeatherApiKey"]));
+            }
+            set {
+                this["WeatherApiKey"] = value;
             }
         }
     }

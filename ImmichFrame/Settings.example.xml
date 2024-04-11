@@ -16,16 +16,16 @@
 		<Person>First Person UID</Person>
 		<Person>Second Person UID</Person>
 	</People>
-	
+
 	<!--Interval for photo cycling in seconds-->
 	<Interval>8</Interval>
 
 	<!--Photo fade in/out time in seconds-->
 	<TransitionDuration>1.0</TransitionDuration>
-	
+
 	<!--Determines if images should be saved locally-->
 	<DownloadImages>false</DownloadImages>
-	
+
 	<!--Show todays memories-->
 	<ShowMemories>false</ShowMemories>
 
@@ -48,11 +48,15 @@
 	<ShowImageDesc>true</ShowImageDesc>
 	<ImageDescFontSize>36</ImageDescFontSize>
 
-	<!--Show the current weather-->
-	<ShowWeather>false</ShowWeather>
-	<WeatherFontSize>12</WeatherFontSize>	
-	<!--The temperature units. either celsius or fahrenheit-->
-	<WeatherUnits>fahrenheit</WeatherUnits>
+	<!--The current weather is only shown, when a WeatherApiKey is specified-->
+	<!--Weather ApiKey from https://openweathermap.org/-->
+	<!--<WeatherApiKey>xxx</WeatherApiKey>-->
+	<WeatherFontSize>12</WeatherFontSize>
+	<!--The temperature units. either metric or imperial-->
+	<UnitSystem>imperial</UnitSystem>
 	<!--Your latitude/longitude coordinates (ex. 40.7128,74.0060)-->
 	<WeatherLatLong>40.7128,74.0060</WeatherLatLong>
+	
+	<!--Your ISO2 Language Code-->
+	<Language>en</Language>
 </Settings>

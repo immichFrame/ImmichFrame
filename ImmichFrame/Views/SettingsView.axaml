@@ -131,16 +131,20 @@
 					<CheckBox IsChecked="{Binding Settings.ShowWeather}" VerticalAlignment="Center" Margin="10"/>
 				</StackPanel>
 				<StackPanel Orientation="Horizontal">
-					<TextBlock Text="WeatherFontSize" VerticalAlignment="Center" Margin="10"/>
-					<TextBox Text="{Binding Settings.ShowWeather}" VerticalAlignment="Center" Margin="10"/>
-				</StackPanel>
-				<StackPanel Orientation="Horizontal">
-					<TextBlock Text="WeatherUnits" VerticalAlignment="Center" Margin="10"/>
-					<TextBox Text="{Binding Settings.WeatherUnits}" VerticalAlignment="Center" Margin="10"/>
+					<TextBlock Text="UnitSystem" VerticalAlignment="Center" Margin="10"/>
+					<TextBox Text="{Binding Settings.UnitSystem}" VerticalAlignment="Center" Margin="10"/>
 				</StackPanel>
 				<StackPanel Orientation="Horizontal">
 					<TextBlock Text="WeatherLatLong" VerticalAlignment="Center" Margin="10"/>
 					<TextBox Text="{Binding Settings.WeatherLatLong}" VerticalAlignment="Center" Margin="10"/>
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Text="WeatherApiKey" VerticalAlignment="Center" Margin="10"/>
+					<TextBox Text="{Binding Settings.WeatherApiKey}" VerticalAlignment="Center" Margin="10"/>
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Text="Language" VerticalAlignment="Center" Margin="10"/>
+					<TextBox Text="{Binding Settings.Language}" VerticalAlignment="Center" Margin="10"/>
 				</StackPanel>
 			</StackPanel>
 		</ScrollViewer>

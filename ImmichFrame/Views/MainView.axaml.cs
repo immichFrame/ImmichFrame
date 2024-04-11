@@ -11,6 +11,7 @@ using ImmichFrame.ViewModels;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ImmichFrame.Views;
@@ -93,14 +94,11 @@ public partial class MainView : UserControl
     }
     private void timerWeatherTick(object? state)
     {
-        string latitude = _appSettings.WeatherLatLong!.Split(',')[0];
-        string longitude = _appSettings.WeatherLatLong!.Split(',')[1];
-        OpenMeteoResponse? openMeteoResponse = Task.Run(() => Weather.GetWeather(latitude, longitude, _appSettings.WeatherUnits!)).Result;
-        if (openMeteoResponse != null)
+        var weatherInfo = WeatherHelper.GetWeather().Result;
+        if (weatherInfo != null)
         {
-            _viewModel.WeatherTemperature = openMeteoResponse.current_weather!.temperature.ToString() + openMeteoResponse.current_weather_units!.temperature;
-            string description = WmoWeatherInterpreter.GetWeatherDescription(openMeteoResponse.current_weather.weathercode, Convert.ToBoolean(openMeteoResponse.current_weather.is_day));
-            _viewModel.WeatherCurrent = description;
+            _viewModel.WeatherTemperature = $"{weatherInfo.Main.Temperature}{Environment.NewLine}{weatherInfo.CityName}";
+            _viewModel.WeatherCurrent = $"{string.Join(',', weatherInfo.Weather.Select(x=>x.Description))}";
         }
     }
 
