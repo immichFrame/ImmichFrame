@@ -77,24 +77,25 @@ public class Settings
         // settings
         var defaultSettings = Properties.Settings.Default;
 
-            defaultSettings.ImmichServerUrl = this.ImmichServerUrl;
-            defaultSettings.ApiKey = this.ApiKey;
-            defaultSettings.Interval = this.Interval;
-            defaultSettings.DownloadImages = this.DownloadImages;
-            defaultSettings.ShowMemories = this.ShowMemories;
-            defaultSettings.RenewImagesDuration = this.RenewImagesDuration;
-            defaultSettings.ShowClock = this.ShowClock;
-            defaultSettings.ClockFontSize = this.ClockFontSize;
-            defaultSettings.ClockFormat = this.ClockFormat;
-            defaultSettings.ShowPhotoDate = this.ShowPhotoDate;
-            defaultSettings.PhotoDateFontSize = this.PhotoDateFontSize;
-            defaultSettings.PhotoDateFormat = this.PhotoDateFormat;
-            defaultSettings.ShowImageDesc = this.ShowImageDesc;
-            defaultSettings.ImageDescFontSize = this.ImageDescFontSize;
-            defaultSettings.WeatherFontSize = this.WeatherFontSize;
-            defaultSettings.UnitSystem = this.UnitSystem?.ToString() ?? OpenWeatherMap.UnitSystem.Imperial;
-            defaultSettings.WeatherLatLong = this.WeatherLatLong;
-            defaultSettings.WeatherApiKey = this.WeatherApiKey;
+        defaultSettings.ImmichServerUrl = this.ImmichServerUrl;
+        defaultSettings.ApiKey = this.ApiKey;
+        defaultSettings.Interval = this.Interval;
+        defaultSettings.DownloadImages = this.DownloadImages;
+        defaultSettings.ShowMemories = this.ShowMemories;
+        defaultSettings.RenewImagesDuration = this.RenewImagesDuration;
+        defaultSettings.ShowClock = this.ShowClock;
+        defaultSettings.ClockFontSize = this.ClockFontSize;
+        defaultSettings.ClockFormat = this.ClockFormat;
+        defaultSettings.ShowPhotoDate = this.ShowPhotoDate;
+        defaultSettings.PhotoDateFontSize = this.PhotoDateFontSize;
+        defaultSettings.PhotoDateFormat = this.PhotoDateFormat;
+        defaultSettings.ShowImageDesc = this.ShowImageDesc;
+        defaultSettings.ImageDescFontSize = this.ImageDescFontSize;
+        defaultSettings.WeatherFontSize = this.WeatherFontSize;
+        defaultSettings.UnitSystem = this.UnitSystem?.ToString() ?? OpenWeatherMap.UnitSystem.Imperial;
+        defaultSettings.WeatherLatLong = this.WeatherLatLong;
+        defaultSettings.WeatherApiKey = this.WeatherApiKey;
+        defaultSettings.Language = this.Language;
 
         var albums = new StringCollection();
         if (this.Albums?.Any() ?? false)
