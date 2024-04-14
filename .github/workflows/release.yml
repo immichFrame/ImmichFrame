@@ -11,7 +11,7 @@ jobs:
     name: Release
     strategy:
       matrix:
-        kind: ['linux-x64', 'linux-arm', 'linux-arm64', 'windows', 'macOS']
+        kind: ['linux-x64', 'linux-arm', 'linux-arm64', 'windows', 'macOS', 'android']
         include:
           - kind: linux-x64
             os: ubuntu-latest
@@ -25,6 +25,9 @@ jobs:
           - kind: windows
             os: windows-latest
             target: win-x64
+          - kind: android
+            os: ubuntu-latest
+            target: android
           - kind: macOS
             os: macos-latest
             target: osx-x64
@@ -35,28 +38,42 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-      - name: Build
+      - name: Build Desktop
         shell: bash
         run: |
           tag=$(git describe --tags --abbrev=0)
           release_name="ImmichFrame-$tag-${{ matrix.target }}"
 
           # Build everything
-          dotnet publish ./ImmichFrame.Desktop/ImmichFrame.Desktop.csproj --runtime "${{ matrix.target }}" -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=None -c Release -o "$release_name" --self-contained true
+          if [ "${{ matrix.kind }}" == "android" ]; then
+            # Android Build
+            ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager \
+            --sdk_root=$ANDROID_SDK_ROOT \
+            "platform-tools"
+            dotnet workload restore --project ./ImmichFrame.Android/ImmichFrame.Android.csproj
+            dotnet publish ./ImmichFrame.Android/ImmichFrame.Android.csproj -p:DebugType=None -c Release -o "$release_name"
+          else
+            # Desktop Build
+            dotnet publish ./ImmichFrame.Desktop/ImmichFrame.Desktop.csproj --runtime "${{ matrix.target }}" -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=None -c Release -o "$release_name" --self-contained true
+          fi
 
           # Pack files
           if [ "${{ matrix.target }}" == "win-x64" ]; then
             # Pack to zip for Windows
             7z a -tzip "${release_name}.zip" "./${release_name}/*"
+          elif [ "${{ matrix.target }}" == "android" ]; then
+            # Move apk
+            mv $release_name/* .
           else
-          tar czvf "${release_name}.tar.gz" "$release_name"
+            tar czvf "${release_name}.tar.gz" "$release_name"
           fi
-
-          # Delete output directory
+          
           rm -r "$release_name"
       - name: Publish
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
-          files: "ImmichFrame*"
+          files: |
+            ImmichFrame*
+            com.immichframe*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
