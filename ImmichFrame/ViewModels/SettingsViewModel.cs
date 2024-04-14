@@ -76,6 +76,8 @@ namespace ImmichFrame.ViewModels
             {
                 Settings.People = PeopleList.Select(x => Guid.Parse(x.Value)).ToList();
                 Settings.Albums = AlbumList.Select(x => Guid.Parse(x.Value)).ToList();
+
+                Settings.Serialize();
             }
             catch (Exception ex)
             {
@@ -83,8 +85,6 @@ namespace ImmichFrame.ViewModels
                 ShowMessageBox(ex.Message, "Error");
                 return;
             }
-
-            Settings.Serialize();
 
             Navigate(new MainViewModel());
         }
