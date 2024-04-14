@@ -72,9 +72,17 @@ namespace ImmichFrame.ViewModels
         public void SaveAction()
         {
             // TODO: Validation
-
-            Settings.People = PeopleList.Select(x=>Guid.Parse(x.Value)).ToList();
-            Settings.Albums = AlbumList.Select(x=> Guid.Parse(x.Value)).ToList();
+            try
+            {
+                Settings.People = PeopleList.Select(x => Guid.Parse(x.Value)).ToList();
+                Settings.Albums = AlbumList.Select(x => Guid.Parse(x.Value)).ToList();
+            }
+            catch (Exception ex)
+            {
+                // could not parse 
+                ShowMessageBox(ex.Message, "Error");
+                return;
+            }
 
             Settings.Serialize();
 

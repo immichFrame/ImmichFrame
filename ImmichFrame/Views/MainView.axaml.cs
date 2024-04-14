@@ -3,21 +3,17 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
-using Avalonia.Threading;
 using ImmichFrame.Exceptions;
 using ImmichFrame.Helpers;
 using ImmichFrame.Models;
 using ImmichFrame.ViewModels;
-using MsBox.Avalonia;
-using MsBox.Avalonia.Enums;
 using System;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace ImmichFrame.Views;
 
-public partial class MainView : UserControl
+public partial class MainView : BaseView
 {
     System.Threading.Timer? timerImageSwitcher;
     System.Threading.Timer? timerLiveTime;
@@ -189,21 +185,5 @@ public partial class MainView : UserControl
     {
         ExitView();
         Environment.Exit(0);
-    }
-    private Task ShowMessageBoxFromThread(string message)
-    {
-        var tcs = new TaskCompletionSource<bool>();
-        Dispatcher.UIThread.Post(async () =>
-            {
-                await ShowMessageBox(message);
-                tcs.SetResult(true);
-            });
-        return tcs.Task;
-    }
-
-    private async Task ShowMessageBox(string message, string title = "")
-    {
-        var box = MessageBoxManager.GetMessageBoxStandard(title, message, ButtonEnum.Ok);
-        await box.ShowAsPopupAsync(this);
     }
 }

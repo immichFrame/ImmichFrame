@@ -1,11 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
+using System.Threading.Tasks;
 
 namespace ImmichFrame.ViewModels;
 
 public class ViewModelBase : ObservableObject
 {
-
+    public Func<string, string, Task> ShowMessageBoxFromThread;
+    public Func<string, string, Task> ShowMessageBox;
 }
 
 public class NavigatableViewModelBase : ViewModelBase

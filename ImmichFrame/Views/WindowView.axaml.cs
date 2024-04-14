@@ -3,7 +3,7 @@ using ImmichFrame.ViewModels;
 
 namespace ImmichFrame.Views
 {
-    public partial class WindowView : UserControl
+    public partial class WindowView : BaseView
     {
         public WindowView()
         {
