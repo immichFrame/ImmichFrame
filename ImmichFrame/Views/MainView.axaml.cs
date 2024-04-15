@@ -3,20 +3,17 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
-using Avalonia.Threading;
 using ImmichFrame.Exceptions;
 using ImmichFrame.Helpers;
 using ImmichFrame.Models;
 using ImmichFrame.ViewModels;
-using MsBox.Avalonia;
-using MsBox.Avalonia.Enums;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace ImmichFrame.Views;
 
-public partial class MainView : UserControl
+public partial class MainView : BaseView
 {
     System.Threading.Timer? timerImageSwitcher;
     System.Threading.Timer? timerLiveTime;
@@ -47,9 +44,12 @@ public partial class MainView : UserControl
                     insetsManager.IsSystemBarVisible = false;
                 }
             }
-            _viewModel = this.DataContext as MainViewModel;
+            _viewModel = (this.DataContext as MainViewModel)!;
 
             _appSettings = _viewModel.Settings;
+
+            if (_appSettings == null)
+                throw new SettingsNotValidException("Settings could not be parsed.");
 
             ShowSplash();
 
@@ -170,8 +170,11 @@ public partial class MainView : UserControl
     }
     public void btnSettings_Click(object? sender, RoutedEventArgs args)
     {
-        ExitView();
-        ((NavigatableViewModelBase)this.DataContext).Navigate(new SettingsViewModel());
+        if (!Settings.IsFromXmlFile)
+        {
+            ExitView();
+            ((NavigatableViewModelBase)this.DataContext).Navigate(new SettingsViewModel());
+        }
     }
 
     private void ExitView()
@@ -185,21 +188,5 @@ public partial class MainView : UserControl
     {
         ExitView();
         Environment.Exit(0);
-    }
-    private Task ShowMessageBoxFromThread(string message)
-    {
-        var tcs = new TaskCompletionSource<bool>();
-        Dispatcher.UIThread.Post(async () =>
-            {
-                await ShowMessageBox(message);
-                tcs.SetResult(true);
-            });
-        return tcs.Task;
-    }
-
-    private async Task ShowMessageBox(string message, string title = "")
-    {
-        var box = MessageBoxManager.GetMessageBoxStandard(title, message, ButtonEnum.Ok);
-        await box.ShowAsPopupAsync(this);
     }
 }

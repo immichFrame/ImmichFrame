@@ -1,8 +1,6 @@
 ﻿using ImmichFrame.Models;
 using OpenWeatherMap;
 using OpenWeatherMap.Models;
-using System;
-using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace ImmichFrame.Helpers

@@ -9,17 +9,7 @@
 	<Design.DataContext>
 		<vm:MainViewModel />
 	</Design.DataContext>
-	<Grid>
-		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="1*" />
-			<ColumnDefinition Width="1*" />
-			<ColumnDefinition Width="1*" />
-		</Grid.ColumnDefinitions>
-		<Grid.RowDefinitions>
-			<RowDefinition Height="1*" />
-			<RowDefinition Height="1*" />
-			<RowDefinition Height="1*" />
-		</Grid.RowDefinitions>
+	<Grid ColumnDefinitions="*, *, *" RowDefinitions="*, *, *">
 		<TransitioningContentControl x:Name="transitioningControl" Content="{Binding Images}" Grid.ColumnSpan="3" Grid.RowSpan="3" >
 			<TransitioningContentControl.PageTransition>
 				<CrossFade Duration="0:00:01.000" />

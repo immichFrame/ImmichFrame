@@ -41,33 +41,31 @@ public class Settings
     public float WeatherLat => !string.IsNullOrWhiteSpace(WeatherLatLong) ? float.Parse(WeatherLatLong!.Split(',')[0]) : 0f;
     public float WeatherLong => !string.IsNullOrWhiteSpace(WeatherLatLong) ? float.Parse(WeatherLatLong!.Split(',')[1]) : 0f;
     public string Language { get; set; } = "en";
+    public static string XmlSettingsPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Settings.xml");
+    public static bool IsFromXmlFile => File.Exists(XmlSettingsPath);
 
     private static Settings? _settings;
     public static Settings CurrentSettings
     {
         get
         {
-            if (PlatformDetector.IsAndroid())
+            if (_settings == null)
             {
-                if (_settings == null)
+                if (Settings.IsFromXmlFile)
+                {
+                    _settings = ParseFromXml();
+
+                    _settings.Validate();
+
+                }
+                else
                 {
                     _settings = ParseFromAppSettings();
 
                     _settings.Validate();
                 }
-                return _settings;
             }
-            else
-            {
-                if (_settings == null)
-                {
-                    _settings = ParseFromXml();
-
-                    _settings.Validate();
-                }
-                return _settings;
-            }
-
+            return _settings;
         }
     }
 
@@ -75,61 +73,41 @@ public class Settings
     {
         this.Validate();
 
-        if (PlatformDetector.IsAndroid())
-        {
-            // settings
-            var defaultSettings = Properties.Settings.Default;
+        // settings
+        var defaultSettings = Properties.Settings.Default;
 
-            defaultSettings.ImmichServerUrl = this.ImmichServerUrl;
-            defaultSettings.ApiKey = this.ApiKey;
-            defaultSettings.Interval = this.Interval;
-            defaultSettings.DownloadImages = this.DownloadImages;
-            defaultSettings.ShowMemories = this.ShowMemories;
-            defaultSettings.RenewImagesDuration = this.RenewImagesDuration;
-            defaultSettings.ShowClock = this.ShowClock;
-            defaultSettings.ClockFontSize = this.ClockFontSize;
-            defaultSettings.ClockFormat = this.ClockFormat;
-            defaultSettings.ShowPhotoDate = this.ShowPhotoDate;
-            defaultSettings.PhotoDateFontSize = this.PhotoDateFontSize;
-            defaultSettings.PhotoDateFormat = this.PhotoDateFormat;
-            defaultSettings.ShowImageDesc = this.ShowImageDesc;
-            defaultSettings.ImageDescFontSize = this.ImageDescFontSize;
-            defaultSettings.WeatherFontSize = this.WeatherFontSize;
-            defaultSettings.UnitSystem = this.UnitSystem?.ToString() ?? OpenWeatherMap.UnitSystem.Imperial;
-            defaultSettings.WeatherLatLong = this.WeatherLatLong;
-            defaultSettings.WeatherApiKey = this.WeatherApiKey;
+        defaultSettings.ImmichServerUrl = this.ImmichServerUrl;
+        defaultSettings.ApiKey = this.ApiKey;
+        defaultSettings.Interval = this.Interval;
+        defaultSettings.DownloadImages = this.DownloadImages;
+        defaultSettings.ShowMemories = this.ShowMemories;
+        defaultSettings.RenewImagesDuration = this.RenewImagesDuration;
+        defaultSettings.ShowClock = this.ShowClock;
+        defaultSettings.ClockFontSize = this.ClockFontSize;
+        defaultSettings.ClockFormat = this.ClockFormat;
+        defaultSettings.ShowPhotoDate = this.ShowPhotoDate;
+        defaultSettings.PhotoDateFontSize = this.PhotoDateFontSize;
+        defaultSettings.PhotoDateFormat = this.PhotoDateFormat;
+        defaultSettings.ShowImageDesc = this.ShowImageDesc;
+        defaultSettings.ImageDescFontSize = this.ImageDescFontSize;
+        defaultSettings.WeatherFontSize = this.WeatherFontSize;
+        defaultSettings.UnitSystem = this.UnitSystem?.ToString() ?? OpenWeatherMap.UnitSystem.Imperial;
+        defaultSettings.WeatherLatLong = this.WeatherLatLong;
+        defaultSettings.WeatherApiKey = this.WeatherApiKey;
+        defaultSettings.Language = this.Language;
 
-            var albums = new StringCollection();
-            if(this.Albums?.Any() ?? false)
-                albums.AddRange(this.Albums.Select(x => x.ToString()).ToArray());
-            defaultSettings.Albums = albums;
+        var albums = new StringCollection();
+        if (this.Albums?.Any() ?? false)
+            albums.AddRange(this.Albums.Select(x => x.ToString()).ToArray());
+        defaultSettings.Albums = albums;
 
-            var people = new StringCollection();
-            if (this.People?.Any() ?? false)
-                people.AddRange(this.People.Select(x => x.ToString()).ToArray());
-            defaultSettings.People = people;
-            defaultSettings.TransitionDuration = this.TransitionDuration;
+        var people = new StringCollection();
+        if (this.People?.Any() ?? false)
+            people.AddRange(this.People.Select(x => x.ToString()).ToArray());
+        defaultSettings.People = people;
+        defaultSettings.TransitionDuration = this.TransitionDuration;
 
-            defaultSettings.Save();
-        }
-        else
-        {
-            // xml
-            XmlSerializer xsSubmit = new XmlSerializer(typeof(Settings));
-            var xml = "";
-
-            using (var sww = new StringWriter())
-            {
-                using (XmlWriter writer = XmlWriter.Create(sww))
-                {
-                    xsSubmit.Serialize(writer, this);
-                    xml = sww.ToString();
-                }
-            }
-
-            // TODO: some error handling with try catch?
-            File.WriteAllText(AppDomain.CurrentDomain.BaseDirectory + @"Settings.xml", xml);
-        }
+        defaultSettings.Save();
     }
 
     private void Validate()
@@ -143,7 +121,7 @@ public class Settings
 
     private static Settings ParseFromXml()
     {
-        var xml = File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + @"Settings.xml");
+        var xml = File.ReadAllText(Settings.XmlSettingsPath);
 
         XElement doc;
         try

@@ -1,8 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using ImmichFrame.Exceptions;
 using ImmichFrame.Models;
-using System;
-using static ImmichFrame.ViewModels.NavigatableViewModelBase;
 
 namespace ImmichFrame.ViewModels
 {
@@ -16,7 +14,7 @@ namespace ImmichFrame.ViewModels
 
                 ContentViewModel = new MainViewModel();
             }
-            catch (SettingsNotValidException ex)
+            catch (SettingsNotValidException)
             {
                 ContentViewModel = new SettingsViewModel();
             }

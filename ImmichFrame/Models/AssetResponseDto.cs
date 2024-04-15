@@ -12,7 +12,7 @@ namespace ImmichFrame.Models;
 public partial class AssetResponseDto
 {
     [JsonIgnore]
-    private string _imageDesc;
+    private string? _imageDesc;
 
     [JsonIgnore]
     public string ImageDesc

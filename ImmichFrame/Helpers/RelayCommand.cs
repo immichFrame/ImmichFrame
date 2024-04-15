@@ -7,11 +7,11 @@ namespace ImmichFrame.Helpers
     {
         private readonly Action _action;
 
-        public bool CanExecute(object parameter) => true;
+        public bool CanExecute(object? parameter) => true;
 
-        public void Execute(object parameter) => _action();
+        public void Execute(object? parameter) => _action();
 
-        public event EventHandler CanExecuteChanged;
+        public event EventHandler? CanExecuteChanged;
 
         public RelayCommand(Action action)
         {
@@ -26,15 +26,18 @@ namespace ImmichFrame.Helpers
             _action = action;
         }
 
-        public bool CanExecute(object parameter)
+        public bool CanExecute(object? parameter)
         {
             return true;
         }
 
-        public event EventHandler CanExecuteChanged;
+        public event EventHandler? CanExecuteChanged;
 
-        public void Execute(object parameter)
+        public void Execute(object? parameter)
         {
+            if (parameter == null)
+                return;
+
             _action(parameter);
         }
     }
