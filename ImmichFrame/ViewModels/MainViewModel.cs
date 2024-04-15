@@ -23,6 +23,9 @@ public partial class MainViewModel : NavigatableViewModelBase
     }
     public async Task SetImage(AssetResponseDto asset)
     {
+        if (asset.ThumbhashImage == null)
+            return;
+
         using (Stream tmbStream = asset.ThumbhashImage)
         using (Stream imgStream = await asset.AssetImage)
         {
