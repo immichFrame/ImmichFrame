@@ -135,6 +135,10 @@
 					<TextBlock Text="ShowWeather"/>
 					<CheckBox IsChecked="{Binding Settings.ShowWeather}"/>
 				</StackPanel>
+        <StackPanel>
+          <TextBlock Text="WeatherFontSize"/>
+          <TextBox Text="{Binding Settings.WeatherFontSize}"/>
+        </StackPanel>
 				<StackPanel>
 					<TextBlock Text="UnitSystem"/>
 					<TextBox Text="{Binding Settings.UnitSystem}"/>
