@@ -31,10 +31,13 @@ public partial class AssetResponseDto
     }
 
     [JsonIgnore]
-    public Stream ThumbhashImage => GetThumbHashStream();
+    public Stream? ThumbhashImage => GetThumbHashStream();
 
-    private Stream GetThumbHashStream()
+    private Stream? GetThumbHashStream()
     {
+        if (this.Thumbhash == null)
+            return null;
+
         var hash = Convert.FromBase64String(this.Thumbhash);
         var thumbhash = new ThumbHash(hash);
         return ImageHelper.SaveDataUrlToStream(thumbhash.ToDataUrl());
@@ -46,7 +49,7 @@ public partial class AssetResponseDto
     private async Task<Stream> ServeImage()
     {
         string localPath;
-        if(PlatformDetector.IsDesktop())
+        if (PlatformDetector.IsDesktop())
         {
             localPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Immich_Assets", $"{Id}.{ThumbnailFormat.JPEG}");
         }

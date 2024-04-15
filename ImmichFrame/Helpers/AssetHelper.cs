@@ -59,8 +59,8 @@ namespace ImmichFrame.Helpers
             }
 
             if (assetsAdded)
-                // return only unique assets, no duplicates
-                return list.DistinctBy(x => x.Id).ToDictionary(x => Guid.Parse(x.Id));
+                // return only unique assets, no duplicates, only with Thumbnail
+                return list.Where(x => x.Thumbhash != null).DistinctBy(x => x.Id).ToDictionary(x => Guid.Parse(x.Id));
 
             return null;
         }
@@ -184,6 +184,12 @@ namespace ImmichFrame.Helpers
 
                     if (randomAssets.Any())
                     {
+                        var asset = randomAssets.First();
+
+                        // do not return with no thumbnail
+                        if (asset.Thumbhash == null)
+                            return await GetRandomAsset();
+
                         return randomAssets.First();
                     }
                 }
