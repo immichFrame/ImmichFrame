@@ -20,6 +20,7 @@ namespace ImmichFrame.ViewModels
         [ObservableProperty]
         public Settings settings;
         public ICommand SaveCommand { get; set; }
+        public ICommand CancelCommand { get; set; }
         public ICommand AddPersonCommand { get; set; }
         public ICommand RemovePersonCommand { get; set; }
         public ICommand AddAlbumCommand { get; set; }
@@ -37,6 +38,7 @@ namespace ImmichFrame.ViewModels
             }
 
             SaveCommand = new RelayCommand(SaveAction);
+            CancelCommand = new RelayCommand(CancelAction);
             AddPersonCommand = new RelayCommand(AddPersonAction);
             RemovePersonCommand = new RelayCommandParams(RemovePersonAction);
             AddAlbumCommand = new RelayCommand(AddAlbumAction);
@@ -69,6 +71,19 @@ namespace ImmichFrame.ViewModels
             AlbumList?.Remove(item);
         }
 
+        public void CancelAction()
+        {
+            try
+            {
+                var settings = Settings.CurrentSettings;
+                Navigate(new MainViewModel());
+            }
+            catch (SettingsNotValidException)
+            {
+                ShowMessageBox("Please provide valid settings", "Invalid Settings");
+            }
+        }
+
         public void SaveAction()
         {
             // TODO: Validation
@@ -78,6 +93,8 @@ namespace ImmichFrame.ViewModels
                 Settings.Albums = AlbumList.Select(x => Guid.Parse(x.Value)).ToList();
 
                 Settings.Serialize();
+
+                var settings = Settings.CurrentSettings;
             }
             catch (Exception ex)
             {

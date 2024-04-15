@@ -63,7 +63,6 @@ public class Settings
                     _settings = ParseFromAppSettings();
 
                     _settings.Validate();
-
                 }
             }
             return _settings;

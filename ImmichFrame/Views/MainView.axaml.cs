@@ -48,6 +48,9 @@ public partial class MainView : BaseView
 
             _appSettings = _viewModel.Settings;
 
+            if (_appSettings == null)
+                throw new SettingsNotValidException("Settings could not be parsed.");
+
             ShowSplash();
 
             ShowNextImage();
