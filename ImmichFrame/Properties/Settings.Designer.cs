@@ -283,6 +283,6 @@ namespace ImmichFrame.Properties {
             set {
                 this["Language"] = value;
             }
-        }        
+        }
     }
 }

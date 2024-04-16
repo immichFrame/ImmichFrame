@@ -33,7 +33,7 @@ public class Settings
     public string? PhotoDateFormat { get; set; } = "MM/dd/yyyy";
     public bool ShowImageDesc { get; set; } = true;
     public int ImageDescFontSize { get; set; } = 36;
-    bool ShowWeather => !string.IsNullOrWhiteSpace(WeatherApiKey);
+    public bool ShowWeather => !string.IsNullOrWhiteSpace(WeatherApiKey);
     public int WeatherFontSize { get; set; } = 36;
     public string? UnitSystem { get; set; } = OpenWeatherMap.UnitSystem.Imperial;
     public string? WeatherLatLong { get; set; } = "40.7128,74.0060";
