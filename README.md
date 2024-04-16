@@ -66,7 +66,7 @@ ImmichFrame is easy to run on your desired plattform.
     <ImmichServerUrl>http://yourdomain.com</ImmichServerUrl>
    ```
 4. Change `<ApiKey>`. Read more about how to obtain an [Immich API key][immich-api-url]
-   ```xP
+   ```xml
     <ApiKey>YourApiKey</ApiKey>
    ```
 5. *Optional:* Choose albums you would like to display
