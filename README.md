@@ -23,7 +23,7 @@
     <br />
     <a href="https://github.com/3rob3/ImmichFrame/issues">Report Bug</a>
     ·
-    <a href="https://github.com/3rob3/immichFrame/issues">Request Feature</a>
+    <a href="https://github.com/3rob3/ImmichFrame/issues">Request Feature</a>
   </p>
 </div>
 
