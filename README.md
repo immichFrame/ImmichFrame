@@ -18,23 +18,23 @@
   <p align="center">
     An awesome way to display your photos as an digital photo frame
     <br />
-    <a href="https://immich.app/"><strong>Explore Immich »</strong></a>
+    <a href="https://immich.app/"><strong>Explore immich »</strong></a>
     <br />
     <br />
     <a href="https://github.com/3rob3/ImmichFrame/issues">Report Bug</a>
     ·
-    <a href="https://github.com/3rob3/ImmichFrame/issues">Request Feature</a>
+    <a href="https://github.com/3rob3/immichFrame/issues">Request Feature</a>
   </p>
 </div>
 
 ## ⚠️ Disclaimer
 
-**This project is not affiliated with [Immich][immich-github-url]!**
+**This project is not affiliated with [immich][immich-github-url]!**
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-This project is a digital photo frame application that interfaces with your [Immich][immich-github-url] server. It is a cross-platform C# .NET 7 project that currently supports Linux, macOS, and Windows.
+This project is a digital photo frame application that interfaces with your [immich][immich-github-url] server. It is a cross-platform C# .NET 7 project that currently supports Linux, macOS, and Windows.
 
 ### Built With
 
@@ -51,7 +51,7 @@ ImmichFrame is easy to run on your desired plattform.
 ### Prerequisites
 
 
-- A set up and functioning Immich server that is accessible by the network of the ImmichFrame device.
+- A set up and functioning immich server that is accessible by the network of the ImmichFrame device.
 
 
 ### Installation
@@ -65,7 +65,7 @@ ImmichFrame is easy to run on your desired plattform.
    ```xml
     <ImmichServerUrl>http://yourdomain.com</ImmichServerUrl>
    ```
-4. Change `<ApiKey>`. Read more about how to obtain an [Immich API key][immich-api-url]
+4. Change `<ApiKey>`. Read more about how to obtain an [immich API key][immich-api-url]
    ```xml
     <ApiKey>YourApiKey</ApiKey>
    ```
@@ -146,7 +146,7 @@ TODO
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
-* BIG thanks to the [Immich team][immich-github-url] for creating an awesome tool
+* BIG thanks to the [immich team][immich-github-url] for creating an awesome tool
 * [Img Shields](https://shields.io)
 * [GitHub Pages](https://pages.github.com)
 
