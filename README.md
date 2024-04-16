@@ -18,7 +18,7 @@
   <p align="center">
     An awesome way to display your photos as an digital photo frame
     <br />
-    <a href="https://github.com/immich-app/immich"><strong>Explore immich »</strong></a>
+    <a href="https://immich.app/"><strong>Explore Immich »</strong></a>
     <br />
     <br />
     <a href="https://github.com/3rob3/ImmichFrame/issues">Report Bug</a>
@@ -29,12 +29,12 @@
 
 ## ⚠️ Disclaimer
 
-**This project is not affiliated with [immich][immich-github-url]!**
+**This project is not affiliated with [Immich][immich-github-url]!**
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-This project is a digital photo frame application that interfaces with your [immich][immich-github-url] server. It is a cross-platform C# .NET 7 project that currently supports Linux, macOS, and Windows.
+This project is a digital photo frame application that interfaces with your [Immich][immich-github-url] server. It is a cross-platform C# .NET 7 project that currently supports Linux, macOS, and Windows.
 
 ### Built With
 
@@ -51,7 +51,7 @@ ImmichFrame is easy to run on your desired plattform.
 ### Prerequisites
 
 
-- A set up and functioning immich server
+- A set up and functioning Immich server that is accessible by the network of the ImmichFrame device.
 
 
 ### Installation
@@ -59,14 +59,14 @@ ImmichFrame is easy to run on your desired plattform.
 > [!IMPORTANT]  
 > Make sure to copy the **Settings.example.xml** and name it **Settings.xml**
 
-1. Get the latest release from the [release page][releases-url] and unzip
+1. Get the latest stable release from the [release page][releases-url] and unzip
 2. Rename the `Settings.example.xml` file to `Settings.xml`
 3. Change `<ImmichServerUrl>` to your domain or local ip
    ```xml
     <ImmichServerUrl>http://yourdomain.com</ImmichServerUrl>
    ```
-4. Change `<ApiKey>`. Read more about immich ApiKey here: https://immich.app/docs/features/command-line-interface#obtain-the-api-key
-   ```xml
+4. Change `<ApiKey>`. Read more about how to obtain an [Immich API key][immich-api-url]
+   ```xP
     <ApiKey>YourApiKey</ApiKey>
    ```
 5. *Optional:* Choose albums you would like to display
@@ -88,31 +88,24 @@ ImmichFrame is easy to run on your desired plattform.
 <!-- USAGE EXAMPLES -->
 ## Usage
 ### Linux
-- GUI - Double-click Immich_Frame.
-- CLI - CD into folder, and launch with "./Immich_Frame".
-- SSH - CD into folder, and launch with "DISPLAY=:0.0 ./Immich_Frame".
+- GUI - Double-click `Immich_Frame`.
+- CLI - CD into folder, and launch with `./Immich_Frame`.
+- SSH - CD into folder, and launch with `DISPLAY=:0.0 ./Immich_Frame`.
 ### Windows
-- Double-click Immich_Frame.
-- Screensaver - Rename Immich_Frame.exe to Immich_Frame.scr. Right-click-Install. Configure screensaver settings and apply. Note: you will still have to click middle/bottom in the app to exit screensaver.
+- Double-click `Immich_Frame.exe`.
+- Screensaver - Rename `Immich_Frame.exe` to `Immich_Frame.scr`. Right-click &rarr; Install. Configure screensaver settings and apply.
+  - You will still have to click middle/bottom in the app to exit screensaver.
 ### MacOS
-- Double-click Immich_Frame. Note: If nothing happens, right-click-open with-Utilities-Terminal. Check Always Open With.
+- Double-click `Immich_Frame`. Note: If nothing happens, right-click &rarr; open with &rarr; Utilities &rarr; Terminal. Check Always Open With.
 
 <!-- INTERACTIONS -->
 ## Interactions
-The screen is configured in a 3x3 gird
+The screen is configured in a 3x3 gird. You can touch or click to:
 
 |   -   |   -   |   -   |
 | :---: | :---: | :---: |
-| **A** |   -   | **B** |
-|   -   | **C** |   -   |
-
-Touch or click to:
-
-A. Go back to last image
-
-B. Next random image
-
-C. Quit
+| **Prev<br>image** |   -   | **Next<br>image** |
+|   -   | **Quit** |   -   |
 
 <!-- ROADMAP -->
 ## Roadmap
@@ -153,9 +146,7 @@ TODO
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
-BIG thanks to the [immich][immich-github-url]-team for creating an awesome tool
-
-* [immich][immich-github-url]
+* BIG thanks to the [Immich team][immich-github-url] for creating an awesome tool
 * [Img Shields](https://shields.io)
 * [GitHub Pages](https://pages.github.com)
 
@@ -177,9 +168,10 @@ BIG thanks to the [immich][immich-github-url]-team for creating an awesome tool
 [issues-url]: https://github.com/3rob3/ImmichFrame/issues
 [license-shield]: https://img.shields.io/github/license/3rob3/ImmichFrame.svg?style=for-the-badge
 [license-url]: https://github.com/3rob3/ImmichFrame/blob/master/LICENSE.txt
-[releases-url]: https://github.com/3rob3/ImmichFrame/releases
+[releases-url]: https://github.com/3rob3/ImmichFrame/releases/latest
 [immich-github-url]: https://github.com/immich-app/immich
 [pope-screenshot]: https://github.com/3rob3/ImmichFrame/assets/156599986/9b8a899c-c012-4262-b02c-59d5e011dbd7
 [beach-screenshot]: https://github.com/3rob3/ImmichFrame/assets/156599986/a21a28d3-1111-4f35-8d4b-9d6ece84aac1
 [Avalonia]: https://img.shields.io/badge/avalonia-purple?style=for-the-badge&logo=avalonia&logoColor=white
 [Avalonia-url]: https://docs.avaloniaui.net/docs/welcome
+[immich-api-url]: https://immich.app/docs/features/command-line-interface#obtain-the-api-key
