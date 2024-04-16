@@ -33,7 +33,7 @@ public class Settings
     public string? PhotoDateFormat { get; set; } = "MM/dd/yyyy";
     public bool ShowImageDesc { get; set; } = true;
     public int ImageDescFontSize { get; set; } = 36;
-    public bool ShowWeather { get; set; } = true;
+    bool ShowWeather => !string.IsNullOrWhiteSpace(WeatherApiKey);
     public int WeatherFontSize { get; set; } = 36;
     public string? UnitSystem { get; set; } = OpenWeatherMap.UnitSystem.Imperial;
     public string? WeatherLatLong { get; set; } = "40.7128,74.0060";
@@ -90,7 +90,6 @@ public class Settings
         defaultSettings.PhotoDateFormat = this.PhotoDateFormat;
         defaultSettings.ShowImageDesc = this.ShowImageDesc;
         defaultSettings.ImageDescFontSize = this.ImageDescFontSize;
-        defaultSettings.ShowWeather = this.ShowWeather;
         defaultSettings.WeatherFontSize = this.WeatherFontSize;
         defaultSettings.UnitSystem = this.UnitSystem?.ToString() ?? OpenWeatherMap.UnitSystem.Imperial;
         defaultSettings.WeatherLatLong = this.WeatherLatLong;
@@ -252,7 +251,6 @@ public class Settings
                 case "ShowMemories":
                 case "ShowClock":
                 case "ShowPhotoDate":
-                case "ShowWeather":
                 case "ShowImageDesc":
                     if (!bool.TryParse(value.ToString(), out var boolValue))
                         throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. ('{value}')");
