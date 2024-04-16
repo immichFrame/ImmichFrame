@@ -1,4 +1,5 @@
 ﻿using ImmichFrame.Models;
+using Microsoft.Extensions.Options;
 using OpenWeatherMap;
 using OpenWeatherMap.Models;
 using System.Threading.Tasks;
@@ -7,18 +8,18 @@ namespace ImmichFrame.Helpers
 {
     public class WeatherHelper
     {
-        private static readonly OpenWeatherMapOptions Options = new OpenWeatherMapOptions
-        {
-            ApiKey = Settings.CurrentSettings.WeatherApiKey,
-            UnitSystem = Settings.CurrentSettings.UnitSystem,
-            Language = Settings.CurrentSettings.Language,
-        };
         public static Task<WeatherInfo?> GetWeather()
         {
             var settings = Settings.CurrentSettings;
-            return GetWeather(settings.WeatherLat, settings.WeatherLong);
+            OpenWeatherMapOptions options = new OpenWeatherMapOptions
+            {
+                ApiKey = Settings.CurrentSettings.WeatherApiKey,
+                UnitSystem = Settings.CurrentSettings.UnitSystem,
+                Language = Settings.CurrentSettings.Language,
+            };
+            return GetWeather(settings.WeatherLat, settings.WeatherLong, options);
         }
-        public static async Task<WeatherInfo?> GetWeather(double latitude, double longitude)
+        public static async Task<WeatherInfo?> GetWeather(double latitude, double longitude, OpenWeatherMapOptions Options)
         {
             try
             {

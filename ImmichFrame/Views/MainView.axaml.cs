@@ -29,6 +29,7 @@ public partial class MainView : BaseView
         InitializeComponent();
         _appSettings = new Settings();
         _assetHelper = new AssetHelper();
+        _viewModel = new MainViewModel();
         this.Loaded += OnLoaded;
     }
     private async void OnLoaded(object? sender, RoutedEventArgs e)
@@ -173,7 +174,7 @@ public partial class MainView : BaseView
         if (!Settings.IsFromXmlFile)
         {
             ExitView();
-            ((NavigatableViewModelBase)this.DataContext).Navigate(new SettingsViewModel());
+            ((NavigatableViewModelBase)this.DataContext!).Navigate(new SettingsViewModel());
         }
     }
 
