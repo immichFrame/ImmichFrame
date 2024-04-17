@@ -25,7 +25,7 @@ namespace ImmichFrame.ViewModels
         [ObservableProperty]
         private NavigatableViewModelBase contentViewModel;
 
-        public void Navigate(object sender, NavigatedEventArgs e)
+        private void Navigate(object? sender, NavigatedEventArgs e)
         {
             this.ContentViewModel.Navigated -= Navigate;
             ContentViewModel = e.ViewModel;
