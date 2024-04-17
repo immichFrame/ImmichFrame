@@ -50,12 +50,13 @@ public partial class MainView : BaseView
             if (_appSettings == null)
                 throw new SettingsNotValidException("Settings could not be parsed.");
 
-            await _viewModel.ShowNextImage();
 
             if (transitioningControl.PageTransition is CrossFade crossFade)
             {
                 crossFade.Duration = TimeSpan.FromSeconds(_appSettings.TransitionDuration);
             }
+
+            await _viewModel.ShowNextImage();
 
             _viewModel.TimerEnabled = true;
             timerImageSwitcher = new System.Threading.Timer(_viewModel.NextImageTick, null, 0, _appSettings.Interval * 1000);

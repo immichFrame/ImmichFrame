@@ -90,6 +90,7 @@ public partial class MainViewModel : NavigatableViewModelBase
         ResetTimer?.Invoke(this, new EventArgs());
         await ShowNextImage();
     }
+
     public async Task ShowNextImage()
     {
         try
@@ -117,6 +118,11 @@ public partial class MainViewModel : NavigatableViewModelBase
     }
 
     public async void PreviousImageAction()
+    {
+        ResetTimer?.Invoke(this, new EventArgs());
+        await ShowPreviousImage();
+    }
+    public async Task ShowPreviousImage()
     {
         try
         {
