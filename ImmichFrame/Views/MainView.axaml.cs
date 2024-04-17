@@ -173,7 +173,7 @@ public partial class MainView : BaseView
         if (!Settings.IsFromXmlFile)
         {
             ExitView();
-            ((NavigatableViewModelBase)this.DataContext).Navigate(new SettingsViewModel());
+            ((NavigatableViewModelBase)this.DataContext!).Navigate(new SettingsViewModel());
         }
     }
 

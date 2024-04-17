@@ -131,10 +131,6 @@
 					<TextBlock Text="ImageDescFontSize"/>
 					<TextBox Text="{Binding Settings.ImageDescFontSize}"/>
 				</StackPanel>
-				<StackPanel>
-					<TextBlock Text="ShowWeather"/>
-					<CheckBox IsChecked="{Binding Settings.ShowWeather}"/>
-				</StackPanel>
         <StackPanel>
           <TextBlock Text="WeatherFontSize"/>
           <TextBox Text="{Binding Settings.WeatherFontSize}"/>

@@ -56,7 +56,7 @@ namespace ImmichFrame.ViewModels
 
         public void RemovePersonAction(object param)
         {
-            var item = PeopleList.First(x => x.Id == Guid.Parse(param.ToString()));
+            var item = PeopleList.First(x => x.Id == Guid.Parse(param.ToString()!));
             PeopleList?.Remove(item);
         }
 
@@ -67,7 +67,7 @@ namespace ImmichFrame.ViewModels
 
         public void RemoveAlbumAction(object param)
         {
-            var item = AlbumList.First(x => x.Id == Guid.Parse(param.ToString()));
+            var item = AlbumList.First(x => x.Id == Guid.Parse(param.ToString()!));
             AlbumList?.Remove(item);
         }
 

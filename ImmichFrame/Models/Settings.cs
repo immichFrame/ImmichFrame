@@ -209,7 +209,7 @@ public class Settings
             switch (SettingsValue.Key)
             {
                 case "ImmichServerUrl":
-                    var url = value.ToString().TrimEnd('/');
+                    var url = value.ToString()!.TrimEnd('/');
                     // Match URL or IP
                     if (!Regex.IsMatch(url, @"^(https?:\/\/)?(([a-zA-Z0-9\.\-_]+(\.[a-zA-Z]{2,})+)|(\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b))(\:\d{1,5})?$"))
                         throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. (' {value} ')");
@@ -263,14 +263,14 @@ public class Settings
                     property.SetValue(settings, value);
                     break;
                 case "UnitSystem":
-                    if (!Regex.IsMatch(value.ToString(), @"^(?i)(metric|imperial)$"))
+                    if (!Regex.IsMatch(value.ToString()!, @"^(?i)(metric|imperial)$"))
                         throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. ('{value}')");
-                    value = value.ToString().ToLower() == "metric" ? OpenWeatherMap.UnitSystem.Metric : OpenWeatherMap.UnitSystem.Imperial;
+                    value = value.ToString()!.ToLower() == "metric" ? OpenWeatherMap.UnitSystem.Metric : OpenWeatherMap.UnitSystem.Imperial;
                     property.SetValue(settings, value);
                     break;
                 case "WeatherLatLong":
                     // Regex match Lat/Lon
-                    if (!Regex.IsMatch(value.ToString(), @"^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$"))
+                    if (!Regex.IsMatch(value.ToString()!, @"^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$"))
                         throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. ('{value}')");
                     property.SetValue(settings, value);
                     break;

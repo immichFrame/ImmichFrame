@@ -60,7 +60,7 @@ public partial class AssetResponseDto
         var localDir = Path.GetDirectoryName(localPath);
         if (!Directory.Exists(localDir))
         {
-            Directory.CreateDirectory(localDir);
+            Directory.CreateDirectory(localDir!);
         }
 
         if (File.Exists(localPath))
