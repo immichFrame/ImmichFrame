@@ -14,13 +14,11 @@ public class NavigatableViewModelBase : ViewModelBase
 {
     public virtual void Navigate(NavigatableViewModelBase viewModel)
     {
-        Disposed?.Invoke(this, new EventArgs());
         Navigated?.Invoke(this, new NavigatedEventArgs(viewModel));
     }
 
     public delegate void NavigatedEventHandler(object sender, NavigatedEventArgs e);
     public event NavigatedEventHandler? Navigated;
-    public event EventHandler? Disposed;
 }
 public class NavigatedEventArgs : EventArgs
 {
