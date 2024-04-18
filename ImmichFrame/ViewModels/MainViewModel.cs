@@ -6,6 +6,7 @@ using ImmichFrame.Models;
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -18,6 +19,7 @@ public partial class MainViewModel : NavigatableViewModelBase
     public bool TimerEnabled = false;
     private AssetResponseDto? LastAsset;
     private AssetResponseDto? CurrentAsset;
+    private PreloadedAsset? NextAsset;
     private AssetHelper _assetHelper;
 
     public ICommand NextImageCommand { get; set; }
@@ -40,13 +42,19 @@ public partial class MainViewModel : NavigatableViewModelBase
             Image = image
         };
     }
-    public async Task SetImage(AssetResponseDto asset)
+
+    public async Task SetImage(PreloadedAsset asset)
+    {
+        await SetImage(asset.Asset, asset.Image);
+    }
+
+    public async Task SetImage(AssetResponseDto asset, Stream? preloadedAsset = null)
     {
         if (asset.ThumbhashImage == null)
             return;
 
         using (Stream tmbStream = asset.ThumbhashImage)
-        using (Stream imgStream = await asset.AssetImage)
+        using (Stream imgStream = preloadedAsset ?? await asset.AssetImage)
         {
             Images = new UiImage
             {
@@ -88,7 +96,9 @@ public partial class MainViewModel : NavigatableViewModelBase
     public async void NextImageAction()
     {
         ResetTimer?.Invoke(this, new EventArgs());
-        await ShowNextImage();
+
+        // Needs to run on another task, android does not allow running network stuff on the main thread
+        await Task.Run(ShowNextImage);
     }
 
     public async Task ShowNextImage()
@@ -98,11 +108,37 @@ public partial class MainViewModel : NavigatableViewModelBase
             if (TimerEnabled)
             {
                 LastAsset = CurrentAsset;
-                CurrentAsset = await _assetHelper.GetNextAsset();
-                if (CurrentAsset != null)
+
+                if (NextAsset?.Image == null)
                 {
-                    await SetImage(CurrentAsset);
+                    // Load Image if next image was not ready
+                    CurrentAsset = await _assetHelper.GetNextAsset();
+
+                    if (CurrentAsset != null)
+                    {
+                        await SetImage(CurrentAsset);
+                    }
                 }
+                else
+                {
+                    // Use preloaded asset
+
+                    await SetImage(NextAsset);
+                    CurrentAsset = NextAsset.Asset;
+                    NextAsset = null;
+                }
+
+                // Load next asset without waiting
+                _ = Task.Run(async () =>
+                {
+                    var asset = await _assetHelper.GetNextAsset();
+                    if (asset != null)
+                    {
+                        NextAsset = new PreloadedAsset(asset);
+                        // Preload the actual Image
+                        await NextAsset.Preload();
+                    }
+                });
             }
         }
         catch (AssetNotFoundException)
@@ -154,4 +190,26 @@ public partial class MainViewModel : NavigatableViewModelBase
     private string? weatherCurrent;
     [ObservableProperty]
     private string? weatherTemperature;
+}
+
+public class PreloadedAsset
+{
+    public AssetResponseDto Asset { get; }
+    private Stream? _image;
+    public Stream? Image
+    {
+        get
+        {
+            return _image;
+        }
+    }
+    public PreloadedAsset(AssetResponseDto asset)
+    {
+        Asset = asset;
+    }
+
+    public async Task Preload()
+    {
+        _image = await Asset.AssetImage;
+    }
 }
