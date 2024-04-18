@@ -97,7 +97,7 @@ public partial class MainViewModel : NavigatableViewModelBase
     {
         ResetTimer?.Invoke(this, new EventArgs());
 
-        // Needs to run on another task, android does not allow running network stuff on the main thread
+        // Needs to run on another thread, android does not allow running network stuff on the main thread
         await Task.Run(ShowNextImage);
     }
 
@@ -156,7 +156,9 @@ public partial class MainViewModel : NavigatableViewModelBase
     public async void PreviousImageAction()
     {
         ResetTimer?.Invoke(this, new EventArgs());
-        await ShowPreviousImage();
+
+        // Needs to run on another thread, android does not allow running network stuff on the main thread
+        await Task.Run(ShowPreviousImage);
     }
     public async Task ShowPreviousImage()
     {
