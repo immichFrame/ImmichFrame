@@ -48,9 +48,9 @@
 	<ShowImageDesc>true</ShowImageDesc>
 	<ImageDescFontSize>36</ImageDescFontSize>
 
-	<!--The current weather is only shown, when a WeatherApiKey is specified-->
-	<!--Weather ApiKey from https://openweathermap.org/-->
-	<!--<WeatherApiKey>xxx</WeatherApiKey>-->
+	<!--The current weather is only shown when a WeatherApiKey is specified-->
+	<!--Get your Weather ApiKey from https://openweathermap.org/-->
+	<WeatherApiKey></WeatherApiKey>
 	<WeatherFontSize>12</WeatherFontSize>
 	<!--The temperature units. either metric or imperial-->
 	<UnitSystem>imperial</UnitSystem>

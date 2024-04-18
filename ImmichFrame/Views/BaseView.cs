@@ -4,16 +4,20 @@ using MsBox.Avalonia.Enums;
 using MsBox.Avalonia;
 using System.Threading.Tasks;
 using ImmichFrame.ViewModels;
+using System;
 
 namespace ImmichFrame.Views
 {
-    public class BaseView : UserControl
+    public class BaseView : UserControl, IDisposable
     {
         public BaseView()
         {
             Loaded += (sender, args) =>
             {
                 var vm = (ViewModelBase)DataContext!;
+
+                if (vm is NavigatableViewModelBase navVm)
+                    navVm.Disposed += Dispose;
 
                 vm.ShowMessageBoxFromThread = this.ShowMessageBoxFromThread;
                 vm.ShowMessageBox = this.ShowMessageBox;
@@ -35,6 +39,17 @@ namespace ImmichFrame.Views
         {
             var box = MessageBoxManager.GetMessageBoxStandard(title, message, ButtonEnum.Ok);
             await box.ShowAsPopupAsync(this);
+        }
+
+        public void Dispose(object? sender, EventArgs? e)
+        {
+            Dispose();
+        }
+
+
+        public virtual void Dispose()
+        {
+
         }
     }
 }
