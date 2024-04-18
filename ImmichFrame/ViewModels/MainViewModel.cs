@@ -87,7 +87,7 @@ public partial class MainViewModel : NavigatableViewModelBase
 
     public void NavigateSettingsPageAction()
     {
-        if (!Settings.IsFromXmlFile || true)
+        if (!Settings.IsFromXmlFile)
         {
             Navigate(new SettingsViewModel());
         }
