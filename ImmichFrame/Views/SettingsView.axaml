@@ -25,18 +25,23 @@
 		<Design.DataContext>
 			<vm:SettingsViewModel />
 		</Design.DataContext>
-		<Grid DockPanel.Dock="Bottom" ColumnDefinitions="*,*">
+		<Grid DockPanel.Dock="Bottom" ColumnDefinitions="*,*,*">
 			<Button Grid.Column="0"
-					Content="Cancel"
-					HorizontalAlignment="Stretch"
-					Command="{Binding CancelCommand}"
-					HorizontalContentAlignment="Center"/>
+              Content="Cancel"
+              HorizontalAlignment="Stretch"
+              Command="{Binding CancelCommand}"
+              HorizontalContentAlignment="Center"/>
 			<Button Grid.Column="1"
-					Content="Save"
-					HorizontalAlignment="Stretch"
-					Command="{Binding SaveCommand}"
-					HorizontalContentAlignment="Center"/>
-		</Grid>
+              Content="Save"
+              HorizontalAlignment="Stretch"
+              Command="{Binding SaveCommand}"
+              HorizontalContentAlignment="Center"/>
+      <Button Grid.Column="2"
+              Content="Quit"
+              HorizontalAlignment="Stretch"
+              Command="{Binding QuitCommand}"
+              HorizontalContentAlignment="Center"/>
+    </Grid>
 		<ScrollViewer>
 			<StackPanel Orientation="Vertical" Margin="10">
 				<StackPanel>

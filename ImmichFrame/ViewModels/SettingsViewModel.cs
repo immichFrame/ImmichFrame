@@ -21,6 +21,7 @@ namespace ImmichFrame.ViewModels
         public Settings settings;
         public ICommand SaveCommand { get; set; }
         public ICommand CancelCommand { get; set; }
+        public ICommand QuitCommand { get; set; }
         public ICommand AddPersonCommand { get; set; }
         public ICommand RemovePersonCommand { get; set; }
         public ICommand AddAlbumCommand { get; set; }
@@ -39,6 +40,7 @@ namespace ImmichFrame.ViewModels
 
             SaveCommand = new RelayCommand(SaveAction);
             CancelCommand = new RelayCommand(CancelAction);
+            QuitCommand = new RelayCommand(QuitAction);
             AddPersonCommand = new RelayCommand(AddPersonAction);
             RemovePersonCommand = new RelayCommandParams(RemovePersonAction);
             AddAlbumCommand = new RelayCommand(AddAlbumAction);
@@ -104,6 +106,10 @@ namespace ImmichFrame.ViewModels
             }
 
             Navigate(new MainViewModel());
+        }
+        public void QuitAction()
+        {
+            Environment.Exit(0);
         }
     }
 
