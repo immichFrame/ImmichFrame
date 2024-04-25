@@ -119,9 +119,9 @@ The screen is configured in a 3x3 gird. You can touch or click to:
 - [x] Display Albums
 - [x] Display Memories
 - [x] Android build
+- [x] Add License
 - [ ] Web app
 - [ ] Add Additional Templates w/ Examples
-- [ ] Add License
 
 See the [open issues](https://github.com/3rob3/ImmichFrame/issues) for a full list of proposed features (and known issues).
 
@@ -142,7 +142,7 @@ Don't forget to give the project a star! Thanks again!
 <!-- LICENSE -->
 ## License
 
-TODO
+[GNU General Public License v3.0](LICENSE.txt)
 
 <!-- CONTACT -->
 ## Contact
