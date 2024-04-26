@@ -180,16 +180,14 @@ public partial class MainViewModel : NavigatableViewModelBase
             await ShowMessageBoxFromThread(ex.Message, "");
         }
     }
-    public async void PauseImageAction()
+    public void PauseImageAction()
     {
-        //ResetTimer?.Invoke(this, new EventArgs());
-        await PauseImage();
+        PauseImage();
     }
-    public Task PauseImage()
+    public void PauseImage()
     {
         ImagePaused = !ImagePaused;
         TimerEnabled = !ImagePaused;
-        return Task.CompletedTask;
     }
 
     [ObservableProperty]
