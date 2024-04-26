@@ -17,7 +17,6 @@ public partial class MainViewModel : NavigatableViewModelBase
     public event EventHandler? ResetTimer;
 
     public bool TimerEnabled = false;
-    private bool ImagePaused = false;
     private AssetResponseDto? LastAsset;
     private AssetResponseDto? CurrentAsset;
     private PreloadedAsset? NextAsset;
@@ -190,7 +189,6 @@ public partial class MainViewModel : NavigatableViewModelBase
     {
         ImagePaused = !ImagePaused;
         TimerEnabled = !ImagePaused;
-        ShowPaused = ImagePaused;
         return Task.CompletedTask;
     }
 
@@ -209,7 +207,7 @@ public partial class MainViewModel : NavigatableViewModelBase
     [ObservableProperty]
     private string? weatherTemperature;
     [ObservableProperty]
-    private bool? showPaused = false;
+    private bool imagePaused = false;
 }
 
 public class PreloadedAsset

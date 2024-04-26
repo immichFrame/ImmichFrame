@@ -23,7 +23,7 @@
 				</DataTemplate>
 			</TransitioningContentControl.ContentTemplate>
 		</TransitioningContentControl>
-    <TextBlock x:Name="txtShowPaused" Grid.Column="1" Grid.Row="0" Foreground="Blue" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="10" IsVisible = "{Binding ShowPaused}" Text="Paused..." />
+    <TextBlock x:Name="txtShowPaused" Grid.Column="1" Grid.Row="0" Foreground="Blue" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="10" IsVisible = "{Binding ImagePaused}" Text="Paused..." />
 		<Button x:Name="btnBack" Opacity="0" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Command="{Binding PreviousImageCommand}"/>
 		<Button x:Name="btnNext" Opacity="0" Grid.Column="2" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Command="{Binding NextImageCommand}"/>
     <Button x:Name="btnPause" Opacity="0" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Command="{Binding PauseImageCommand}"/>
