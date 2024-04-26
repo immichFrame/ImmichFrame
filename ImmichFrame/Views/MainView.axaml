@@ -26,7 +26,7 @@
     <TextBlock x:Name="txtShowPaused" Grid.Column="1" Grid.Row="0" Foreground="Blue" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="10" IsVisible = "{Binding ImagePaused}" Text="Paused..." />
 		<Button x:Name="btnBack" Opacity="0" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Command="{Binding PreviousImageCommand}" HotKey="Left"/>
 		<Button x:Name="btnNext" Opacity="0" Grid.Column="2" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Command="{Binding NextImageCommand}" HotKey="Right"/>
-    <Button x:Name="btnPause" Opacity="0" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Command="{Binding PauseImageCommand}" HotKey="Space"/>
+    <Button x:Name="btnPause" Opacity="0" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Command="{Binding PauseImageCommand}" HotKey="Enter"/>
 		<Button x:Name="btnQuit" Opacity="0" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="btnQuit_Click" HotKey="Down"/>
 		<Button x:Name="btnSettings" Opacity="0" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Command="{Binding NavigateSettingsPageCommand}" HotKey="Up"/>
 		<StackPanel Grid.Column="0" Grid.Row="2" Margin="10" VerticalAlignment="Bottom" >
