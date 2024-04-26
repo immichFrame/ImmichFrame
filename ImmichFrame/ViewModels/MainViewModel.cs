@@ -24,6 +24,7 @@ public partial class MainViewModel : NavigatableViewModelBase
 
     public ICommand NextImageCommand { get; set; }
     public ICommand PreviousImageCommand { get; set; }
+    public ICommand PauseImageCommand { get; set; }
     public ICommand NavigateSettingsPageCommand { get; set; }
     public MainViewModel()
     {
@@ -32,6 +33,7 @@ public partial class MainViewModel : NavigatableViewModelBase
 
         NextImageCommand = new RelayCommand(NextImageAction);
         PreviousImageCommand = new RelayCommand(PreviousImageAction);
+        PauseImageCommand = new RelayCommand(PauseImageAction);
         NavigateSettingsPageCommand = new RelayCommand(NavigateSettingsPageAction);
     }
 
@@ -96,7 +98,6 @@ public partial class MainViewModel : NavigatableViewModelBase
     public async void NextImageAction()
     {
         ResetTimer?.Invoke(this, new EventArgs());
-
         // Needs to run on another thread, android does not allow running network stuff on the main thread
         await Task.Run(ShowNextImage);
     }
@@ -107,6 +108,7 @@ public partial class MainViewModel : NavigatableViewModelBase
         {
             if (TimerEnabled)
             {
+
                 LastAsset = CurrentAsset;
 
                 if (NextAsset?.Image == null)
@@ -155,10 +157,12 @@ public partial class MainViewModel : NavigatableViewModelBase
 
     public async void PreviousImageAction()
     {
-        ResetTimer?.Invoke(this, new EventArgs());
-
-        // Needs to run on another thread, android does not allow running network stuff on the main thread
-        await Task.Run(ShowPreviousImage);
+        if (!ImagePaused)
+        {
+            ResetTimer?.Invoke(this, new EventArgs());
+            // Needs to run on another thread, android does not allow running network stuff on the main thread
+            await Task.Run(ShowPreviousImage);
+        }
     }
     public async Task ShowPreviousImage()
     {
@@ -176,7 +180,15 @@ public partial class MainViewModel : NavigatableViewModelBase
             await ShowMessageBoxFromThread(ex.Message, "");
         }
     }
-
+    public void PauseImageAction()
+    {
+        PauseImage();
+    }
+    public void PauseImage()
+    {
+        ImagePaused = !ImagePaused;
+        TimerEnabled = !ImagePaused;
+    }
 
     [ObservableProperty]
     public Settings settings;
@@ -192,6 +204,8 @@ public partial class MainViewModel : NavigatableViewModelBase
     private string? weatherCurrent;
     [ObservableProperty]
     private string? weatherTemperature;
+    [ObservableProperty]
+    private bool imagePaused = false;
 }
 
 public class PreloadedAsset
