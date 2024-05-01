@@ -23,12 +23,12 @@
 				</DataTemplate>
 			</TransitioningContentControl.ContentTemplate>
 		</TransitioningContentControl>
-    <TextBlock x:Name="txtShowPaused" Grid.Column="1" Grid.Row="0" Foreground="Blue" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="10" IsVisible = "{Binding ImagePaused}" Text="Paused..." />
-		<Button x:Name="btnBack" Opacity="0" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Command="{Binding PreviousImageCommand}"/>
-		<Button x:Name="btnNext" Opacity="0" Grid.Column="2" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Command="{Binding NextImageCommand}"/>
-    <Button x:Name="btnPause" Opacity="0" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Command="{Binding PauseImageCommand}"/>
-		<Button x:Name="btnQuit" Opacity="0" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="btnQuit_Click"/>
-		<Button x:Name="btnSettings" Opacity="0" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Command="{Binding NavigateSettingsPageCommand}"/>
+    <TextBlock x:Name="txtShowPaused" Grid.Column="1" Grid.Row="1" Foreground="Blue" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10" IsVisible = "{Binding ImagePaused}" Text="Paused..." />
+		<Button x:Name="btnBack" Opacity="0" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Command="{Binding PreviousImageCommand}" HotKey="Left"/>
+		<Button x:Name="btnNext" Opacity="0" Grid.Column="2" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Command="{Binding NextImageCommand}" HotKey="Right"/>
+    <Button x:Name="btnPause" Opacity="0" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Command="{Binding PauseImageCommand}" HotKey="Enter"/>
+		<Button x:Name="btnQuit" Opacity="0" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="btnQuit_Click" HotKey="Down"/>
+		<Button x:Name="btnSettings" Opacity="0" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Command="{Binding NavigateSettingsPageCommand}" HotKey="Up"/>
 		<StackPanel Grid.Column="0" Grid.Row="2" Margin="10" VerticalAlignment="Bottom" >
 			<TextBlock x:Name="txtWeatherTemperature" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Bottom" Opacity="0.85" IsVisible = "{Binding Settings.ShowWeather}" Text="{Binding WeatherTemperature}" FontSize="{Binding Settings.WeatherFontSize}"/>
 			<TextBlock x:Name="txtWeatherCurrent" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Bottom" Opacity="0.85" IsVisible = "{Binding Settings.ShowWeather}" Text="{Binding WeatherCurrent}" FontSize="{Binding Settings.WeatherFontSize}"/>
