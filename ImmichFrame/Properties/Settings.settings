@@ -68,5 +68,14 @@
     <Setting Name="Language" Type="System.String" Scope="User">
       <Value Profile="(Default)">en</Value>
     </Setting>
+    <Setting Name="ShowImageLocation" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="ImageLocationFontSize" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">36</Value>
+    </Setting>
+    <Setting Name="FontColor" Type="System.String" Scope="User">
+      <Value Profile="(Default)">#FFFFFF</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

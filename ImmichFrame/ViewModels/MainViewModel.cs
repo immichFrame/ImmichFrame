@@ -6,7 +6,6 @@ using ImmichFrame.Models;
 using System;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -66,6 +65,20 @@ public partial class MainViewModel : NavigatableViewModelBase
 
             ImageDate = asset?.FileCreatedAt.ToString(Settings.PhotoDateFormat) ?? string.Empty;
             ImageDesc = asset?.ImageDesc ?? string.Empty;
+
+            if (asset?.ExifInfo != null)
+            {
+                var locationData = new[] {
+                    asset.ExifInfo.City,
+                    asset.ExifInfo.Country
+                }.Where(x=>!string.IsNullOrWhiteSpace(x));
+
+                ImageLocation = string.Join(", ", locationData);
+            }
+            else
+            {
+                ImageLocation = string.Empty;
+            }
         }
     }
 
@@ -198,6 +211,8 @@ public partial class MainViewModel : NavigatableViewModelBase
     private string? imageDate;
     [ObservableProperty]
     private string? imageDesc;
+    [ObservableProperty]
+    private string? imageLocation;
     [ObservableProperty]
     private string? liveTime;
     [ObservableProperty]

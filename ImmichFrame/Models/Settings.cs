@@ -33,6 +33,9 @@ public class Settings
     public string? PhotoDateFormat { get; set; } = "MM/dd/yyyy";
     public bool ShowImageDesc { get; set; } = true;
     public int ImageDescFontSize { get; set; } = 36;
+    public bool ShowImageLocation { get; set; } = true;
+    public int ImageLocationFontSize { get; set; } = 36;
+    public string FontColor { get; set; } = "#FFFFFF";
     public bool ShowWeather => !string.IsNullOrWhiteSpace(WeatherApiKey);
     public int WeatherFontSize { get; set; } = 36;
     public string? UnitSystem { get; set; } = OpenWeatherMap.UnitSystem.Imperial;
@@ -90,6 +93,9 @@ public class Settings
         defaultSettings.PhotoDateFormat = this.PhotoDateFormat;
         defaultSettings.ShowImageDesc = this.ShowImageDesc;
         defaultSettings.ImageDescFontSize = this.ImageDescFontSize;
+        defaultSettings.ShowImageLocation = this.ShowImageLocation;
+        defaultSettings.ImageLocationFontSize = this.ImageLocationFontSize;
+        defaultSettings.FontColor = this.FontColor;
         defaultSettings.WeatherFontSize = this.WeatherFontSize;
         defaultSettings.UnitSystem = this.UnitSystem?.ToString() ?? OpenWeatherMap.UnitSystem.Imperial;
         defaultSettings.WeatherLatLong = this.WeatherLatLong;
@@ -242,6 +248,7 @@ public class Settings
                 case "ClockFontSize":
                 case "PhotoDateFontSize":
                 case "ImageDescFontSize":
+                case "ImageLocationFontSize":
                 case "WeatherFontSize":
                     if (!int.TryParse(value.ToString(), out var intValue))
                         throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. ('{value}')");
@@ -252,6 +259,7 @@ public class Settings
                 case "ShowClock":
                 case "ShowPhotoDate":
                 case "ShowImageDesc":
+                case "ShowImageLocation":
                     if (!bool.TryParse(value.ToString(), out var boolValue))
                         throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. ('{value}')");
                     property.SetValue(settings, boolValue);
@@ -271,6 +279,12 @@ public class Settings
                 case "WeatherLatLong":
                     // Regex match Lat/Lon
                     if (!Regex.IsMatch(value.ToString()!, @"^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$"))
+                        throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. ('{value}')");
+                    property.SetValue(settings, value);
+                    break;
+                case "FontColor":
+                    // Regex match Hex color
+                    if (!Regex.IsMatch(value.ToString()!, @"^#(?:[0-9a-fA-F]{3}){1,2}$"))
                         throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. ('{value}')");
                     property.SetValue(settings, value);
                     break;

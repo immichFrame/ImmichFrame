@@ -6,6 +6,17 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
              x:Class="ImmichFrame.Views.MainView"
              x:DataType="vm:MainViewModel">
+	<UserControl.Styles>
+		<Style Selector="TextBlock">
+			<Setter Property="Opacity" Value="0.85"/>
+			<Setter Property="Foreground" Value="{Binding Settings.FontColor}"/>
+		</Style>
+		<Style Selector="Button">
+			<Setter Property="Opacity" Value="0"/>
+			<Setter Property="HorizontalAlignment" Value="Stretch"/>
+			<Setter Property="VerticalAlignment" Value="Stretch"/>
+		</Style>
+	</UserControl.Styles>
 	<Design.DataContext>
 		<vm:MainViewModel />
 	</Design.DataContext>
@@ -23,18 +34,21 @@
 				</DataTemplate>
 			</TransitioningContentControl.ContentTemplate>
 		</TransitioningContentControl>
-    <TextBlock x:Name="txtShowPaused" Grid.Column="1" Grid.Row="1" Foreground="Blue" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10" IsVisible = "{Binding ImagePaused}" Text="Paused..." />
-		<Button x:Name="btnBack" Opacity="0" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Command="{Binding PreviousImageCommand}" HotKey="Left"/>
-		<Button x:Name="btnNext" Opacity="0" Grid.Column="2" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Command="{Binding NextImageCommand}" HotKey="Right"/>
-    <Button x:Name="btnPause" Opacity="0" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Command="{Binding PauseImageCommand}" HotKey="Enter"/>
-		<Button x:Name="btnQuit" Opacity="0" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="btnQuit_Click" HotKey="Down"/>
-		<Button x:Name="btnSettings" Opacity="0" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Command="{Binding NavigateSettingsPageCommand}" HotKey="Up"/>
+		<TextBlock x:Name="txtShowPaused" Grid.Column="1" Grid.Row="1" Foreground="Blue" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10" IsVisible="{Binding ImagePaused}" Text="Paused..." />
+		<Button x:Name="btnBack" Grid.Column="0" Grid.Row="1" Command="{Binding PreviousImageCommand}" HotKey="Left"/>
+		<Button x:Name="btnNext" Grid.Column="2" Grid.Row="1" Command="{Binding NextImageCommand}" HotKey="Right"/>
+		<Button x:Name="btnPause" Grid.Column="1" Grid.Row="1" Command="{Binding PauseImageCommand}" HotKey="Enter"/>
+		<Button x:Name="btnQuit" Grid.Column="1" Grid.Row="2" Click="btnQuit_Click" HotKey="Down"/>
+		<Button x:Name="btnSettings" Grid.Column="1" Grid.Row="0" Command="{Binding NavigateSettingsPageCommand}" HotKey="Up"/>
 		<StackPanel Grid.Column="0" Grid.Row="2" Margin="10" VerticalAlignment="Bottom" >
-			<TextBlock x:Name="txtWeatherTemperature" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Bottom" Opacity="0.85" IsVisible = "{Binding Settings.ShowWeather}" Text="{Binding WeatherTemperature}" FontSize="{Binding Settings.WeatherFontSize}"/>
-			<TextBlock x:Name="txtWeatherCurrent" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Bottom" Opacity="0.85" IsVisible = "{Binding Settings.ShowWeather}" Text="{Binding WeatherCurrent}" FontSize="{Binding Settings.WeatherFontSize}"/>
-			<TextBlock x:Name="txtLiveTime" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Bottom" Opacity="0.85" IsVisible = "{Binding Settings.ShowClock}" Text="{Binding LiveTime}" FontSize="{Binding Settings.ClockFontSize}"/>
+			<TextBlock x:Name="txtWeatherTemperature" HorizontalAlignment="Left" VerticalAlignment="Bottom" IsVisible="{Binding Settings.ShowWeather}" Text="{Binding WeatherTemperature}" FontSize="{Binding Settings.WeatherFontSize}"/>
+			<TextBlock x:Name="txtWeatherCurrent" HorizontalAlignment="Left" VerticalAlignment="Bottom" IsVisible="{Binding Settings.ShowWeather}" Text="{Binding WeatherCurrent}" FontSize="{Binding Settings.WeatherFontSize}"/>
+			<TextBlock x:Name="txtLiveTime" HorizontalAlignment="Left" VerticalAlignment="Bottom" IsVisible="{Binding Settings.ShowClock}" Text="{Binding LiveTime}" FontSize="{Binding Settings.ClockFontSize}"/>
 		</StackPanel>
-		<TextBlock x:Name="txtImageDate" Grid.Column="2" Grid.Row="2" Foreground="White" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10" Opacity="0.85" IsVisible = "{Binding Settings.ShowPhotoDate}" Text="{Binding ImageDate}" FontSize="{Binding Settings.PhotoDateFontSize}"/>
-		<TextBlock x:Name="txtImageDesc" Grid.Column="1" Grid.Row="2" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="10" Opacity="0.85" IsVisible = "{Binding Settings.ShowImageDesc}" Text="{Binding ImageDesc}" FontSize="{Binding Settings.ImageDescFontSize}"/>
+		<TextBlock x:Name="txtImageDate" Grid.Column="2" Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10" IsVisible="{Binding Settings.ShowPhotoDate}" Text="{Binding ImageDate}" FontSize="{Binding Settings.PhotoDateFontSize}"/>
+		<TextBlock x:Name="txtImageDesc" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="10" IsVisible="{Binding Settings.ShowImageDesc}" Text="{Binding ImageDesc}" FontSize="{Binding Settings.ImageDescFontSize}"/>
+		<StackPanel Grid.Column="0" Grid.Row="0" Margin="10" VerticalAlignment="Top" IsVisible="{Binding Settings.ShowImageLocation}">
+			<TextBlock x:Name="txtImageLocation" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10" Text="{Binding ImageLocation}" FontSize="{Binding Settings.ImageDescFontSize}"/>
+		</StackPanel>
 	</Grid>
 </UserControl>

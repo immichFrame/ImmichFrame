@@ -20,7 +20,6 @@
       <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
   </UserControl.Styles>
-
   <DockPanel>
     <Design.DataContext>
       <vm:SettingsViewModel />
