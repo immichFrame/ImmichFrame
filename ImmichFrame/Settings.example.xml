@@ -48,6 +48,13 @@
 	<ShowImageDesc>true</ShowImageDesc>
 	<ImageDescFontSize>36</ImageDescFontSize>
 
+	<!--Show the location-->
+	<ShowImageLocation>true</ShowImageLocation>
+	<ImageLocationFontSize>36</ImageLocationFontSize>
+
+	<!--Color for all text overlays-->
+	<FontColor>#FFFFFF</FontColor>
+
 	<!--The current weather is only shown when a WeatherApiKey is specified-->
 	<!--Get your Weather ApiKey from https://openweathermap.org/-->
 	<WeatherApiKey></WeatherApiKey>

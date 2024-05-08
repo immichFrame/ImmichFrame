@@ -284,5 +284,41 @@ namespace ImmichFrame.Properties {
                 this["Language"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ShowImageLocation {
+            get {
+                return ((bool)(this["ShowImageLocation"]));
+            }
+            set {
+                this["ShowImageLocation"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("36")]
+        public int ImageLocationFontSize {
+            get {
+                return ((int)(this["ImageLocationFontSize"]));
+            }
+            set {
+                this["ImageLocationFontSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("#FFFFFF")]
+        public string FontColor {
+            get {
+                return ((string)(this["FontColor"]));
+            }
+            set {
+                this["FontColor"] = value;
+            }
+        }
     }
 }
