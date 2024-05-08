@@ -6,7 +6,7 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="900"
 			 xmlns:vm="using:ImmichFrame.ViewModels"
              x:DataType="vm:SettingsViewModel">
-	<UserControl.Styles>
+  <UserControl.Styles>
 		<Style Selector="TextBlock">
 			<Setter Property="Margin" Value="10,10,10,0"/>
 			<Setter Property="VerticalAlignment" Value="Center"/>
@@ -20,10 +20,10 @@
 			<Setter Property="VerticalAlignment" Value="Center"/>
 		</Style>
 	</UserControl.Styles>
-	<DockPanel>
-		<Design.DataContext>
-			<vm:SettingsViewModel />
-		</Design.DataContext>
+  <Design.DataContext>
+    <vm:SettingsViewModel />
+  </Design.DataContext>
+  <DockPanel>
 		<Grid DockPanel.Dock="Bottom" ColumnDefinitions="*,*,*">
 			<Button Grid.Column="0"
 					Content="Cancel"
@@ -85,11 +85,11 @@
 				</StackPanel>
 				<StackPanel>
 					<TextBlock Text="Interval"/>
-					<TextBox Text="{Binding Settings.Interval}"/>
+          <NumericUpDown Value="{Binding Settings.Interval}" FormatString="F0"/>
 				</StackPanel>
 				<StackPanel>
 					<TextBlock Text="TransitionDuration"/>
-					<TextBox Text="{Binding Settings.TransitionDuration}"/>
+          <NumericUpDown Value="{Binding Settings.TransitionDuration}" FormatString="F0"/>
 				</StackPanel>
 				<StackPanel>
 					<TextBlock Text="DownloadImages"/>
@@ -101,7 +101,7 @@
 				</StackPanel>
 				<StackPanel>
 					<TextBlock Text="RenewImagesDuration"/>
-					<TextBox Text="{Binding Settings.RenewImagesDuration}"/>
+          <NumericUpDown Value="{Binding Settings.RenewImagesDuration}" FormatString="F0"/>
 				</StackPanel>
 				<StackPanel>
 					<TextBlock Text="ShowClock"/>
@@ -109,7 +109,7 @@
 				</StackPanel>
 				<StackPanel>
 					<TextBlock Text="ClockFontSize"/>
-					<TextBox Text="{Binding Settings.ClockFontSize}"/>
+          <NumericUpDown Value="{Binding Settings.ClockFontSize}" FormatString="F0"/>
 				</StackPanel>
 				<StackPanel>
 					<TextBlock Text="ClockFormat"/>
@@ -121,7 +121,7 @@
 				</StackPanel>
 				<StackPanel>
 					<TextBlock Text="PhotoDateFontSize"/>
-					<TextBox Text="{Binding Settings.PhotoDateFontSize}"/>
+          <NumericUpDown Value="{Binding Settings.PhotoDateFontSize}" FormatString="F0"/>
 				</StackPanel>
 				<StackPanel>
 					<TextBlock Text="PhotoDateFormat"/>
@@ -133,7 +133,7 @@
 				</StackPanel>
 				<StackPanel>
 					<TextBlock Text="ImageDescFontSize"/>
-					<TextBox Text="{Binding Settings.ImageDescFontSize}"/>
+          <NumericUpDown Value="{Binding Settings.ImageDescFontSize}" FormatString="F0"/>
 				</StackPanel>
 				<StackPanel>
 					<TextBlock Text="ShowImageLocation"/>
@@ -141,7 +141,7 @@
 				</StackPanel>
 				<StackPanel>
 					<TextBlock Text="ImageLocationFontSize"/>
-					<TextBox Text="{Binding Settings.ImageLocationFontSize}"/>
+          <NumericUpDown Value="{Binding Settings.ImageLocationFontSize}" FormatString="F0"/>
 				</StackPanel>
 				<StackPanel>
 					<TextBlock Text="FontColor"/>
@@ -149,7 +149,7 @@
 				</StackPanel>
 				<StackPanel>
 					<TextBlock Text="WeatherFontSize"/>
-					<TextBox Text="{Binding Settings.WeatherFontSize}"/>
+          <NumericUpDown Value="{Binding Settings.WeatherFontSize}" FormatString="F0"/>
 				</StackPanel>
 				<StackPanel>
 					<TextBlock Text="UnitSystem"/>
