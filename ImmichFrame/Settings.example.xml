@@ -1,69 +1,72 @@
 <Settings>
-	<ImmichServerUrl>http://YourIpOrUrl:2283</ImmichServerUrl>
-	<!--Your immich API-Key, see here https://immich.app/docs/features/command-line-interface#obtain-the-api-key-->
-	<ApiKey>YourApiKey</ApiKey>
+  <ImmichServerUrl>http://YourIpOrUrl:2283</ImmichServerUrl>
+  <!--Your immich API-Key, see here https://immich.app/docs/features/command-line-interface#obtain-the-api-key-->
+  <ApiKey>YourApiKey</ApiKey>
 
-	<!--OPTIONAL: Choose one or multiple Albums to have in the rotation-->
-	<!--Remove this section if you want to show random images-->
-	<Albums>
-		<Album>First Album UID</Album>
-		<Album>Second Album UID</Album>
-	</Albums>
+  <!--Adjustable margins (left,top,right,bottom) for fine tuning position-->
+  <Margin>0,0,0,0</Margin>
 
-	<!--OPTIONAL: Choose one or multiple People to have in the rotation-->
-	<!--Remove this section if you want to show random images-->
-	<People>
-		<Person>First Person UID</Person>
-		<Person>Second Person UID</Person>
-	</People>
+  <!--OPTIONAL: Choose one or multiple Albums to have in the rotation-->
+  <!--Remove this section if you want to show random images-->
+  <Albums>
+    <Album>First Album UID</Album>
+    <Album>Second Album UID</Album>
+  </Albums>
 
-	<!--Interval for photo cycling in seconds-->
-	<Interval>8</Interval>
+  <!--OPTIONAL: Choose one or multiple People to have in the rotation-->
+  <!--Remove this section if you want to show random images-->
+  <People>
+    <Person>First Person UID</Person>
+    <Person>Second Person UID</Person>
+  </People>
 
-	<!--Photo fade in/out time in seconds-->
-	<TransitionDuration>1.0</TransitionDuration>
+  <!--Interval for photo cycling in seconds-->
+  <Interval>8</Interval>
 
-	<!--Determines if images should be saved locally-->
-	<DownloadImages>false</DownloadImages>
+  <!--Photo fade in/out time in seconds-->
+  <TransitionDuration>1.0</TransitionDuration>
 
-	<!--Show todays memories-->
-	<ShowMemories>false</ShowMemories>
+  <!--Determines if images should be saved locally-->
+  <DownloadImages>false</DownloadImages>
 
-	<!--Duration for images to keep if existing, renews the image if older than the duration. Duration in Days-->
-	<RenewImagesDuration>20</RenewImagesDuration>
+  <!--Show todays memories-->
+  <ShowMemories>false</ShowMemories>
 
-	<!--Show clock in lower left bottom-->
-	<ShowClock>true</ShowClock>
-	<ClockFontSize>48</ClockFontSize>
-	<!--The format of the clock (ex. h:mm tt). See here for options https://www.c-sharpcorner.com/blogs/date-and-time-format-in-c-sharp-programming1-->
-	<ClockFormat>h:mm tt</ClockFormat>
+  <!--Duration for images to keep if existing, renews the image if older than the duration. Duration in Days-->
+  <RenewImagesDuration>20</RenewImagesDuration>
 
-	<!--Show the date photo was taken.-->
-	<ShowPhotoDate>true</ShowPhotoDate>
-	<PhotoDateFontSize>36</PhotoDateFontSize>
-	<!--The format of the date (ex. MM/dd/yyyy). See here for options https://www.c-sharpcorner.com/blogs/date-and-time-format-in-c-sharp-programming1-->
-	<PhotoDateFormat>MM/dd/yyyy</PhotoDateFormat>
+  <!--Show clock in lower left bottom-->
+  <ShowClock>true</ShowClock>
+  <ClockFontSize>48</ClockFontSize>
+  <!--The format of the clock (ex. h:mm tt). See here for options https://www.c-sharpcorner.com/blogs/date-and-time-format-in-c-sharp-programming1-->
+  <ClockFormat>h:mm tt</ClockFormat>
 
-	<!--Show the description-->
-	<ShowImageDesc>true</ShowImageDesc>
-	<ImageDescFontSize>36</ImageDescFontSize>
+  <!--Show the date photo was taken.-->
+  <ShowPhotoDate>true</ShowPhotoDate>
+  <PhotoDateFontSize>36</PhotoDateFontSize>
+  <!--The format of the date (ex. MM/dd/yyyy). See here for options https://www.c-sharpcorner.com/blogs/date-and-time-format-in-c-sharp-programming1-->
+  <PhotoDateFormat>MM/dd/yyyy</PhotoDateFormat>
 
-	<!--Show the location-->
-	<ShowImageLocation>true</ShowImageLocation>
-	<ImageLocationFontSize>36</ImageLocationFontSize>
+  <!--Show the description-->
+  <ShowImageDesc>true</ShowImageDesc>
+  <ImageDescFontSize>36</ImageDescFontSize>
 
-	<!--Color for all text overlays-->
-	<FontColor>#FFFFFF</FontColor>
+  <!--Show the location-->
+  <ShowImageLocation>true</ShowImageLocation>
+  <ImageLocationFontSize>36</ImageLocationFontSize>
 
-	<!--The current weather is only shown when a WeatherApiKey is specified-->
-	<!--Get your Weather ApiKey from https://openweathermap.org/-->
-	<WeatherApiKey></WeatherApiKey>
-	<WeatherFontSize>12</WeatherFontSize>
-	<!--The temperature units. either metric or imperial-->
-	<UnitSystem>imperial</UnitSystem>
-	<!--Your latitude/longitude coordinates (ex. 40.7128,74.0060)-->
-	<WeatherLatLong>40.7128,74.0060</WeatherLatLong>
-	
-	<!--Your ISO2 Language Code-->
-	<Language>en</Language>
+  <!--Color for all text overlays-->
+  <FontColor>#FFFFFF</FontColor>
+
+  <!--The current weather is only shown when a WeatherApiKey is specified-->
+  <!--Get your Weather ApiKey from https://openweathermap.org/-->
+  <WeatherApiKey></WeatherApiKey>
+  <WeatherFontSize>12</WeatherFontSize>
+  <!--The temperature units. either metric or imperial-->
+  <UnitSystem>imperial</UnitSystem>
+  <!--Your latitude/longitude coordinates (ex. 40.7128,74.0060)-->
+  <WeatherLatLong>40.7128,74.0060</WeatherLatLong>
+
+  <!--Your ISO2 Language Code-->
+  <Language>en</Language>
 </Settings>
