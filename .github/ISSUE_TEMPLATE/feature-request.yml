@@ -1,0 +1,57 @@
+---
+name: 'Request a feature'
+description: 'Request a feature'
+labels:
+  - 'enhancement'
+body:
+  - type: 'markdown'
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this feature request.
+
+        Please review the following requirements before submitting this issue type:
+
+        1. Ensure there are no other similar feature requests.
+        2. Please ensure that this is not an issue/bug and that there is no feature request like this.
+  - type: 'textarea'
+    id: 'description'
+    attributes:
+      label: |
+        Description
+      description: |
+        Describe the feature
+    validations:
+      required: true
+  - type: 'textarea'
+    id: 'use-case'
+    attributes:
+      label: |
+        Use Case
+      description: |
+        Provide a use case
+    validations:
+      required: true
+  - type: 'textarea'
+    id: 'details'
+    attributes:
+      label: |
+        Details
+      description: |
+        Describe the feature in detail, provide additional information.
+    validations:
+      required: false
+  - type: 'checkboxes'
+    id: 'checklist'
+    attributes:
+      label: |
+        Pre-Submission Checklist
+      description: |
+        By submitting this issue confirm all of the following.
+      options:
+        - label: |
+            This is a feature request and not a bug report
+          required: true
+        - label: |
+            I have checked for related issues and checked the documentation
+          required: true
+...
