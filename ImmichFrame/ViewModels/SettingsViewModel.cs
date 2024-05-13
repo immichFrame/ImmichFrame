@@ -51,7 +51,7 @@ namespace ImmichFrame.ViewModels
 
             PeopleList = new ObservableCollection<ListItem>(Settings.People.Select(x => new ListItem(x.ToString())));
             AlbumList = new ObservableCollection<ListItem>(Settings.Albums.Select(x => new ListItem(x.ToString())));
-            Margin = new string(Settings.Margin.ToString());
+            Margin = Settings.Margin.ToString();
         }
 
 
