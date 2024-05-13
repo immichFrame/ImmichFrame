@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Avalonia;
+using CommunityToolkit.Mvvm.ComponentModel;
 using ImmichFrame.Exceptions;
 using ImmichFrame.Helpers;
 using ImmichFrame.Models;
@@ -16,6 +17,8 @@ namespace ImmichFrame.ViewModels
 
         [ObservableProperty]
         private ObservableCollection<ListItem> albumList;
+        [ObservableProperty]
+        private string margin;
 
         [ObservableProperty]
         public Settings settings;
@@ -48,6 +51,7 @@ namespace ImmichFrame.ViewModels
 
             PeopleList = new ObservableCollection<ListItem>(Settings.People.Select(x => new ListItem(x.ToString())));
             AlbumList = new ObservableCollection<ListItem>(Settings.Albums.Select(x => new ListItem(x.ToString())));
+            Margin = new string(Settings.Margin.ToString());
         }
 
 
@@ -93,6 +97,7 @@ namespace ImmichFrame.ViewModels
             {
                 Settings.People = PeopleList.Select(x => Guid.Parse(x.Value)).ToList();
                 Settings.Albums = AlbumList.Select(x => Guid.Parse(x.Value)).ToList();
+                Settings.Margin = Thickness.Parse(Margin);
 
                 Settings.Serialize();
 

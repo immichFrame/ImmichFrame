@@ -85,11 +85,11 @@
         </StackPanel>
         <StackPanel>
           <TextBlock Text="Interval"/>
-          <NumericUpDown Value="{Binding Settings.Interval}" FormatString="F0"/>
+          <NumericUpDown Value="{Binding Settings.Interval}" FormatString="F0" Margin="10,0" />
         </StackPanel>
         <StackPanel>
           <TextBlock Text="TransitionDuration"/>
-          <NumericUpDown Value="{Binding Settings.TransitionDuration}" FormatString="F0"/>
+          <NumericUpDown Value="{Binding Settings.TransitionDuration}" FormatString="F0" Margin="10,0" />
         </StackPanel>
         <StackPanel>
           <TextBlock Text="DownloadImages"/>
@@ -101,7 +101,11 @@
         </StackPanel>
         <StackPanel>
           <TextBlock Text="RenewImagesDuration"/>
-          <NumericUpDown Value="{Binding Settings.RenewImagesDuration}" FormatString="F0"/>
+          <NumericUpDown Value="{Binding Settings.RenewImagesDuration}" FormatString="F0" Margin="10,0" />
+        </StackPanel>
+        <StackPanel>
+          <TextBlock Text="Margin"/>
+          <TextBox Text="{Binding Margin}" />
         </StackPanel>
         <StackPanel>
           <TextBlock Text="ShowClock"/>
@@ -109,7 +113,7 @@
         </StackPanel>
         <StackPanel>
           <TextBlock Text="ClockFontSize"/>
-          <NumericUpDown Value="{Binding Settings.ClockFontSize}" FormatString="F0"/>
+          <NumericUpDown Value="{Binding Settings.ClockFontSize}" FormatString="F0" Margin="10,0" />
         </StackPanel>
         <StackPanel>
           <TextBlock Text="ClockFormat"/>
@@ -121,7 +125,7 @@
         </StackPanel>
         <StackPanel>
           <TextBlock Text="PhotoDateFontSize"/>
-          <NumericUpDown Value="{Binding Settings.PhotoDateFontSize}" FormatString="F0"/>
+          <NumericUpDown Value="{Binding Settings.PhotoDateFontSize}" FormatString="F0" Margin="10,0" />
         </StackPanel>
         <StackPanel>
           <TextBlock Text="PhotoDateFormat"/>
@@ -133,7 +137,7 @@
         </StackPanel>
         <StackPanel>
           <TextBlock Text="ImageDescFontSize"/>
-          <NumericUpDown Value="{Binding Settings.ImageDescFontSize}" FormatString="F0"/>
+          <NumericUpDown Value="{Binding Settings.ImageDescFontSize}" FormatString="F0" Margin="10,0" />
         </StackPanel>
         <StackPanel>
           <TextBlock Text="ShowImageLocation"/>
@@ -141,7 +145,7 @@
         </StackPanel>
         <StackPanel>
           <TextBlock Text="ImageLocationFontSize"/>
-          <NumericUpDown Value="{Binding Settings.ImageLocationFontSize}" FormatString="F0"/>
+          <NumericUpDown Value="{Binding Settings.ImageLocationFontSize}" FormatString="F0" Margin="10,0" />
         </StackPanel>
         <StackPanel>
           <TextBlock Text="FontColor"/>
@@ -149,7 +153,7 @@
         </StackPanel>
         <StackPanel>
           <TextBlock Text="WeatherFontSize"/>
-          <NumericUpDown Value="{Binding Settings.WeatherFontSize}" FormatString="F0"/>
+          <NumericUpDown Value="{Binding Settings.WeatherFontSize}" FormatString="F0" Margin="10,0" />
         </StackPanel>
         <StackPanel>
           <TextBlock Text="UnitSystem"/>

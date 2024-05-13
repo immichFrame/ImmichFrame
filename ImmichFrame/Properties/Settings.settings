@@ -77,5 +77,8 @@
     <Setting Name="FontColor" Type="System.String" Scope="User">
       <Value Profile="(Default)">#FFFFFF</Value>
     </Setting>
+    <Setting Name="Margin" Type="System.String" Scope="User">
+      <Value Profile="(Default)">0,0,0,0</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
