@@ -4,6 +4,7 @@ using ImmichFrame.Exceptions;
 using ImmichFrame.Helpers;
 using ImmichFrame.Models;
 using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,6 +21,7 @@ public partial class MainViewModel : NavigatableViewModelBase
     private AssetResponseDto? CurrentAsset;
     private PreloadedAsset? NextAsset;
     private AssetHelper _assetHelper;
+    private CultureInfo culture;
 
     public ICommand NextImageCommand { get; set; }
     public ICommand PreviousImageCommand { get; set; }
@@ -29,7 +31,7 @@ public partial class MainViewModel : NavigatableViewModelBase
     {
         settings = Settings.CurrentSettings;
         _assetHelper = new AssetHelper();
-
+        culture = new CultureInfo(settings.Language);
         NextImageCommand = new RelayCommand(NextImageAction);
         PreviousImageCommand = new RelayCommand(PreviousImageAction);
         PauseImageCommand = new RelayCommand(PauseImageAction);
@@ -63,7 +65,7 @@ public partial class MainViewModel : NavigatableViewModelBase
                 ThumbhashImage = new Bitmap(tmbStream)
             };
 
-            ImageDate = asset?.FileCreatedAt.ToString(Settings.PhotoDateFormat) ?? string.Empty;
+            ImageDate = asset?.FileCreatedAt.ToString(Settings.PhotoDateFormat,culture) ?? string.Empty;
             ImageDesc = asset?.ImageDesc ?? string.Empty;
 
             if (asset?.ExifInfo != null)
@@ -88,7 +90,7 @@ public partial class MainViewModel : NavigatableViewModelBase
     }
     public void LiveTimeTick(object? state)
     {
-        LiveTime = DateTime.Now.ToString(Settings.ClockFormat);
+        LiveTime = DateTime.Now.ToString(Settings.ClockFormat,culture);
     }
     public void WeatherTick(object? state)
     {
