@@ -110,7 +110,7 @@
         </StackPanel>
         <StackPanel>
           <TextBlock Text="Margin"/>
-          <TextBox Text="{Binding Margin}" />
+          <TextBox Text="{Binding Settings.Margin}" />
         </StackPanel>
         <StackPanel>
           <TextBlock Text="ShowClock"/>
