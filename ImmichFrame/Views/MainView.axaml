@@ -20,7 +20,7 @@
   <Design.DataContext>
     <vm:MainViewModel />
   </Design.DataContext>
-  <Grid ColumnDefinitions="*, *, *" RowDefinitions="*, *, *" Margin="{Binding Settings.Margin}">
+  <Grid ColumnDefinitions="*, *, *" RowDefinitions="*, *, *">
     <TransitioningContentControl x:Name="transitioningControl" Content="{Binding Images}" Grid.ColumnSpan="3" Grid.RowSpan="3" >
       <TransitioningContentControl.PageTransition>
         <CrossFade Duration="0:00:01.000" />
