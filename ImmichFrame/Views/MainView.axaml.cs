@@ -27,20 +27,20 @@ public partial class MainView : BaseView
 
     private async void OnLoaded(object? sender, RoutedEventArgs e)
     {
+        if (PlatformDetector.IsAndroid())
+        {
+            var insetsManager = TopLevel.GetTopLevel(this)?.InsetsManager;
+            if (insetsManager != null)
+            {
+                insetsManager.DisplayEdgeToEdge = true;
+                insetsManager.IsSystemBarVisible = false;
+            }
+        }
+
+        _viewModel = (this.DataContext as MainViewModel)!;
+
         try
         {
-            if (PlatformDetector.IsAndroid())
-            {
-                var insetsManager = TopLevel.GetTopLevel(this)?.InsetsManager;
-                if (insetsManager != null)
-                {
-                    insetsManager.DisplayEdgeToEdge = true;
-                    insetsManager.IsSystemBarVisible = false;
-                }
-            }
-
-            _viewModel = (this.DataContext as MainViewModel)!;
-
             _viewModel.ResetTimer += ResetTimer;
 
             ShowSplash();
@@ -69,15 +69,9 @@ public partial class MainView : BaseView
                 timerWeather = new System.Threading.Timer(_viewModel.WeatherTick, null, 0, 10 * 60 * 1000); //every 10 minutes
             }
         }
-        catch (SettingsNotValidException ex)
-        {
-            await ShowMessageBox(ex.Message, "There was a Problem loading the Settings");
-            ExitApp();
-        }
         catch (Exception ex)
         {
-            await ShowMessageBox(ex.Message);
-            ExitApp();
+            this._viewModel.Navigate(new ErrorViewModel(ex));
         }
     }
 

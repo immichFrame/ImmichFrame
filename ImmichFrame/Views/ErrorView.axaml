@@ -22,14 +22,22 @@
 				<StackPanel>
 					<Label HorizontalAlignment="Center" Content="An error occured"></Label>
 					<TextBlock Margin="20" Text="{Binding Ex.Message}"></TextBlock>
-					<Expander Header="Show more information" Content="{Binding Ex.StackTrace}"></Expander>
-					<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="5">
+					<Expander Header="Show more information" Content="{Binding Ex}"></Expander>
+					<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="5" Spacing="5">
 						<Button
 							Content="Copy to clipboard"
 							Command="{Binding CopyCommand}"/>
 						<Button
 							Content="Open Log"
+							IsVisible="{Binding LogVisible}"
 							Command="{Binding LogCommand}"/>
+						<Button
+							Content="Settings"
+							IsVisible="{Binding SettingsVisible}"
+							Command="{Binding SettingsCommand}"/>
+						<Button
+							Content="Continue"
+							Command="{Binding ContinueCommand}"/>
 					</StackPanel>
 				</StackPanel>
 			</Border>
