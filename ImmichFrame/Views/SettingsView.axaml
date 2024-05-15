@@ -110,7 +110,10 @@
 				</StackPanel>
 				<StackPanel>
 					<TextBlock Text="Margin"/>
-					<TextBox Text="{Binding Settings.Margin}" />
+					<Grid ColumnDefinitions="*,Auto">
+						<TextBox Grid.Column="0" Text="{Binding Settings.Margin}" />
+						<Button Grid.Column="1" Content="Try out" Command="{Binding TestMarginCommand}" />
+					</Grid>
 				</StackPanel>
 				<StackPanel>
 					<TextBlock Text="ShowClock"/>

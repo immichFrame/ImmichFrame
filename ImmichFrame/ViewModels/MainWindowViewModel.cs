@@ -28,10 +28,16 @@ namespace ImmichFrame.ViewModels
             }
 
             this.ContentViewModel.Navigated += Navigate;
+            this.ContentViewModel.MarginUpdated += UpdateMargin;
         }
 
         [ObservableProperty]
         private NavigatableViewModelBase contentViewModel;
+
+        private void UpdateMargin(object? sender, MarginUpdatedEventArgs e)
+        {
+            this.Margin = Thickness.Parse(e.Margin);
+        }
 
         private void Navigate(object? sender, NavigatedEventArgs e)
         {

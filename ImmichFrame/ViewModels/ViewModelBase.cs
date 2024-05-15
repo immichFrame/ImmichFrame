@@ -10,6 +10,14 @@ public class ViewModelBase : ObservableObject
     public Func<string, string, Task> ShowMessageBoxFromThread;
     public Func<string, string, Task> ShowMessageBox;
     public Func<UserControl> GetUserControl;
+
+    public virtual void UpdateMargin(string margin)
+    {
+        MarginUpdated?.Invoke(this, new MarginUpdatedEventArgs(margin));
+    }
+
+    public delegate void MarginUpdatedEventHandler(object sender, MarginUpdatedEventArgs e);
+    public event MarginUpdatedEventHandler? MarginUpdated;
 }
 
 public class NavigatableViewModelBase : ViewModelBase
@@ -31,4 +39,12 @@ public class NavigatedEventArgs : EventArgs
         ViewModel = viewModel;
     }
     public NavigatableViewModelBase ViewModel { get; set; }
+}
+public class MarginUpdatedEventArgs : EventArgs
+{
+    public MarginUpdatedEventArgs(string margin)
+    {
+        Margin = margin;
+    }
+    public string Margin { get; set; }
 }
