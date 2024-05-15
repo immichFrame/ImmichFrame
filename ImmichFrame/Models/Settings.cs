@@ -1,5 +1,4 @@
 ﻿using ImmichFrame.Exceptions;
-using ImmichFrame.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -7,9 +6,7 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Xml;
 using System.Xml.Linq;
-using System.Xml.Serialization;
 
 namespace ImmichFrame.Models;
 
@@ -18,6 +15,7 @@ public class Settings
 {
     public string ImmichServerUrl { get; set; } = string.Empty;
     public string ApiKey { get; set; } = string.Empty;
+    public string Margin { get; set; } = "0,0,0,0";
     public int Interval { get; set; } = 8;
     public double TransitionDuration { get; set; } = 1;
     public bool DownloadImages { get; set; } = false;
@@ -81,6 +79,7 @@ public class Settings
 
         defaultSettings.ImmichServerUrl = this.ImmichServerUrl;
         defaultSettings.ApiKey = this.ApiKey;
+        defaultSettings.Margin = this.Margin;
         defaultSettings.Interval = this.Interval;
         defaultSettings.DownloadImages = this.DownloadImages;
         defaultSettings.ShowMemories = this.ShowMemories;
@@ -221,6 +220,15 @@ public class Settings
                         throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. (' {value} ')");
 
                     property.SetValue(settings, url);
+                    break;
+                case "Margin":
+                    var margin = value.ToString()!;
+                    if (!Regex.IsMatch(margin, @"^((\d+)||(\d+\,\d+)||(\d+\,\d+\,\d+\,\d+))$"))
+                    {
+                        throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. (' {value} ')");
+                    }
+
+                    property.SetValue(settings, margin);
                     break;
                 case "ApiKey":
                 case "WeatherApiKey":

@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Avalonia;
+using CommunityToolkit.Mvvm.ComponentModel;
 using ImmichFrame.Exceptions;
 using ImmichFrame.Helpers;
 using ImmichFrame.Models;
