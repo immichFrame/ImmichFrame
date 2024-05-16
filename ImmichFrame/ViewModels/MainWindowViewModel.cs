@@ -22,10 +22,7 @@ namespace ImmichFrame.ViewModels
             }
             catch (SettingsNotValidException ex)
             {
-                if (Settings.IsFromXmlFile)
-                    ContentViewModel = new ErrorViewModel(ex);
-                else
-                    ContentViewModel = new SettingsViewModel();
+                ContentViewModel = new ErrorViewModel(ex);
 
                 Margin = new Thickness(0);
             }

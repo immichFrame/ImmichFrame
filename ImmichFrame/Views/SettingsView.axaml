@@ -12,19 +12,18 @@
 	</Design.DataContext>
 	<UserControl.Styles>
 		<Style Selector="TextBlock">
-			<Setter Property="Margin" Value="10,10,10,0"/>
 			<Setter Property="VerticalAlignment" Value="Center"/>
 		</Style>
 		<Style Selector="TextBox">
-			<Setter Property="Margin" Value="10,3,10,10"/>
+			<Setter Property="Margin" Value="0 0 0 5"/>
 			<Setter Property="VerticalAlignment" Value="Center"/>
 		</Style>
 		<Style Selector="CheckBox">
-			<Setter Property="Margin" Value="10,0,10,10"/>
+			<Setter Property="Margin" Value="0 0 0 5"/>
 			<Setter Property="VerticalAlignment" Value="Center"/>
 		</Style>
 		<Style Selector="NumericUpDown">
-			<Setter Property="Margin" Value="10,3,10,10"/>
+			<Setter Property="Margin" Value="0 0 0 5"/>
 			<Setter Property="VerticalAlignment" Value="Center"/>
 			<Setter Property="FormatString" Value="F0"/>
 		</Style>
