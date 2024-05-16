@@ -27,6 +27,7 @@ namespace ImmichFrame.ViewModels
         public ICommand RemovePersonCommand { get; set; }
         public ICommand AddAlbumCommand { get; set; }
         public ICommand RemoveAlbumCommand { get; set; }
+        public ICommand TestMarginCommand { get; set; }
 
         public SettingsViewModel()
         {
@@ -46,35 +47,40 @@ namespace ImmichFrame.ViewModels
             RemovePersonCommand = new RelayCommandParams(RemovePersonAction);
             AddAlbumCommand = new RelayCommand(AddAlbumAction);
             RemoveAlbumCommand = new RelayCommandParams(RemoveAlbumAction);
+            TestMarginCommand = new RelayCommand(TestMarginAction);
 
             PeopleList = new ObservableCollection<ListItem>(Settings.People.Select(x => new ListItem(x.ToString())));
             AlbumList = new ObservableCollection<ListItem>(Settings.Albums.Select(x => new ListItem(x.ToString())));
         }
 
+        private void TestMarginAction()
+        {
+            this.UpdateMargin(Settings.Margin);
+        }
 
-        public void AddPersonAction()
+        private void AddPersonAction()
         {
             PeopleList.Add(new ListItem());
         }
 
-        public void RemovePersonAction(object param)
+        private void RemovePersonAction(object param)
         {
             var item = PeopleList.First(x => x.Id == Guid.Parse(param.ToString()!));
             PeopleList?.Remove(item);
         }
 
-        public void AddAlbumAction()
+        private void AddAlbumAction()
         {
             AlbumList.Add(new ListItem());
         }
 
-        public void RemoveAlbumAction(object param)
+        private void RemoveAlbumAction(object param)
         {
             var item = AlbumList.First(x => x.Id == Guid.Parse(param.ToString()!));
             AlbumList?.Remove(item);
         }
 
-        public void CancelAction()
+        private void CancelAction()
         {
             try
             {
@@ -87,7 +93,7 @@ namespace ImmichFrame.ViewModels
             }
         }
 
-        public void SaveAction()
+        private void SaveAction()
         {
             // TODO: Validation
             try
@@ -108,7 +114,7 @@ namespace ImmichFrame.ViewModels
 
             Navigate(new MainViewModel());
         }
-        public void QuitAction()
+        private void QuitAction()
         {
             Environment.Exit(0);
         }
