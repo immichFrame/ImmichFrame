@@ -27,6 +27,10 @@
 			<Setter Property="VerticalAlignment" Value="Center"/>
 			<Setter Property="FormatString" Value="F0"/>
 		</Style>
+		<Style Selector="Button">
+			<Setter Property="Margin" Value="5 0 5 5"/>
+			<Setter Property="VerticalAlignment" Value="Center"/>
+		</Style>
 	</UserControl.Styles>
 	<DockPanel>
 		<Grid DockPanel.Dock="Bottom" ColumnDefinitions="*,*,*">
