@@ -164,9 +164,7 @@ public partial class MainViewModel : NavigatableViewModelBase
         }
         catch (Exception ex)
         {
-            TimerEnabled = false;
-            await ShowMessageBoxFromThread(ex.Message, "");
-            TimerEnabled = true;
+            this.Navigate(new ErrorViewModel(ex));
         }
     }
 
@@ -192,7 +190,7 @@ public partial class MainViewModel : NavigatableViewModelBase
         }
         catch (Exception ex)
         {
-            await ShowMessageBoxFromThread(ex.Message, "");
+            this.Navigate(new ErrorViewModel(ex));
         }
     }
     public void PauseImageAction()

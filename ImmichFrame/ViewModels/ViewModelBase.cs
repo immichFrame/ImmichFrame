@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Avalonia.Controls;
+using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Threading.Tasks;
 
@@ -8,6 +9,7 @@ public class ViewModelBase : ObservableObject
 {
     public Func<string, string, Task> ShowMessageBoxFromThread;
     public Func<string, string, Task> ShowMessageBox;
+    public Func<UserControl> GetUserControl;
 }
 
 public class NavigatableViewModelBase : ViewModelBase

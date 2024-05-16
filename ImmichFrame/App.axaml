@@ -2,11 +2,15 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="ImmichFrame.App"
              RequestedThemeVariant="Default"
-			 xmlns:local="using:ImmichFrame.Views">
+			 xmlns:local="using:ImmichFrame.Views"
+			 xmlns:sty="using:FluentAvalonia.Styling"
+			 xmlns:ui="using:FluentAvalonia.UI.Controls"
+			 xmlns:uip="using:FluentAvalonia.UI.Controls.Primitives">
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
-
+	
     <Application.Styles>
-        <FluentTheme />
+		<sty:FluentAvaloniaTheme />
+		<StyleInclude Source="avares://ImmichFrame/Views/Templates/SettingsSection.axaml" />
     </Application.Styles>
 	<Application.DataTemplates>
 		<local:ViewLocator/>

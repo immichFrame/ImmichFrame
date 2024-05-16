@@ -21,7 +21,13 @@ namespace ImmichFrame.Views
 
                 vm.ShowMessageBoxFromThread = this.ShowMessageBoxFromThread;
                 vm.ShowMessageBox = this.ShowMessageBox;
+                vm.GetUserControl = this.GetUserControl;
             };
+        }
+
+        public UserControl GetUserControl()
+        {
+            return this;
         }
 
         public Task ShowMessageBoxFromThread(string message, string title = "")
