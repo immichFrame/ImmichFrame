@@ -64,10 +64,10 @@ ImmichFrame is easy to run on your desired plattform. Get the latest stable rele
 ### MacOS
 - Double-click `Immich_Frame`. Note: If nothing happens, right-click &rarr; open with &rarr; Utilities &rarr; Terminal. Check Always Open With.
 
-### Settings
+## Settings
 There are two options for configuring ImmichFrame; Settings.xml (Linux, macOS, Windows), or a GUI based settings screen (all platforms). If Settings.xml exists it will be used, and the GUI settings will be unavailable.
 
-#### Settings.xml
+### Settings.xml
 > [!IMPORTANT]  
 > Make sure to copy the **Settings.example.xml** and name it **Settings.xml**. 
  
@@ -100,18 +100,25 @@ There are two options for configuring ImmichFrame; Settings.xml (Linux, macOS, W
    ```
 7. Adjust other settings to your needs
 
-#### Settings GUI
-Only available if Settings.xml does not exist. The same information as in `Settings.xml` will be enterred from this screen. Can be enterred at any time by clicking the upper middle quadrant of the screen, see `Interactions` section.
+### Settings GUI
+Only available if Settings.xml does not exist. The same information as in `Settings.xml` will be enterred from this screen. Can be enterred at any time by clicking the upper middle quadrant of the screen (or Up arrow key), see `Interactions` section.
 
 <!-- INTERACTIONS -->
 ## Interactions
-The screen is configured in a 3x3 gird. You can touch or click to:
+### Touch/Mouse
+The screen is configured in a 3x3 gird. You can touch or click:
 
 |   -   | **Settings** |   -   |
 | :---: | :---: | :---: |
-| **Prev<br>image** |   -   | **Next<br>image** |
+| **Prev<br>image** | **Pause** | **Next<br>image** |
 |   -   | **Quit** |   -   |
 
+### Keyboard:
+**Settings** - Up arrow <br/>
+**Quit** - Down arrow <br/>
+**Prev Image** - Left arrow <br/>
+**Next Image** - Right arrow <br/>
+**Pause** - Enter/Return <br/>
 <!-- ROADMAP -->
 ## Roadmap
 
