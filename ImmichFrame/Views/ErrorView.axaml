@@ -17,30 +17,34 @@
 				Command="{Binding QuitCommand}"
 				HorizontalContentAlignment="Center"/>
 		</Grid>
-		<Grid ColumnDefinitions="*,Auto,*" RowDefinitions="*,Auto,*">
-			<Border Grid.Column="1" Grid.Row="1" Margin="50" Padding="10" Background="Teal" CornerRadius="10">
-				<StackPanel>
-					<Label HorizontalAlignment="Center" Content="An error occured"></Label>
-					<TextBlock Margin="20" Text="{Binding Ex.Message}"></TextBlock>
-					<Expander Header="Show more information" Content="{Binding Ex}"></Expander>
-					<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="5" Spacing="5">
-						<Button
-							Content="Copy to clipboard"
-							Command="{Binding CopyCommand}"/>
-						<Button
-							Content="Open Log"
-							IsVisible="{Binding LogVisible}"
-							Command="{Binding LogCommand}"/>
-						<Button
-							Content="Settings"
-							IsVisible="{Binding SettingsVisible}"
-							Command="{Binding SettingsCommand}"/>
-						<Button
-							Content="Continue"
-							Command="{Binding ContinueCommand}"/>
-					</StackPanel>
-				</StackPanel>
-			</Border>
-		</Grid>
+		<ScrollViewer>
+			<Grid ColumnDefinitions="*,10*,*" RowDefinitions="*,Auto,*">
+				<Border Grid.Column="1" Grid.Row="1" Background="Teal" CornerRadius="10" Margin="0 20">
+						<StackPanel Margin="10">
+							<TextBlock HorizontalAlignment="Center" TextWrapping="Wrap" Text="An error occured"></TextBlock>
+							<TextBlock Margin="5 20" TextWrapping="Wrap" Text="{Binding Ex.Message}"></TextBlock>
+							<Expander Margin="5 0" Header="Show more information">
+								<TextBlock TextWrapping="Wrap" Text="{Binding Ex}"></TextBlock>
+							</Expander>
+							<WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="5">
+								<Button
+									Content="Copy to clipboard"
+									Command="{Binding CopyCommand}"/>
+								<Button
+									Content="Open Log"
+									IsVisible="{Binding LogVisible}"
+									Command="{Binding LogCommand}"/>
+								<Button
+									Content="Settings"
+									IsVisible="{Binding SettingsVisible}"
+									Command="{Binding SettingsCommand}"/>
+								<Button
+									Content="Continue"
+									Command="{Binding ContinueCommand}"/>
+							</WrapPanel>
+						</StackPanel>
+				</Border>
+			</Grid>
+		</ScrollViewer>
 	</DockPanel>
 </UserControl>
