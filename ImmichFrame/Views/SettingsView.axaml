@@ -112,7 +112,7 @@
 					<TextBlock Text="Margin"/>
 					<Grid ColumnDefinitions="*,Auto">
 						<TextBox Grid.Column="0" Text="{Binding Settings.Margin}" />
-						<Button Grid.Column="1" Content="Try out" Command="{Binding TestMarginCommand}" />
+						<Button Grid.Column="1" Content="Apply" Command="{Binding TestMarginCommand}" />
 					</Grid>
 				</StackPanel>
 				<StackPanel>
