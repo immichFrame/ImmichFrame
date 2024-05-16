@@ -42,8 +42,10 @@ namespace ImmichFrame.ViewModels
         private void Navigate(object? sender, NavigatedEventArgs e)
         {
             this.ContentViewModel.Navigated -= Navigate;
+            this.ContentViewModel.MarginUpdated -= UpdateMargin;
             ContentViewModel = e.ViewModel;
             this.ContentViewModel.Navigated += Navigate;
+            this.ContentViewModel.MarginUpdated += UpdateMargin;
         }
     }
 }
