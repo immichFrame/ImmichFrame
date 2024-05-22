@@ -49,7 +49,7 @@
     <TextBlock x:Name="txtImageDate" Grid.Column="2" Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10" IsVisible="{Binding Settings.ShowPhotoDate}" Text="{Binding ImageDate}" FontSize="{Binding Settings.PhotoDateFontSize}"/>
     <TextBlock x:Name="txtImageDesc" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="10" IsVisible="{Binding Settings.ShowImageDesc}" Text="{Binding ImageDesc}" FontSize="{Binding Settings.ImageDescFontSize}"/>
     <StackPanel Grid.Column="0" Grid.Row="0" Margin="10" VerticalAlignment="Top" IsVisible="{Binding Settings.ShowImageLocation}">
-      <TextBlock x:Name="txtImageLocation" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10" Text="{Binding ImageLocation}" FontSize="{Binding Settings.ImageDescFontSize}"/>
+      <TextBlock x:Name="txtImageLocation" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10" Text="{Binding ImageLocation}" FontSize="{Binding Settings.ImageLocationFontSize}"/>
     </StackPanel>
   </Grid>
 </UserControl>
