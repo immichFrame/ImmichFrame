@@ -82,6 +82,11 @@ public partial class MainViewModel : NavigatableViewModelBase
                 ImageLocation = string.Empty;
             }
         }
+        if(Settings.UseImmichFrameAlbum)
+        {
+            await _assetHelper.AddAssetToAlbum(asset!);
+        }
+
     }
 
     public async void NextImageTick(object? state)

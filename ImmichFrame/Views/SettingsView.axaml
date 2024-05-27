@@ -123,6 +123,12 @@
 					<TextBlock Text="ShowClock"/>
 					<CheckBox IsChecked="{Binding Settings.ShowClock}"/>
 				</StackPanel>
+        <StackPanel>
+          <TextBlock Text="UseImmichFrameAlbum"/>
+          <CheckBox IsChecked="{Binding Settings.UseImmichFrameAlbum}"/>
+          <TextBlock Text="ImmichFrameAlbumName"/>
+          <TextBox Text="{Binding Settings.ImmichFrameAlbumName}"/>
+        </StackPanel>
 				<StackPanel>
 					<TextBlock Text="ClockFontSize"/>
 					<NumericUpDown Value="{Binding Settings.ClockFontSize}"/>

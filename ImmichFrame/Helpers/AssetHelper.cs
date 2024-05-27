@@ -6,12 +6,14 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
+
 namespace ImmichFrame.Helpers
 {
     public class AssetHelper
     {
         private Task<Dictionary<Guid, AssetResponseDto>?>? _filteredAssetInfos;
         private DateTime lastFilteredAssetRefesh;
+        private List<Guid> ImmichFrameAlbumAssets = new List<Guid>();
         public Task<Dictionary<Guid, AssetResponseDto>?> FilteredAssetInfos
         {
             get
@@ -34,6 +36,55 @@ namespace ImmichFrame.Helpers
             }
 
             return await GetRandomAsset();
+        }
+        public async Task AddAssetToAlbum(AssetResponseDto assetToAdd)
+        {
+            using (var client = new HttpClient())
+            {
+                var settings = Settings.CurrentSettings;
+                client.UseApiKey(settings.ApiKey);
+                var immichApi = new ImmichApi(settings.ImmichServerUrl, client);
+                var immichAlbums = await immichApi.GetAllAlbumsAsync(null, null);
+                var immichFrameAlbum = immichAlbums.FirstOrDefault(album => album.AlbumName == settings.ImmichFrameAlbumName);
+                if (immichFrameAlbum == null)
+                {
+                    var albumDto = new CreateAlbumDto
+                    {
+                        AlbumName = settings.ImmichFrameAlbumName,
+                        Description = "Recent ImmichFrame Photos"
+                    };
+                    var result = await immichApi.CreateAlbumAsync(albumDto);
+                    immichFrameAlbum = new AlbumResponseDto { Id = result.Id };
+                }
+                var itemsToAdd = new BulkIdsDto();
+                itemsToAdd.Ids.Add(new Guid(assetToAdd.Id));
+                await immichApi.AddAssetsToAlbumAsync(new Guid(immichFrameAlbum.Id), null, itemsToAdd);
+                ImmichFrameAlbumAssets.Add(new Guid(assetToAdd.Id));
+                //only keep 50 most recent assets in album
+                var albumInfo = await immichApi.GetAlbumInfoAsync(new Guid(immichFrameAlbum.Id), null, null);
+                if (albumInfo.AssetCount > 50)
+                {
+                    var itemToRemove = new BulkIdsDto();
+                    itemToRemove.Ids.Add(ImmichFrameAlbumAssets[0]);
+                    await immichApi.RemoveAssetFromAlbumAsync(new Guid(immichFrameAlbum.Id), itemToRemove);
+                    ImmichFrameAlbumAssets.RemoveAt(0);
+                }
+            }
+        }
+        public async Task DeleteImmichFrameAlbum()
+        {            
+            using (var client = new HttpClient())
+            {
+                var settings = Settings.CurrentSettings;
+                client.UseApiKey(settings.ApiKey);
+                var immichApi = new ImmichApi(settings.ImmichServerUrl, client);
+                var immichAlbums = await immichApi.GetAllAlbumsAsync(null, null);
+                var immichFrameAlbum = immichAlbums.FirstOrDefault(album => album.AlbumName == settings.ImmichFrameAlbumName);
+                if (immichFrameAlbum != null)
+                {
+                    await immichApi.DeleteAlbumAsync(new Guid(immichFrameAlbum.Id));
+                }
+            }
         }
 
         private async Task<Dictionary<Guid, AssetResponseDto>?> GetFilteredAssetIds()
