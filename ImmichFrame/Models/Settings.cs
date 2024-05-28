@@ -220,7 +220,7 @@ public class Settings
                 case "ImmichServerUrl":
                     var url = value.ToString()!.TrimEnd('/');
                     // Match URL or IP
-                    if (!Regex.IsMatch(url, @"^(https?:\/\/)?(([a-zA-Z0-9\.\-_]+(\.[a-zA-Z]{2,})+)|(\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b))(\:\d{1,5})?$"))
+                    if (!Regex.IsMatch(url, @"^(?!.*\/api)(https?:\/\/)?(([a-zA-Z0-9\.\-_]+(\.[a-zA-Z]{2,})+)|(\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b))(\:\d{1,5})?$"))
                         throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. (' {value} ')");
 
                     property.SetValue(settings, url);
