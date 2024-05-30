@@ -271,6 +271,10 @@ public class Settings
                 case "ShowPhotoDate":
                 case "ShowImageDesc":
                 case "ShowImageLocation":
+                    if (!bool.TryParse(value.ToString(), out var boolValue))
+                        throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. ('{value}')");
+                    property.SetValue(settings, boolValue);
+                    break;
                 case "ClockFormat":
                     property.SetValue(settings, value);
                     break;
