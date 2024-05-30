@@ -61,7 +61,7 @@ namespace ImmichFrame.Helpers
                 itemsToAdd.Ids.Add(new Guid(assetToAdd.Id));
                 await immichApi.AddAssetsToAlbumAsync(new Guid(immichFrameAlbum.Id), null, itemsToAdd);
                 ImmichFrameAlbumAssets.Add(new Guid(assetToAdd.Id));
-                //only keep 50 most recent assets in album
+                //only keep 100 most recent assets in album
                 var albumInfo = await immichApi.GetAlbumInfoAsync(new Guid(immichFrameAlbum.Id), null, null);
                 if (albumInfo.AssetCount > 100)
                 {
