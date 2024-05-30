@@ -335,19 +335,7 @@ namespace ImmichFrame.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool UseImmichFrameAlbum {
-            get {
-                return ((bool)(this["UseImmichFrameAlbum"]));
-            }
-            set {
-                this["UseImmichFrameAlbum"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("ImmichFrame(DeviceName)")]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string ImmichFrameAlbumName {
             get {
                 return ((string)(this["ImmichFrameAlbumName"]));

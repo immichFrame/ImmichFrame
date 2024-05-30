@@ -23,8 +23,8 @@ public class Settings
     public int RenewImagesDuration { get; set; } = 20;
     public List<Guid> Albums { get; set; } = new List<Guid>();
     public List<Guid> People { get; set; } = new List<Guid>();
-    public bool UseImmichFrameAlbum { get; set; } = false;
-    public string ImmichFrameAlbumName { get; set; } = $"ImmichFrame({Environment.MachineName})";
+    public bool UseImmichFrameAlbum => !string.IsNullOrWhiteSpace(ImmichFrameAlbumName);
+    public string ImmichFrameAlbumName { get; set; } = string.Empty;
     public bool ShowClock { get; set; } = true;
     public int ClockFontSize { get; set; } = 48;
     public string? ClockFormat { get; set; } = "h:mm tt";
@@ -86,7 +86,6 @@ public class Settings
         defaultSettings.DownloadImages = this.DownloadImages;
         defaultSettings.ShowMemories = this.ShowMemories;
         defaultSettings.RenewImagesDuration = this.RenewImagesDuration;
-        defaultSettings.UseImmichFrameAlbum = this.UseImmichFrameAlbum;
         defaultSettings.ImmichFrameAlbumName = this.ImmichFrameAlbumName;
         defaultSettings.ShowClock = this.ShowClock;
         defaultSettings.ClockFontSize = this.ClockFontSize;
@@ -272,11 +271,6 @@ public class Settings
                 case "ShowPhotoDate":
                 case "ShowImageDesc":
                 case "ShowImageLocation":
-                case "UseImmichFrameAlbum":
-                    if (!bool.TryParse(value.ToString(), out var boolValue))
-                        throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. ('{value}')");
-                    property.SetValue(settings, boolValue);
-                    break;
                 case "ClockFormat":
                     property.SetValue(settings, value);
                     break;

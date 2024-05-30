@@ -40,9 +40,8 @@
   <ClockFontSize>48</ClockFontSize>
   <!--The format of the clock (ex. h:mm tt). See here for options https://www.c-sharpcorner.com/blogs/date-and-time-format-in-c-sharp-programming1-->
   <ClockFormat>h:mm tt</ClockFormat>
-  <!--Store recent 50 displayed photos in an album-->
-  <UseImmichFrameAlbum>false</UseImmichFrameAlbum>
-  <ImmichFrameAlbumName>ImmichFrame(DeviceName)</ImmichFrameAlbumName>
+  <!--Store recent 50 displayed photos in an album. Album name must be unique per device!-->
+  <ImmichFrameAlbumName></ImmichFrameAlbumName>
   
   <!--Show the date photo was taken.-->
   <ShowPhotoDate>true</ShowPhotoDate>

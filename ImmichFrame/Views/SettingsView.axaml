@@ -124,9 +124,7 @@
 					<CheckBox IsChecked="{Binding Settings.ShowClock}"/>
 				</StackPanel>
         <StackPanel>
-          <TextBlock Text="UseImmichFrameAlbum"/>
-          <CheckBox IsChecked="{Binding Settings.UseImmichFrameAlbum}"/>
-          <TextBlock Text="ImmichFrameAlbumName"/>
+          <TextBlock Text="ImmichFrameAlbumName (must be unique per device!)"/>
           <TextBox Text="{Binding Settings.ImmichFrameAlbumName}"/>
         </StackPanel>
 				<StackPanel>
