@@ -65,7 +65,7 @@ public partial class MainViewModel : NavigatableViewModelBase
                 ThumbhashImage = new Bitmap(tmbStream)
             };
 
-            ImageDate = asset?.FileCreatedAt.ToString(Settings.PhotoDateFormat,culture) ?? string.Empty;
+            ImageDate = asset?.LocalDateTime.ToString(Settings.PhotoDateFormat,culture) ?? string.Empty;
             ImageDesc = asset?.ImageDesc ?? string.Empty;
 
             if (asset?.ExifInfo != null)
