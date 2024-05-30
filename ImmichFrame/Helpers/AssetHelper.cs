@@ -55,6 +55,7 @@ namespace ImmichFrame.Helpers
                     };
                     var result = await immichApi.CreateAlbumAsync(albumDto);
                     immichFrameAlbum = new AlbumResponseDto { Id = result.Id };
+                    ImmichFrameAlbumAssets.Clear();
                 }
                 var itemsToAdd = new BulkIdsDto();
                 itemsToAdd.Ids.Add(new Guid(assetToAdd.Id));
@@ -62,7 +63,7 @@ namespace ImmichFrame.Helpers
                 ImmichFrameAlbumAssets.Add(new Guid(assetToAdd.Id));
                 //only keep 50 most recent assets in album
                 var albumInfo = await immichApi.GetAlbumInfoAsync(new Guid(immichFrameAlbum.Id), null, null);
-                if (albumInfo.AssetCount > 50)
+                if (albumInfo.AssetCount > 100)
                 {
                     var itemToRemove = new BulkIdsDto();
                     itemToRemove.Ids.Add(ImmichFrameAlbumAssets[0]);
