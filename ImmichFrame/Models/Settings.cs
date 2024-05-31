@@ -300,11 +300,10 @@ public class Settings
                     property.SetValue(settings, value);
                     break;
                 case "Language":
-                    property.SetValue(settings, value);
-                    break;
                 case "ImmichFrameAlbumName":
                     property.SetValue(settings, value);
                     break;
+
                 default:
                     throw new SettingsNotValidException($"Element '{SettingsValue.Key}' is unknown. ('{value}')");
             }
