@@ -14,6 +14,7 @@ namespace ImmichFrame.Helpers
         private Task<Dictionary<Guid, AssetResponseDto>?>? _filteredAssetInfos;
         private DateTime lastFilteredAssetRefesh;
         private List<Guid> ImmichFrameAlbumAssets = new List<Guid>();
+        private static AlbumResponseDto immichFrameAlbum = new AlbumResponseDto();
         public Task<Dictionary<Guid, AssetResponseDto>?> FilteredAssetInfos
         {
             get
@@ -44,19 +45,6 @@ namespace ImmichFrame.Helpers
                 var settings = Settings.CurrentSettings;
                 client.UseApiKey(settings.ApiKey);
                 var immichApi = new ImmichApi(settings.ImmichServerUrl, client);
-                var immichAlbums = await immichApi.GetAllAlbumsAsync(null, null);
-                var immichFrameAlbum = immichAlbums.FirstOrDefault(album => album.AlbumName == settings.ImmichFrameAlbumName);
-                if (immichFrameAlbum == null)
-                {
-                    var albumDto = new CreateAlbumDto
-                    {
-                        AlbumName = settings.ImmichFrameAlbumName,
-                        Description = "Recent ImmichFrame Photos"
-                    };
-                    var result = await immichApi.CreateAlbumAsync(albumDto);
-                    immichFrameAlbum = new AlbumResponseDto { Id = result.Id };
-                    ImmichFrameAlbumAssets.Clear();
-                }
                 var itemsToAdd = new BulkIdsDto();
                 itemsToAdd.Ids.Add(new Guid(assetToAdd.Id));
                 await immichApi.AddAssetsToAlbumAsync(new Guid(immichFrameAlbum.Id), null, itemsToAdd);
@@ -72,7 +60,7 @@ namespace ImmichFrame.Helpers
                 }
             }
         }
-        public async Task DeleteImmichFrameAlbum()
+        public async Task DeleteAndCreateImmichFrameAlbum()
         {            
             using (var client = new HttpClient())
             {
@@ -80,11 +68,18 @@ namespace ImmichFrame.Helpers
                 client.UseApiKey(settings.ApiKey);
                 var immichApi = new ImmichApi(settings.ImmichServerUrl, client);
                 var immichAlbums = await immichApi.GetAllAlbumsAsync(null, null);
-                var immichFrameAlbum = immichAlbums.FirstOrDefault(album => album.AlbumName == settings.ImmichFrameAlbumName);
+                immichFrameAlbum = immichAlbums.FirstOrDefault(album => album.AlbumName == settings.ImmichFrameAlbumName)!;
                 if (immichFrameAlbum != null)
                 {
                     await immichApi.DeleteAlbumAsync(new Guid(immichFrameAlbum.Id));
                 }
+                var albumDto = new CreateAlbumDto
+                {
+                    AlbumName = settings.ImmichFrameAlbumName,
+                    Description = "Recent ImmichFrame Photos"
+                };
+                var result = await immichApi.CreateAlbumAsync(albumDto);
+                immichFrameAlbum = new AlbumResponseDto { Id = result.Id };
             }
         }
 
