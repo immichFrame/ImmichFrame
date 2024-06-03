@@ -23,6 +23,8 @@ public class Settings
     public int RenewImagesDuration { get; set; } = 20;
     public List<Guid> Albums { get; set; } = new List<Guid>();
     public List<Guid> People { get; set; } = new List<Guid>();
+    public bool UseImmichFrameAlbum => !string.IsNullOrWhiteSpace(ImmichFrameAlbumName);
+    public string ImmichFrameAlbumName { get; set; } = string.Empty;
     public bool ShowClock { get; set; } = true;
     public int ClockFontSize { get; set; } = 48;
     public string? ClockFormat { get; set; } = "h:mm tt";
@@ -84,6 +86,7 @@ public class Settings
         defaultSettings.DownloadImages = this.DownloadImages;
         defaultSettings.ShowMemories = this.ShowMemories;
         defaultSettings.RenewImagesDuration = this.RenewImagesDuration;
+        defaultSettings.ImmichFrameAlbumName = this.ImmichFrameAlbumName;
         defaultSettings.ShowClock = this.ShowClock;
         defaultSettings.ClockFontSize = this.ClockFontSize;
         defaultSettings.ClockFormat = this.ClockFormat;
@@ -215,10 +218,10 @@ public class Settings
             {
                 case "ImmichServerUrl":
                     var url = value.ToString()!.TrimEnd('/');
-                    // Match URL or IP
-                    if (!Regex.IsMatch(url, @"^(https?:\/\/)?(([a-zA-Z0-9\.\-_]+(\.[a-zA-Z]{2,})+)|(\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b))(\:\d{1,5})?$"))
-                        throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. (' {value} ')");
-
+                    if (!Uri.TryCreate(url, UriKind.Absolute, out Uri result) || result == null || (result.Scheme != Uri.UriSchemeHttp && result.Scheme != Uri.UriSchemeHttps))
+                    {
+                        throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not a valid URL: '{url}'");
+                    }
                     property.SetValue(settings, url);
                     break;
                 case "Margin":
@@ -297,8 +300,10 @@ public class Settings
                     property.SetValue(settings, value);
                     break;
                 case "Language":
+                case "ImmichFrameAlbumName":
                     property.SetValue(settings, value);
                     break;
+
                 default:
                     throw new SettingsNotValidException($"Element '{SettingsValue.Key}' is unknown. ('{value}')");
             }

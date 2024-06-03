@@ -123,6 +123,10 @@
 					<TextBlock Text="ShowClock"/>
 					<CheckBox IsChecked="{Binding Settings.ShowClock}"/>
 				</StackPanel>
+        <StackPanel>
+          <TextBlock Text="ImmichFrameAlbumName (must be unique per device!)"/>
+          <TextBox Text="{Binding Settings.ImmichFrameAlbumName}"/>
+        </StackPanel>
 				<StackPanel>
 					<TextBlock Text="ClockFontSize"/>
 					<NumericUpDown Value="{Binding Settings.ClockFontSize}"/>
