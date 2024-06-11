@@ -52,11 +52,11 @@ public partial class AssetResponseDto
         string localPath;
         if (PlatformDetector.IsDesktop())
         {
-            localPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Immich_Assets", $"{Id}.{Settings.CurrentSettings.PreviewFormat}");
+            localPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Immich_Assets");
         }
         else
         {
-            localPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Immich_Assets", $"{Id}.{Settings.CurrentSettings.PreviewFormat}");
+            localPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Immich_Assets");
         }
         var localDir = Path.GetDirectoryName(localPath);
         if (!Directory.Exists(localDir))
@@ -88,7 +88,13 @@ public partial class AssetResponseDto
 
             var immichApi = new ImmichApi(settings.ImmichServerUrl, client);
 
-            var data = await immichApi.ViewAssetAsync(Guid.Parse(this.Id), string.Empty,AssetMediaSize.Preview);
+            var data = await immichApi.ViewAssetAsync(Guid.Parse(this.Id), string.Empty, AssetMediaSize.Preview);
+
+            var contentType = "";
+            if (data.Headers.ContainsKey("Content-Type"))
+            {
+                contentType = data.Headers["Content-Type"].ToString();
+            }
 
             var stream = data.Stream;
             var ms = new MemoryStream();
@@ -96,6 +102,9 @@ public partial class AssetResponseDto
             ms.Position = 0;
             if (Settings.CurrentSettings.DownloadImages)
             {
+                var ext = contentType?.ToLower() == "image/webp" ? "webp" : ".jpeg";
+                var filePath = Path.Combine(localPath, $"{Id}.{ext}");
+
                 // save to folder
                 using (var fs = File.Create(localPath))
                 {
