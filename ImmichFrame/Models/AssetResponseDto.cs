@@ -103,9 +103,9 @@ public partial class AssetResponseDto
             var ms = new MemoryStream();
             stream.CopyTo(ms);
             ms.Position = 0;
-            if (Settings.CurrentSettings.DownloadImages)
+            if (!string.IsNullOrWhiteSpace(contentType) && Settings.CurrentSettings.DownloadImages)
             {
-                var ext = contentType?.ToLower() == "image/webp" ? "webp" : "jpeg";
+                var ext = contentType.ToLower() == "image/webp" ? "webp" : "jpeg";
                 var filePath = Path.Combine(localPath, $"{Id}.{ext}");
 
                 // save to folder
