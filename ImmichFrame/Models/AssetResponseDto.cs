@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Net.Http;
 using System.Text.Json.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
 using ThumbHashes;
 
@@ -51,11 +52,11 @@ public partial class AssetResponseDto
         string localPath;
         if (PlatformDetector.IsDesktop())
         {
-            localPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Immich_Assets", $"{Id}.{ThumbnailFormat.JPEG}");
+            localPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Immich_Assets", $"{Id}.{Settings.CurrentSettings.PreviewFormat}");
         }
         else
         {
-            localPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Immich_Assets", $"{Id}.{ThumbnailFormat.JPEG}");
+            localPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Immich_Assets", $"{Id}.{Settings.CurrentSettings.PreviewFormat}");
         }
         var localDir = Path.GetDirectoryName(localPath);
         if (!Directory.Exists(localDir))
@@ -87,7 +88,7 @@ public partial class AssetResponseDto
 
             var immichApi = new ImmichApi(settings.ImmichServerUrl, client);
 
-            var data = await immichApi.GetAssetThumbnailAsync(ThumbnailFormat.JPEG, Guid.Parse(this.Id), null);
+            var data = await immichApi.ViewAssetAsync(Guid.Parse(this.Id), string.Empty,AssetMediaSize.Preview);
 
             var stream = data.Stream;
             var ms = new MemoryStream();

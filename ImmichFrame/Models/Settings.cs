@@ -1,10 +1,12 @@
 ﻿using ImmichFrame.Exceptions;
+using ImmichFrame.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
@@ -15,6 +17,33 @@ public class Settings
 {
     public string ImmichServerUrl { get; set; } = string.Empty;
     public string ApiKey { get; set; } = string.Empty;
+
+    private string _previewFormat;
+    private string _thumbnailFormat;
+    public string PreviewFormat
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(_previewFormat))
+            {
+                LoadAssetFormats();
+            }
+
+            return _previewFormat;
+        }
+    }
+    public string ThumbnailFormat
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(_thumbnailFormat))
+            {
+                LoadAssetFormats();
+            }
+
+            return _thumbnailFormat;
+        }
+    }
     public string Margin { get; set; } = "0,0,0,0";
     public int Interval { get; set; } = 8;
     public double TransitionDuration { get; set; } = 1;
@@ -125,6 +154,19 @@ public class Settings
 
         if (string.IsNullOrWhiteSpace(this.ApiKey))
             throw new SettingsNotValidException($"Settings element '{nameof(ApiKey)}' is required!");
+    }
+
+    private void LoadAssetFormats()
+    {
+        using (var client = new HttpClient())
+        {
+            var api = new ImmichApi(this.ImmichServerUrl, client);
+            client.UseApiKey(ApiKey);
+
+            var cfg = api.GetConfigAsync().Result;
+            _previewFormat = cfg.Image.PreviewFormat.ToString();
+            _thumbnailFormat = cfg.Image.ThumbnailFormat.ToString();
+        }
     }
 
     private static Settings ParseFromXml()
