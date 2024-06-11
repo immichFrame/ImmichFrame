@@ -1,6 +1,7 @@
 ﻿using ImmichFrame.Helpers;
 using System;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Text.Json.Serialization;
 using System.Threading;
@@ -58,21 +59,23 @@ public partial class AssetResponseDto
         {
             localPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Immich_Assets");
         }
-        var localDir = Path.GetDirectoryName(localPath);
-        if (!Directory.Exists(localDir))
+
+        if (!Directory.Exists(localPath))
         {
-            Directory.CreateDirectory(localDir!);
+            Directory.CreateDirectory(localPath!);
         }
 
-        if (File.Exists(localPath))
+        var file = Directory.GetFiles(localPath!).FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == Id);
+
+        if (!string.IsNullOrWhiteSpace(file))
         {
-            if (Settings.CurrentSettings.RenewImagesDuration < (DateTime.UtcNow - File.GetCreationTimeUtc(localPath)).Days)
+            if (Settings.CurrentSettings.RenewImagesDuration < (DateTime.UtcNow - File.GetCreationTimeUtc(file)).Days)
             {
-                File.Delete(localPath);
+                File.Delete(file);
             }
             else
             {
-                return File.OpenRead(localPath);
+                return File.OpenRead(file);
             }
         }
 
@@ -106,7 +109,7 @@ public partial class AssetResponseDto
                 var filePath = Path.Combine(localPath, $"{Id}.{ext}");
 
                 // save to folder
-                using (var fs = File.Create(localPath))
+                using (var fs = File.Create(filePath))
                 {
                     ms.CopyTo(fs);
                     ms.Position = 0;
