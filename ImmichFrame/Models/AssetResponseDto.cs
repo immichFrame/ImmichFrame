@@ -1,8 +1,10 @@
 ﻿using ImmichFrame.Helpers;
 using System;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Text.Json.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
 using ThumbHashes;
 
@@ -51,27 +53,29 @@ public partial class AssetResponseDto
         string localPath;
         if (PlatformDetector.IsDesktop())
         {
-            localPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Immich_Assets", $"{Id}.{ThumbnailFormat.JPEG}");
+            localPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Immich_Assets");
         }
         else
         {
-            localPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Immich_Assets", $"{Id}.{ThumbnailFormat.JPEG}");
-        }
-        var localDir = Path.GetDirectoryName(localPath);
-        if (!Directory.Exists(localDir))
-        {
-            Directory.CreateDirectory(localDir!);
+            localPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Immich_Assets");
         }
 
-        if (File.Exists(localPath))
+        if (!Directory.Exists(localPath))
         {
-            if (Settings.CurrentSettings.RenewImagesDuration < (DateTime.UtcNow - File.GetCreationTimeUtc(localPath)).Days)
+            Directory.CreateDirectory(localPath!);
+        }
+
+        var file = Directory.GetFiles(localPath!).FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == Id);
+
+        if (!string.IsNullOrWhiteSpace(file))
+        {
+            if (Settings.CurrentSettings.RenewImagesDuration < (DateTime.UtcNow - File.GetCreationTimeUtc(file)).Days)
             {
-                File.Delete(localPath);
+                File.Delete(file);
             }
             else
             {
-                return File.OpenRead(localPath);
+                return File.OpenRead(file);
             }
         }
 
@@ -87,16 +91,25 @@ public partial class AssetResponseDto
 
             var immichApi = new ImmichApi(settings.ImmichServerUrl, client);
 
-            var data = await immichApi.GetAssetThumbnailAsync(ThumbnailFormat.JPEG, Guid.Parse(this.Id), null);
+            var data = await immichApi.ViewAssetAsync(Guid.Parse(this.Id), string.Empty, AssetMediaSize.Preview);
+
+            var contentType = "";
+            if (data.Headers.ContainsKey("Content-Type"))
+            {
+                contentType = data.Headers["Content-Type"].ToString();
+            }
 
             var stream = data.Stream;
             var ms = new MemoryStream();
             stream.CopyTo(ms);
             ms.Position = 0;
-            if (Settings.CurrentSettings.DownloadImages)
+            if (!string.IsNullOrWhiteSpace(contentType) && Settings.CurrentSettings.DownloadImages)
             {
+                var ext = contentType.ToLower() == "image/webp" ? "webp" : "jpeg";
+                var filePath = Path.Combine(localPath, $"{Id}.{ext}");
+
                 // save to folder
-                using (var fs = File.Create(localPath))
+                using (var fs = File.Create(filePath))
                 {
                     ms.CopyTo(fs);
                     ms.Position = 0;

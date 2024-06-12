@@ -137,7 +137,7 @@ namespace ImmichFrame.Helpers
                 foreach (var lane in memoryLane)
                 {
                     var assets = lane.Assets.ToList();
-                    assets.ForEach(asset => asset.ImageDesc = lane.Title);
+                    assets.ForEach(asset => asset.ImageDesc = $"{lane.YearsAgo} {(lane.YearsAgo == 1 ? "year" : "years")} ago");
 
                     allAssets.AddRange(assets);
                 }
