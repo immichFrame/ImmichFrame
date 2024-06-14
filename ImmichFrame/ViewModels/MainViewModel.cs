@@ -124,52 +124,62 @@ public partial class MainViewModel : NavigatableViewModelBase
 
     public async Task ShowNextImage()
     {
-        try
+        int attempt = 0;
+
+        while (attempt < 2)
         {
-            if (TimerEnabled)
+            try
             {
-
-                LastAsset = CurrentAsset;
-
-                if (NextAsset?.Image == null)
+                if (TimerEnabled)
                 {
-                    // Load Image if next image was not ready
-                    CurrentAsset = await _assetHelper.GetNextAsset();
+                    LastAsset = CurrentAsset;
 
-                    if (CurrentAsset != null)
+                    if (NextAsset?.Image == null)
                     {
-                        await SetImage(CurrentAsset);
+                        // Load Image if next image was not ready
+                        CurrentAsset = await _assetHelper.GetNextAsset();
+
+                        if (CurrentAsset != null)
+                        {
+                            await SetImage(CurrentAsset);
+                        }
                     }
-                }
-                else
-                {
-                    // Use preloaded asset
-
-                    await SetImage(NextAsset);
-                    CurrentAsset = NextAsset.Asset;
-                    NextAsset = null;
-                }
-
-                // Load next asset without waiting
-                _ = Task.Run(async () =>
-                {
-                    var asset = await _assetHelper.GetNextAsset();
-                    if (asset != null)
+                    else
                     {
-                        NextAsset = new PreloadedAsset(asset);
-                        // Preload the actual Image
-                        await NextAsset.Preload();
+                        // Use preloaded asset
+                        await SetImage(NextAsset);
+                        CurrentAsset = NextAsset.Asset;
+                        NextAsset = null;
                     }
-                });
+
+                    // Load next asset without waiting
+                    _ = Task.Run(async () =>
+                    {
+                        var asset = await _assetHelper.GetNextAsset();
+                        if (asset != null)
+                        {
+                            NextAsset = new PreloadedAsset(asset);
+                            // Preload the actual Image
+                            await NextAsset.Preload();
+                        }
+                    });
+                }
+
+                break;
             }
-        }
-        catch (AssetNotFoundException)
-        {
-            // Do not show message
-        }
-        catch (Exception ex)
-        {
-            this.Navigate(new ErrorViewModel(ex));
+            catch (AssetNotFoundException)
+            {
+                // Do not show message and break the loop
+                break;
+            }
+            catch (Exception ex)
+            {
+                attempt++;
+                if (attempt >= 2)
+                {
+                    this.Navigate(new ErrorViewModel(ex));
+                }
+            }
         }
     }
 
@@ -184,18 +194,29 @@ public partial class MainViewModel : NavigatableViewModelBase
     }
     public async Task ShowPreviousImage()
     {
-        try
+        int attempt = 0;
+
+        while (attempt < 2)
         {
-            if (LastAsset != null)
+            try
             {
-                TimerEnabled = false;
-                await SetImage(LastAsset);
-                TimerEnabled = true;
+                if (LastAsset != null)
+                {
+                    TimerEnabled = false;
+                    await SetImage(LastAsset);
+                    TimerEnabled = true;
+                }
+
+                break;
             }
-        }
-        catch (Exception ex)
-        {
-            this.Navigate(new ErrorViewModel(ex));
+            catch (Exception ex)
+            {
+                attempt++;
+                if (attempt >= 2)
+                {
+                    this.Navigate(new ErrorViewModel(ex));
+                }
+            }
         }
     }
     public void PauseImageAction()
