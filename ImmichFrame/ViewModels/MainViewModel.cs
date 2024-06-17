@@ -126,7 +126,7 @@ public partial class MainViewModel : NavigatableViewModelBase
     {
         int attempt = 0;
 
-        while (attempt < 2)
+        while (attempt < 3)
         {
             try
             {
@@ -175,7 +175,7 @@ public partial class MainViewModel : NavigatableViewModelBase
             catch (Exception ex)
             {
                 attempt++;
-                if (attempt >= 2)
+                if (attempt >= 3)
                 {
                     this.Navigate(new ErrorViewModel(ex));
                 }
@@ -196,7 +196,7 @@ public partial class MainViewModel : NavigatableViewModelBase
     {
         int attempt = 0;
 
-        while (attempt < 2)
+        while (attempt < 3)
         {
             try
             {
@@ -212,7 +212,7 @@ public partial class MainViewModel : NavigatableViewModelBase
             catch (Exception ex)
             {
                 attempt++;
-                if (attempt >= 2)
+                if (attempt >= 3)
                 {
                     this.Navigate(new ErrorViewModel(ex));
                 }
