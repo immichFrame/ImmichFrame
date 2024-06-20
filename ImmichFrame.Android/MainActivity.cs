@@ -1,6 +1,5 @@
 ﻿using Android.App;
 using Android.Content.PM;
-using Android.OS;
 using Avalonia;
 using Avalonia.Android;
 
@@ -10,6 +9,7 @@ namespace ImmichFrame.Android;
     Label = "ImmichFrame",
     Theme = "@style/MyTheme.NoActionBar",
     Icon = "@drawable/Immich",
+    Name = "com.immichframe.immichframe.MainActivity",
     MainLauncher = true,
     ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize | ConfigChanges.UiMode)]
 public class MainActivity : AvaloniaMainActivity<App>
