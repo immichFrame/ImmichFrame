@@ -50,8 +50,8 @@
 						  Command="{Binding QuitCommand}"
 						  HorizontalContentAlignment="Center"/>
 		</Grid>
-		<ScrollViewer Padding="20">
-			<StackPanel Orientation="Vertical" Margin="10">
+		<ScrollViewer x:Name="scrollViewer" Padding="20">
+			<StackPanel Name="stackPanel" Orientation="Vertical" Margin="10" >
 				<StackPanel>
 					<TextBlock Text="ImmichServerUrl"/>
 					<TextBox Text="{Binding Settings.ImmichServerUrl}"/>
@@ -187,6 +187,7 @@
 					<TextBlock Text="Language"/>
 					<TextBox Text="{Binding Settings.Language}"/>
 				</StackPanel>
+        <Rectangle Height="600" Fill="Transparent" />
 			</StackPanel>
 		</ScrollViewer>
 	</DockPanel>
