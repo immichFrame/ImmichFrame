@@ -15,13 +15,13 @@ namespace ImmichFrame.Models;
 
 public partial class Settings
 {
-    [GeneratedRegex(@"^((\d+)||(\d+\,\d+)||(\d+\,\d+\,\d+\,\d+))$")]
+    [GeneratedRegex(@"^(([0-9]+)||([0-9]+\,[0-9]+)||([0-9]+\,[0-9]+\,[0-9]+\,[0-9]+))$")]
     private static partial Regex MarginRegex();
 
     [GeneratedRegex(@"^(?i)(metric|imperial)$")]
     private static partial Regex UnitRegex();
 
-    [GeneratedRegex(@"^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$")]
+    [GeneratedRegex(@"^(-?[0-9]+(\.[0-9]+)?),\s*(-?[0-9]+(\.[0-9]+)?)$")]
     private static partial Regex LatLongRegex();
 
     [GeneratedRegex(@"^#(?:[0-9a-fA-F]{3}){1,2}$")]
