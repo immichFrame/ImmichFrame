@@ -13,8 +13,20 @@ using System.Xml.Linq;
 namespace ImmichFrame.Models;
 
 
-public class Settings
+public partial class Settings
 {
+    [GeneratedRegex(@"^((\d+)||(\d+\,\d+)||(\d+\,\d+\,\d+\,\d+))$")]
+    private static partial Regex MarginRegex();
+
+    [GeneratedRegex(@"^(?i)(metric|imperial)$")]
+    private static partial Regex UnitRegex();
+
+    [GeneratedRegex(@"^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$")]
+    private static partial Regex LatLongRegex();
+
+    [GeneratedRegex(@"^#(?:[0-9a-fA-F]{3}){1,2}$")]
+    private static partial Regex HexColorRegex();
+    
     public string ImmichServerUrl { get; set; } = string.Empty;
     public string ApiKey { get; set; } = string.Empty;
     public string Margin { get; set; } = "0,0,0,0";
@@ -228,7 +240,7 @@ public class Settings
                     break;
                 case "Margin":
                     var margin = value.ToString()!;
-                    if (!Regex.IsMatch(margin, @"^((\d+)||(\d+\,\d+)||(\d+\,\d+\,\d+\,\d+))$"))
+                    if (!MarginRegex().IsMatch(margin))
                     {
                         throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. (' {value} ')");
                     }
@@ -284,20 +296,20 @@ public class Settings
                     property.SetValue(settings, value);
                     break;
                 case "UnitSystem":
-                    if (!Regex.IsMatch(value.ToString()!, @"^(?i)(metric|imperial)$"))
+                    if (!UnitRegex().IsMatch(value.ToString()!))
                         throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. ('{value}')");
                     value = value.ToString()!.ToLower() == "metric" ? OpenWeatherMap.UnitSystem.Metric : OpenWeatherMap.UnitSystem.Imperial;
                     property.SetValue(settings, value);
                     break;
                 case "WeatherLatLong":
                     // Regex match Lat/Lon
-                    if (!Regex.IsMatch(value.ToString()!, @"^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$"))
+                    if (!LatLongRegex().IsMatch(value.ToString()!))
                         throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. ('{value}')");
                     property.SetValue(settings, value);
                     break;
                 case "FontColor":
                     // Regex match Hex color
-                    if (!Regex.IsMatch(value.ToString()!, @"^#(?:[0-9a-fA-F]{3}){1,2}$"))
+                    if (!HexColorRegex().IsMatch(value.ToString()!))
                         throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. ('{value}')");
                     property.SetValue(settings, value);
                     break;
