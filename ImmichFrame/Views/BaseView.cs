@@ -10,6 +10,7 @@ namespace ImmichFrame.Views
 {
     public class BaseView : UserControl, IDisposable
     {
+        public event EventHandler? MessageBoxClosed;
         public BaseView()
         {
             Loaded += (sender, args) =>
@@ -45,6 +46,7 @@ namespace ImmichFrame.Views
         {
             var box = MessageBoxManager.GetMessageBoxStandard(title, message, ButtonEnum.Ok);
             await box.ShowAsPopupAsync(this);
+            MessageBoxClosed?.Invoke(this, EventArgs.Empty);
         }
 
         public void Dispose(object? sender, EventArgs? e)
