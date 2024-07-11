@@ -5,6 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="900"
 			 xmlns:vm="using:ImmichFrame.ViewModels"
+             KeyDown="On_KeyDown"
              x:DataType="vm:ErrorViewModel">
 	<Design.DataContext>
 		<vm:ErrorViewModel />
@@ -22,25 +23,28 @@
 				<Border Grid.Column="1" Grid.Row="1" Background="Teal" CornerRadius="10" Margin="0 20">
 						<StackPanel Margin="10">
 							<TextBlock HorizontalAlignment="Center" TextWrapping="Wrap" Text="An error occured"></TextBlock>
-							<TextBlock Margin="5 20" TextWrapping="Wrap" Text="{Binding Ex.Message}"></TextBlock>
+							<TextBlock Margin="5 20" TextWrapping="Wrap" Text="{Binding Ex.Message}" TabIndex="0"></TextBlock>
 							<Expander Margin="5 0" Header="Show more information">
 								<TextBlock TextWrapping="Wrap" Text="{Binding Ex}"></TextBlock>
 							</Expander>
 							<WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="5">
 								<Button
 									Content="Copy to clipboard"
-									Command="{Binding CopyCommand}"/>
+									Command="{Binding CopyCommand}"
+                  TabIndex="1"/>
 								<Button
 									Content="Open Log"
 									IsVisible="{Binding LogVisible}"
-									Command="{Binding LogCommand}"/>
+									Command="{Binding LogCommand}"
+                  TabIndex="2"/>
 								<Button
 									Content="Settings"
-									IsVisible="{Binding SettingsVisible}"
-									Command="{Binding SettingsCommand}"/>
+									Command="{Binding SettingsCommand}"
+                  TabIndex="3"/>
 								<Button
 									Content="Continue"
-									Command="{Binding ContinueCommand}"/>
+									Command="{Binding ContinueCommand}"
+                  TabIndex="4"/>
 							</WrapPanel>
 						</StackPanel>
 				</Border>
