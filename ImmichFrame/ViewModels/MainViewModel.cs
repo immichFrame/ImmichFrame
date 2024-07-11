@@ -65,7 +65,7 @@ public partial class MainViewModel : NavigatableViewModelBase
                 ThumbhashImage = new Bitmap(tmbStream)
             };
 
-            ImageDate = asset?.LocalDateTime.ToString(Settings.PhotoDateFormat,culture) ?? string.Empty;
+            ImageDate = asset?.LocalDateTime.ToString(Settings.PhotoDateFormat, culture) ?? string.Empty;
             ImageDesc = asset?.ImageDesc ?? string.Empty;
 
             if (asset?.ExifInfo != null)
@@ -73,7 +73,7 @@ public partial class MainViewModel : NavigatableViewModelBase
                 var locationData = new[] {
                     asset.ExifInfo.City,
                     asset.ExifInfo.Country
-                }.Where(x=>!string.IsNullOrWhiteSpace(x));
+                }.Where(x => !string.IsNullOrWhiteSpace(x));
 
                 ImageLocation = string.Join(", ", locationData);
             }
@@ -82,7 +82,7 @@ public partial class MainViewModel : NavigatableViewModelBase
                 ImageLocation = string.Empty;
             }
         }
-        if(Settings.UseImmichFrameAlbum)
+        if (Settings.UseImmichFrameAlbum)
         {
             await _assetHelper.AddAssetToAlbum(asset!);
         }
@@ -95,7 +95,7 @@ public partial class MainViewModel : NavigatableViewModelBase
     }
     public void LiveTimeTick(object? state)
     {
-        LiveTime = DateTime.Now.ToString(Settings.ClockFormat,culture);
+        LiveTime = DateTime.Now.ToString(Settings.ClockFormat, culture);
     }
     public void WeatherTick(object? state)
     {
@@ -109,10 +109,7 @@ public partial class MainViewModel : NavigatableViewModelBase
 
     public void NavigateSettingsPageAction()
     {
-        if (!Settings.IsFromXmlFile)
-        {
-            Navigate(new SettingsViewModel());
-        }
+        Navigate(new SettingsViewModel());
     }
 
     public async void NextImageAction()

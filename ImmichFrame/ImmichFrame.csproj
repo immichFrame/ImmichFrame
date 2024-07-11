@@ -13,11 +13,11 @@
   <ItemGroup>
     <None Remove="Assets\Immich.ico" />
     <None Remove="Assets\Immich.png" />
-    <None Remove="Settings.example.xml" />
+    <None Remove="Settings.json" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Settings.example.xml">
+    <Content Include="Settings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -52,11 +52,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Properties\Settings.Designer.cs">
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-    </Compile>
     <Compile Update="Views\ErrorView.axaml.cs">
       <DependentUpon>ErrorView.axaml</DependentUpon>
     </Compile>
@@ -69,10 +64,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
     <None Update="Settings.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

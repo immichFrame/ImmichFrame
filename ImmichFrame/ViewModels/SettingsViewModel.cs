@@ -104,8 +104,7 @@ namespace ImmichFrame.ViewModels
                 Settings.People = PeopleList.Select(x => Guid.Parse(x.Value)).ToList();
                 Settings.Albums = AlbumList.Select(x => Guid.Parse(x.Value)).ToList();
 
-                Settings.Serialize();
-
+                Settings.SaveSettings(Settings);
                 var settings = Settings.CurrentSettings;
             }
             catch (Exception ex)

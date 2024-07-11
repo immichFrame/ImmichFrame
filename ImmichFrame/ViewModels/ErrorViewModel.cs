@@ -13,8 +13,6 @@ public partial class ErrorViewModel : NavigatableViewModelBase
     [ObservableProperty]
     private Exception ex;
     [ObservableProperty]
-    private bool settingsVisible;
-    [ObservableProperty]
     private bool logVisible;
 
     public ICommand QuitCommand { get; set; }
@@ -31,8 +29,6 @@ public partial class ErrorViewModel : NavigatableViewModelBase
     public ErrorViewModel(Exception ex)
     {
         Ex = ex;
-
-        SettingsVisible = !Settings.IsFromXmlFile;
         LogVisible = false;
 
         QuitCommand = new RelayCommand(QuitAction);
