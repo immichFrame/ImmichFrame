@@ -13,11 +13,11 @@
   <ItemGroup>
     <None Remove="Assets\Immich.ico" />
     <None Remove="Assets\Immich.png" />
-    <None Remove="Settings.json" />
+    <None Remove="Settings.example.json" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Settings.json">
+    <Content Include="Settings.example.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
