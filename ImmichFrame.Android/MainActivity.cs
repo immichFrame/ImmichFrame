@@ -1,5 +1,6 @@
 ﻿using Android.App;
 using Android.Content.PM;
+using Android.Views;
 using Avalonia;
 using Avalonia.Android;
 
@@ -16,6 +17,7 @@ public class MainActivity : AvaloniaMainActivity<App>
 {
     protected override AppBuilder CustomizeAppBuilder(AppBuilder builder)
     {
+        Window!.AddFlags(WindowManagerFlags.KeepScreenOn);
         return base.CustomizeAppBuilder(builder)
             .WithInterFont();
     }
