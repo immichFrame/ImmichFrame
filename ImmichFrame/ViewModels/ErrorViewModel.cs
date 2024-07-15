@@ -40,7 +40,7 @@ public partial class ErrorViewModel : NavigatableViewModelBase
 
     public async void CopyAction()
     {
-        var clipboard = TopLevel.GetTopLevel(GetUserControl())?.Clipboard;
+        var clipboard = TopLevel.GetTopLevel(GetUserControl!())?.Clipboard;
 
         if (clipboard == null)
             return;

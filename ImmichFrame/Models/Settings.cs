@@ -161,7 +161,7 @@ namespace ImmichFrame.Models
                 {
                     case "ImmichServerUrl":
                         var url = value.ToString()!.TrimEnd('/');
-                        if (!Uri.TryCreate(url, UriKind.Absolute, out Uri result) || result == null || (result.Scheme != Uri.UriSchemeHttp && result.Scheme != Uri.UriSchemeHttps))
+                        if (!Uri.TryCreate(url, UriKind.Absolute, out Uri? result) || result == null || (result.Scheme != Uri.UriSchemeHttp && result.Scheme != Uri.UriSchemeHttps))
                         {
                             throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not a valid URL: '{url}'");
                         }
