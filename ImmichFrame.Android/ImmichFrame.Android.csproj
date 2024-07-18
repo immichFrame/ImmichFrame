@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net7.0-android</TargetFramework>
+    <TargetFramework>net8.0-android</TargetFramework>
     <Nullable>enable</Nullable>
     <AndroidPackageFormat>apk</AndroidPackageFormat>
-    <AndroidEnableProfiledAot>True</AndroidEnableProfiledAot>
+    <RunAOTCompilation>true</RunAOTCompilation>
   </PropertyGroup>  
 
   <ItemGroup>
-    <PackageReference Include="Avalonia.Android" Version="$(AvaloniaVersion)" />
+    <PackageReference Include="Avalonia.Android" Version="11.1.0-rc2" />
   </ItemGroup>
 
   <ItemGroup>

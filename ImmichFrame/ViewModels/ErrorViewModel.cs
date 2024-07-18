@@ -1,7 +1,6 @@
 ﻿using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using ImmichFrame.Helpers;
-using ImmichFrame.Models;
 using System;
 using System.Windows.Input;
 

@@ -6,9 +6,7 @@
 			 xmlns:templates="clr-namespace:ImmichFrame.Views.Templates"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="900"
 			 xmlns:vm="using:ImmichFrame.ViewModels"
-             AttachedToVisualTree="UserControl_AttachedToVisualTree"
              GotFocus="GotFocus_Handler"
-             KeyDown="On_KeyDown"
              x:DataType="vm:SettingsViewModel">
   <Design.DataContext>
     <vm:SettingsViewModel />
@@ -29,7 +27,6 @@
       <Setter Property="Margin" Value="0 0 0 5"/>
       <Setter Property="VerticalAlignment" Value="Center"/>
       <Setter Property="FormatString" Value="F0"/>
-      <Setter Property="Focusable" Value="True"/>
     </Style>
     <Style Selector="Button">
       <Setter Property="Margin" Value="5 0 5 5"/>

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.Serialization;
 
 namespace ImmichFrame.Exceptions
 {
@@ -8,7 +7,6 @@ namespace ImmichFrame.Exceptions
         public ImmichFrameException() { }
         public ImmichFrameException(string? message) : base(message) { }
         public ImmichFrameException(string? message, Exception? innerException) : base(message, innerException) { }
-        protected ImmichFrameException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
 
     public class AssetNotFoundException : ImmichFrameException
@@ -16,7 +14,6 @@ namespace ImmichFrame.Exceptions
         public AssetNotFoundException() : base() { }
         public AssetNotFoundException(string message) : base(message) { }
         public AssetNotFoundException(string message, Exception innerException) : base(message, innerException) { }
-        public AssetNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
 
     public class AlbumNotFoundException : ImmichFrameException
@@ -24,27 +21,23 @@ namespace ImmichFrame.Exceptions
         public AlbumNotFoundException() : base() { }
         public AlbumNotFoundException(string message) : base(message) { }
         public AlbumNotFoundException(string message, Exception innerException) : base(message, innerException) { }
-        public AlbumNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
-public class PersonNotFoundException : ImmichFrameException
+    public class PersonNotFoundException : ImmichFrameException
     {
         public PersonNotFoundException() : base() { }
         public PersonNotFoundException(string message) : base(message) { }
         public PersonNotFoundException(string message, Exception innerException) : base(message, innerException) { }
-        public PersonNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
     public class MemoryNotFoundException : ImmichFrameException
     {
         public MemoryNotFoundException() : base() { }
         public MemoryNotFoundException(string message) : base(message) { }
         public MemoryNotFoundException(string message, Exception innerException) : base(message, innerException) { }
-        public MemoryNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
     public class SettingsNotValidException : ImmichFrameException
     {
         public SettingsNotValidException() : base() { }
         public SettingsNotValidException(string message) : base(message) { }
         public SettingsNotValidException(string message, Exception innerException) : base(message, innerException) { }
-        public SettingsNotValidException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
 }

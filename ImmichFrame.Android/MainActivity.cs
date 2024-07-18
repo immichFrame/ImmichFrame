@@ -16,7 +16,7 @@ namespace ImmichFrame.Android;
     ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize | ConfigChanges.UiMode)]
 public class MainActivity : AvaloniaMainActivity<App>
 {
-    protected override void OnCreate(Bundle savedInstanceState)
+    protected override void OnCreate(Bundle? savedInstanceState)
     {
         Window!.AddFlags(WindowManagerFlags.KeepScreenOn);
         base.OnCreate(savedInstanceState);

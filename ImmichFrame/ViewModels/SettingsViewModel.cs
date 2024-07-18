@@ -92,7 +92,7 @@ namespace ImmichFrame.ViewModels
             }
             catch (SettingsNotValidException)
             {
-                ShowMessageBox!("Please provide valid settings", "Invalid Settings");
+                this.Navigate(new ErrorViewModel(new Exception("Please provide valid settings")));
             }
         }
 
@@ -110,7 +110,7 @@ namespace ImmichFrame.ViewModels
             catch (Exception ex)
             {
                 // could not parse 
-                ShowMessageBox!(ex.Message, "Error");
+                this.Navigate(new ErrorViewModel(ex));
                 return;
             }
 
