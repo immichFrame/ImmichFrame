@@ -1,12 +1,15 @@
-﻿using ImmichFrame.Exceptions;
+﻿using Avalonia.Platform.Storage;
+using ImmichFrame.Exceptions;
 using ImmichFrame.Helpers;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace ImmichFrame.Models
 {
@@ -259,6 +262,23 @@ namespace ImmichFrame.Models
         {
             var json = JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(Settings.JsonSettingsPath, json);
+        }
+        public static async Task BackupSettings(IStorageFile file)
+        {
+            var settings = CurrentSettings;
+            var json = JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true });
+            await using var stream = await file.OpenWriteAsync();
+            using var streamWriter = new StreamWriter(stream);
+            await streamWriter.WriteAsync(json);
+        }
+        public static async Task RestoreSettings(IStorageFile file)
+        {
+            await using var stream = await file.OpenReadAsync();
+            using var streamReader = new StreamReader(stream, Encoding.UTF8);
+            var jsonContents = await streamReader.ReadToEndAsync();
+            var settings = JsonSerializer.Deserialize<Settings>(jsonContents, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            _settings = settings;
+            _settings!.Validate();
         }
         private static void CreateDefaultSettingsFile()
         {

@@ -34,26 +34,33 @@
     </Style>
   </UserControl.Styles>
   <DockPanel>
-    <Grid DockPanel.Dock="Bottom" ColumnDefinitions="*,*,*">
-      <Button Grid.Column="0"
-              Content="Cancel"
+    <UniformGrid DockPanel.Dock="Bottom" Columns="3">
+      <Button Content="Cancel"
               HorizontalAlignment="Stretch"
               Command="{Binding CancelCommand}"
               HorizontalContentAlignment="Center"
               TabIndex="34"/>
-      <Button Grid.Column="1"
-              Content="Save"
+      <Button Content="Save"
               HorizontalAlignment="Stretch"
               Command="{Binding SaveCommand}"
               HorizontalContentAlignment="Center"
               TabIndex="35"/>
-      <Button Grid.Column="2"
-              Content="Quit"
+      <Button Content="Quit"
               HorizontalAlignment="Stretch"
               Command="{Binding QuitCommand}"
               HorizontalContentAlignment="Center"
               TabIndex="36"/>
-    </Grid>
+      <Button Content="Backup"
+              HorizontalAlignment="Stretch"
+              Command="{Binding BackupCommand}"
+              HorizontalContentAlignment="Center"
+              TabIndex="37"/>
+      <Button Content="Restore"
+              HorizontalAlignment="Stretch"
+              Command="{Binding RestoreCommand}"
+              HorizontalContentAlignment="Center"
+              TabIndex="38"/>
+    </UniformGrid>
     <ScrollViewer x:Name="scrollViewer" Padding="20">
       <StackPanel Name="stackPanel" Orientation="Vertical" Margin="10" >
         <StackPanel>

@@ -1,4 +1,5 @@
-﻿using Avalonia;
+﻿using Avalonia.Controls;
+using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using ImmichFrame.Exceptions;
 using ImmichFrame.Helpers;
@@ -6,6 +7,7 @@ using ImmichFrame.Models;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace ImmichFrame.ViewModels
@@ -23,6 +25,8 @@ namespace ImmichFrame.ViewModels
         public ICommand SaveCommand { get; set; }
         public ICommand CancelCommand { get; set; }
         public ICommand QuitCommand { get; set; }
+        public ICommand BackupCommand { get; set; }
+        public ICommand RestoreCommand { get; set; }
         public ICommand AddPersonCommand { get; set; }
         public ICommand RemovePersonCommand { get; set; }
         public ICommand AddAlbumCommand { get; set; }
@@ -44,6 +48,8 @@ namespace ImmichFrame.ViewModels
             SaveCommand = new RelayCommand(SaveAction);
             CancelCommand = new RelayCommand(CancelAction);
             QuitCommand = new RelayCommand(QuitAction);
+            BackupCommand = new RelayCommand(BackupAction);
+            RestoreCommand = new RelayCommand(RestoreAction);
             AddPersonCommand = new RelayCommand(AddPersonAction);
             RemovePersonCommand = new RelayCommandParams(RemovePersonAction);
             AddAlbumCommand = new RelayCommand(AddAlbumAction);
@@ -119,6 +125,59 @@ namespace ImmichFrame.ViewModels
         private void QuitAction()
         {
             Environment.Exit(0);
+        }
+        private async void BackupAction()
+        {
+            var backupFile = await ShowSaveFileDialog(true);
+            if (backupFile is not null)
+            {
+                await Settings.BackupSettings(backupFile);
+            }
+        }
+        private async void RestoreAction()
+        {
+            var restoreFile = await ShowOpenFileDialog();
+            if (restoreFile is not null)
+            {
+                await Settings.RestoreSettings(restoreFile);
+                Settings = Settings.CurrentSettings;
+            }
+        }
+        public async Task<IStorageFile?> ShowSaveFileDialog(bool showOverwritePrompt)
+        {
+            var topLevel = TopLevel.GetTopLevel(GetUserControl!());
+            if (topLevel != null)
+            {
+                var file = await topLevel.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+                {
+                    Title = "Save File",
+                    SuggestedFileName = "ImmichFrameSettings.json",
+                    ShowOverwritePrompt = showOverwritePrompt
+                });
+                if (file is not null)
+                {
+                    return file;
+                }
+            }
+            return null;
+        }
+        public async Task<IStorageFile?> ShowOpenFileDialog()
+        {
+            var topLevel = TopLevel.GetTopLevel(GetUserControl!());
+            if (topLevel != null)
+            {
+                var file = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+                {
+                    Title = "Open File",
+                    AllowMultiple = false,
+                    SuggestedFileName = "ImmichFrameSettings.json",
+                });
+                if (file is not null)
+                {
+                    return file[0];
+                }
+            }
+            return null;
         }
     }
 
