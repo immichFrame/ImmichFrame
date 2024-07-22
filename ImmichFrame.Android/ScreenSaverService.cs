@@ -1,22 +1,32 @@
 ﻿using Android.App;
 using Android.Content;
-using Android.Content.PM;
+using Android.OS;
 using Android.Service.Dreams;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ImmichFrame.Android
 {
     [Service(Name = "com.immichframe.immichframe.ScreenSaverService", Permission = "android.permission.BIND_DREAM_SERVICE")]
     public class ScreenSaverService : DreamService
     {
+        private PowerManager.WakeLock? _wakeLock;
         public override void OnAttachedToWindow()
         {
             base.OnAttachedToWindow();
-            base.Fullscreen = true;
+            
+            // Try to get a WakeLock
+            try
+            {
+                PowerManager powerManager = (PowerManager)GetSystemService(Context.PowerService)!;
+                _wakeLock = powerManager.NewWakeLock(WakeLockFlags.ScreenBright | WakeLockFlags.AcquireCausesWakeup, "ImmichFrame::ScreenSaverWakeLock");
+                if (_wakeLock != null)
+                {
+                    _wakeLock.Acquire();
+                }
+            }
+            catch
+            {
+               //couldn't get a WakeLock, just continue
+            }
         }
         public override void OnDreamingStarted()
         {
@@ -25,14 +35,27 @@ namespace ImmichFrame.Android
             var intent = new Intent(this, typeof(MainActivity));
             intent.AddFlags(ActivityFlags.NewTask);
             StartActivity(intent);
-
-            // Finish the dream (screensaver)
-            Finish();
         }
 
         public override void OnDreamingStopped()
         {
             base.OnDreamingStopped();
+            ReleaseWakeLock();
+        }
+
+        public override void OnDetachedFromWindow()
+        {
+            base.OnDetachedFromWindow();
+            ReleaseWakeLock();
+        }
+
+        private void ReleaseWakeLock()
+        {
+            if (_wakeLock != null && _wakeLock.IsHeld)
+            {
+                _wakeLock.Release();
+                _wakeLock = null;
+            }
         }
     }
 }

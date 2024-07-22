@@ -1,4 +1,5 @@
-﻿using Avalonia;
+﻿using Avalonia.Controls;
+using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using ImmichFrame.Exceptions;
 using ImmichFrame.Helpers;
@@ -6,6 +7,7 @@ using ImmichFrame.Models;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace ImmichFrame.ViewModels
@@ -23,11 +25,14 @@ namespace ImmichFrame.ViewModels
         public ICommand SaveCommand { get; set; }
         public ICommand CancelCommand { get; set; }
         public ICommand QuitCommand { get; set; }
+        public ICommand BackupCommand { get; set; }
+        public ICommand RestoreCommand { get; set; }
         public ICommand AddPersonCommand { get; set; }
         public ICommand RemovePersonCommand { get; set; }
         public ICommand AddAlbumCommand { get; set; }
         public ICommand RemoveAlbumCommand { get; set; }
         public ICommand TestMarginCommand { get; set; }
+        public event EventHandler? ListItemRemoved;
 
         public SettingsViewModel()
         {
@@ -43,6 +48,8 @@ namespace ImmichFrame.ViewModels
             SaveCommand = new RelayCommand(SaveAction);
             CancelCommand = new RelayCommand(CancelAction);
             QuitCommand = new RelayCommand(QuitAction);
+            BackupCommand = new RelayCommand(BackupAction);
+            RestoreCommand = new RelayCommand(RestoreAction);
             AddPersonCommand = new RelayCommand(AddPersonAction);
             RemovePersonCommand = new RelayCommandParams(RemovePersonAction);
             AddAlbumCommand = new RelayCommand(AddAlbumAction);
@@ -67,6 +74,7 @@ namespace ImmichFrame.ViewModels
         {
             var item = PeopleList.First(x => x.Id == Guid.Parse(param.ToString()!));
             PeopleList?.Remove(item);
+            ListItemRemoved?.Invoke(this, EventArgs.Empty);
         }
 
         private void AddAlbumAction()
@@ -78,6 +86,7 @@ namespace ImmichFrame.ViewModels
         {
             var item = AlbumList.First(x => x.Id == Guid.Parse(param.ToString()!));
             AlbumList?.Remove(item);
+            ListItemRemoved?.Invoke(this, EventArgs.Empty);
         }
 
         private void CancelAction()
@@ -89,7 +98,7 @@ namespace ImmichFrame.ViewModels
             }
             catch (SettingsNotValidException)
             {
-                ShowMessageBox("Please provide valid settings", "Invalid Settings");
+                this.Navigate(new ErrorViewModel(new Exception("Please provide valid settings")));
             }
         }
 
@@ -101,14 +110,13 @@ namespace ImmichFrame.ViewModels
                 Settings.People = PeopleList.Select(x => Guid.Parse(x.Value)).ToList();
                 Settings.Albums = AlbumList.Select(x => Guid.Parse(x.Value)).ToList();
 
-                Settings.Serialize();
-
+                Settings.SaveSettings(Settings);
                 var settings = Settings.CurrentSettings;
             }
             catch (Exception ex)
             {
                 // could not parse 
-                ShowMessageBox(ex.Message, "Error");
+                this.Navigate(new ErrorViewModel(ex));
                 return;
             }
 
@@ -117,6 +125,59 @@ namespace ImmichFrame.ViewModels
         private void QuitAction()
         {
             Environment.Exit(0);
+        }
+        private async void BackupAction()
+        {
+            var backupFile = await ShowSaveFileDialog(true);
+            if (backupFile is not null)
+            {
+                await Settings.BackupSettings(backupFile);
+            }
+        }
+        private async void RestoreAction()
+        {
+            var restoreFile = await ShowOpenFileDialog();
+            if (restoreFile is not null)
+            {
+                await Settings.RestoreSettings(restoreFile);
+                Settings = Settings.CurrentSettings;
+            }
+        }
+        public async Task<IStorageFile?> ShowSaveFileDialog(bool showOverwritePrompt)
+        {
+            var topLevel = TopLevel.GetTopLevel(GetUserControl!());
+            if (topLevel != null)
+            {
+                var file = await topLevel.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+                {
+                    Title = "Save File",
+                    SuggestedFileName = "ImmichFrameSettings.json",
+                    ShowOverwritePrompt = showOverwritePrompt
+                });
+                if (file is not null)
+                {
+                    return file;
+                }
+            }
+            return null;
+        }
+        public async Task<IStorageFile?> ShowOpenFileDialog()
+        {
+            var topLevel = TopLevel.GetTopLevel(GetUserControl!());
+            if (topLevel != null)
+            {
+                var file = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+                {
+                    Title = "Open File",
+                    AllowMultiple = false,
+                    SuggestedFileName = "ImmichFrameSettings.json",
+                });
+                if (file is not null)
+                {
+                    return file[0];
+                }
+            }
+            return null;
         }
     }
 

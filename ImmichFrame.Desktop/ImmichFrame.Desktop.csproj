@@ -3,18 +3,21 @@
     <OutputType>WinExe</OutputType>
     <!--If you are willing to use Windows/MacOS native APIs you will need to create 3 projects.
     One for Windows with net7.0-windows TFM, one for MacOS with net7.0-macos and one with net7.0 TFM for Linux.-->
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <AssemblyName>Immich_Frame</AssemblyName>
     <AssemblyVersion>1.0.5.0</AssemblyVersion> <!-- Set the assembly version -->
     <FileVersion>1.0.5.0</FileVersion>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\Immich.ico</ApplicationIcon>
   </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Assets\Immich.ico" />
+  </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Avalonia.Desktop" Version="$(AvaloniaVersion)" />
-    <PackageReference Include="MessageBox.Avalonia" Version="3.1.5.1" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.1.0" />
   </ItemGroup>
 
   <ItemGroup>

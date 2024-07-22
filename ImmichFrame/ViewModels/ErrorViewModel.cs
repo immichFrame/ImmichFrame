@@ -1,7 +1,6 @@
 ﻿using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using ImmichFrame.Helpers;
-using ImmichFrame.Models;
 using System;
 using System.Windows.Input;
 
@@ -12,8 +11,6 @@ public partial class ErrorViewModel : NavigatableViewModelBase
 
     [ObservableProperty]
     private Exception ex;
-    [ObservableProperty]
-    private bool settingsVisible;
     [ObservableProperty]
     private bool logVisible;
 
@@ -31,8 +28,6 @@ public partial class ErrorViewModel : NavigatableViewModelBase
     public ErrorViewModel(Exception ex)
     {
         Ex = ex;
-
-        SettingsVisible = !Settings.IsFromXmlFile;
         LogVisible = false;
 
         QuitCommand = new RelayCommand(QuitAction);
@@ -44,7 +39,7 @@ public partial class ErrorViewModel : NavigatableViewModelBase
 
     public async void CopyAction()
     {
-        var clipboard = TopLevel.GetTopLevel(GetUserControl())?.Clipboard;
+        var clipboard = TopLevel.GetTopLevel(GetUserControl!())?.Clipboard;
 
         if (clipboard == null)
             return;

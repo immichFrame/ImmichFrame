@@ -7,9 +7,9 @@ namespace ImmichFrame.ViewModels;
 
 public class ViewModelBase : ObservableObject
 {
-    public Func<string, string, Task> ShowMessageBoxFromThread;
-    public Func<string, string, Task> ShowMessageBox;
-    public Func<UserControl> GetUserControl;
+    public Func<string, string, Task>? ShowMessageBoxFromThread;
+    public Func<string, string, Task>? ShowMessageBox;
+    public Func<UserControl>? GetUserControl;
 
     public virtual void UpdateMargin(string margin)
     {

@@ -11,7 +11,7 @@ namespace ImmichFrame.Helpers
 
         public void Execute(object? parameter) => _action();
 
-        public event EventHandler? CanExecuteChanged;
+        public event EventHandler? CanExecuteChanged { add { } remove { } }
 
         public RelayCommand(Action action)
         {
@@ -31,7 +31,7 @@ namespace ImmichFrame.Helpers
             return true;
         }
 
-        public event EventHandler? CanExecuteChanged;
+        public event EventHandler? CanExecuteChanged { add { } remove { } }
 
         public void Execute(object? parameter)
         {
