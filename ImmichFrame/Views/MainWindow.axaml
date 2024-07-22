@@ -6,7 +6,7 @@
         xmlns:views="clr-namespace:ImmichFrame.Views"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="ImmichFrame.Views.MainWindow"
-        Icon="/Assets/Immich.ico"
+        Icon="/Assets/AppIcon.ico"
         Title="ImmichFrame">
 	<views:WindowView />
 </Window>

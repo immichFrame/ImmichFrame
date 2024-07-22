@@ -11,7 +11,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Assets\Immich.ico" />
     <None Remove="Assets\Immich.png" />
     <None Remove="Settings.example.json" />
   </ItemGroup>

@@ -10,7 +10,7 @@
 
   <application
     android:label="ImmichFrame"
-    android:icon="@drawable/immich"
+    android:icon="@drawable/appicon"
     android:usesCleartextTraffic="true">
 
     <activity android:name="com.immichframe.immichframe.MainActivity"
@@ -29,7 +29,7 @@
 
     <service android:name="com.immichframe.immichframe.ScreenSaverService"
              android:exported="true"
-             android:icon="@drawable/immich"
+             android:icon="@drawable/appicon"
              android:label="ImmichFrame"
              android:permission="android.permission.BIND_DREAM_SERVICE">
       <intent-filter>

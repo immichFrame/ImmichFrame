@@ -10,10 +10,10 @@
     <AssemblyVersion>1.0.5.0</AssemblyVersion> <!-- Set the assembly version -->
     <FileVersion>1.0.5.0</FileVersion>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <ApplicationIcon>Assets\Immich.ico</ApplicationIcon>
+    <ApplicationIcon>Assets\AppIcon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="Assets\Immich.ico" />
+    <None Remove="Assets\AppIcon.ico" />
   </ItemGroup>
 
   <ItemGroup>
