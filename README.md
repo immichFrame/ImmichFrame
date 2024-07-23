@@ -10,7 +10,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/3rob3/ImmichFrame">
-    <img src="https://raw.githubusercontent.com/immich-app/immich/main/design/immich-logo.svg" alt="Logo" width="200" height="200">
+    <img src="ImmichFrame/Assets/AppIcon.png" alt="Logo" width="200" height="200">
   </a>
 
   <h3 align="center">ImmichFrame</h3>
@@ -34,7 +34,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-This project is a digital photo frame application that interfaces with your [immich][immich-github-url] server. It is a cross-platform C# .NET 7 project that currently supports Android, Linux, macOS, and Windows.
+This project is a digital photo frame application that interfaces with your [immich][immich-github-url] server. It is a cross-platform C# .NET 8 project that currently supports Android, Linux, macOS, and Windows.
 
 ### Built With
 
@@ -65,43 +65,40 @@ ImmichFrame is easy to run on your desired plattform. Get the latest stable rele
 - Double-click `Immich_Frame`. Note: If nothing happens, right-click &rarr; open with &rarr; Utilities &rarr; Terminal. Check Always Open With.
 
 ## Settings
-There are two options for configuring ImmichFrame; Settings.xml (Linux, macOS, Windows), or a GUI based settings screen (all platforms). If Settings.xml exists it will be used, and the GUI settings will be unavailable.
+There are two options for configuring ImmichFrame; Settings.json (Linux, macOS, Windows), or a GUI based settings screen (all platforms). 
 
-### Settings.xml
+### Settings.json
 > [!IMPORTANT]  
-> Make sure to copy the **Settings.example.xml** and name it **Settings.xml**. 
+> Make sure to copy the **Settings.example.json** and name it **Settings.json**. 
  
-1. Rename the `Settings.example.xml` file to `Settings.xml`
-2. Change `<ImmichServerUrl>` to your domain or local ip
-   ```xml
-    <ImmichServerUrl>http://yourdomain.com</ImmichServerUrl>
+1. Rename the `Settings.example.json` file to `Settings.json`
+2. Change `ImmichServerUrl` to your domain or local ip
+   ```json
+   "ImmichServerUrl": "http://yourdomain.com",  
+   or
+   "ImmichServerUrl": "192.168.0.100:2283",  
    ```
-3. Change `<ApiKey>`. Read more about how to obtain an [immich API key][immich-api-url]
-   ```xml
-    <ApiKey>YourApiKey</ApiKey>
+3. Change `ApiKey`. Read more about how to obtain an [immich API key][immich-api-url]
+   ```json
+   "ApiKey": "YourApiKey", 
    ```
 4. *Optional:* Choose albums you would like to display
-   ```xml
-    <Albums>
-	    <Album>First Album UID</Album>
-	    <Album>Second Album UID</Album>
-    </Albums>
+   ```json
+   "Albums": ["First Album UID","Second Album UID],
    ```
 5. *Optional:* Choose people you would like to display
-   ```xml
-    <People>
-	    <Album>First person UID</Album>
-	    <Album>Second person UID</Album>
-    </People>
+   ```json
+    "People": ["First Person UID","Second Person UID],
    ```
 6. *Optional:* Weather is enabled by entering an API key. Get yours free from [OpenWeatherMap][openweathermap-url]
-```xml
-    <WeatherApiKey>YourApiKey</WeatherApiKey>
+```json
+    "WeatherApiKey": "YourApiKey",
+    "WeatherLatLong": "YourLatitude,YourLongitude",
    ```
 7. Adjust other settings to your needs
 
 ### Settings GUI
-Only available if Settings.xml does not exist. The same information as in `Settings.xml` will be enterred from this screen. Can be enterred at any time by clicking the upper middle quadrant of the screen (or Up arrow key), see `Interactions` section.
+The same information as in `Settings.json` will be enterred from this screen. Can be enterred at any time by clicking the upper middle quadrant of the screen (or Up arrow key), see `Interactions` section. Settings can also be backup/restored from here.
 
 <!-- INTERACTIONS -->
 ## Interactions
@@ -151,10 +148,9 @@ Don't forget to give the project a star! Thanks again!
 
 [GNU General Public License v3.0](LICENSE.txt)
 
-<!-- CONTACT -->
-## Contact
-
-TODO
+<!-- Help -->
+## Help
+[Discord Channel](https://discord.com/channels/979116623879368755/1217843270244372480)
 
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
