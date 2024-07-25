@@ -1,42 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  android:installLocation="auto"
-  package="com.immichframe.immichframe"
-  android:versionCode="6"
-  android:versionName="1.0.6.0">
-
-  <uses-permission android:name="android.permission.INTERNET" />
-  <uses-permission android:name="android.permission.WAKE_LOCK" />
-
-  <application
-    android:label="ImmichFrame"
-    android:icon="@drawable/appicon"
-    android:usesCleartextTraffic="true">
-
-    <activity android:name="com.immichframe.immichframe.MainActivity"
-              android:label="ImmichFrame"
-              android:theme="@style/MyTheme.NoActionBar"
-              android:exported="true">
-      <intent-filter>
-        <action android:name="android.intent.action.MAIN" />
-        <category android:name="android.intent.category.LAUNCHER" />
-      </intent-filter>
-      <intent-filter>
-        <action android:name="android.intent.action.MAIN" />
-        <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
-      </intent-filter>
-    </activity>
-
-    <service android:name="com.immichframe.immichframe.ScreenSaverService"
-             android:exported="true"
-             android:icon="@drawable/appicon"
-             android:label="ImmichFrame"
-             android:permission="android.permission.BIND_DREAM_SERVICE">
-      <intent-filter>
-        <action android:name="android.service.dreams.DreamService" />
-      </intent-filter>
-    </service>
-  </application>
-
-  <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="34" />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:installLocation="auto" package="com.immichframe.immichframe" android:versionCode="6" android:versionName="1.0.6.0">
+	<uses-permission android:name="android.permission.INTERNET" />
+	<uses-permission android:name="android.permission.WAKE_LOCK" />
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+	<application android:label="ImmichFrame" android:icon="@drawable/appicon" android:usesCleartextTraffic="true">
+		<activity android:name="com.immichframe.immichframe.MainActivity" android:label="ImmichFrame" android:theme="@style/MyTheme.NoActionBar" android:exported="true">
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+			</intent-filter>
+		</activity>
+		<service android:name="com.immichframe.immichframe.ScreenSaverService" android:exported="true" android:icon="@drawable/appicon" android:label="ImmichFrame" android:permission="android.permission.BIND_DREAM_SERVICE">
+			<intent-filter>
+				<action android:name="android.service.dreams.DreamService" />
+			</intent-filter>
+		</service>
+	</application>
 </manifest>
