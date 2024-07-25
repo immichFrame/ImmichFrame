@@ -56,7 +56,8 @@ public partial class MainView : BaseView
                 crossFade.Duration = TimeSpan.FromSeconds(_appSettings.TransitionDuration);
             }
             AssetHelper _assetHelper = new AssetHelper();
-            await _assetHelper.DeleteAndCreateImmichFrameAlbum();
+            if(_appSettings.ImmichFrameAlbumName)
+                await _assetHelper.DeleteAndCreateImmichFrameAlbum();
             await _viewModel.ShowNextImage();
 
             _viewModel.TimerEnabled = true;
