@@ -90,7 +90,7 @@ namespace ImmichFrame.ViewModels
         {
             try
             {
-                var settings = Settings.CurrentSettings;
+                Settings.ReloadFromJson();
                 Navigate(new MainViewModel());
             }
             catch (SettingsNotValidException)
