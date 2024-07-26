@@ -107,6 +107,11 @@ namespace ImmichFrame.Models
                 throw new SettingsNotValidException($"Settings element '{nameof(ApiKey)}' is required!");
         }
 
+        public static void ReloadFromJson()
+        {
+            _settings = ParseFromJson();
+            _settings.Validate();
+        }
         private static Settings ParseFromJson()
         {
             var json = File.ReadAllText(Settings.JsonSettingsPath);
