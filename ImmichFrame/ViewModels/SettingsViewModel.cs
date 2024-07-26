@@ -32,7 +32,6 @@ namespace ImmichFrame.ViewModels
         public ICommand AddAlbumCommand { get; set; }
         public ICommand RemoveAlbumCommand { get; set; }
         public ICommand TestMarginCommand { get; set; }
-        public event EventHandler? ListItemRemoved;
 
         public SettingsViewModel()
         {
@@ -74,7 +73,6 @@ namespace ImmichFrame.ViewModels
         {
             var item = PeopleList.First(x => x.Id == Guid.Parse(param.ToString()!));
             PeopleList?.Remove(item);
-            ListItemRemoved?.Invoke(this, EventArgs.Empty);
         }
 
         private void AddAlbumAction()
@@ -86,7 +84,6 @@ namespace ImmichFrame.ViewModels
         {
             var item = AlbumList.First(x => x.Id == Guid.Parse(param.ToString()!));
             AlbumList?.Remove(item);
-            ListItemRemoved?.Invoke(this, EventArgs.Empty);
         }
 
         private void CancelAction()

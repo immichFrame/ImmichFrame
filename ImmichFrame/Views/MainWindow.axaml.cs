@@ -1,9 +1,8 @@
 ﻿using Avalonia.Controls;
-using FluentAvalonia.UI.Windowing;
 
 namespace ImmichFrame.Views;
 
-public partial class MainWindow : AppWindow
+public partial class MainWindow : Window
 {
     public MainWindow()
     {
