@@ -57,6 +57,7 @@ ImmichFrame is easy to run on your desired plattform. Get the latest stable rele
 - GUI - Double-click `Immich_Frame`.
 - CLI - CD into folder, and launch with `./Immich_Frame`.
 - SSH - CD into folder, and launch with `DISPLAY=:0.0 ./Immich_Frame`.
+- Ubuntu Desktop - Right-click Immich_Frame, properties, set 'Execute as program' to True, OK. Right-click Immich_Frame, Open with, choose 'Run Software', always use for this file type TRUE.
 ### Windows
 - Double-click `Immich_Frame.exe`.
 - Screensaver - Rename `Immich_Frame.exe` to `Immich_Frame.scr`. Right-click &rarr; Install. Configure screensaver settings and apply.
