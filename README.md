@@ -64,7 +64,11 @@ ImmichFrame is easy to run on your desired plattform. Get the latest stable rele
   - You will still have to click middle/bottom in the app to exit screensaver.
 ### MacOS
 - Double-click `Immich_Frame`. Note: If nothing happens, right-click &rarr; open with &rarr; Utilities &rarr; Terminal. Check Always Open With.
-
+### Android Screensaver
+- Run the app normally and configure settings.
+- Go to Settings, Display, Advanced, Screen Saver, Current Screen Saver, choose ImmichFrame. Settings, Display, Advanced, Sleep, choose your sleep timeout. The menu options may differ slightly on different Android versions.
+### Android TV Screensaver
+- If you are unable to set ImmichFrame as a screen saver you may need to run this ADB command `adb shell settings put secure screensaver_components com.immichframe.immichframe/.ScreenSaverService`
 ## Settings
 There are two options for configuring ImmichFrame; Settings.json (Linux, macOS, Windows), or a GUI based settings screen (all platforms). 
 
