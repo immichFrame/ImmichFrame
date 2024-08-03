@@ -19,7 +19,6 @@ public class MainActivity : AvaloniaMainActivity<App>
     protected override void OnCreate(Bundle? savedInstanceState)
     {
         Window!.AddFlags(WindowManagerFlags.KeepScreenOn);
-        Window.AddFlags(WindowManagerFlags.Fullscreen);
         base.OnCreate(savedInstanceState);
     }
     protected override AppBuilder CustomizeAppBuilder(AppBuilder builder)

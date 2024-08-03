@@ -27,6 +27,15 @@ public partial class MainView : BaseView
 
     private async void OnLoaded(object? sender, RoutedEventArgs e)
     {       
+        if(PlatformDetector.IsAndroid())
+        {
+            var insetsManager = TopLevel.GetTopLevel(this)?.InsetsManager;
+            if (insetsManager != null)
+            {
+                insetsManager.DisplayEdgeToEdge = true;
+                insetsManager.IsSystemBarVisible = false;
+            }
+        }
 
         _viewModel = (this.DataContext as MainViewModel)!;
 
