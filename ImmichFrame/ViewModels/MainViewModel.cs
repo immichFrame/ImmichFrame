@@ -102,7 +102,7 @@ public partial class MainViewModel : NavigatableViewModelBase
         var weatherInfo = WeatherHelper.GetWeather().Result;
         if (weatherInfo != null)
         {
-            WeatherTemperature = $"{weatherInfo.Main.Temperature:F1}{Environment.NewLine}{weatherInfo.CityName}";
+            WeatherTemperature = $"{weatherInfo.Main.Temperature.ToString("F0").Replace(" ", "")}";
             WeatherCurrent = $"{string.Join(',', weatherInfo.Weather.Select(x => x.Description))}";
         }
     }
