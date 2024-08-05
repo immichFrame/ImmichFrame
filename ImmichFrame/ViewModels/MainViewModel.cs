@@ -104,9 +104,10 @@ public partial class MainViewModel : NavigatableViewModelBase
         {
             WeatherTemperature = $"{weatherInfo.Main.Temperature.ToString("F0").Replace(" ", "")}";
             WeatherCurrent = $"{string.Join(',', weatherInfo.Weather.Select(x => x.Description))}";
+            var iconId = $"{string.Join(',', weatherInfo.Weather.Select(x => x.IconId))}";
+            WeatherImage = ImageHelper.LoadImageFromWeb(new Uri($"https://openweathermap.org/img/wn/{iconId}.png")).Result;
         }
     }
-
     public void NavigateSettingsPageAction()
     {
         Navigate(new SettingsViewModel());
@@ -242,6 +243,8 @@ public partial class MainViewModel : NavigatableViewModelBase
     private string? weatherCurrent;
     [ObservableProperty]
     private string? weatherTemperature;
+    [ObservableProperty]
+    private Bitmap? weatherImage;
     [ObservableProperty]
     private bool imagePaused = false;
 }
