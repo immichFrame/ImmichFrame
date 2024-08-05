@@ -17,7 +17,7 @@ namespace ImmichFrame.ViewModels
             {
                 if (!File.Exists(Settings.JsonSettingsPath))
                 {
-                    ContentViewModel = new SettingsViewModel(false);
+                    ContentViewModel = new WelcomeViewModel();
                 }
                 else
                 {
