@@ -89,14 +89,14 @@ There are two options for configuring ImmichFrame; Settings.json (Linux, macOS, 
    ```
 4. *Optional:* Choose albums you would like to display
    ```json
-   "Albums": ["First Album UID","Second Album UID],
+   "Albums": ["First Album UID","Second Album UID"],
    ```
 > [!TIP]  
 > You can get the Album UID from the URL of the album. For this URL: `https://demo.immich.app/albums/85c85b29-c95d-4a8b-90f7-c87da1d518ba` this is the UID: `85c85b29-c95d-4a8b-90f7-c87da1d518ba`
 
 5. *Optional:* Choose people you would like to display
    ```json
-    "People": ["First Person UID","Second Person UID],
+    "People": ["First Person UID","Second Person UID"],
    ```
 > [!TIP]  
 > You can get the Person UID from the URL of the person. For this URL: `https://demo.immich.app/people/faff4d55-e859-4f6c-ae34-80f14da486c7` this is the UID: `faff4d55-e859-4f6c-ae34-80f14da486c7`
