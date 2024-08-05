@@ -91,10 +91,16 @@ There are two options for configuring ImmichFrame; Settings.json (Linux, macOS, 
    ```json
    "Albums": ["First Album UID","Second Album UID],
    ```
+> [!TIP]  
+> You can get the Album UID from the URL of the album. For this URL: `https://demo.immich.app/albums/85c85b29-c95d-4a8b-90f7-c87da1d518ba` this is the UID: `85c85b29-c95d-4a8b-90f7-c87da1d518ba`
+
 5. *Optional:* Choose people you would like to display
    ```json
     "People": ["First Person UID","Second Person UID],
    ```
+> [!TIP]  
+> You can get the Person UID from the URL of the person. For this URL: `https://demo.immich.app/people/faff4d55-e859-4f6c-ae34-80f14da486c7` this is the UID: `faff4d55-e859-4f6c-ae34-80f14da486c7`
+
 6. *Optional:* Weather is enabled by entering an API key. Get yours free from [OpenWeatherMap][openweathermap-url]
 ```json
     "WeatherApiKey": "YourApiKey",
