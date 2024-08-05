@@ -98,7 +98,7 @@ There are two options for configuring ImmichFrame; Settings.json (Linux, macOS, 
    ```json
     "People": ["First Person UID","Second Person UID],
    ```
-> [!IMPORTANT]  
+> [!TIP]  
 > You can get the Person UID from the URL of the person. For this URL: `https://demo.immich.app/people/faff4d55-e859-4f6c-ae34-80f14da486c7` this is the UID: `faff4d55-e859-4f6c-ae34-80f14da486c7`
 
 6. *Optional:* Weather is enabled by entering an API key. Get yours free from [OpenWeatherMap][openweathermap-url]
