@@ -91,7 +91,7 @@ There are two options for configuring ImmichFrame; Settings.json (Linux, macOS, 
    ```json
    "Albums": ["First Album UID","Second Album UID],
    ```
-> [!IMPORTANT]  
+> [!TIP]  
 > You can get the Album UID from the URL of the album. For this URL: `https://demo.immich.app/albums/85c85b29-c95d-4a8b-90f7-c87da1d518ba` this is the UID: `85c85b29-c95d-4a8b-90f7-c87da1d518ba`
 
 5. *Optional:* Choose people you would like to display
