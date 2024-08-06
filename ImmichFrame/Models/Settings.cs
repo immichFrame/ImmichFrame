@@ -39,10 +39,12 @@ namespace ImmichFrame.Models
         public bool ShowMemories { get; set; } = false;
         public int RenewImagesDuration { get; set; } = 20;
         public List<Guid> Albums { get; set; } = new List<Guid>();
+        public List<Guid> ExcludedAlbums { get; set; } = new List<Guid>();
         public List<Guid> People { get; set; } = new List<Guid>();
         [JsonIgnore]
         public bool UseImmichFrameAlbum => !string.IsNullOrWhiteSpace(ImmichFrameAlbumName);
         public string ImmichFrameAlbumName { get; set; } = string.Empty;
+        public bool NoVideos { get; set; } = true;
         public bool ShowClock { get; set; } = true;
         public int ClockFontSize { get; set; } = 48;
         public string? ClockFormat { get; set; } = "h:mm tt";
@@ -310,8 +312,10 @@ namespace ImmichFrame.Models
                 ShowMemories = false,
                 RenewImagesDuration = 20,
                 Albums = new List<Guid>(),
+                ExcludedAlbums = new List<Guid>(),
                 People = new List<Guid>(),
                 ImmichFrameAlbumName = "",
+                NoVideos = true,
                 ShowClock = true,
                 ClockFontSize = 48,
                 ClockFormat = "h:mm tt",
