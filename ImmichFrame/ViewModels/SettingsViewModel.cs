@@ -1,10 +1,12 @@
 ﻿using Avalonia.Controls;
+using Avalonia.Media;
 using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using ImmichFrame.Exceptions;
 using ImmichFrame.Helpers;
 using ImmichFrame.Models;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -32,6 +34,7 @@ namespace ImmichFrame.ViewModels
         public ICommand AddAlbumCommand { get; set; }
         public ICommand RemoveAlbumCommand { get; set; }
         public ICommand TestMarginCommand { get; set; }
+        public List<string> StretchOptions { get; } = Enum.GetNames(typeof(Stretch)).ToList();
 
         public SettingsViewModel()
         {
