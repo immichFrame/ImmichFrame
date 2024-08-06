@@ -195,7 +195,7 @@ namespace ImmichFrame.Models
                         var stretch = new Stretch();
                         if (!Enum.TryParse(value.ToString(), true, out stretch) && Enum.IsDefined(typeof(Stretch), stretch))
                             throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. ('{value}')");
-                        property.SetValue(settings, stretch);
+                        property.SetValue(settings, value);
                         break;
                     case "Albums":
                     case "People":
