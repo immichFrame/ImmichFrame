@@ -1,4 +1,5 @@
-﻿using Avalonia.Media.Imaging;
+﻿using Avalonia.Media;
+using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using ImmichFrame.Exceptions;
 using ImmichFrame.Helpers;
@@ -36,6 +37,7 @@ public partial class MainViewModel : NavigatableViewModelBase
         PreviousImageCommand = new RelayCommand(PreviousImageAction);
         PauseImageCommand = new RelayCommand(PauseImageAction);
         NavigateSettingsPageCommand = new RelayCommand(NavigateSettingsPageAction);
+        ImageStretchEnum = StretchHelper.FromString(settings.ImageStretch);
     }
 
     public void SetImage(Bitmap image)
@@ -247,6 +249,8 @@ public partial class MainViewModel : NavigatableViewModelBase
     private Bitmap? weatherImage;
     [ObservableProperty]
     private bool imagePaused = false;
+    [ObservableProperty]
+    private Stretch imageStretchEnum = Stretch.Uniform;
 }
 
 public class PreloadedAsset
@@ -268,5 +272,17 @@ public class PreloadedAsset
     public async Task Preload()
     {
         _image = await Asset.AssetImage;
+    }
+}
+public static class StretchHelper
+{
+    public static Stretch FromString(string stretch)
+    {
+        return Enum.TryParse(stretch, out Stretch result) ? result : Stretch.Uniform;
+    }
+
+    public static string ToString(Stretch stretch)
+    {
+        return stretch.ToString();
     }
 }

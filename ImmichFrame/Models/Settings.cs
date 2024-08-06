@@ -1,4 +1,5 @@
-﻿using Avalonia.Platform.Storage;
+﻿using Avalonia.Media;
+using Avalonia.Platform.Storage;
 using ImmichFrame.Exceptions;
 using ImmichFrame.Helpers;
 using System;
@@ -10,6 +11,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace ImmichFrame.Models
 {
@@ -29,6 +31,7 @@ namespace ImmichFrame.Models
 
         public string ImmichServerUrl { get; set; } = string.Empty;
         public string ApiKey { get; set; } = string.Empty;
+        public string ImageStretch { get; set; } = "Uniform";
         public string Margin { get; set; } = "0,0,0,0";
         public int Interval { get; set; } = 8;
         public double TransitionDuration { get; set; } = 1;
@@ -174,7 +177,7 @@ namespace ImmichFrame.Models
                             throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not a valid URL: '{url}'");
                         }
                         property.SetValue(settings, url);
-                        break;
+                        break;                        
                     case "Margin":
                         var margin = value.ToString()!;
                         if (!MarginRegex().IsMatch(margin))
@@ -186,6 +189,12 @@ namespace ImmichFrame.Models
                         break;
                     case "ApiKey":
                     case "WeatherApiKey":
+                        property.SetValue(settings, value);
+                        break;
+                    case "ImageStretch":
+                        var stretch = new Stretch();
+                        if (!Enum.TryParse(value.ToString(), true, out stretch) && Enum.IsDefined(typeof(Stretch), stretch))
+                            throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. ('{value}')");
                         property.SetValue(settings, value);
                         break;
                     case "Albums":
@@ -291,6 +300,7 @@ namespace ImmichFrame.Models
             {
                 ImmichServerUrl = "",
                 ApiKey = "",
+                ImageStretch = "Uniform",
                 Margin = "0,0,0,0",
                 Interval = 8,
                 TransitionDuration = 2,
