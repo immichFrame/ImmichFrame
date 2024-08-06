@@ -201,6 +201,7 @@ namespace ImmichFrame.Models
                         property.SetValue(settings, value);
                         break;
                     case "Albums":
+                    case "ExcludedAlbums":
                     case "People":
                         var list = new List<Guid>();
                         foreach (var item in (List<string>)(SettingsValue.Value ?? new()))
@@ -235,6 +236,7 @@ namespace ImmichFrame.Models
                     case "ShowImageDesc":
                     case "ShowImageLocation":
                     case "ShowWeatherDescription":
+                    case "NoVideos":
                         if (!bool.TryParse(value.ToString(), out var boolValue))
                             throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. ('{value}')");
                         property.SetValue(settings, boolValue);
