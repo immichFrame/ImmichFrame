@@ -54,12 +54,13 @@ namespace ImmichFrame.Models
         public bool ShowImageLocation { get; set; } = true;
         public int ImageLocationFontSize { get; set; } = 36;
         public string FontColor { get; set; } = "#FFFFFF";
+        public string? WeatherApiKey { get; set; } = string.Empty;
         [JsonIgnore]
         public bool ShowWeather => !string.IsNullOrWhiteSpace(WeatherApiKey);
+        public bool ShowWeatherDescription { get; set; } = true;
         public int WeatherFontSize { get; set; } = 36;
         public string? UnitSystem { get; set; } = OpenWeatherMap.UnitSystem.Imperial;
         public string? WeatherLatLong { get; set; } = "40.7128,74.0060";
-        public string? WeatherApiKey { get; set; } = string.Empty;
         [JsonIgnore]
         public float WeatherLat => !string.IsNullOrWhiteSpace(WeatherLatLong) ? float.Parse(WeatherLatLong!.Split(',')[0]) : 0f;
         [JsonIgnore]
@@ -231,6 +232,7 @@ namespace ImmichFrame.Models
                     case "ShowPhotoDate":
                     case "ShowImageDesc":
                     case "ShowImageLocation":
+                    case "ShowWeatherDescription":
                         if (!bool.TryParse(value.ToString(), out var boolValue))
                             throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. ('{value}')");
                         property.SetValue(settings, boolValue);
@@ -321,10 +323,11 @@ namespace ImmichFrame.Models
                 ShowImageLocation = true,
                 ImageLocationFontSize = 36,
                 FontColor = "#FFFFFF",
+                WeatherApiKey = "",
+                ShowWeatherDescription = true,
                 WeatherFontSize = 36,
                 UnitSystem = "imperial",
                 WeatherLatLong = "40.7128,74.0060",
-                WeatherApiKey = "",
                 Language = "en"
             };
             string json = JsonSerializer.Serialize(defaultSettings, new JsonSerializerOptions { WriteIndented = true });

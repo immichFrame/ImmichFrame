@@ -46,7 +46,7 @@
         <TextBlock x:Name="txtWeatherTemperature" HorizontalAlignment="Left" VerticalAlignment="Bottom" IsVisible="{Binding Settings.ShowWeather}" Text="{Binding WeatherTemperature}" FontSize="{Binding Settings.WeatherFontSize}"/>
         <Image Source="{Binding WeatherImage}" VerticalAlignment="Center" MaxWidth="30"/>
       </StackPanel>
-      <TextBlock x:Name="txtWeatherCurrent" HorizontalAlignment="Left" VerticalAlignment="Bottom" IsVisible="{Binding Settings.ShowWeather}" Text="{Binding WeatherCurrent}" FontSize="{Binding Settings.WeatherFontSize}"/>
+      <TextBlock x:Name="txtWeatherCurrent" HorizontalAlignment="Left" VerticalAlignment="Bottom" IsVisible="{Binding Settings.ShowWeatherDescription}" Text="{Binding WeatherCurrent}" FontSize="{Binding Settings.WeatherFontSize}"/>
       <TextBlock x:Name="txtLiveTime" HorizontalAlignment="Left" VerticalAlignment="Bottom" IsVisible="{Binding Settings.ShowClock}" Text="{Binding LiveTime}" FontSize="{Binding Settings.ClockFontSize}"/>
     </StackPanel>
     <TextBlock x:Name="txtImageDate" Grid.Column="2" Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10" IsVisible="{Binding Settings.ShowPhotoDate}" Text="{Binding ImageDate}" FontSize="{Binding Settings.PhotoDateFontSize}"/>
