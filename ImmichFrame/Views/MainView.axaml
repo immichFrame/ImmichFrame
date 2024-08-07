@@ -30,7 +30,7 @@
         <DataTemplate>
           <Grid>
             <Image Stretch="Fill" Source="{Binding ThumbhashImage}"  />
-            <Image Stretch="{Binding ImageStretchEnum, RelativeSource={RelativeSource AncestorType=TransitioningContentControl}}" Source="{Binding Image}"  />
+            <Image Stretch="{Binding ImageStretch}" Source="{Binding Image}"  />
           </Grid>
         </DataTemplate>
       </TransitioningContentControl.ContentTemplate>

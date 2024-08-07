@@ -1,4 +1,5 @@
-﻿using Avalonia.Media.Imaging;
+﻿using Avalonia.Media;
+using Avalonia.Media.Imaging;
 
 namespace ImmichFrame.Models
 {
@@ -6,5 +7,6 @@ namespace ImmichFrame.Models
     {
         public Bitmap? Image { get; set; }
         public Bitmap? ThumbhashImage { get; set; }
+        public Stretch ImageStretch { get; set; }
     }
 }

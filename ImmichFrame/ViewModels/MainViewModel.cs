@@ -37,14 +37,14 @@ public partial class MainViewModel : NavigatableViewModelBase
         PreviousImageCommand = new RelayCommand(PreviousImageAction);
         PauseImageCommand = new RelayCommand(PauseImageAction);
         NavigateSettingsPageCommand = new RelayCommand(NavigateSettingsPageAction);
-        ImageStretchEnum = StretchHelper.FromString(settings.ImageStretch);
     }
 
     public void SetImage(Bitmap image)
     {
         Images = new UiImage
         {
-            Image = image
+            Image = image,
+            ImageStretch = StretchHelper.FromString(Settings.ImageStretch),
         };
     }
 
@@ -249,8 +249,6 @@ public partial class MainViewModel : NavigatableViewModelBase
     private Bitmap? weatherImage;
     [ObservableProperty]
     private bool imagePaused = false;
-    [ObservableProperty]
-    private Stretch imageStretchEnum = Stretch.Uniform;
 }
 
 public class PreloadedAsset
