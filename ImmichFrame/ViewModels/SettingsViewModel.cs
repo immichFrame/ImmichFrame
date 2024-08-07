@@ -23,6 +23,9 @@ namespace ImmichFrame.ViewModels
         private ObservableCollection<ListItem> albumList;
 
         [ObservableProperty]
+        private ObservableCollection<ListItem> excludedAlbumList;
+
+        [ObservableProperty]
         public Settings settings;
         public ICommand SaveCommand { get; set; }
         public ICommand CancelCommand { get; set; }
@@ -33,6 +36,8 @@ namespace ImmichFrame.ViewModels
         public ICommand RemovePersonCommand { get; set; }
         public ICommand AddAlbumCommand { get; set; }
         public ICommand RemoveAlbumCommand { get; set; }
+        public ICommand AddExcludedAlbumCommand { get; set; }
+        public ICommand RemoveExcludedAlbumCommand { get; set; }
         public ICommand TestMarginCommand { get; set; }
         public List<string> StretchOptions { get; } = Enum.GetNames(typeof(Stretch)).ToList();
 
@@ -56,10 +61,13 @@ namespace ImmichFrame.ViewModels
             RemovePersonCommand = new RelayCommandParams(RemovePersonAction);
             AddAlbumCommand = new RelayCommand(AddAlbumAction);
             RemoveAlbumCommand = new RelayCommandParams(RemoveAlbumAction);
+            AddExcludedAlbumCommand = new RelayCommand(AddExcludedAlbumAction);
+            RemoveExcludedAlbumCommand = new RelayCommandParams(RemoveExcludedAlbumAction);
             TestMarginCommand = new RelayCommand(TestMarginAction);
 
             PeopleList = new ObservableCollection<ListItem>(Settings.People.Select(x => new ListItem(x.ToString())));
             AlbumList = new ObservableCollection<ListItem>(Settings.Albums.Select(x => new ListItem(x.ToString())));
+            ExcludedAlbumList = new ObservableCollection<ListItem>(Settings.ExcludedAlbums.Select(x => new ListItem(x.ToString())));
         }
 
         private void TestMarginAction()
@@ -89,6 +97,17 @@ namespace ImmichFrame.ViewModels
             AlbumList?.Remove(item);
         }
 
+        private void AddExcludedAlbumAction()
+        {
+            ExcludedAlbumList.Add(new ListItem());
+        }
+
+        private void RemoveExcludedAlbumAction(object param)
+        {
+            var item = ExcludedAlbumList.First(x => x.Id == Guid.Parse(param.ToString()!));
+            ExcludedAlbumList?.Remove(item);
+        }
+
         private void CancelAction()
         {
             try
@@ -109,6 +128,7 @@ namespace ImmichFrame.ViewModels
             {
                 Settings.People = PeopleList.Select(x => Guid.Parse(x.Value)).ToList();
                 Settings.Albums = AlbumList.Select(x => Guid.Parse(x.Value)).ToList();
+                Settings.ExcludedAlbums = ExcludedAlbumList.Select(x => Guid.Parse(x.Value)).ToList();
 
                 Settings.SaveSettings(Settings);
                 var settings = Settings.CurrentSettings;

@@ -61,7 +61,7 @@ namespace ImmichFrame.Helpers
             }
         }
         public async Task DeleteAndCreateImmichFrameAlbum()
-        {            
+        {
             using (var client = new HttpClient())
             {
                 var settings = Settings.CurrentSettings;
@@ -106,8 +106,19 @@ namespace ImmichFrame.Helpers
             }
 
             if (assetsAdded)
+            {
+                // Exclude videos
+                    list = list.Where(x => x.Type != AssetTypeEnum.VIDEO);
+
+                var excludedalbumAssetIds = (await GetExcludedAlbumAssets()).Select(x => x.Id);
+
+                // Exclude assets if configured
+                if(excludedalbumAssetIds.Any())
+                    list = list.Where(x=> !excludedalbumAssetIds.Contains(x.Id));
+
                 // return only unique assets, no duplicates, only with Thumbnail
                 return list.Where(x => x.Thumbhash != null).DistinctBy(x => x.Id).ToDictionary(x => Guid.Parse(x.Id));
+            }
 
             return null;
         }
@@ -145,32 +156,55 @@ namespace ImmichFrame.Helpers
                 return allAssets;
             }
         }
+
+        private async Task<IEnumerable<AssetResponseDto>> GetAlbumAssets(Guid albumId, ImmichApi immichApi)
+        {
+            try
+            {
+                var albumInfo = await immichApi.GetAlbumInfoAsync(albumId, null, null);
+
+                return albumInfo.Assets;
+            }
+            catch (ApiException ex)
+            {
+                throw new AlbumNotFoundException($"Album '{albumId}' was not found, check your settings file!{Environment.NewLine}{Environment.NewLine}{ex.Message}", ex);
+            }
+        }
+
         private async Task<IEnumerable<AssetResponseDto>> GetAlbumAssets()
         {
-            using (var client = new HttpClient())
+            using var client = new HttpClient();
+
+            var allAssets = new List<AssetResponseDto>();
+            var settings = Settings.CurrentSettings;
+
+            var immichApi = new ImmichApi(settings.ImmichServerUrl, client);
+
+            client.UseApiKey(settings.ApiKey);
+            foreach (var albumId in settings.Albums!)
             {
-                var allAssets = new List<AssetResponseDto>();
-                var settings = Settings.CurrentSettings;
-
-                var immichApi = new ImmichApi(settings.ImmichServerUrl, client);
-
-                client.UseApiKey(settings.ApiKey);
-                foreach (var albumId in settings.Albums!)
-                {
-                    try
-                    {
-                        var albumInfo = await immichApi.GetAlbumInfoAsync(albumId, null, null);
-
-                        allAssets.AddRange(albumInfo.Assets);
-                    }
-                    catch (ApiException ex)
-                    {
-                        throw new AlbumNotFoundException($"Album '{albumId}' was not found, check your settings file!{Environment.NewLine}{Environment.NewLine}{ex.Message}", ex);
-                    }
-                }
-
-                return allAssets;
+                allAssets.AddRange(await GetAlbumAssets(albumId, immichApi));
             }
+
+            return allAssets;
+        }
+
+        private async Task<IEnumerable<AssetResponseDto>> GetExcludedAlbumAssets()
+        {
+            using var client = new HttpClient();
+
+            var allAssets = new List<AssetResponseDto>();
+            var settings = Settings.CurrentSettings;
+
+            var immichApi = new ImmichApi(settings.ImmichServerUrl, client);
+
+            client.UseApiKey(settings.ApiKey);
+            foreach (var albumId in settings.ExcludedAlbums!)
+            {
+                allAssets.AddRange(await GetAlbumAssets(albumId, immichApi));
+            }
+
+            return allAssets;
         }
 
         private async Task<IEnumerable<AssetResponseDto>> GetPeopleAssets()
@@ -232,6 +266,17 @@ namespace ImmichFrame.Helpers
                     if (randomAssets.Any())
                     {
                         var asset = randomAssets.First();
+
+                        if (asset.Type == AssetTypeEnum.VIDEO)
+                            return await GetRandomAsset();
+
+                        var albumIds = (await immichApi.GetAllAlbumsAsync(Guid.Parse(asset.Id), true)).Select(x => Guid.Parse(x.Id));
+
+                        // Reload if exclude album is configured
+                        if (Settings.CurrentSettings.ExcludedAlbums.Any(x => albumIds.Contains(x)))
+                        {
+                            return await GetRandomAsset();
+                        }
 
                         // do not return with no thumbnail
                         if (asset.Thumbhash == null)
