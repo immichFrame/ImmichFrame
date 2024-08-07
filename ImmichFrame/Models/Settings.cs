@@ -67,6 +67,7 @@ namespace ImmichFrame.Models
         [JsonIgnore]
         public float WeatherLong => !string.IsNullOrWhiteSpace(WeatherLatLong) ? float.Parse(WeatherLatLong!.Split(',')[1]) : 0f;
         public string Language { get; set; } = "en";
+        public bool UnattendedMode { get; set; } = false;
         //public static string JsonSettingsPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Settings.json");
         public static string JsonSettingsPath
         {
@@ -179,7 +180,7 @@ namespace ImmichFrame.Models
                             throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not a valid URL: '{url}'");
                         }
                         property.SetValue(settings, url);
-                        break;                        
+                        break;
                     case "Margin":
                         var margin = value.ToString()!;
                         if (!MarginRegex().IsMatch(margin))
@@ -235,6 +236,7 @@ namespace ImmichFrame.Models
                     case "ShowImageDesc":
                     case "ShowImageLocation":
                     case "ShowWeatherDescription":
+                    case "UnattendedMode":
                         if (!bool.TryParse(value.ToString(), out var boolValue))
                             throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. ('{value}')");
                         property.SetValue(settings, boolValue);
@@ -331,7 +333,8 @@ namespace ImmichFrame.Models
                 WeatherFontSize = 36,
                 UnitSystem = "imperial",
                 WeatherLatLong = "40.7128,74.0060",
-                Language = "en"
+                Language = "en",
+                UnattendedMode = false
             };
             string json = JsonSerializer.Serialize(defaultSettings, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(JsonSettingsPath, json);
