@@ -178,6 +178,11 @@ public partial class MainViewModel : NavigatableViewModelBase
                 attempt++;
                 if (attempt >= 3)
                 {
+                    if (Settings.UnattendedMode)
+                    {
+                        // Do not show message and break the loop
+                        break;
+                    }
                     this.Navigate(new ErrorViewModel(ex));
                 }
             }
