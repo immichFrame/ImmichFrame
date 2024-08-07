@@ -1,5 +1,6 @@
 ﻿using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using CommunityToolkit.Mvvm.ComponentModel;
 using ImmichFrame.Exceptions;
 using ImmichFrame.Helpers;
@@ -15,7 +16,7 @@ namespace ImmichFrame.ViewModels;
 
 public partial class MainViewModel : NavigatableViewModelBase
 {
-    public event EventHandler? ResetTimer;
+    //public event EventHandler? ResetTimer;
 
     public bool TimerEnabled = false;
     private AssetResponseDto? LastAsset;
@@ -23,28 +24,56 @@ public partial class MainViewModel : NavigatableViewModelBase
     private PreloadedAsset? NextAsset;
     private AssetHelper _assetHelper;
     private CultureInfo culture;
+    System.Threading.Timer? timerImageSwitcher;
+    System.Threading.Timer? timerLiveTime;
+    System.Threading.Timer? timerWeather;
 
     public ICommand NextImageCommand { get; set; }
     public ICommand PreviousImageCommand { get; set; }
     public ICommand PauseImageCommand { get; set; }
+    public ICommand QuitCommand { get; set; }
     public ICommand NavigateSettingsPageCommand { get; set; }
     public MainViewModel()
     {
         settings = Settings.CurrentSettings;
         _assetHelper = new AssetHelper();
         culture = new CultureInfo(settings.Language);
-        NextImageCommand = new RelayCommand(NextImageAction);
-        PreviousImageCommand = new RelayCommand(PreviousImageAction);
+        NextImageCommand = new RelayCommand(async () => await NextImageAction());
+        PreviousImageCommand = new RelayCommand(async () => await PreviousImageAction());
         PauseImageCommand = new RelayCommand(PauseImageAction);
+        QuitCommand = new RelayCommand(ExitApp);
         NavigateSettingsPageCommand = new RelayCommand(NavigateSettingsPageAction);
-        ImageStretchEnum = StretchHelper.FromString(settings.ImageStretch);
     }
 
+    public async Task InitializeAsync()
+    {
+        ShowSplash();
+        var settings = Settings;
+
+        if (settings == null)
+            throw new SettingsNotValidException("Settings could not be parsed.");
+
+        // Perform async initialization tasks
+        await Task.Run(() => _assetHelper.DeleteAndCreateImmichFrameAlbum());
+        await ShowNextImage();
+
+        TimerEnabled = true;
+        timerImageSwitcher = new System.Threading.Timer(NextImageTick, null, 0, settings.Interval * 1000);
+        if (settings.ShowClock)
+        {
+            timerLiveTime = new System.Threading.Timer(LiveTimeTick, null, 0, 1 * 1000); //every second
+        }
+        if (settings.ShowWeather)
+        {
+            timerWeather = new System.Threading.Timer(WeatherTick, null, 0, 10 * 60 * 1000); //every 10 minutes
+        }
+    }
     public void SetImage(Bitmap image)
     {
         Images = new UiImage
         {
-            Image = image
+            Image = image,
+            ImageStretch = StretchHelper.FromString(Settings.ImageStretch),
         };
     }
 
@@ -64,7 +93,8 @@ public partial class MainViewModel : NavigatableViewModelBase
             Images = new UiImage
             {
                 Image = new Bitmap(imgStream),
-                ThumbhashImage = new Bitmap(tmbStream)
+                ThumbhashImage = new Bitmap(tmbStream),
+                ImageStretch = StretchHelper.FromString(Settings.ImageStretch),
             };
 
             ImageDate = asset?.LocalDateTime.ToString(Settings.PhotoDateFormat, culture) ?? string.Empty;
@@ -90,6 +120,12 @@ public partial class MainViewModel : NavigatableViewModelBase
         }
 
     }
+    private void ShowSplash()
+    {
+        var uri = new Uri("avares://ImmichFrame/Assets/Immich.png");
+        var bitmap = new Bitmap(AssetLoader.Open(uri));
+        SetImage(bitmap);
+    }
 
     public async void NextImageTick(object? state)
     {
@@ -99,15 +135,15 @@ public partial class MainViewModel : NavigatableViewModelBase
     {
         LiveTime = DateTime.Now.ToString(Settings.ClockFormat, culture);
     }
-    public void WeatherTick(object? state)
+    public async void WeatherTick(object? state)
     {
-        var weatherInfo = WeatherHelper.GetWeather().Result;
+        var weatherInfo = await WeatherHelper.GetWeather();
         if (weatherInfo != null)
         {
             WeatherTemperature = $"{weatherInfo.Main.Temperature.ToString("F0").Replace(" ", "")}";
             WeatherCurrent = $"{string.Join(',', weatherInfo.Weather.Select(x => x.Description))}";
             var iconId = $"{string.Join(',', weatherInfo.Weather.Select(x => x.IconId))}";
-            WeatherImage = ImageHelper.LoadImageFromWeb(new Uri($"https://openweathermap.org/img/wn/{iconId}.png")).Result;
+            WeatherImage = await ImageHelper.LoadImageFromWeb(new Uri($"https://openweathermap.org/img/wn/{iconId}.png"));
         }
     }
     public void NavigateSettingsPageAction()
@@ -115,9 +151,9 @@ public partial class MainViewModel : NavigatableViewModelBase
         Navigate(new SettingsViewModel());
     }
 
-    public async void NextImageAction()
+    public async Task NextImageAction()
     {
-        ResetTimer?.Invoke(this, new EventArgs());
+        ResetTimer();
         // Needs to run on another thread, android does not allow running network stuff on the main thread
         await Task.Run(ShowNextImage);
     }
@@ -183,13 +219,13 @@ public partial class MainViewModel : NavigatableViewModelBase
         }
     }
 
-    public async void PreviousImageAction()
+    public async Task PreviousImageAction()
     {
         if (!ImagePaused)
         {
-            ResetTimer?.Invoke(this, new EventArgs());
+            ResetTimer();
             // Needs to run on another thread, android does not allow running network stuff on the main thread
-            await Task.Run(ShowPreviousImage);
+            await ShowPreviousImage();
         }
     }
     public async Task ShowPreviousImage()
@@ -228,6 +264,18 @@ public partial class MainViewModel : NavigatableViewModelBase
         ImagePaused = !ImagePaused;
         TimerEnabled = !ImagePaused;
     }
+    public void ResetTimer()
+    {
+        timerImageSwitcher?.Change(Settings.Interval * 1000, Settings.Interval * 1000);
+    }
+
+    public void ExitApp()
+    {
+        timerImageSwitcher?.Dispose();
+        timerLiveTime?.Dispose();
+        timerWeather?.Dispose();
+        Environment.Exit(0);
+    }
 
     [ObservableProperty]
     public Settings settings;
@@ -249,21 +297,13 @@ public partial class MainViewModel : NavigatableViewModelBase
     private Bitmap? weatherImage;
     [ObservableProperty]
     private bool imagePaused = false;
-    [ObservableProperty]
-    private Stretch imageStretchEnum = Stretch.Uniform;
 }
 
 public class PreloadedAsset
 {
     public AssetResponseDto Asset { get; }
     private Stream? _image;
-    public Stream? Image
-    {
-        get
-        {
-            return _image;
-        }
-    }
+    public Stream? Image => _image;
     public PreloadedAsset(AssetResponseDto asset)
     {
         Asset = asset;
