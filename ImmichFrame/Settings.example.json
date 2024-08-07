@@ -9,6 +9,7 @@
   "ShowMemories": false,
   "RenewImagesDuration": 30,
   "Albums": [ "" ],
+  "ExcludedAlbums": [ "" ],
   "People": [ "" ],
   "ImmichFrameAlbumName": "",
   "ShowClock": true,

@@ -7,216 +7,232 @@
 			 xmlns:vm="using:ImmichFrame.ViewModels"
              GotFocus="GotFocus_Handler"
              x:DataType="vm:SettingsViewModel">
-  <Design.DataContext>
-    <vm:SettingsViewModel />
-  </Design.DataContext>
-  <UserControl.Styles>
-    <Style Selector="TextBlock">
-      <Setter Property="VerticalAlignment" Value="Center"/>
-    </Style>
-    <Style Selector="TextBox">
-      <Setter Property="Margin" Value="0 0 0 5"/>
-      <Setter Property="VerticalAlignment" Value="Center"/>
-    </Style>
-    <Style Selector="CheckBox">
-      <Setter Property="Margin" Value="0 0 0 5"/>
-      <Setter Property="VerticalAlignment" Value="Center"/>
-    </Style>
-    <Style Selector="NumericUpDown">
-      <Setter Property="Margin" Value="0 0 0 5"/>
-      <Setter Property="VerticalAlignment" Value="Center"/>
-      <Setter Property="FormatString" Value="F0"/>
-    </Style>
-    <Style Selector="Button">
-      <Setter Property="Margin" Value="5 0 5 5"/>
-      <Setter Property="VerticalAlignment" Value="Center"/>
-    </Style>
-    <Style Selector="HyperlinkButton">
-      <Setter Property="Padding" Value="0"/>
-      <Setter Property="VerticalAlignment" Value="Center"/>
-    </Style>
-  </UserControl.Styles>
-  <DockPanel>
-    <UniformGrid DockPanel.Dock="Bottom" Columns="3">
-      <Button Content="Cancel"
-              HorizontalAlignment="Stretch"
-              Command="{Binding CancelCommand}"
-              HorizontalContentAlignment="Center"
-              TabIndex="36"/>
-      <Button Content="Save"
-              HorizontalAlignment="Stretch"
-              Command="{Binding SaveCommand}"
-              HorizontalContentAlignment="Center"
-              TabIndex="37"/>
-      <Button Content="Quit"
-              HorizontalAlignment="Stretch"
-              Command="{Binding QuitCommand}"
-              HorizontalContentAlignment="Center"
-              TabIndex="38"/>
-      <Button Content="Backup"
-              HorizontalAlignment="Stretch"
-              Command="{Binding BackupCommand}"
-              HorizontalContentAlignment="Center"
-              TabIndex="39"/>
-      <Button Content="Restore"
-              HorizontalAlignment="Stretch"
-              Command="{Binding RestoreCommand}"
-              HorizontalContentAlignment="Center"
-              TabIndex="40"/>
-    </UniformGrid>
-    <ScrollViewer x:Name="scrollViewer" Padding="20">
-      <StackPanel Name="stackPanel" Orientation="Vertical" Margin="10" >
-        <StackPanel>
-          <TextBlock Text="ImmichServerUrl"/>
-          <TextBox x:Name="txtImmichServerUrl" Text="{Binding Settings.ImmichServerUrl}" Watermark="http://192.168.0.100:2283" TabIndex="0" />
-        </StackPanel>
-        <StackPanel>
-          <HyperlinkButton Content="ApiKey" NavigateUri="https://immich.app/docs/features/command-line-interface#obtain-the-api-key" />
-          <TextBox Text="{Binding Settings.ApiKey}" Watermark="Click ApiKey to learn how to obtain" TabIndex="1" />
-        </StackPanel>
-        <StackPanel>
-          <TextBlock Text="Image fill option"/>
-          <ComboBox SelectedItem="{Binding Settings.ImageStretch}" ItemsSource="{Binding StretchOptions}" HorizontalAlignment="Stretch"  TabIndex="2">
-            <ComboBox.ItemTemplate>
-              <DataTemplate>
-                <TextBlock Text="{Binding}" />
-              </DataTemplate>
-            </ComboBox.ItemTemplate>
-          </ComboBox>
-        </StackPanel>
-        <StackPanel Orientation="Vertical">
-          <Grid ColumnDefinitions="*, Auto">
-            <TextBlock Text="Albums"/>
-            <Button Grid.Column="1" HorizontalAlignment="Right" Content="+" Command="{Binding AddAlbumCommand}" TabIndex="3" />
-          </Grid>
-          <ItemsControl ItemsSource="{Binding AlbumList}" TabIndex="4">
-            <ItemsControl.ItemTemplate>
-              <DataTemplate>
-                <Grid ColumnDefinitions="*, Auto">
-                  <TextBox Text="{Binding Value}" TabIndex="5"/>
-                  <Button Grid.Column="1" HorizontalAlignment="Right" Content="-" Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}, Path=DataContext.RemoveAlbumCommand}" CommandParameter="{Binding Id}" TabIndex="6" />
-                </Grid>
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
-        </StackPanel>
-        <StackPanel Orientation="Vertical">
-          <Grid ColumnDefinitions="*, Auto">
-            <TextBlock Text="People"/>
-            <Button Grid.Column="1" HorizontalAlignment="Right" Content="+" Command="{Binding AddPersonCommand}" TabIndex="7" />
-          </Grid>
-          <ItemsControl ItemsSource="{Binding PeopleList}" TabIndex="8">
-            <ItemsControl.ItemTemplate>
-              <DataTemplate>
-                <Grid ColumnDefinitions="*, Auto">
-                  <TextBox Text="{Binding Value}" TabIndex="9"/>
-                  <Button Grid.Column="1" HorizontalAlignment="Right" Content="-" Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}, Path=DataContext.RemovePersonCommand}" CommandParameter="{Binding Id}" TabIndex="10" />
-                </Grid>
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
-        </StackPanel>
-        <StackPanel>
-          <TextBlock Text="Interval"/>
-          <NumericUpDown Value="{Binding Settings.Interval}" KeyDown="NumericUpDown_KeyDown" TabIndex="11"/>
-        </StackPanel>
-        <StackPanel>
-          <TextBlock Text="TransitionDuration"/>
-          <NumericUpDown Value="{Binding Settings.TransitionDuration}" KeyDown="NumericUpDown_KeyDown" TabIndex="12"/>
-        </StackPanel>
-        <StackPanel>
-          <TextBlock Text="DownloadImages"/>
-          <CheckBox IsChecked="{Binding Settings.DownloadImages}" TabIndex="13"/>
-        </StackPanel>
-        <StackPanel>
-          <TextBlock Text="ShowMemories"/>
-          <CheckBox IsChecked="{Binding Settings.ShowMemories}" TabIndex="14"/>
-        </StackPanel>
-        <StackPanel>
-          <TextBlock Text="RenewImagesDuration"/>
-          <NumericUpDown Value="{Binding Settings.RenewImagesDuration}" KeyDown="NumericUpDown_KeyDown" TabIndex="15"/>
-        </StackPanel>
-        <StackPanel>
-          <TextBlock Text="Margin"/>
-          <Grid ColumnDefinitions="*,Auto">
-            <TextBox Grid.Column="0" Text="{Binding Settings.Margin}"  TabIndex="16"/>
-            <Button Grid.Column="1" Content="Apply" Command="{Binding TestMarginCommand}"  TabIndex="17"/>
-          </Grid>
-        </StackPanel>
-        <StackPanel>
-          <TextBlock Text="ShowClock"/>
-          <CheckBox IsChecked="{Binding Settings.ShowClock}" TabIndex="18"/>
-        </StackPanel>
-        <StackPanel>
-          <TextBlock Text="ImmichFrameAlbumName (must be unique per device!)"/>
-          <TextBox Text="{Binding Settings.ImmichFrameAlbumName}" Watermark="Save last 100 displayed items to this album on server" TabIndex="19"/>
-        </StackPanel>
-        <StackPanel>
-          <TextBlock Text="ClockFontSize"/>
-          <NumericUpDown Value="{Binding Settings.ClockFontSize}" KeyDown="NumericUpDown_KeyDown" TabIndex="20"/>
-        </StackPanel>
-        <StackPanel>
-          <TextBlock Text="ClockFormat"/>
-          <TextBox Text="{Binding Settings.ClockFormat}" TabIndex="21"/>
-        </StackPanel>
-        <StackPanel>
-          <TextBlock Text="ShowPhotoDate"/>
-          <CheckBox IsChecked="{Binding Settings.ShowPhotoDate}" TabIndex="22"/>
-        </StackPanel>
-        <StackPanel>
-          <TextBlock Text="PhotoDateFontSize"/>
-          <NumericUpDown Value="{Binding Settings.PhotoDateFontSize}" KeyDown="NumericUpDown_KeyDown" TabIndex="23"/>
-        </StackPanel>
-        <StackPanel>
-          <TextBlock Text="PhotoDateFormat"/>
-          <TextBox Text="{Binding Settings.PhotoDateFormat}" TabIndex="24"/>
-        </StackPanel>
-        <StackPanel>
-          <TextBlock Text="ShowImageDesc"/>
-          <CheckBox IsChecked="{Binding Settings.ShowImageDesc}" TabIndex="25"/>
-        </StackPanel>
-        <StackPanel>
-          <TextBlock Text="ImageDescFontSize"/>
-          <NumericUpDown Value="{Binding Settings.ImageDescFontSize}" KeyDown="NumericUpDown_KeyDown" TabIndex="26"/>
-        </StackPanel>
-        <StackPanel>
-          <TextBlock Text="ShowImageLocation"/>
-          <CheckBox IsChecked="{Binding Settings.ShowImageLocation}" TabIndex="27"/>
-        </StackPanel>
-        <StackPanel>
-          <TextBlock Text="ImageLocationFontSize"/>
-          <NumericUpDown Value="{Binding Settings.ImageLocationFontSize}" KeyDown="NumericUpDown_KeyDown" TabIndex="28"/>
-        </StackPanel>
-        <StackPanel>
-          <TextBlock Text="FontColor"/>
-          <TextBox Text="{Binding Settings.FontColor}" TabIndex="29"/>
-        </StackPanel>
-        <StackPanel>
-          <HyperlinkButton Content="WeatherApiKey" NavigateUri="https://openweathermap.org/appid" />
-          <TextBox Text="{Binding Settings.WeatherApiKey}" Watermark="Click WeatherApiKey learn more" TabIndex="30"/>
-        </StackPanel>
-        <StackPanel>
-          <TextBlock Text="ShowWeatherDescription"/>
-          <CheckBox IsChecked="{Binding Settings.ShowWeatherDescription}" TabIndex="31"/>
-        </StackPanel>
-        <StackPanel>
-          <TextBlock Text="WeatherFontSize"/>
-          <NumericUpDown Value="{Binding Settings.WeatherFontSize}" KeyDown="NumericUpDown_KeyDown" TabIndex="32"/>
-        </StackPanel>
-        <StackPanel>
-          <TextBlock Text="UnitSystem"/>
-          <TextBox Text="{Binding Settings.UnitSystem}" TabIndex="33"/>
-        </StackPanel>
-        <StackPanel>
-          <TextBlock Text="WeatherLatLong"/>
-          <TextBox Text="{Binding Settings.WeatherLatLong}" TabIndex="34"/>
-        </StackPanel>
-        <StackPanel>
-          <TextBlock Text="Language"/>
-          <TextBox Text="{Binding Settings.Language}" TabIndex="35"/>
-        </StackPanel>
-        <Rectangle Height="600" Fill="Transparent" />
-      </StackPanel>
-    </ScrollViewer>
-  </DockPanel>
+	<Design.DataContext>
+		<vm:SettingsViewModel />
+	</Design.DataContext>
+	<UserControl.Styles>
+		<Style Selector="TextBlock">
+			<Setter Property="VerticalAlignment" Value="Center"/>
+		</Style>
+		<Style Selector="TextBox">
+			<Setter Property="Margin" Value="0 0 0 5"/>
+			<Setter Property="VerticalAlignment" Value="Center"/>
+		</Style>
+		<Style Selector="CheckBox">
+			<Setter Property="Margin" Value="0 0 0 5"/>
+			<Setter Property="VerticalAlignment" Value="Center"/>
+		</Style>
+		<Style Selector="NumericUpDown">
+			<Setter Property="Margin" Value="0 0 0 5"/>
+			<Setter Property="VerticalAlignment" Value="Center"/>
+			<Setter Property="FormatString" Value="F0"/>
+		</Style>
+		<Style Selector="Button">
+			<Setter Property="Margin" Value="5 0 5 5"/>
+			<Setter Property="VerticalAlignment" Value="Center"/>
+		</Style>
+		<Style Selector="HyperlinkButton">
+			<Setter Property="Padding" Value="0"/>
+			<Setter Property="VerticalAlignment" Value="Center"/>
+		</Style>
+	</UserControl.Styles>
+	<DockPanel>
+		<UniformGrid DockPanel.Dock="Bottom" Columns="3">
+			<Button Content="Cancel"
+					HorizontalAlignment="Stretch"
+					Command="{Binding CancelCommand}"
+					HorizontalContentAlignment="Center"
+					TabIndex="36"/>
+			<Button Content="Save"
+					HorizontalAlignment="Stretch"
+					Command="{Binding SaveCommand}"
+					HorizontalContentAlignment="Center"
+					TabIndex="37"/>
+			<Button Content="Quit"
+					HorizontalAlignment="Stretch"
+					Command="{Binding QuitCommand}"
+					HorizontalContentAlignment="Center"
+					TabIndex="38"/>
+			<Button Content="Backup"
+					HorizontalAlignment="Stretch"
+					Command="{Binding BackupCommand}"
+					HorizontalContentAlignment="Center"
+					TabIndex="39"/>
+			<Button Content="Restore"
+					HorizontalAlignment="Stretch"
+					Command="{Binding RestoreCommand}"
+					HorizontalContentAlignment="Center"
+					TabIndex="40"/>
+		</UniformGrid>
+		<ScrollViewer x:Name="scrollViewer" Padding="20">
+			<StackPanel Name="stackPanel" Orientation="Vertical" Margin="10" >
+				<StackPanel>
+					<TextBlock Text="ImmichServerUrl"/>
+					<TextBox x:Name="txtImmichServerUrl" Text="{Binding Settings.ImmichServerUrl}" Watermark="http://192.168.0.100:2283" TabIndex="0" />
+				</StackPanel>
+				<StackPanel>
+					<HyperlinkButton Content="ApiKey" NavigateUri="https://immich.app/docs/features/command-line-interface#obtain-the-api-key" />
+					<TextBox Text="{Binding Settings.ApiKey}" Watermark="Click ApiKey to learn how to obtain" TabIndex="1" />
+				</StackPanel>
+				<StackPanel>
+					<TextBlock Text="Image fill option"/>
+					<ComboBox SelectedItem="{Binding Settings.ImageStretch}" ItemsSource="{Binding StretchOptions}" HorizontalAlignment="Stretch"  TabIndex="2">
+						<ComboBox.ItemTemplate>
+							<DataTemplate>
+								<TextBlock Text="{Binding}" />
+							</DataTemplate>
+						</ComboBox.ItemTemplate>
+					</ComboBox>
+				</StackPanel>
+				<StackPanel Orientation="Vertical">
+					<Grid ColumnDefinitions="*, Auto">
+						<TextBlock Text="Albums"/>
+						<Button Grid.Column="1" HorizontalAlignment="Right" Content="+" Command="{Binding AddAlbumCommand}" TabIndex="3" />
+					</Grid>
+					<ItemsControl ItemsSource="{Binding AlbumList}" TabIndex="4">
+						<ItemsControl.ItemTemplate>
+							<DataTemplate>
+								<Grid ColumnDefinitions="*, Auto">
+									<TextBox Text="{Binding Value}" TabIndex="5"/>
+									<Button Grid.Column="1" HorizontalAlignment="Right" Content="-" Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}, Path=DataContext.RemoveAlbumCommand}" CommandParameter="{Binding Id}" TabIndex="6" />
+								</Grid>
+							</DataTemplate>
+						</ItemsControl.ItemTemplate>
+					</ItemsControl>
+				</StackPanel>
+				<StackPanel Orientation="Vertical">
+					<Grid ColumnDefinitions="*, Auto">
+						<TextBlock Text="Excluded albums"/>
+						<Button Grid.Column="1" HorizontalAlignment="Right" Content="+" Command="{Binding AddExcludedAlbumCommand}" TabIndex="3" />
+					</Grid>
+					<ItemsControl ItemsSource="{Binding ExcludedAlbumList}" TabIndex="4">
+						<ItemsControl.ItemTemplate>
+							<DataTemplate>
+								<Grid ColumnDefinitions="*, Auto">
+									<TextBox Text="{Binding Value}" TabIndex="5"/>
+									<Button Grid.Column="1" HorizontalAlignment="Right" Content="-" Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}, Path=DataContext.RemoveExcludedAlbumCommand}" CommandParameter="{Binding Id}" TabIndex="6" />
+								</Grid>
+							</DataTemplate>
+						</ItemsControl.ItemTemplate>
+					</ItemsControl>
+				</StackPanel>
+				<StackPanel Orientation="Vertical">
+					<Grid ColumnDefinitions="*, Auto">
+						<TextBlock Text="People"/>
+						<Button Grid.Column="1" HorizontalAlignment="Right" Content="+" Command="{Binding AddPersonCommand}" TabIndex="7" />
+					</Grid>
+					<ItemsControl ItemsSource="{Binding PeopleList}" TabIndex="8">
+						<ItemsControl.ItemTemplate>
+							<DataTemplate>
+								<Grid ColumnDefinitions="*, Auto">
+									<TextBox Text="{Binding Value}" TabIndex="9"/>
+									<Button Grid.Column="1" HorizontalAlignment="Right" Content="-" Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}, Path=DataContext.RemovePersonCommand}" CommandParameter="{Binding Id}" TabIndex="10" />
+								</Grid>
+							</DataTemplate>
+						</ItemsControl.ItemTemplate>
+					</ItemsControl>
+				</StackPanel>
+				<StackPanel>
+					<TextBlock Text="Interval"/>
+					<NumericUpDown Value="{Binding Settings.Interval}" KeyDown="NumericUpDown_KeyDown" TabIndex="11"/>
+				</StackPanel>
+				<StackPanel>
+					<TextBlock Text="TransitionDuration"/>
+					<NumericUpDown Value="{Binding Settings.TransitionDuration}" KeyDown="NumericUpDown_KeyDown" TabIndex="12"/>
+				</StackPanel>
+				<StackPanel>
+					<TextBlock Text="DownloadImages"/>
+					<CheckBox IsChecked="{Binding Settings.DownloadImages}" TabIndex="13"/>
+				</StackPanel>
+				<StackPanel>
+					<TextBlock Text="ShowMemories"/>
+					<CheckBox IsChecked="{Binding Settings.ShowMemories}" TabIndex="14"/>
+				</StackPanel>
+				<StackPanel>
+					<TextBlock Text="RenewImagesDuration"/>
+					<NumericUpDown Value="{Binding Settings.RenewImagesDuration}" KeyDown="NumericUpDown_KeyDown" TabIndex="15"/>
+				</StackPanel>
+				<StackPanel>
+					<TextBlock Text="Margin"/>
+					<Grid ColumnDefinitions="*,Auto">
+						<TextBox Grid.Column="0" Text="{Binding Settings.Margin}"  TabIndex="16"/>
+						<Button Grid.Column="1" Content="Apply" Command="{Binding TestMarginCommand}"  TabIndex="17"/>
+					</Grid>
+				</StackPanel>
+				<StackPanel>
+					<TextBlock Text="ShowClock"/>
+					<CheckBox IsChecked="{Binding Settings.ShowClock}" TabIndex="18"/>
+				</StackPanel>
+				<StackPanel>
+					<TextBlock Text="ImmichFrameAlbumName (must be unique per device!)"/>
+					<TextBox Text="{Binding Settings.ImmichFrameAlbumName}" Watermark="Save last 100 displayed items to this album on server" TabIndex="19"/>
+				</StackPanel>
+				<StackPanel>
+					<TextBlock Text="ClockFontSize"/>
+					<NumericUpDown Value="{Binding Settings.ClockFontSize}" KeyDown="NumericUpDown_KeyDown" TabIndex="20"/>
+				</StackPanel>
+				<StackPanel>
+					<TextBlock Text="ClockFormat"/>
+					<TextBox Text="{Binding Settings.ClockFormat}" TabIndex="21"/>
+				</StackPanel>
+				<StackPanel>
+					<TextBlock Text="ShowPhotoDate"/>
+					<CheckBox IsChecked="{Binding Settings.ShowPhotoDate}" TabIndex="22"/>
+				</StackPanel>
+				<StackPanel>
+					<TextBlock Text="PhotoDateFontSize"/>
+					<NumericUpDown Value="{Binding Settings.PhotoDateFontSize}" KeyDown="NumericUpDown_KeyDown" TabIndex="23"/>
+				</StackPanel>
+				<StackPanel>
+					<TextBlock Text="PhotoDateFormat"/>
+					<TextBox Text="{Binding Settings.PhotoDateFormat}" TabIndex="24"/>
+				</StackPanel>
+				<StackPanel>
+					<TextBlock Text="ShowImageDesc"/>
+					<CheckBox IsChecked="{Binding Settings.ShowImageDesc}" TabIndex="25"/>
+				</StackPanel>
+				<StackPanel>
+					<TextBlock Text="ImageDescFontSize"/>
+					<NumericUpDown Value="{Binding Settings.ImageDescFontSize}" KeyDown="NumericUpDown_KeyDown" TabIndex="26"/>
+				</StackPanel>
+				<StackPanel>
+					<TextBlock Text="ShowImageLocation"/>
+					<CheckBox IsChecked="{Binding Settings.ShowImageLocation}" TabIndex="27"/>
+				</StackPanel>
+				<StackPanel>
+					<TextBlock Text="ImageLocationFontSize"/>
+					<NumericUpDown Value="{Binding Settings.ImageLocationFontSize}" KeyDown="NumericUpDown_KeyDown" TabIndex="28"/>
+				</StackPanel>
+				<StackPanel>
+					<TextBlock Text="FontColor"/>
+					<TextBox Text="{Binding Settings.FontColor}" TabIndex="29"/>
+				</StackPanel>
+				<StackPanel>
+					<HyperlinkButton Content="WeatherApiKey" NavigateUri="https://openweathermap.org/appid" />
+					<TextBox Text="{Binding Settings.WeatherApiKey}" Watermark="Click WeatherApiKey learn more" TabIndex="30"/>
+				</StackPanel>
+				<StackPanel>
+					<TextBlock Text="ShowWeatherDescription"/>
+					<CheckBox IsChecked="{Binding Settings.ShowWeatherDescription}" TabIndex="31"/>
+				</StackPanel>
+				<StackPanel>
+					<TextBlock Text="WeatherFontSize"/>
+					<NumericUpDown Value="{Binding Settings.WeatherFontSize}" KeyDown="NumericUpDown_KeyDown" TabIndex="32"/>
+				</StackPanel>
+				<StackPanel>
+					<TextBlock Text="UnitSystem"/>
+					<TextBox Text="{Binding Settings.UnitSystem}" TabIndex="33"/>
+				</StackPanel>
+				<StackPanel>
+					<TextBlock Text="WeatherLatLong"/>
+					<TextBox Text="{Binding Settings.WeatherLatLong}" TabIndex="34"/>
+				</StackPanel>
+				<StackPanel>
+					<TextBlock Text="Language"/>
+					<TextBox Text="{Binding Settings.Language}" TabIndex="35"/>
+				</StackPanel>
+				<Rectangle Height="600" Fill="Transparent" />
+			</StackPanel>
+		</ScrollViewer>
+	</DockPanel>
 </UserControl>

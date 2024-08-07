@@ -39,6 +39,7 @@ namespace ImmichFrame.Models
         public bool ShowMemories { get; set; } = false;
         public int RenewImagesDuration { get; set; } = 20;
         public List<Guid> Albums { get; set; } = new List<Guid>();
+        public List<Guid> ExcludedAlbums { get; set; } = new List<Guid>();
         public List<Guid> People { get; set; } = new List<Guid>();
         [JsonIgnore]
         public bool UseImmichFrameAlbum => !string.IsNullOrWhiteSpace(ImmichFrameAlbumName);
@@ -199,6 +200,7 @@ namespace ImmichFrame.Models
                         property.SetValue(settings, value);
                         break;
                     case "Albums":
+                    case "ExcludedAlbums":
                     case "People":
                         var list = new List<Guid>();
                         foreach (var item in (List<string>)(SettingsValue.Value ?? new()))
@@ -310,6 +312,7 @@ namespace ImmichFrame.Models
                 ShowMemories = false,
                 RenewImagesDuration = 20,
                 Albums = new List<Guid>(),
+                ExcludedAlbums = new List<Guid>(),
                 People = new List<Guid>(),
                 ImmichFrameAlbumName = "",
                 ShowClock = true,
