@@ -42,22 +42,22 @@
 					HorizontalAlignment="Stretch"
 					Command="{Binding CancelCommand}"
 					HorizontalContentAlignment="Center"
-					TabIndex="36"/>
+					TabIndex="37"/>
 			<Button Content="Save"
 					HorizontalAlignment="Stretch"
 					Command="{Binding SaveCommand}"
 					HorizontalContentAlignment="Center"
-					TabIndex="37"/>
+					TabIndex="38"/>
 			<Button Content="Quit"
 					HorizontalAlignment="Stretch"
 					Command="{Binding QuitCommand}"
 					HorizontalContentAlignment="Center"
-					TabIndex="38"/>
+					TabIndex="39"/>
 			<Button Content="Backup"
 					HorizontalAlignment="Stretch"
 					Command="{Binding BackupCommand}"
 					HorizontalContentAlignment="Center"
-					TabIndex="39"/>
+					TabIndex="40"/>
 			<Button Content="Restore"
 					HorizontalAlignment="Stretch"
 					Command="{Binding RestoreCommand}"
@@ -231,6 +231,10 @@
 					<TextBlock Text="Language"/>
 					<TextBox Text="{Binding Settings.Language}" TabIndex="35"/>
 				</StackPanel>
+        <StackPanel>
+          <TextBlock Text="UnattendedMode"/>
+          <CheckBox IsChecked="{Binding Settings.UnattendedMode}" TabIndex="36"/>
+        </StackPanel>
 				<Rectangle Height="600" Fill="Transparent" />
 			</StackPanel>
 		</ScrollViewer>

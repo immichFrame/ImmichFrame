@@ -28,5 +28,6 @@
   "WeatherFontSize": 24,
   "UnitSystem": "imperial",
   "WeatherLatLong": "",
-  "Language": "en"
+  "Language": "en",
+  "UnattendedMode":  false
 }
