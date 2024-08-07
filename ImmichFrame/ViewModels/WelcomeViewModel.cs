@@ -14,7 +14,7 @@ namespace ImmichFrame.ViewModels
 
         public void SettingsAction()
         {
-            this.Navigate(new SettingsViewModel());
+            this.Navigate(new SettingsViewModel(false));
         }
     }
 }

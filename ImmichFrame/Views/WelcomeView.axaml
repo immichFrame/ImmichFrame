@@ -9,5 +9,20 @@
 	<Design.DataContext>
 		<vm:WelcomeViewModel />
 	</Design.DataContext>
-  Welcome to Avalonia!
+	<DockPanel>
+		<Grid HorizontalAlignment="Center" DockPanel.Dock="Bottom">
+			<Button Content="Navigate to Settings"
+			 HorizontalAlignment="Stretch"
+			 Command="{Binding SettingsCommand}"
+			 HorizontalContentAlignment="Center"
+			 TabIndex="36"/>
+		</Grid>
+		<ScrollViewer x:Name="scrollViewer" Padding="20">
+			<Grid>
+				<Label>
+					Welcome to Avalonia!
+				</Label>
+			</Grid>
+		</ScrollViewer>
+	</DockPanel>
 </UserControl>
