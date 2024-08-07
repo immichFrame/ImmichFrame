@@ -171,7 +171,7 @@ namespace ImmichFrame.Helpers
             }
         }
 
-        private async Task<IEnumerable<AssetResponseDto>> GetAlbumAssets(Guid albumId)
+        private async Task<IEnumerable<AssetResponseDto>> GetAlbumAssets()
         {
             using var client = new HttpClient();
 
@@ -181,8 +181,12 @@ namespace ImmichFrame.Helpers
             var immichApi = new ImmichApi(settings.ImmichServerUrl, client);
 
             client.UseApiKey(settings.ApiKey);
+            foreach (var albumId in settings.Albums!)
+            {
+                allAssets.AddRange(await GetAlbumAssets(albumId, immichApi));
+            }
 
-            return await GetAlbumAssets(albumId, immichApi);
+            return allAssets;
         }
 
         private async Task<IEnumerable<AssetResponseDto>> GetExcludedAlbumAssets()
@@ -196,24 +200,6 @@ namespace ImmichFrame.Helpers
 
             client.UseApiKey(settings.ApiKey);
             foreach (var albumId in settings.ExcludedAlbums!)
-            {
-                allAssets.AddRange(await GetAlbumAssets(albumId, immichApi));
-            }
-
-            return allAssets;
-        }
-
-        private async Task<IEnumerable<AssetResponseDto>> GetAlbumAssets()
-        {
-            using var client = new HttpClient();
-
-            var allAssets = new List<AssetResponseDto>();
-            var settings = Settings.CurrentSettings;
-
-            var immichApi = new ImmichApi(settings.ImmichServerUrl, client);
-
-            client.UseApiKey(settings.ApiKey);
-            foreach (var albumId in settings.Albums!)
             {
                 allAssets.AddRange(await GetAlbumAssets(albumId, immichApi));
             }
