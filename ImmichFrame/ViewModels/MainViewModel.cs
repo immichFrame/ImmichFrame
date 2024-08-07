@@ -64,7 +64,8 @@ public partial class MainViewModel : NavigatableViewModelBase
             Images = new UiImage
             {
                 Image = new Bitmap(imgStream),
-                ThumbhashImage = new Bitmap(tmbStream)
+                ThumbhashImage = new Bitmap(tmbStream),
+                ImageStretch = StretchHelper.FromString(Settings.ImageStretch),
             };
 
             ImageDate = asset?.LocalDateTime.ToString(Settings.PhotoDateFormat, culture) ?? string.Empty;
