@@ -44,7 +44,6 @@ namespace ImmichFrame.Models
         [JsonIgnore]
         public bool UseImmichFrameAlbum => !string.IsNullOrWhiteSpace(ImmichFrameAlbumName);
         public string ImmichFrameAlbumName { get; set; } = string.Empty;
-        public bool NoVideos { get; set; } = true;
         public bool ShowClock { get; set; } = true;
         public int ClockFontSize { get; set; } = 48;
         public string? ClockFormat { get; set; } = "h:mm tt";
@@ -236,7 +235,6 @@ namespace ImmichFrame.Models
                     case "ShowImageDesc":
                     case "ShowImageLocation":
                     case "ShowWeatherDescription":
-                    case "NoVideos":
                         if (!bool.TryParse(value.ToString(), out var boolValue))
                             throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. ('{value}')");
                         property.SetValue(settings, boolValue);
@@ -317,7 +315,6 @@ namespace ImmichFrame.Models
                 ExcludedAlbums = new List<Guid>(),
                 People = new List<Guid>(),
                 ImmichFrameAlbumName = "",
-                NoVideos = true,
                 ShowClock = true,
                 ClockFontSize = 48,
                 ClockFormat = "h:mm tt",

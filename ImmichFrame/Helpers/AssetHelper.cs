@@ -107,8 +107,7 @@ namespace ImmichFrame.Helpers
 
             if (assetsAdded)
             {
-                // Exclude videos if configured
-                if (Settings.CurrentSettings.NoVideos)
+                // Exclude videos
                     list = list.Where(x => x.Type != AssetTypeEnum.VIDEO);
 
                 var excludedalbumAssetIds = (await GetExcludedAlbumAssets()).Select(x => x.Id);
@@ -282,8 +281,7 @@ namespace ImmichFrame.Helpers
                     {
                         var asset = randomAssets.First();
 
-                        // Reload if exclude videos if configured
-                        if (settings.NoVideos && asset.Type == AssetTypeEnum.VIDEO)
+                        if (asset.Type == AssetTypeEnum.VIDEO)
                             return await GetRandomAsset();
 
                         var albumIds = (await immichApi.GetAllAlbumsAsync(Guid.Parse(asset.Id), true)).Select(x => Guid.Parse(x.Id));
