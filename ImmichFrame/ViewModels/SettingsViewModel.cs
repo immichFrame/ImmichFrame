@@ -129,7 +129,10 @@ namespace ImmichFrame.ViewModels
                 Settings.People = PeopleList.Select(x => Guid.Parse(x.Value)).ToList();
                 Settings.Albums = AlbumList.Select(x => Guid.Parse(x.Value)).ToList();
                 Settings.ExcludedAlbums = ExcludedAlbumList.Select(x => Guid.Parse(x.Value)).ToList();
-
+                if (string.IsNullOrEmpty(Settings.ImmichServerUrl) || string.IsNullOrEmpty(Settings.ApiKey))
+                {
+                    return;
+                }
                 Settings.SaveSettings(Settings);
                 var settings = Settings.CurrentSettings;
             }

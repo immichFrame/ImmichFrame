@@ -36,6 +36,12 @@
 			<Setter Property="VerticalAlignment" Value="Center"/>
 		</Style>
 	</UserControl.Styles>
+  <UserControl.Styles>
+    <Style Selector="TextBox.empty:empty">
+      <Setter Property="BorderBrush" Value="Red"/>
+      <Setter Property="BorderThickness" Value="2"/>
+    </Style>
+  </UserControl.Styles>
 	<DockPanel>
 		<UniformGrid DockPanel.Dock="Bottom" Columns="3">
 			<Button Content="Cancel"
@@ -46,6 +52,7 @@
 			<Button Content="Save"
 					HorizontalAlignment="Stretch"
 					Command="{Binding SaveCommand}"
+          Click="OnSaveClick"
 					HorizontalContentAlignment="Center"
 					TabIndex="38"/>
 			<Button Content="Quit"
@@ -68,11 +75,11 @@
 			<StackPanel Name="stackPanel" Orientation="Vertical" Margin="10" >
 				<StackPanel>
 					<TextBlock Text="ImmichServerUrl"/>
-					<TextBox x:Name="txtImmichServerUrl" Text="{Binding Settings.ImmichServerUrl}" Watermark="http://192.168.0.100:2283" TabIndex="0" />
+					<TextBox x:Name="txtImmichServerUrl" Text="{Binding Settings.ImmichServerUrl}" Watermark="http://192.168.0.100:2283" Classes="empty" TabIndex="0" />
 				</StackPanel>
 				<StackPanel>
 					<HyperlinkButton Content="ApiKey" NavigateUri="https://immich.app/docs/features/command-line-interface#obtain-the-api-key" />
-					<TextBox Text="{Binding Settings.ApiKey}" Watermark="Click ApiKey to learn how to obtain" TabIndex="1" />
+					<TextBox Text="{Binding Settings.ApiKey}" Watermark="Click ApiKey to learn how to obtain" Classes="empty" TabIndex="1" />
 				</StackPanel>
 				<StackPanel>
 					<TextBlock Text="Image fill option"/>
