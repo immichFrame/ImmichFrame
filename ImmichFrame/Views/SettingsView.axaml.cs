@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 
 namespace ImmichFrame.Views
 {
@@ -14,19 +15,11 @@ namespace ImmichFrame.Views
         {
             if (e.Source is TextBox textBox)
             {
-                ScrollToControl(textBox);
-            }
-        }
-        private void ScrollToControl(Control control)
-        {
-            var scrollViewer = this.FindControl<ScrollViewer>("scrollViewer");
-            if (scrollViewer != null)
-            {
-                var controlPosition = control.TranslatePoint(new Point(0, 0), scrollViewer);
-                if (controlPosition.HasValue)
+
+                var scrollViewer = this.FindControl<ScrollViewer>("scrollViewer");
+                if (scrollViewer != null)
                 {
-                    var targetOffsetY = scrollViewer.Offset.Y + controlPosition.Value.Y - 40;
-                    scrollViewer.Offset = new Vector(0, targetOffsetY);
+                    scrollViewer.ScrollToEnd();
                 }
             }
         }
@@ -45,5 +38,14 @@ namespace ImmichFrame.Views
                 e.Handled = true;
             }
         }
+        private void OnSaveClick(object sender, RoutedEventArgs e)
+        {
+            var scrollViewer = this.FindControl<ScrollViewer>("scrollViewer");
+            if (scrollViewer != null)
+            {
+                scrollViewer.Offset = new Vector(0, 0);
+            }
+        }
+
     }
 }

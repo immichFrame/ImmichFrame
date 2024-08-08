@@ -52,6 +52,7 @@
 			<Button Content="Save"
 					HorizontalAlignment="Stretch"
 					Command="{Binding SaveCommand}"
+          Click="OnSaveClick"
 					HorizontalContentAlignment="Center"
 					TabIndex="38"/>
 			<Button Content="Quit"
