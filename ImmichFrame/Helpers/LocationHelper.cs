@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using ImmichFrame.Models;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 
@@ -29,11 +30,20 @@ namespace ImmichFrame.Helpers
 
         public static string GetLocationString(ImmichFrame.Models.ExifResponseDto exifInfo)
         {
-            string country = GetCountryCode(exifInfo.Country);
-            string state = exifInfo.State?.Split(", ").Last() ?? string.Empty;
+            var settings = Settings.CurrentSettings;
+
+            string country = settings.ShowCountry ? exifInfo.Country : string.Empty;
+            if (settings.AbbreviateCountry)
+            {
+                country = GetCountryCode(country);
+            }
+
+            string state = settings.ShowState ? exifInfo.State?.Split(", ").Last() ?? string.Empty : string.Empty;
+
+            string city = settings.ShowCity ? exifInfo.City : string.Empty;
 
             var locationData = new[] {
-                    exifInfo.City,
+                    city,
                     state,
                     country
                 }.Where(x => !string.IsNullOrWhiteSpace(x));

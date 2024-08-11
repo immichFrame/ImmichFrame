@@ -200,40 +200,56 @@
 					<CheckBox IsChecked="{Binding Settings.ShowImageLocation}" TabIndex="27"/>
 				</StackPanel>
 				<StackPanel>
+					<TextBlock Text="ShowCity"/>
+					<CheckBox IsChecked="{Binding Settings.ShowCity}" TabIndex="28"/>
+				</StackPanel>
+				<StackPanel>
+					<TextBlock Text="ShowState"/>
+					<CheckBox IsChecked="{Binding Settings.ShowState}" TabIndex="29"/>
+				</StackPanel>
+				<StackPanel>
+					<TextBlock Text="ShowCountry"/>
+					<CheckBox IsChecked="{Binding Settings.ShowCountry}" TabIndex="30"/>
+				</StackPanel>
+				<StackPanel>
+					<TextBlock Text="AbbreviateCountry"/>
+					<CheckBox IsChecked="{Binding Settings.AbbreviateCountry}" TabIndex="31"/>
+				</StackPanel>
+				<StackPanel>
 					<TextBlock Text="ImageLocationFontSize"/>
-					<NumericUpDown Value="{Binding Settings.ImageLocationFontSize}" KeyDown="NumericUpDown_KeyDown" TabIndex="28"/>
+					<NumericUpDown Value="{Binding Settings.ImageLocationFontSize}" KeyDown="NumericUpDown_KeyDown" TabIndex="32"/>
 				</StackPanel>
 				<StackPanel>
 					<TextBlock Text="FontColor"/>
-					<TextBox Text="{Binding Settings.FontColor}" TabIndex="29"/>
+					<TextBox Text="{Binding Settings.FontColor}" TabIndex="33"/>
 				</StackPanel>
 				<StackPanel>
 					<HyperlinkButton Content="WeatherApiKey" NavigateUri="https://openweathermap.org/appid" />
-					<TextBox Text="{Binding Settings.WeatherApiKey}" Watermark="Click WeatherApiKey learn more" TabIndex="30"/>
+					<TextBox Text="{Binding Settings.WeatherApiKey}" Watermark="Click WeatherApiKey learn more" TabIndex="34"/>
 				</StackPanel>
 				<StackPanel>
 					<TextBlock Text="ShowWeatherDescription"/>
-					<CheckBox IsChecked="{Binding Settings.ShowWeatherDescription}" TabIndex="31"/>
+					<CheckBox IsChecked="{Binding Settings.ShowWeatherDescription}" TabIndex="35"/>
 				</StackPanel>
 				<StackPanel>
 					<TextBlock Text="WeatherFontSize"/>
-					<NumericUpDown Value="{Binding Settings.WeatherFontSize}" KeyDown="NumericUpDown_KeyDown" TabIndex="32"/>
+					<NumericUpDown Value="{Binding Settings.WeatherFontSize}" KeyDown="NumericUpDown_KeyDown" TabIndex="36"/>
 				</StackPanel>
 				<StackPanel>
 					<TextBlock Text="UnitSystem"/>
-					<TextBox Text="{Binding Settings.UnitSystem}" TabIndex="33"/>
+					<TextBox Text="{Binding Settings.UnitSystem}" TabIndex="37"/>
 				</StackPanel>
 				<StackPanel>
 					<TextBlock Text="WeatherLatLong"/>
-					<TextBox Text="{Binding Settings.WeatherLatLong}" TabIndex="34"/>
+					<TextBox Text="{Binding Settings.WeatherLatLong}" TabIndex="38"/>
 				</StackPanel>
 				<StackPanel>
 					<TextBlock Text="Language"/>
-					<TextBox Text="{Binding Settings.Language}" TabIndex="35"/>
+					<TextBox Text="{Binding Settings.Language}" TabIndex="39"/>
 				</StackPanel>
         <StackPanel>
           <TextBlock Text="UnattendedMode"/>
-          <CheckBox IsChecked="{Binding Settings.UnattendedMode}" TabIndex="36"/>
+          <CheckBox IsChecked="{Binding Settings.UnattendedMode}" TabIndex="40"/>
         </StackPanel>
 				<Rectangle Height="600" Fill="Transparent" />
 			</StackPanel>
