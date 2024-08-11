@@ -17,6 +17,7 @@ namespace ImmichFrame.ViewModels;
 public partial class MainViewModel : NavigatableViewModelBase
 {
     //public event EventHandler? ResetTimer;
+    public static MainViewModel? Instance { get; private set; }
 
     public bool TimerEnabled = false;
     private AssetResponseDto? LastAsset;
@@ -43,6 +44,7 @@ public partial class MainViewModel : NavigatableViewModelBase
         PauseImageCommand = new RelayCommand(PauseImageAction);
         QuitCommand = new RelayCommand(ExitApp);
         NavigateSettingsPageCommand = new RelayCommand(NavigateSettingsPageAction);
+        Instance = this;
     }
 
     public async Task InitializeAsync()
@@ -230,7 +232,7 @@ public partial class MainViewModel : NavigatableViewModelBase
         {
             ResetTimer();
             // Needs to run on another thread, android does not allow running network stuff on the main thread
-            await ShowPreviousImage();
+            await Task.Run(ShowPreviousImage);
         }
     }
     public async Task ShowPreviousImage()
