@@ -4,6 +4,7 @@ using Android.OS;
 using Android.Views;
 using Avalonia;
 using Avalonia.Android;
+using ImmichFrame.ViewModels;
 
 namespace ImmichFrame.Android;
 
@@ -18,9 +19,9 @@ public class MainActivity : AvaloniaMainActivity<App>
 {
     protected override void OnCreate(Bundle? savedInstanceState)
     {
+        base.OnCreate(savedInstanceState);
         Window!.AddFlags(WindowManagerFlags.KeepScreenOn);
         Window!.AddFlags(WindowManagerFlags.Fullscreen);
-        base.OnCreate(savedInstanceState);
     }
     protected override AppBuilder CustomizeAppBuilder(AppBuilder builder)
     {
