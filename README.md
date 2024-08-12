@@ -58,12 +58,15 @@ ImmichFrame is easy to run on your desired plattform. Get the latest stable rele
 - CLI - CD into folder, and launch with `./Immich_Frame`.
 - SSH - CD into folder, and launch with `DISPLAY=:0.0 ./Immich_Frame`.
 - Ubuntu Desktop - Right-click Immich_Frame, properties, set 'Execute as program' to True, OK. Right-click Immich_Frame, Open with, choose 'Run Software', always use for this file type TRUE.
+- If you get a permissions error run `chmod +x Immich_Frame`.
 ### Windows
 - Double-click `Immich_Frame.exe`.
 - Screensaver - Rename `Immich_Frame.exe` to `Immich_Frame.scr`. Right-click &rarr; Install. Configure screensaver settings and apply.
   - You will still have to click middle/bottom in the app to exit screensaver.
 ### MacOS
-- Double-click `Immich_Frame`. Note: If nothing happens, right-click &rarr; open with &rarr; Utilities &rarr; Terminal. Check Always Open With.
+- GUI - Double-click `Immich_Frame`. Note: If nothing happens, right-click &rarr; open with &rarr; Utilities &rarr; Terminal. Check Always Open With.
+- CLI - CD into folder, and launch with `./Immich_Frame`.
+- If you get a permissions error run `chmod +x Immich_Frame`.
 ### Android Screensaver
 - Run the app normally and configure settings.
 - Go to Settings, Display, Advanced, Screen Saver, Current Screen Saver, choose ImmichFrame. Settings, Display, Advanced, Sleep, choose your sleep timeout. The menu options may differ slightly on different Android versions.
