@@ -12,7 +12,7 @@ namespace ImmichFrame.Android
         public override void OnAttachedToWindow()
         {
             base.OnAttachedToWindow();
-            
+
             // Try to get a WakeLock
             try
             {
@@ -25,7 +25,7 @@ namespace ImmichFrame.Android
             }
             catch
             {
-               //couldn't get a WakeLock, just continue
+                //couldn't get a WakeLock, just continue
             }
         }
         public override void OnDreamingStarted()
@@ -33,7 +33,7 @@ namespace ImmichFrame.Android
             base.OnDreamingStarted();
             // Launch main activity when the screensaver starts
             var intent = new Intent(this, typeof(MainActivity));
-            intent.AddFlags(ActivityFlags.NewTask);
+            intent.AddFlags(ActivityFlags.ReorderToFront | ActivityFlags.NewTask);
             StartActivity(intent);
         }
 

@@ -16,7 +16,6 @@ namespace ImmichFrame.ViewModels;
 
 public partial class MainViewModel : NavigatableViewModelBase
 {
-    //public event EventHandler? ResetTimer;
 
     public bool TimerEnabled = false;
     private AssetResponseDto? LastAsset;
@@ -230,7 +229,7 @@ public partial class MainViewModel : NavigatableViewModelBase
         {
             ResetTimer();
             // Needs to run on another thread, android does not allow running network stuff on the main thread
-            await ShowPreviousImage();
+            await Task.Run(ShowPreviousImage);
         }
     }
     public async Task ShowPreviousImage()
