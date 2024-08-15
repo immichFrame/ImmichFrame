@@ -38,7 +38,7 @@
     <TextBlock x:Name="txtShowPaused" Grid.Column="1" Grid.Row="1" Foreground="Blue" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10" IsVisible="{Binding ImagePaused}" Text="Paused..." />
     <Button x:Name="btnBack" Grid.Column="0" Grid.Row="1" Command="{Binding PreviousImageCommand}" HotKey="Left"/>
     <Button x:Name="btnNext" Grid.Column="2" Grid.Row="1" Command="{Binding NextImageCommand}" HotKey="Right"/>
-    <Button x:Name="btnPause" Grid.Column="1" Grid.Row="1" Command="{Binding PauseImageCommand}" HotKey="Enter"/>
+    <Button x:Name="btnPause" Grid.Column="1" Grid.Row="1" Command="{Binding PauseImageCommand}" HotKey="Space"/>
     <Button x:Name="btnQuit" Grid.Column="1" Grid.Row="2" Command="{Binding QuitCommand}" HotKey="Down"/>
     <Button x:Name="btnSettings" Grid.Column="1" Grid.Row="0" Command="{Binding NavigateSettingsPageCommand}" HotKey="Up"/>
     <StackPanel Grid.Column="0" Grid.Row="2" Margin="10" VerticalAlignment="Bottom" >
