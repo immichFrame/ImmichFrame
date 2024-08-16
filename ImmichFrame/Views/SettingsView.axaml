@@ -179,7 +179,7 @@
           <CheckBox IsChecked="{Binding Settings.UnattendedMode}" />
         </StackPanel>
       </Expander>
-      <UniformGrid DockPanel.Dock="Bottom" Columns="3" Margin="0,10" >
+      <UniformGrid Columns="3" Margin="0,10" >
         <Button Content="Cancel"
             HorizontalAlignment="Stretch"
             Command="{Binding CancelCommand}"
