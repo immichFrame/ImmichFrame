@@ -185,7 +185,6 @@
           <TextBox Text="{Binding Settings.FontColor}" />
           <TextBlock Text="UnattendedMode"/>
           <CheckBox IsChecked="{Binding Settings.UnattendedMode}" />
-          <CheckBox IsChecked="{Binding Settings.UnattendedMode}" TabIndex="40"/>
         </StackPanel>
       </Expander>
       <UniformGrid Columns="3" Margin="0,10" >
