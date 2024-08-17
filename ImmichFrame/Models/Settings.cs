@@ -53,6 +53,10 @@ namespace ImmichFrame.Models
         public bool ShowImageDesc { get; set; } = true;
         public int ImageDescFontSize { get; set; } = 36;
         public bool ShowImageLocation { get; set; } = true;
+        public bool ShowCity { get; set; } = true;
+        public bool ShowState { get; set; } = true;
+        public bool ShowCountry { get; set; } = true;
+        public bool AbbreviateCountry { get; set; } = true;
         public int ImageLocationFontSize { get; set; } = 36;
         public string FontColor { get; set; } = "#FFFFFF";
         public string? WeatherApiKey { get; set; } = string.Empty;
@@ -235,6 +239,10 @@ namespace ImmichFrame.Models
                     case "ShowPhotoDate":
                     case "ShowImageDesc":
                     case "ShowImageLocation":
+                    case "ShowCity":
+                    case "ShowState":
+                    case "ShowCountry":
+                    case "AbbreviateCountry":
                     case "ShowWeatherDescription":
                     case "UnattendedMode":
                         if (!bool.TryParse(value.ToString(), out var boolValue))
@@ -326,6 +334,10 @@ namespace ImmichFrame.Models
                 ShowImageDesc = true,
                 ImageDescFontSize = 36,
                 ShowImageLocation = true,
+                ShowCity = true,
+                ShowState = true,
+                ShowCountry = true,
+                AbbreviateCountry = true,
                 ImageLocationFontSize = 36,
                 FontColor = "#FFFFFF",
                 WeatherApiKey = "",
