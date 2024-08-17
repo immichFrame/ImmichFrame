@@ -2,6 +2,8 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.VisualTree;
+using System;
 
 namespace ImmichFrame.Views
 {
@@ -10,18 +12,6 @@ namespace ImmichFrame.Views
         public SettingsView()
         {
             InitializeComponent();
-        }
-        private void GotFocus_Handler(object sender, GotFocusEventArgs e)
-        {
-            if (e.Source is TextBox textBox)
-            {
-
-                var scrollViewer = this.FindControl<ScrollViewer>("scrollViewer");
-                if (scrollViewer != null)
-                {
-                    scrollViewer.ScrollToEnd();
-                }
-            }
         }
         private void NumericUpDown_KeyDown(object sender, KeyEventArgs e)
         {
@@ -45,7 +35,35 @@ namespace ImmichFrame.Views
             {
                 scrollViewer.Offset = new Vector(0, 0);
             }
+            var expander = this.FindControl<Expander>("serverExpander");
+            if (expander != null)
+            {
+                expander.IsExpanded = true;
+            }
         }
+        private void Expander_Expanded(object sender, RoutedEventArgs e)
+        {
+            if (sender is Expander expandedExpander)
+            {
+                foreach (var child in (expandedExpander.Parent as StackPanel)!.Children)
+                {
+                    if (child is Expander expander && expander != expandedExpander)
+                    {
+                        expander.IsExpanded = false;
+                    }
+                }
+                var scrollViewer = this.FindControl<ScrollViewer>("scrollViewer");
 
+                if (scrollViewer != null)
+                {
+                    var expanderPosition = expandedExpander.Bounds.Y;
+                    var scrollViewerOffset = scrollViewer.Offset.Y;
+                    var scrollViewerHeight = scrollViewer.Bounds.Height;
+
+                    double newOffset = expanderPosition - (scrollViewerHeight / 2) + (expandedExpander.Bounds.Height / 2);
+                    scrollViewer.Offset = new Vector(scrollViewer.Offset.X, Math.Max(0, newOffset));
+                }
+            }
+        }
     }
 }
