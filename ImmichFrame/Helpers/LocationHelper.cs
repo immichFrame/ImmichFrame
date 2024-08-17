@@ -1,4 +1,5 @@
 ﻿using ImmichFrame.Models;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -11,10 +12,7 @@ namespace ImmichFrame.Helpers
 
         static LocationHelper()
         {
-            foreach (CultureInfo culture in CultureInfo.GetCultures(CultureTypes.SpecificCultures))
-            {
-                countries_info.Add(new RegionInfo(culture.TextInfo.CultureName));
-            }
+            countries_info = CultureInfo.GetCultures(CultureTypes.SpecificCultures).Select(x => new RegionInfo(x.Name)).ToList();
         }
 
         public static string GetCountryCode(string country)
@@ -31,23 +29,13 @@ namespace ImmichFrame.Helpers
         public static string GetLocationString(ImmichFrame.Models.ExifResponseDto exifInfo)
         {
             var settings = Settings.CurrentSettings;
+            var locationParts = settings.ImageLocationFormat?.Split(',') ?? Array.Empty<string>();
 
-            string country = settings.ShowCountry ? exifInfo.Country : string.Empty;
-            if (settings.AbbreviateCountry)
-            {
-                country = GetCountryCode(country);
-            }
+            var city = locationParts.Length >= 1 ? exifInfo.City : string.Empty;
+            var state = locationParts.Length >= 2 ? (exifInfo.State?.Split(", ").Last() ?? string.Empty) : string.Empty;
+            var country = locationParts.Length >= 3 ? GetCountryCode(exifInfo.Country) : string.Empty;
 
-            string state = settings.ShowState ? exifInfo.State?.Split(", ").Last() ?? string.Empty : string.Empty;
-
-            string city = settings.ShowCity ? exifInfo.City : string.Empty;
-
-            var locationData = new[] {
-                    city,
-                    state,
-                    country
-                }.Where(x => !string.IsNullOrWhiteSpace(x));
-            return string.Join(", ", locationData);
+            return string.Join(", ", new[] { city, state, country }.Where(part => !string.IsNullOrWhiteSpace(part)));
         }
     }
 }

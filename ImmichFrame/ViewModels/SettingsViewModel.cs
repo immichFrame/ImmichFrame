@@ -40,6 +40,7 @@ namespace ImmichFrame.ViewModels
         public ICommand RemoveExcludedAlbumCommand { get; set; }
         public ICommand TestMarginCommand { get; set; }
         public List<string> StretchOptions { get; } = Enum.GetNames(typeof(Stretch)).ToList();
+        public List<string> ImageLocationOptions { get; } = new List<string> { "City", "City,State", "City,State,Country" };
 
         public SettingsViewModel()
         {

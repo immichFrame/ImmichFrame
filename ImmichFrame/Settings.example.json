@@ -21,6 +21,7 @@
   "ShowImageDesc": true,
   "ImageDescFontSize": 24,
   "ShowImageLocation": true,
+  "ImageLocationFormat": "City,State,Country",
   "ImageLocationFontSize": 16,
   "FontColor": "#FF5733",
   "WeatherApiKey": "",

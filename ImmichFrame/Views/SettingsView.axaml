@@ -144,6 +144,14 @@
           <NumericUpDown Value="{Binding Settings.ImageDescFontSize}" KeyDown="NumericUpDown_KeyDown" />
           <TextBlock Text="ShowImageLocation"/>
           <CheckBox IsChecked="{Binding Settings.ShowImageLocation}" />
+          <TextBlock Text="ImageLocationFormat"/>
+          <ComboBox SelectedItem="{Binding Settings.ImageLocationFormat}" ItemsSource="{Binding ImageLocationOptions}" HorizontalAlignment="Stretch"  >
+            <ComboBox.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding}" />
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
           <TextBlock Text="ImageLocationFontSize"/>
           <NumericUpDown Value="{Binding Settings.ImageLocationFontSize}" KeyDown="NumericUpDown_KeyDown" />
         </StackPanel>
