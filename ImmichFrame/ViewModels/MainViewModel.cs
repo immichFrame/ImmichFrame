@@ -101,12 +101,7 @@ public partial class MainViewModel : NavigatableViewModelBase
 
             if (asset?.ExifInfo != null)
             {
-                var locationData = new[] {
-                    asset.ExifInfo.City,
-                    asset.ExifInfo.Country
-                }.Where(x => !string.IsNullOrWhiteSpace(x));
-
-                ImageLocation = string.Join(", ", locationData);
+                ImageLocation = LocationHelper.GetLocationString(asset.ExifInfo);
             }
             else
             {
