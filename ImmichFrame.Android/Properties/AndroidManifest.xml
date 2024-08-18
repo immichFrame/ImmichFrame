@@ -18,7 +18,8 @@
               android:label="ImmichFrame"
               android:launchMode="singleTop"
               android:theme="@style/MyTheme.NoActionBar"
-              android:exported="true">
+              android:exported="true"
+              android:windowSoftInputMode="stateHidden|adjustResize">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />
