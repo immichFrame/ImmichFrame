@@ -4,7 +4,6 @@ using Android.OS;
 using Android.Views;
 using Avalonia;
 using Avalonia.Android;
-using ImmichFrame.ViewModels;
 
 namespace ImmichFrame.Android;
 

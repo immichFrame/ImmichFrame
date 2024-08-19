@@ -26,6 +26,9 @@ namespace ImmichFrame.ViewModels
         private ObservableCollection<ListItem> excludedAlbumList;
 
         [ObservableProperty]
+        private bool cancelVisible = true;
+
+        [ObservableProperty]
         public Settings settings;
         public ICommand SaveCommand { get; set; }
         public ICommand CancelCommand { get; set; }
@@ -42,7 +45,9 @@ namespace ImmichFrame.ViewModels
         public List<string> StretchOptions { get; } = Enum.GetNames(typeof(Stretch)).ToList();
         public List<string> ImageLocationOptions { get; } = new List<string> { "City", "City,State", "City,State,Country" };
 
-        public SettingsViewModel()
+        // Parameterless constructor for XAML and design-time support
+        public SettingsViewModel() : this(true) {}
+        public SettingsViewModel(bool cancleEnabled = true)
         {
             try
             {
@@ -69,6 +74,7 @@ namespace ImmichFrame.ViewModels
             PeopleList = new ObservableCollection<ListItem>(Settings.People.Select(x => new ListItem(x.ToString())));
             AlbumList = new ObservableCollection<ListItem>(Settings.Albums.Select(x => new ListItem(x.ToString())));
             ExcludedAlbumList = new ObservableCollection<ListItem>(Settings.ExcludedAlbums.Select(x => new ListItem(x.ToString())));
+            CancelVisible = cancleEnabled;
         }
 
         private void TestMarginAction()

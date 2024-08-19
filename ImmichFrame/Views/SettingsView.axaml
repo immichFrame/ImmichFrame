@@ -189,6 +189,7 @@
       </Expander>
       <UniformGrid Columns="3" Margin="0,10" >
         <Button Content="Cancel"
+            IsVisible="{Binding CancelVisible}"
             HorizontalAlignment="Stretch"
             Command="{Binding CancelCommand}"
             HorizontalContentAlignment="Center"/>

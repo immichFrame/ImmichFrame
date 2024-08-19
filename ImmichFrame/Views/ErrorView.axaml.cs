@@ -1,7 +1,4 @@
-﻿using Avalonia.Input;
-using Avalonia.Threading;
-
-namespace ImmichFrame.Views;
+﻿namespace ImmichFrame.Views;
 
 public partial class ErrorView : BaseView
 {
