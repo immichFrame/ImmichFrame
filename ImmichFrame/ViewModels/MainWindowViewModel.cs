@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using ImmichFrame.Exceptions;
 using ImmichFrame.Models;
+using System.IO;
 
 namespace ImmichFrame.ViewModels
 {
@@ -14,11 +15,18 @@ namespace ImmichFrame.ViewModels
         {
             try
             {
-                var settings = Settings.CurrentSettings;
+                if (!File.Exists(Settings.JsonSettingsPath))
+                {
+                    ContentViewModel = new SettingsViewModel(false);
+                }
+                else
+                {
+                    var settings = Settings.CurrentSettings;
 
-                Margin = Thickness.Parse(settings.Margin);
+                    Margin = Thickness.Parse(settings.Margin);
 
-                ContentViewModel = new MainViewModel();
+                    ContentViewModel = new MainViewModel();
+                }
             }
             catch (SettingsNotValidException ex)
             {
