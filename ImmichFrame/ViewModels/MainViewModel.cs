@@ -32,6 +32,8 @@ public partial class MainViewModel : NavigatableViewModelBase
     public ICommand PauseImageCommand { get; set; }
     public ICommand QuitCommand { get; set; }
     public ICommand NavigateSettingsPageCommand { get; set; }
+    
+    private bool isInitialized;
     public MainViewModel()
     {
         settings = Settings.CurrentSettings;
@@ -46,25 +48,29 @@ public partial class MainViewModel : NavigatableViewModelBase
 
     public async Task InitializeAsync()
     {
-        ShowSplash();
-        var settings = Settings;
-
-        if (settings == null)
-            throw new SettingsNotValidException("Settings could not be parsed.");
-
-        // Perform async initialization tasks
-        await Task.Run(() => _assetHelper.DeleteAndCreateImmichFrameAlbum());
-        await ShowNextImage();
-
-        TimerEnabled = true;
-        timerImageSwitcher = new System.Threading.Timer(NextImageTick, null, 0, settings.Interval * 1000);
-        if (settings.ShowClock)
+        if (!isInitialized)
         {
-            timerLiveTime = new System.Threading.Timer(LiveTimeTick, null, 0, 1 * 1000); //every second
-        }
-        if (settings.ShowWeather)
-        {
-            timerWeather = new System.Threading.Timer(WeatherTick, null, 0, 10 * 60 * 1000); //every 10 minutes
+            ShowSplash();
+            var settings = Settings;
+
+            if (settings == null)
+                throw new SettingsNotValidException("Settings could not be parsed.");
+
+            // Perform async initialization tasks
+            await Task.Run(() => _assetHelper.DeleteAndCreateImmichFrameAlbum());
+            await ShowNextImage();
+
+            TimerEnabled = true;
+            timerImageSwitcher = new System.Threading.Timer(NextImageTick, null, 0, settings.Interval * 1000);
+            if (settings.ShowClock)
+            {
+                timerLiveTime = new System.Threading.Timer(LiveTimeTick, null, 0, 1 * 1000); //every second
+            }
+            if (settings.ShowWeather)
+            {
+                timerWeather = new System.Threading.Timer(WeatherTick, null, 0, 10 * 60 * 1000); //every 10 minutes
+            }
+            isInitialized = true;
         }
     }
     public void SetImage(Bitmap image)
