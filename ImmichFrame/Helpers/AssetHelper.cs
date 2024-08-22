@@ -42,9 +42,8 @@ namespace ImmichFrame.Helpers
         {
             using (var client = new HttpClient())
             {
-                var settings = Settings.CurrentSettings;
-                client.UseApiKey(settings.ApiKey);
-                var immichApi = new ImmichApi(settings.ImmichServerUrl, client);
+                client.UseApiKey(Settings.CurrentSettings.ApiKey);
+                var immichApi = new ImmichApi(Settings.CurrentSettings.ImmichServerUrl, client);
                 var itemsToAdd = new BulkIdsDto();
                 itemsToAdd.Ids.Add(new Guid(assetToAdd.Id));
                 await immichApi.AddAssetsToAlbumAsync(new Guid(immichFrameAlbum.Id), null, itemsToAdd);
@@ -64,18 +63,17 @@ namespace ImmichFrame.Helpers
         {
             using (var client = new HttpClient())
             {
-                var settings = Settings.CurrentSettings;
-                client.UseApiKey(settings.ApiKey);
-                var immichApi = new ImmichApi(settings.ImmichServerUrl, client);
+                client.UseApiKey(Settings.CurrentSettings.ApiKey);
+                var immichApi = new ImmichApi(Settings.CurrentSettings.ImmichServerUrl, client);
                 var immichAlbums = await immichApi.GetAllAlbumsAsync(null, null);
-                immichFrameAlbum = immichAlbums.FirstOrDefault(album => album.AlbumName == settings.ImmichFrameAlbumName)!;
+                immichFrameAlbum = immichAlbums.FirstOrDefault(album => album.AlbumName == Settings.CurrentSettings.ImmichFrameAlbumName)!;
                 if (immichFrameAlbum != null)
                 {
                     await immichApi.DeleteAlbumAsync(new Guid(immichFrameAlbum.Id));
                 }
                 var albumDto = new CreateAlbumDto
                 {
-                    AlbumName = settings.ImmichFrameAlbumName,
+                    AlbumName = Settings.CurrentSettings.ImmichFrameAlbumName,
                     Description = "Recent ImmichFrame Photos"
                 };
                 var result = await immichApi.CreateAlbumAsync(albumDto);
@@ -127,10 +125,9 @@ namespace ImmichFrame.Helpers
         {
             using (var client = new HttpClient())
             {
-                var settings = Settings.CurrentSettings;
-                client.UseApiKey(settings.ApiKey);
+                client.UseApiKey(Settings.CurrentSettings.ApiKey);
 
-                var immichApi = new ImmichApi(settings.ImmichServerUrl, client);
+                var immichApi = new ImmichApi(Settings.CurrentSettings.ImmichServerUrl, client);
 
                 var allAssets = new List<AssetResponseDto>();
 
@@ -176,12 +173,11 @@ namespace ImmichFrame.Helpers
             using var client = new HttpClient();
 
             var allAssets = new List<AssetResponseDto>();
-            var settings = Settings.CurrentSettings;
 
-            var immichApi = new ImmichApi(settings.ImmichServerUrl, client);
+            var immichApi = new ImmichApi(Settings.CurrentSettings.ImmichServerUrl, client);
 
-            client.UseApiKey(settings.ApiKey);
-            foreach (var albumId in settings.Albums!)
+            client.UseApiKey(Settings.CurrentSettings.ApiKey);
+            foreach (var albumId in Settings.CurrentSettings.Albums!)
             {
                 allAssets.AddRange(await GetAlbumAssets(albumId, immichApi));
             }
@@ -194,12 +190,11 @@ namespace ImmichFrame.Helpers
             using var client = new HttpClient();
 
             var allAssets = new List<AssetResponseDto>();
-            var settings = Settings.CurrentSettings;
 
-            var immichApi = new ImmichApi(settings.ImmichServerUrl, client);
+            var immichApi = new ImmichApi(Settings.CurrentSettings.ImmichServerUrl, client);
 
-            client.UseApiKey(settings.ApiKey);
-            foreach (var albumId in settings.ExcludedAlbums!)
+            client.UseApiKey(Settings.CurrentSettings.ApiKey);
+            foreach (var albumId in Settings.CurrentSettings.ExcludedAlbums!)
             {
                 allAssets.AddRange(await GetAlbumAssets(albumId, immichApi));
             }
@@ -212,12 +207,11 @@ namespace ImmichFrame.Helpers
             using (var client = new HttpClient())
             {
                 var allAssets = new List<AssetResponseDto>();
-                var settings = Settings.CurrentSettings;
 
-                var immichApi = new ImmichApi(settings.ImmichServerUrl, client);
+                var immichApi = new ImmichApi(Settings.CurrentSettings.ImmichServerUrl, client);
 
-                client.UseApiKey(settings.ApiKey);
-                foreach (var personId in settings.People!)
+                client.UseApiKey(Settings.CurrentSettings.ApiKey);
+                foreach (var personId in Settings.CurrentSettings.People!)
                 {
                     try
                     {
@@ -252,13 +246,11 @@ namespace ImmichFrame.Helpers
 
         private async Task<AssetResponseDto?> GetRandomAsset()
         {
-            var settings = Settings.CurrentSettings;
-
             using (var client = new HttpClient())
             {
-                client.UseApiKey(settings.ApiKey);
+                client.UseApiKey(Settings.CurrentSettings.ApiKey);
 
-                var immichApi = new ImmichApi(settings.ImmichServerUrl, client);
+                var immichApi = new ImmichApi(Settings.CurrentSettings.ImmichServerUrl, client);
                 try
                 {
                     var randomAssets = await immichApi.GetRandomAsync(null);

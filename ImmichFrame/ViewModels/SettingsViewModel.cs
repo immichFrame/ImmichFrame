@@ -141,7 +141,7 @@ namespace ImmichFrame.ViewModels
                     return;
                 }
                 Settings.SaveSettings(Settings);
-                var settings = Settings.CurrentSettings;
+                Settings = Settings.CurrentSettings;
             }
             catch (Exception ex)
             {

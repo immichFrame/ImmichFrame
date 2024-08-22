@@ -10,14 +10,13 @@ namespace ImmichFrame.Helpers
     {
         public static Task<WeatherInfo?> GetWeather()
         {
-            var settings = Settings.CurrentSettings;
             OpenWeatherMapOptions options = new OpenWeatherMapOptions
             {
                 ApiKey = Settings.CurrentSettings.WeatherApiKey,
                 UnitSystem = Settings.CurrentSettings.UnitSystem,
                 Language = Settings.CurrentSettings.Language,
             };
-            return GetWeather(settings.WeatherLat, settings.WeatherLong, options);
+            return GetWeather(Settings.CurrentSettings.WeatherLat, Settings.CurrentSettings.WeatherLong, options);
         }
         public static async Task<WeatherInfo?> GetWeather(double latitude, double longitude, OpenWeatherMapOptions Options)
         {

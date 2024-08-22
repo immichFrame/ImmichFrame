@@ -28,8 +28,7 @@ namespace ImmichFrame.Helpers
 
         public static string GetLocationString(ImmichFrame.Models.ExifResponseDto exifInfo)
         {
-            var settings = Settings.CurrentSettings;
-            var locationParts = settings.ImageLocationFormat?.Split(',') ?? Array.Empty<string>();
+            var locationParts = Settings.CurrentSettings.ImageLocationFormat?.Split(',') ?? Array.Empty<string>();
 
             var city = locationParts.Length >= 1 ? exifInfo.City : string.Empty;
             var state = locationParts.Length >= 2 ? (exifInfo.State?.Split(", ").Last() ?? string.Empty) : string.Empty;
