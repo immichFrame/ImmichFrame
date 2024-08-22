@@ -32,7 +32,7 @@ public partial class MainViewModel : NavigatableViewModelBase
     public ICommand PauseImageCommand { get; set; }
     public ICommand QuitCommand { get; set; }
     public ICommand NavigateSettingsPageCommand { get; set; }
-    
+
     private bool isInitialized;
     public MainViewModel()
     {
@@ -143,7 +143,9 @@ public partial class MainViewModel : NavigatableViewModelBase
             WeatherTemperature = $"{weatherInfo.Main.Temperature.ToString("F0").Replace(" ", "")}";
             WeatherCurrent = $"{string.Join(',', weatherInfo.Weather.Select(x => x.Description))}";
             var iconId = $"{string.Join(',', weatherInfo.Weather.Select(x => x.IconId))}";
-            WeatherImage = await ImageHelper.LoadImageFromWeb(new Uri($"https://openweathermap.org/img/wn/{iconId}.png"));
+            WeatherImage = new Bitmap(AssetLoader.Open(AssetLoader.Exists(new Uri($"avares://ImmichFrame/Assets/WeatherIcons/{iconId}.png"))
+           ? new Uri($"avares://ImmichFrame/Assets/WeatherIcons/{iconId}.png")
+           : new Uri("avares://ImmichFrame/Assets/WeatherIcons/default.png")));
         }
     }
     public void NavigateSettingsPageAction()

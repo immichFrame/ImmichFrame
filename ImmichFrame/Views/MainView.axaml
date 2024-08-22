@@ -44,7 +44,7 @@
     <StackPanel Grid.Column="0" Grid.Row="2" Margin="10" VerticalAlignment="Bottom" >
       <StackPanel Orientation="Horizontal">
         <TextBlock x:Name="txtWeatherTemperature" HorizontalAlignment="Left" VerticalAlignment="Bottom" IsVisible="{Binding Settings.ShowWeather}" Text="{Binding WeatherTemperature}" FontSize="{Binding Settings.WeatherFontSize}"/>
-        <Image Source="{Binding WeatherImage}" VerticalAlignment="Center" MaxWidth="30"/>
+        <Image Source="{Binding WeatherImage}" VerticalAlignment="Center" MaxWidth="30" Margin="5,0"/>
       </StackPanel>
       <TextBlock x:Name="txtWeatherCurrent" HorizontalAlignment="Left" VerticalAlignment="Bottom" IsVisible="{Binding Settings.ShowWeatherDescription}" Text="{Binding WeatherCurrent}" FontSize="{Binding Settings.WeatherFontSize}"/>
       <TextBlock x:Name="txtLiveTime" HorizontalAlignment="Left" VerticalAlignment="Bottom" IsVisible="{Binding Settings.ShowClock}" Text="{Binding LiveTime}" FontSize="{Binding Settings.ClockFontSize}"/>
