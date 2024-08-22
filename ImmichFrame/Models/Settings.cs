@@ -90,21 +90,21 @@ namespace ImmichFrame.Models
             }
         }
 
-        private static Settings? _settings;
+        private static Settings? currentSettings;
         public static Settings CurrentSettings
         {
             get
             {
-                if (_settings == null)
+                if (currentSettings == null)
                 {
                     if (!File.Exists(JsonSettingsPath))
                     {
                         CreateDefaultSettingsFile();
                     }
-                    _settings = ParseFromJson();
-                    _settings.Validate();
+                    currentSettings = ParseFromJson();
+                    currentSettings.Validate();
                 }
-                return _settings;
+                return currentSettings;
             }
         }
 
@@ -119,8 +119,8 @@ namespace ImmichFrame.Models
 
         public static void ReloadFromJson()
         {
-            _settings = ParseFromJson();
-            _settings.Validate();
+            currentSettings = ParseFromJson();
+            currentSettings.Validate();
         }
         private static Settings ParseFromJson()
         {
@@ -307,8 +307,8 @@ namespace ImmichFrame.Models
             using var streamReader = new StreamReader(stream, Encoding.UTF8);
             var jsonContents = await streamReader.ReadToEndAsync();
             var settings = JsonSerializer.Deserialize<Settings>(jsonContents, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            _settings = settings;
-            _settings!.Validate();
+            currentSettings = settings;
+            currentSettings!.Validate();
         }
         private static void CreateDefaultSettingsFile()
         {

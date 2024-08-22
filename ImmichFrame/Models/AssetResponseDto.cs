@@ -85,11 +85,9 @@ public partial class AssetResponseDto
     {
         using (var client = new HttpClient())
         {
-            var settings = Settings.CurrentSettings;
+            client.UseApiKey(Settings.CurrentSettings.ApiKey);
 
-            client.UseApiKey(settings.ApiKey);
-
-            var immichApi = new ImmichApi(settings.ImmichServerUrl, client);
+            var immichApi = new ImmichApi(Settings.CurrentSettings.ImmichServerUrl, client);
 
             var data = await immichApi.ViewAssetAsync(Guid.Parse(this.Id), string.Empty, AssetMediaSize.Preview);
 
