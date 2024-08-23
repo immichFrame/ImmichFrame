@@ -9,20 +9,73 @@
 	<Design.DataContext>
 		<vm:WelcomeViewModel />
 	</Design.DataContext>
-	<DockPanel>
-		<Grid HorizontalAlignment="Center" DockPanel.Dock="Bottom">
-			<Button Content="Navigate to Settings"
-			 HorizontalAlignment="Stretch"
-			 Command="{Binding SettingsCommand}"
-			 HorizontalContentAlignment="Center"
-			 TabIndex="36"/>
-		</Grid>
-		<ScrollViewer x:Name="scrollViewer" Padding="20">
-			<Grid>
-				<Label>
-					Welcome to Avalonia!
-				</Label>
-			</Grid>
+	<DockPanel MaxWidth="800">
+		<UniformGrid DockPanel.Dock="Bottom" Columns="2" Margin="10" >
+			<Button Content="Exit the app"
+					HorizontalAlignment="Stretch"
+					FontSize="16"
+					FontWeight="Bold"
+					Command="{Binding ExitCommand}"
+					HorizontalContentAlignment="Center"/>
+			<Button Content="Get Started with the Settings"
+					HorizontalAlignment="Stretch"
+					FontSize="16"
+					FontWeight="Bold"
+					Command="{Binding SettingsCommand}"
+					HorizontalContentAlignment="Center"/>
+		</UniformGrid>
+		<ScrollViewer x:Name="scrollViewer" Margin="40">
+			<StackPanel>
+				<!-- Title Section -->
+				<StackPanel HorizontalAlignment="Center" Margin="0,80">
+					<TextBlock TextWrapping="Wrap" FontSize="28" FontWeight="Bold" Margin="0,20,0,10" TextAlignment="Center">
+						Welcome to ImmichFrame
+					</TextBlock>
+					<TextBlock FontSize="16" TextWrapping="Wrap" FontWeight="Regular" TextAlignment="Center">
+						Your Personalized Digital Photo Frame Experience
+					</TextBlock>
+				</StackPanel>
+
+				<!-- Content Section -->
+				<StackPanel VerticalAlignment="Center">
+					<TextBlock FontSize="14" TextAlignment="DetectFromContent" Margin="0,20,0,0" TextWrapping="Wrap">
+						ImmichFrame is a companion app designed to bring your favorite photos to life. Seamlessly integrated with your
+						Immich server, it turns any screen into a beautiful digital photo frame that continuously showcases your best
+						memories.
+					</TextBlock>
+
+					<TextBlock FontSize="14" TextAlignment="Start" Margin="0,10,0,0" TextWrapping="Wrap">
+						Whether it's for your home, office, or a dedicated display device, ImmichFrame lets you relive your moments with
+						style and simplicity.
+					</TextBlock>
+
+					<TextBlock FontSize="14" TextAlignment="DetectFromContent" Margin="0,10,0,20" TextWrapping="Wrap">
+						Get started by connecting to your Immich server, selecting your preferred albums, and enjoy the slideshow of
+						your favorite memories.
+					</TextBlock>
+
+					<!-- Additional Links Section -->
+					<Expander HorizontalAlignment="Stretch" Header="Additional Informations">
+						<StackPanel Orientation="Vertical" HorizontalAlignment="Left" Margin="0,20,0,0">
+							<ItemsControl ItemsSource="{Binding LinkList}" >
+								<ItemsControl.ItemsPanel>
+									<ItemsPanelTemplate>
+										<StackPanel Orientation="Vertical"/>
+									</ItemsPanelTemplate>
+								</ItemsControl.ItemsPanel>
+								<ItemsControl.ItemTemplate>
+									<DataTemplate>
+										<StackPanel Orientation="Horizontal">
+											<Label VerticalAlignment="Center" Content="{Binding Text}"/>
+											<HyperlinkButton VerticalAlignment="Center" Content="{Binding Link}" NavigateUri="{Binding Link}" />
+										</StackPanel>
+									</DataTemplate>
+								</ItemsControl.ItemTemplate>
+							</ItemsControl>
+						</StackPanel>
+					</Expander>
+				</StackPanel>
+			</StackPanel>
 		</ScrollViewer>
 	</DockPanel>
 </UserControl>

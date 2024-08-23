@@ -54,7 +54,14 @@ public partial class ErrorViewModel : NavigatableViewModelBase
 
     public void ContinueAction()
     {
-        this.Navigate(new MainViewModel());
+        try
+        {
+            this.Navigate(new MainViewModel());
+        }
+        catch (Exception ex)
+        {
+            this.Navigate(new ErrorViewModel(ex));
+        }
     }
 
     public void QuitAction()
