@@ -5,13 +5,17 @@
   android:versionCode="8"
   android:versionName="1.0.8.0">
 
+  <!-- Permissions -->
   <uses-permission android:name="android.permission.INTERNET" />
   <uses-permission android:name="android.permission.WAKE_LOCK" />
+  <!-- Features -->
+  <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
   <uses-feature android:name="android.software.leanback" android:required="false" />
 
   <application
     android:label="ImmichFrame"
     android:icon="@drawable/appicon"
+    android:banner="@drawable/TvBanner"
     android:usesCleartextTraffic="true">
 
     <activity android:name="com.immichframe.immichframe.MainActivity"
