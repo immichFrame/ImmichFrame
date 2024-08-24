@@ -44,6 +44,7 @@ namespace ImmichFrame.Models
         public List<Guid> Albums { get; set; } = new List<Guid>();
         public List<Guid> ExcludedAlbums { get; set; } = new List<Guid>();
         public List<Guid> People { get; set; } = new List<Guid>();
+        public int RefreshAlbumPeopleInterval { get; set; } = 12;
         [JsonIgnore]
         public bool UseImmichFrameAlbum => !string.IsNullOrWhiteSpace(ImmichFrameAlbumName);
         public string ImmichFrameAlbumName { get; set; } = string.Empty;
@@ -229,6 +230,7 @@ namespace ImmichFrame.Models
                     case "ImageDescFontSize":
                     case "ImageLocationFontSize":
                     case "WeatherFontSize":
+                    case "RefreshAlbumPeopleInterval":
                         if (!int.TryParse(value.ToString(), out var intValue))
                             throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. ('{value}')");
                         property.SetValue(settings, intValue);
@@ -326,6 +328,7 @@ namespace ImmichFrame.Models
                 Albums = new List<Guid>(),
                 ExcludedAlbums = new List<Guid>(),
                 People = new List<Guid>(),
+                RefreshAlbumPeopleInterval = 12,
                 ImmichFrameAlbumName = "",
                 ShowClock = true,
                 ClockFontSize = 48,

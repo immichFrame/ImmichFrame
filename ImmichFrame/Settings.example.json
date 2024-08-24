@@ -11,6 +11,7 @@
   "Albums": [ "" ],
   "ExcludedAlbums": [ "" ],
   "People": [ "" ],
+  "RefreshAlbumPeopleInterval": 12,
   "ImmichFrameAlbumName": "",
   "ShowClock": true,
   "ClockFontSize": 36,
@@ -30,5 +31,5 @@
   "UnitSystem": "imperial",
   "WeatherLatLong": "",
   "Language": "en",
-  "UnattendedMode":  false
+  "UnattendedMode": false
 }

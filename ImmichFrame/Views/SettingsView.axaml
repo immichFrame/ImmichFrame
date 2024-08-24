@@ -62,13 +62,13 @@
               </DataTemplate>
             </ComboBox.ItemTemplate>
           </ComboBox>
-          <TextBlock Text="Interval"/>
+          <TextBlock Text="Interval (seconds)"/>
           <NumericUpDown Value="{Binding Settings.Interval}" KeyDown="NumericUpDown_KeyDown" />
-          <TextBlock Text="TransitionDuration"/>
+          <TextBlock Text="TransitionDuration (seconds)"/>
           <NumericUpDown Value="{Binding Settings.TransitionDuration}" KeyDown="NumericUpDown_KeyDown" />
           <TextBlock Text="DownloadImages"/>
           <CheckBox IsChecked="{Binding Settings.DownloadImages}" />
-          <TextBlock Text="RenewImagesDuration"/>
+          <TextBlock Text="RenewImagesDuration (days)"/>
           <NumericUpDown Value="{Binding Settings.RenewImagesDuration}" KeyDown="NumericUpDown_KeyDown" />
         </StackPanel>
       </Expander>
@@ -116,6 +116,9 @@
               </DataTemplate>
             </ItemsControl.ItemTemplate>
           </ItemsControl>
+          <TextBlock Text="RefreshAlbum/PeopleInterval (hours)"/>
+          <NumericUpDown Value="{Binding Settings.RefreshAlbumPeopleInterval}" KeyDown="NumericUpDown_KeyDown" />
+
           <TextBlock Text="ShowMemories"/>
           <CheckBox IsChecked="{Binding Settings.ShowMemories}" />
         </StackPanel>
