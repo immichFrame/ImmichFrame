@@ -24,7 +24,7 @@ namespace ImmichFrame.ViewModels
             {
                 new LinkItem()
                 {
-                    Text = "Github:",
+                    Text = "General Help (GitHub):",
                     Link = "https://github.com/3rob3/ImmichFrame"
                 },
                 new LinkItem()
