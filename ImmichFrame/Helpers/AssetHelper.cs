@@ -19,7 +19,8 @@ namespace ImmichFrame.Helpers
         {
             get
             {
-                if (_filteredAssetInfos == null || lastFilteredAssetRefesh.DayOfYear != DateTime.Today.DayOfYear)
+                TimeSpan timeSinceRefresh = DateTime.Now - lastFilteredAssetRefesh;
+                if (_filteredAssetInfos == null || timeSinceRefresh.TotalHours > Settings.CurrentSettings.RefreshAlbumPeopleInterval)
                 {
                     lastFilteredAssetRefesh = DateTime.Now;
                     _filteredAssetInfos = GetFilteredAssetIds();
@@ -106,13 +107,13 @@ namespace ImmichFrame.Helpers
             if (assetsAdded)
             {
                 // Exclude videos
-                    list = list.Where(x => x.Type != AssetTypeEnum.VIDEO);
+                list = list.Where(x => x.Type != AssetTypeEnum.VIDEO);
 
                 var excludedalbumAssetIds = (await GetExcludedAlbumAssets()).Select(x => x.Id);
 
                 // Exclude assets if configured
-                if(excludedalbumAssetIds.Any())
-                    list = list.Where(x=> !excludedalbumAssetIds.Contains(x.Id));
+                if (excludedalbumAssetIds.Any())
+                    list = list.Where(x => !excludedalbumAssetIds.Contains(x.Id));
 
                 // return only unique assets, no duplicates, only with Thumbnail
                 return list.Where(x => x.Thumbhash != null).DistinctBy(x => x.Id).ToDictionary(x => Guid.Parse(x.Id));
