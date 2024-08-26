@@ -48,6 +48,9 @@ This project is a digital photo frame application that interfaces with your [imm
 
 ImmichFrame is easy to run on your desired plattform. Get the latest stable release from the [release page][releases-url] and unzip to desired folder (Linux, macOS, Windows), or install APK (Android).
 
+> [!TIP]
+> The Android-Version of ImmichFrame is available on the [Google Play Store][play-store-link]. Download it via the store for automatic updates.
+
 ### Prerequisites
 - A set up and functioning immich server that is accessible by the network of the ImmichFrame device.
 
@@ -119,10 +122,10 @@ The same information as in `Settings.json` will be enterred from this screen. Ca
 ### Touch/Mouse
 The screen is configured in a 3x3 gird. You can touch or click:
 
-|   -   | **Settings** |   -   |
-| :---: | :---: | :---: |
-| **Prev<br>image** | **Pause** | **Next<br>image** |
-|   -   | **Quit** |   -   |
+|         -         | **Settings** |         -         |
+| :---------------: | :----------: | :---------------: |
+| **Prev<br>image** |  **Pause**   | **Next<br>image** |
+|         -         |   **Quit**   |         -         |
 
 ### Keyboard:
 **Settings** - Up arrow <br/>
@@ -198,3 +201,4 @@ Don't forget to give the project a star! Thanks again!
 [Avalonia]: https://img.shields.io/badge/avalonia-purple?style=for-the-badge&logo=avalonia&logoColor=white
 [Avalonia-url]: https://docs.avaloniaui.net/docs/welcome
 [immich-api-url]: https://immich.app/docs/features/command-line-interface#obtain-the-api-key
+[play-store-link]: https://play.google.com/store/apps/details?id=com.immichframe.immichframe
