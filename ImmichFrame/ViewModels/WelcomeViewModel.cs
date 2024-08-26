@@ -48,7 +48,7 @@ namespace ImmichFrame.ViewModels
 
     internal class LinkItem
     {
-        public string Text { get; set; }
-        public string Link { get; set; }
+        public string? Text { get; set; }
+        public string? Link { get; set; }
     }
 }
