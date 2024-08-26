@@ -46,7 +46,7 @@ namespace ImmichFrame.ViewModels
         public List<string> ImageLocationOptions { get; } = new List<string> { "City", "City,State", "City,State,Country" };
 
         // Parameterless constructor for XAML and design-time support
-        public SettingsViewModel() : this(true) {}
+        public SettingsViewModel() : this(true) { }
         public SettingsViewModel(bool cancleEnabled = true)
         {
             try
@@ -171,6 +171,9 @@ namespace ImmichFrame.ViewModels
             {
                 await Settings.RestoreSettings(restoreFile);
                 Settings = Settings.CurrentSettings;
+                PeopleList = new ObservableCollection<ListItem>(Settings.People.Select(x => new ListItem(x.ToString())));
+                AlbumList = new ObservableCollection<ListItem>(Settings.Albums.Select(x => new ListItem(x.ToString())));
+                ExcludedAlbumList = new ObservableCollection<ListItem>(Settings.ExcludedAlbums.Select(x => new ListItem(x.ToString())));
             }
         }
         public async Task<IStorageFile?> ShowSaveFileDialog(bool showOverwritePrompt)
