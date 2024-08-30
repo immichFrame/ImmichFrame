@@ -22,12 +22,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <OpenApiReference Include="OpenAPIs\immich-openapi-specs.json" CodeGenerator="NSwagCSharp" Namespace="ImmichFrame.Models" ClassName="ImmichApi">
-      <SourceUri>https://raw.githubusercontent.com/immich-app/immich/main/open-api/immich-openapi-specs.json</SourceUri>
-    </OpenApiReference>
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.2.0-beta1" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.0-beta1" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.0-beta1" />
@@ -49,6 +43,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ImmichFrame.Core\ImmichFrame.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="Views\ErrorView.axaml.cs">
       <DependentUpon>ErrorView.axaml</DependentUpon>
     </Compile>
@@ -58,6 +56,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Settings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Settings.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

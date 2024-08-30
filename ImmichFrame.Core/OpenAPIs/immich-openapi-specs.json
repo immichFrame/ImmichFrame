@@ -4854,6 +4854,20 @@
             "description": ""
           }
         },
+        "tags": [
+          "Server"
+        ]
+      }
+    },
+    "/server/license": {
+      "delete": {
+        "operationId": "deleteServerLicense",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
         "security": [
           {
             "bearer": []
@@ -7394,7 +7408,7 @@
   "info": {
     "title": "Immich",
     "description": "Immich API",
-    "version": "1.113.0",
+    "version": "1.112.1",
     "contact": {}
   },
   "tags": [],
@@ -8395,11 +8409,6 @@
             },
             "type": "array"
           },
-          "resized": {
-            "deprecated": true,
-            "description": "This property was deprecated in v1.113.0",
-            "type": "boolean"
-          },
           "smartInfo": {
             "$ref": "#/components/schemas/SmartInfoResponseDto"
           },
@@ -8790,6 +8799,22 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "DownloadResponse": {
+        "properties": {
+          "archiveSize": {
+            "type": "integer"
+          },
+          "includeEmbeddedVideos": {
+            "default": false,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "archiveSize",
+          "includeEmbeddedVideos"
+        ],
         "type": "object"
       },
       "DownloadResponse": {
@@ -12024,11 +12049,11 @@
           "name": {
             "type": "string"
           },
-          "parentId": {
-            "type": "string"
-          },
           "updatedAt": {
             "format": "date-time",
+            "type": "string"
+          },
+          "value": {
             "type": "string"
           },
           "value": {

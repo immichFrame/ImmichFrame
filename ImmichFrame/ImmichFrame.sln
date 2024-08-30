@@ -8,6 +8,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImmichFrame.Android", "..\I
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImmichFrame.Desktop", "..\ImmichFrame.Desktop\ImmichFrame.Desktop.csproj", "{2245B7BA-C59F-4670-92DF-A750F65EBDEE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImmichFrame.Core", "..\ImmichFrame.Core\ImmichFrame.Core.csproj", "{0C93BDBB-C505-4A71-84BC-51471D64FBFE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImmichFrame.WebApi", "..\ImmichFrame.WebApi\ImmichFrame.WebApi.csproj", "{4E550CF5-E5D1-4D1F-8438-A55C5C7AC93F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +31,14 @@ Global
 		{2245B7BA-C59F-4670-92DF-A750F65EBDEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2245B7BA-C59F-4670-92DF-A750F65EBDEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2245B7BA-C59F-4670-92DF-A750F65EBDEE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C93BDBB-C505-4A71-84BC-51471D64FBFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C93BDBB-C505-4A71-84BC-51471D64FBFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C93BDBB-C505-4A71-84BC-51471D64FBFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C93BDBB-C505-4A71-84BC-51471D64FBFE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E550CF5-E5D1-4D1F-8438-A55C5C7AC93F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E550CF5-E5D1-4D1F-8438-A55C5C7AC93F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E550CF5-E5D1-4D1F-8438-A55C5C7AC93F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E550CF5-E5D1-4D1F-8438-A55C5C7AC93F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

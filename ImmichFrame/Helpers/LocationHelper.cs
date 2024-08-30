@@ -26,7 +26,7 @@ namespace ImmichFrame.Helpers
             return country_info?.ThreeLetterISORegionName ?? country;
         }
 
-        public static string GetLocationString(ImmichFrame.Models.ExifResponseDto exifInfo)
+        public static string GetLocationString(ImmichFrame.Core.Api.ExifResponseDto exifInfo)
         {
             var locationParts = Settings.CurrentSettings.ImageLocationFormat?.Split(',') ?? Array.Empty<string>();
 

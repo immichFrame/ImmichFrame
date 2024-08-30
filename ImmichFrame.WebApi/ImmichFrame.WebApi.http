@@ -1,0 +1,6 @@
+@ImmichFrame.WebApi_HostAddress = http://localhost:5217
+
+GET {{ImmichFrame.WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
