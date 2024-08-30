@@ -92,7 +92,7 @@ public partial class MainViewModel : NavigatableViewModelBase
 
     public async Task SetImage(AssetResponseDto asset, Stream? preloadedAsset = null)
     {
-        var thumbHash = asset.GetThumbHashStream();
+        var thumbHash = asset.ThumbhashImage;
         if (thumbHash == null)
             return;
 
@@ -107,7 +107,7 @@ public partial class MainViewModel : NavigatableViewModelBase
             };
 
             ImageDate = asset?.LocalDateTime.ToString(Settings.PhotoDateFormat, culture) ?? string.Empty;
-            ImageDesc = asset?.GetImageDesc() ?? string.Empty;
+            ImageDesc = asset?.ImageDesc ?? string.Empty;
 
             if (asset?.ExifInfo != null)
             {

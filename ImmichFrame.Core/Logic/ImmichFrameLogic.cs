@@ -161,8 +161,7 @@ namespace ImmichFrame.Core.Logic
                 foreach (var lane in memoryLane)
                 {
                     var assets = lane.Assets.ToList();
-                    // TODO: FIX THIS
-                    //assets.ForEach(asset => asset.SetImageDesc($"{lane.YearsAgo} {(lane.YearsAgo == 1 ? "year" : "years")} ago"));
+                    assets.ForEach(asset => asset.ImageDesc =  $"{lane.YearsAgo} {(lane.YearsAgo == 1 ? "year" : "years")} ago");
 
                     allAssets.AddRange(assets);
                 }

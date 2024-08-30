@@ -1,11 +1,9 @@
 ﻿using ImmichFrame.Core.Interfaces;
 using ImmichFrame.Core.Api;
-using ImmichFrame.Core.Helpers;
 using ImmichFrame.Models;
 using System;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using ThumbHashes;
@@ -15,29 +13,6 @@ namespace ImmichFrame.Helpers;
 // Additional data partial
 public static class AssetResponseDtoExtensionMethods
 {
-    [JsonIgnore]
-    private static string? _imageDesc;
-
-    public static void SetImageDesc(this AssetResponseDto dto, string desc) => _imageDesc = desc;
-    public static string GetImageDesc(this AssetResponseDto dto)
-    {
-        if (string.IsNullOrWhiteSpace(_imageDesc))
-            return dto.ExifInfo?.Description ?? string.Empty;
-
-        return _imageDesc;
-    }
-
-
-    public static Stream? GetThumbHashStream(this AssetResponseDto dto)
-    {
-        if (dto.Thumbhash == null)
-            return null;
-
-        var hash = Convert.FromBase64String(dto.Thumbhash);
-        var thumbhash = new ThumbHash(hash);
-        return ImageHelper.SaveDataUrlToStream(thumbhash.ToDataUrl());
-    }
-
     public static async Task<Stream> ServeImage(this AssetResponseDto dto, IImmichFrameLogic logic)
     {
         string localPath;
@@ -72,7 +47,7 @@ public static class AssetResponseDtoExtensionMethods
         return await DownloadImageAsync(Guid.Parse(dto.Id), logic, localPath);
     }
 
-    public static async Task<Stream> DownloadImageAsync(Guid id, IImmichFrameLogic logic, string localPath)
+    private static async Task<Stream> DownloadImageAsync(Guid id, IImmichFrameLogic logic, string localPath)
     {
         var data = await logic.GetImage(id);
 
