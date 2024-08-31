@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
   android:installLocation="auto"
   package="com.immichframe.immichframe"
-  android:versionCode="11"
-  android:versionName="1.0.11.0">
+  android:versionCode="12"
+  android:versionName="1.0.12.0">
 
   <!-- Permissions -->
   <uses-permission android:name="android.permission.INTERNET" />
