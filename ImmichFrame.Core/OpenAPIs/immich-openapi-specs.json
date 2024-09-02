@@ -4854,20 +4854,6 @@
             "description": ""
           }
         },
-        "tags": [
-          "Server"
-        ]
-      }
-    },
-    "/server/license": {
-      "delete": {
-        "operationId": "deleteServerLicense",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
         "security": [
           {
             "bearer": []
@@ -8822,22 +8808,6 @@
         ],
         "type": "object"
       },
-      "DownloadResponse": {
-        "properties": {
-          "archiveSize": {
-            "type": "integer"
-          },
-          "includeEmbeddedVideos": {
-            "default": false,
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "archiveSize",
-          "includeEmbeddedVideos"
-        ],
-        "type": "object"
-      },
       "DownloadResponseDto": {
         "properties": {
           "archives": {
@@ -12059,9 +12029,6 @@
           },
           "updatedAt": {
             "format": "date-time",
-            "type": "string"
-          },
-          "value": {
             "type": "string"
           },
           "value": {
