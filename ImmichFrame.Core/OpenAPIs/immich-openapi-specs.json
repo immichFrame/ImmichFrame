@@ -7408,7 +7408,7 @@
   "info": {
     "title": "Immich",
     "description": "Immich API",
-    "version": "1.112.1",
+    "version": "1.113.0",
     "contact": {}
   },
   "tags": [],
@@ -8408,6 +8408,11 @@
               "$ref": "#/components/schemas/PersonWithFacesResponseDto"
             },
             "type": "array"
+          },
+          "resized": {
+            "deprecated": true,
+            "description": "This property was deprecated in v1.113.0",
+            "type": "boolean"
           },
           "smartInfo": {
             "$ref": "#/components/schemas/SmartInfoResponseDto"
@@ -12047,6 +12052,9 @@
             "type": "string"
           },
           "name": {
+            "type": "string"
+          },
+          "parentId": {
             "type": "string"
           },
           "updatedAt": {
