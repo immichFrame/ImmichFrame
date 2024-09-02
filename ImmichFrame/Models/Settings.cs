@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace ImmichFrame.Models
 {
-    public partial class Settings : ISettings
+    public partial class Settings : IFullSettings
     {
         [GeneratedRegex(@"^(([0-9]+)||([0-9]+\,[0-9]+)||([0-9]+\,[0-9]+\,[0-9]+\,[0-9]+))$")]
         private static partial Regex MarginRegex();

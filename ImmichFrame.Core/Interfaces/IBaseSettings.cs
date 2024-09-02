@@ -1,21 +1,24 @@
 ﻿namespace ImmichFrame.Core.Interfaces
 {
-    public interface ISettings
+    public interface IBaseSettings
     {
         public string ImmichServerUrl { get; set; }
         public string ApiKey { get; set; }
-        public string ImageStretch { get; set; }
-        public string Margin { get; set; }
-        public int Interval { get; set; }
-        public double TransitionDuration { get; set; }
-        public bool DownloadImages { get; set; }
         public bool ShowMemories { get; set; }
-        public int RenewImagesDuration { get; set; }
         public List<Guid> Albums { get; set; }
         public List<Guid> ExcludedAlbums { get; set; }
         public List<Guid> People { get; set; }
         public int RefreshAlbumPeopleInterval { get; set; }
         public string ImmichFrameAlbumName { get; set; }
+    }
+    public interface IFullSettings : IBaseSettings
+    {
+        public string ImageStretch { get; set; }
+        public string Margin { get; set; }
+        public int Interval { get; set; }
+        public double TransitionDuration { get; set; }
+        public bool DownloadImages { get; set; }
+        public int RenewImagesDuration { get; set; }
         public bool ShowClock { get; set; }
         public int ClockFontSize { get; set; }
         public string? ClockFormat { get; set; }

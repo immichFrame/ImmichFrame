@@ -2,8 +2,6 @@ using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.Core.Logic;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
-using System.Net.Http.Headers;
 
 namespace ImmichFrame.WebApi.Controllers
 {
@@ -14,7 +12,7 @@ namespace ImmichFrame.WebApi.Controllers
         private readonly ILogger<AssetController> _logger;
         private IImmichFrameLogic _logic;
 
-        public AssetController(ILogger<AssetController> logger, ISettings settings)
+        public AssetController(ILogger<AssetController> logger, IBaseSettings settings)
         {
             _logger = logger;
             _logic = new ImmichFrameLogic(settings);

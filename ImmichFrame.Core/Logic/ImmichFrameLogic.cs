@@ -8,8 +8,8 @@ namespace ImmichFrame.Core.Logic
 {
     public class ImmichFrameLogic : IImmichFrameLogic
     {
-        private ISettings _settings;
-        public ImmichFrameLogic(ISettings settings)
+        private IBaseSettings _settings;
+        public ImmichFrameLogic(IBaseSettings settings)
         {
             _settings = settings;
         }

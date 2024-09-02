@@ -1,16 +1,32 @@
+using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.WebApi.Models;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddScoped<ISettings>(srv =>
+var settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Settings.json");
+
+var json = File.ReadAllText(settingsPath);
+JsonDocument doc;
+try
 {
-    var settings = new Settings
-    {
-        // READ SETTINGS FROM JSON?
-    };
+    doc = JsonDocument.Parse(json);
+}
+catch (Exception ex)
+{
+    throw new SettingsNotValidException($"Problem with parsing the settings: {ex.Message}", ex);
+}
+
+builder.Services.AddSingleton<IBaseSettings>(srv =>
+{
+    var settings = JsonSerializer.Deserialize<Settings>(doc);
+
+    if (settings == null)
+        throw new FileNotFoundException();
+
     return settings;
 });
 
