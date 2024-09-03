@@ -1,6 +1,7 @@
 using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.Core.Logic;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ImmichFrame.WebApi.Controllers
@@ -25,7 +26,7 @@ namespace ImmichFrame.WebApi.Controllers
         }
 
         [HttpGet("{id}", Name = "GetImage")]
-        public async Task<ActionResult> GetImage(Guid id)
+        public async Task<IActionResult> GetImage(Guid id)
         {
             var data = await _logic.GetImage(id);
 
@@ -38,7 +39,7 @@ namespace ImmichFrame.WebApi.Controllers
             var ext = contentType.ToLower() == "image/webp" ? "webp" : "jpeg";
             var fileName = $"{id}.{ext}";
 
-            return File(data.Stream, "application/octet-stream", fileName); // returns a FileStreamResult
+            return File(data.Stream, contentType, fileName); // returns a FileStreamResult
         }
     }
 }
