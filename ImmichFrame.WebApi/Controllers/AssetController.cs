@@ -1,7 +1,6 @@
 using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.Core.Logic;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ImmichFrame.WebApi.Controllers
@@ -26,7 +25,9 @@ namespace ImmichFrame.WebApi.Controllers
         }
 
         [HttpGet("{id}", Name = "GetImage")]
-        public async Task<IActionResult> GetImage(Guid id)
+        [Produces("image/jpeg", "image/webp")]
+        [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status200OK)]
+        public async Task<FileResult> GetImage(Guid id)
         {
             var data = await _logic.GetImage(id);
 
