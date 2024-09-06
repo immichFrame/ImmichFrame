@@ -35,6 +35,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@mdi/js": "^7.4.47",
 		"oazapfts": "^6.1.0",
 		"openapi-fetch": "^0.12.0",
 		"thumbhash": "^0.1.1"

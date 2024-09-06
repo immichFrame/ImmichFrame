@@ -1,26 +1,42 @@
 <script lang="ts">
 	import * as api from '$lib/immichFrameApi';
-	import Image from '../elements/Image.svelte';
+	import Image from '../elements/image.svelte';
 	import { onMount } from 'svelte';
+	import ThumbHashImage from '../elements/ThumbHashImage.svelte';
+	import ImageOverlay from '../elements/ImageOverlay.svelte';
+	import Clock from '../elements/Clock.svelte';
 	api.defaults.baseUrl = 'https://localhost:7018/'; // TODO: replace configurable settings
 
-	let imageData: Blob;
-	let assetData: api.AssetResponseDto;
+	let imageData: Blob | null;
+	let assetData: api.AssetResponseDto | null;
 
 	async function loadImage() {
 		let assetRequest = await api.getAsset();
+
+		if (assetRequest.status != 200) {
+			assetData = null;
+			return;
+		}
+
 		assetData = assetRequest.data;
 		let imageRequest = await api.getImage(assetRequest.data.id);
+
+		if (imageRequest.status != 200) {
+			imageData = null;
+			return;
+		}
 		imageData = imageRequest.data;
 	}
 
 	onMount(async () => loadImage());
 </script>
 
-<button on:click={async () => loadImage()}>Next</button>
 <section id="home-page" class="fixed grid h-screen w-screen bg-black">
 	{#if imageData && assetData}
-		<Image thumbHash={assetData.thumbhash ?? ''} data={imageData} />
+		<Clock />
+		<ImageOverlay on:next={async () => loadImage()} />
+		<ThumbHashImage thumbHash={assetData.thumbhash ?? ''} />
+		<Image data={imageData} />
 	{:else}
 		<!-- maybe show immich logo?-->
 		<p class="text-white">LOADING ...</p>

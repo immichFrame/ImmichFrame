@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { decodeBase64 } from '$lib/utils';
 	import { thumbHashToDataURL } from 'thumbhash';
+
 	export let thumbHash: string;
 </script>
 

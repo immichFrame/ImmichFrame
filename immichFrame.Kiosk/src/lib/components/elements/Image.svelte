@@ -1,7 +1,5 @@
 <script lang="ts">
-	import ThumbHashImage from '../elements/ThumbHashImage.svelte';
 	export let data: Blob;
-	export let thumbHash;
 	const getUrl = (data: Blob) => {
 		let url = URL.createObjectURL(data);
 		return url;
@@ -9,7 +7,6 @@
 </script>
 
 <div>
-	<ThumbHashImage {thumbHash} />
 	<img class="imageView" src={getUrl(data)} alt="data" />
 </div>
 
