@@ -1,0 +1,19 @@
+services:
+  immichframe_api:
+    build:
+      context: ..
+      # target: final
+    ports:
+      - 8080:8080
+    volumes:
+      - ~/immichFrame_Config:/app/Config
+      # - PATH/TO/CONFIG:/app/Config
+  immichframe_web:
+    build:
+      context: ../immichFrame.Web
+      target: dev
+    ports:
+      - 5173:5173
+    volumes:
+      - ~/immichFrame_Config:/app/Config
+      # - PATH/TO/CONFIG:/app/Config
