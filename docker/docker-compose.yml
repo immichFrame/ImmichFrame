@@ -7,9 +7,9 @@ services:
       - 8080:8080
     volumes:
       - PATH/TO/CONFIG:/app/Config
-  immichframe_kiosk:
+  immichframe_web:
     build:
-      context: ../immichFrame.Kiosk
+      context: ../immichFrame.Web
       target: prod
     ports:
       - 3000:3000
