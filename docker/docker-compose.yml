@@ -9,8 +9,8 @@ services:
       - PATH/TO/CONFIG:/app/Config
   immichframe_kiosk:
     build:
-      context: ../ImmichFrame.Kiosk
-      # target: final
+      context: ../immichFrame.Kiosk
+      target: prod
     ports:
       - 3000:3000
     volumes:

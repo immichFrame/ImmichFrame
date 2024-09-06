@@ -6,14 +6,14 @@ services:
     ports:
       - 8080:8080
     volumes:
-      - C:\Users\Jan\Desktop\immichFrame_Config:/app/Config
+      - ~/immichFrame_Config:/app/Config
       # - PATH/TO/CONFIG:/app/Config
   immichframe_kiosk:
     build:
-      context: ../ImmichFrame.Kiosk
-      # target: final
+      context: ../immichFrame.Kiosk
+      target: dev
     ports:
       - 5173:5173
     volumes:
-      - C:\Users\Jan\Desktop\immichFrame_Config:/app/Config
+      - ~/immichFrame_Config:/app/Config
       # - PATH/TO/CONFIG:/app/Config

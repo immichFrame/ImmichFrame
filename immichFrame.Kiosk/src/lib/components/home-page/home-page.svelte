@@ -2,9 +2,9 @@
 	import * as api from '$lib/immichFrameApi';
 	import Image from '../elements/image.svelte';
 	import { onMount } from 'svelte';
-	import ThumbHashImage from '../elements/ThumbHashImage.svelte';
-	import ImageOverlay from '../elements/ImageOverlay.svelte';
-	import Clock from '../elements/Clock.svelte';
+	import ThumbHashImage from '../elements/thumbHashImage.svelte';
+	import ImageOverlay from '../elements/imageOverlay.svelte';
+	import Clock from '../elements/clock.svelte';
 	api.defaults.baseUrl = 'http://localhost:8080/'; // TODO: replace configurable settings
 
 	let imageData: Blob | null;
