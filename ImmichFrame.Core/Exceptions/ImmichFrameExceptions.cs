@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ImmichFrame.Exceptions
+﻿namespace ImmichFrame.Core.Exceptions
 {
     public class ImmichFrameException : Exception
     {

@@ -1,7 +1,8 @@
 ﻿using Avalonia.Media;
 using Avalonia.Platform.Storage;
-using ImmichFrame.Exceptions;
+using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Helpers;
+using ImmichFrame.Core.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace ImmichFrame.Models
 {
-    public partial class Settings
+    public partial class Settings : IFullSettings
     {
         [GeneratedRegex(@"^(([0-9]+)||([0-9]+\,[0-9]+)||([0-9]+\,[0-9]+\,[0-9]+\,[0-9]+))$")]
         private static partial Regex MarginRegex();

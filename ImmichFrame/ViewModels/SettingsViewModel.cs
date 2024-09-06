@@ -2,7 +2,7 @@
 using Avalonia.Media;
 using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
-using ImmichFrame.Exceptions;
+using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Helpers;
 using ImmichFrame.Models;
 using System;

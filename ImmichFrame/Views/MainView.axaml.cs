@@ -1,11 +1,6 @@
-﻿using Avalonia.Animation;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.Media.Imaging;
-using Avalonia.Platform;
-using ImmichFrame.Exceptions;
 using ImmichFrame.Helpers;
-using ImmichFrame.Models;
 using ImmichFrame.ViewModels;
 using System;
 using System.Threading.Tasks;

@@ -1,6 +1,6 @@
 ﻿using Avalonia;
 using CommunityToolkit.Mvvm.ComponentModel;
-using ImmichFrame.Exceptions;
+using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Models;
 using System.IO;
 

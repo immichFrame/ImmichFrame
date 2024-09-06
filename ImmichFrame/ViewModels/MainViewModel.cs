@@ -2,7 +2,10 @@
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using CommunityToolkit.Mvvm.ComponentModel;
-using ImmichFrame.Exceptions;
+using ImmichFrame.Core.Api;
+using ImmichFrame.Core.Interfaces;
+using ImmichFrame.Core.Logic;
+using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Helpers;
 using ImmichFrame.Models;
 using System;
@@ -21,7 +24,7 @@ public partial class MainViewModel : NavigatableViewModelBase
     private AssetResponseDto? LastAsset;
     private AssetResponseDto? CurrentAsset;
     private PreloadedAsset? NextAsset;
-    private AssetHelper _assetHelper;
+    private IImmichFrameLogic _immichLogic;
     private CultureInfo culture;
     System.Threading.Timer? timerImageSwitcher;
     System.Threading.Timer? timerLiveTime;
@@ -37,7 +40,7 @@ public partial class MainViewModel : NavigatableViewModelBase
     public MainViewModel()
     {
         settings = Settings.CurrentSettings;
-        _assetHelper = new AssetHelper();
+        _immichLogic = new ImmichFrameLogic(Settings.CurrentSettings);
         culture = new CultureInfo(settings.Language);
         NextImageCommand = new RelayCommand(async () => await NextImageAction());
         PreviousImageCommand = new RelayCommand(async () => await PreviousImageAction());
@@ -57,7 +60,7 @@ public partial class MainViewModel : NavigatableViewModelBase
                 throw new SettingsNotValidException("Settings could not be parsed.");
 
             // Perform async initialization tasks
-            await Task.Run(() => _assetHelper.DeleteAndCreateImmichFrameAlbum());
+            await Task.Run(() => _immichLogic.DeleteAndCreateImmichFrameAlbum());
             await ShowNextImage();
 
             TimerEnabled = true;
@@ -89,11 +92,12 @@ public partial class MainViewModel : NavigatableViewModelBase
 
     public async Task SetImage(AssetResponseDto asset, Stream? preloadedAsset = null)
     {
-        if (asset.ThumbhashImage == null)
+        var thumbHash = asset.ThumbhashImage;
+        if (thumbHash == null)
             return;
 
-        using (Stream tmbStream = asset.ThumbhashImage)
-        using (Stream imgStream = preloadedAsset ?? await asset.AssetImage)
+        using (Stream tmbStream = thumbHash)
+        using (Stream imgStream = preloadedAsset ?? await asset.ServeImage(_immichLogic))
         {
             Images = new UiImage
             {
@@ -116,7 +120,7 @@ public partial class MainViewModel : NavigatableViewModelBase
         }
         if (Settings.UseImmichFrameAlbum)
         {
-            await _assetHelper.AddAssetToAlbum(asset!);
+            await _immichLogic.AddAssetToAlbum(asset!);
         }
 
     }
@@ -175,7 +179,7 @@ public partial class MainViewModel : NavigatableViewModelBase
                     if (NextAsset?.Image == null)
                     {
                         // Load Image if next image was not ready
-                        CurrentAsset = await _assetHelper.GetNextAsset();
+                        CurrentAsset = await _immichLogic.GetNextAsset();
 
                         if (CurrentAsset != null)
                         {
@@ -193,12 +197,12 @@ public partial class MainViewModel : NavigatableViewModelBase
                     // Load next asset without waiting
                     _ = Task.Run(async () =>
                     {
-                        var asset = await _assetHelper.GetNextAsset();
+                        var asset = await _immichLogic.GetNextAsset();
                         if (asset != null)
                         {
                             NextAsset = new PreloadedAsset(asset);
                             // Preload the actual Image
-                            await NextAsset.Preload();
+                            await NextAsset.Preload(_immichLogic);
                         }
                     });
                 }
@@ -316,9 +320,9 @@ public class PreloadedAsset
         Asset = asset;
     }
 
-    public async Task Preload()
+    public async Task Preload(IImmichFrameLogic logic)
     {
-        _image = await Asset.AssetImage;
+        _image = await Asset.ServeImage(logic);
     }
 }
 public static class StretchHelper
