@@ -5,7 +5,7 @@
 	import ThumbHashImage from '../elements/ThumbHashImage.svelte';
 	import ImageOverlay from '../elements/ImageOverlay.svelte';
 	import Clock from '../elements/Clock.svelte';
-	api.defaults.baseUrl = 'https://localhost:7018/'; // TODO: replace configurable settings
+	api.defaults.baseUrl = 'http://localhost:8080/'; // TODO: replace configurable settings
 
 	let imageData: Blob | null;
 	let assetData: api.AssetResponseDto | null;

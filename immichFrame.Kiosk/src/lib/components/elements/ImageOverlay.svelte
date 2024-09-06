@@ -61,7 +61,7 @@
 		display: flex;
 		justify-content: center; /* Centers the SVG horizontally */
 		align-items: center; /* Optionally, centers the SVG vertically as well */
-		background-color: rgba(75, 75, 75, 0.4);
+		/* background-color: rgba(75, 75, 75, 0.4); */
 		color: wheat;
 		height: 100%;
 		width: 100%;

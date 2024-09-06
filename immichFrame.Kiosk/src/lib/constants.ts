@@ -1,4 +1,4 @@
 export const fallbackLocale = {
-  code: 'en-US',
-  name: 'English (US)',
+	code: 'en-US',
+	name: 'English (US)'
 };

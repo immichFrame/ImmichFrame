@@ -4,22 +4,22 @@ import { defaults } from './immichFrameApi.js';
 export * from './immichFrameApi.js';
 
 export interface InitOptions {
-  baseUrl: string;
-  apiKey: string;
+	baseUrl: string;
+	apiKey: string;
 }
 
 export const init = ({ baseUrl, apiKey }: InitOptions) => {
-  setBaseUrl(baseUrl);
-  setApiKey(apiKey);
+	setBaseUrl(baseUrl);
+	setApiKey(apiKey);
 };
 
 export const getBaseUrl = () => defaults.baseUrl;
 
 export const setBaseUrl = (baseUrl: string) => {
-  defaults.baseUrl = baseUrl;
+	defaults.baseUrl = baseUrl;
 };
 
 export const setApiKey = (apiKey: string) => {
-  defaults.headers = defaults.headers || {};
-  defaults.headers['x-api-key'] = apiKey;
+	defaults.headers = defaults.headers || {};
+	defaults.headers['x-api-key'] = apiKey;
 };

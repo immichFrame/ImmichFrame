@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-var settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Settings.json");
+var settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config", "Settings.json");
 
 var json = File.ReadAllText(settingsPath);
 JsonDocument doc;
