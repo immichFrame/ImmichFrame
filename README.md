@@ -74,7 +74,7 @@ Then install unclutter:
 ```
 sudo apt install -y unclutter-xfixes
 ```
-After this, copy the default autostart file to your home folder and add a line to enable autostart.
+After this, copy the default autostart file to your home folder and add a line to enable autostart, by running the following in terminal:
 ```
 cp /etc/xdg/lxsession/LXDE-pi/autostart /home/pi/.config/lxsession/LXDE-pi/autostart
 echo "@/home/pi/{dir with Immich_Frame}/Immich_Frame" > sudo tee /home/pi/.config/lxsession/LXDE-pi/autostart
