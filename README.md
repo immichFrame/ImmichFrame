@@ -62,6 +62,23 @@ ImmichFrame is easy to run on your desired plattform. Get the latest stable rele
 - SSH - CD into folder, and launch with `DISPLAY=:0.0 ./Immich_Frame`.
 - Ubuntu Desktop - Right-click Immich_Frame, properties, set 'Execute as program' to True, OK. Right-click Immich_Frame, Open with, choose 'Run Software', always use for this file type TRUE.
 - If you get a permissions error run `chmod +x Immich_Frame`.
+#### Autostart on Raspberry Pi OS
+The latest Raspberry Pi OS, Bookworm uses Wayland as default, but also includes X11. The following assumes standard user is `pi` and you are working on a fresh install of "Raspberry Pi OS with desktop".
+To autostart ImmichFrame in Wayland, run `nano /home/pi/.config/wayfire.ini` in terminal, to add the following at the end.
+```
+[autostart]
+immichframe=/home/pi/{dir with Immich_Frame}/Immich_Frame
+```
+Wayland does not have an easy way to hide the cursor. If you want that, then change to X11 as the default desktop session through running `sudo raspi-config` in terminal, then Advanced Options &rarr; Wayland &rarr; X11.
+Then install unclutter:
+```
+sudo apt install -y unclutter-xfixes
+```
+After this, copy the default autostart file to your home folder and add a line to enable autostart.
+```
+cp /etc/xdg/lxsession/LXDE-pi/autostart /home/pi/.config/lxsession/LXDE-pi/autostart
+echo "@/home/pi/{dir with Immich_Frame}/Immich_Frame" > sudo tee /home/pi/.config/lxsession/LXDE-pi/autostart
+```
 ### Windows
 - Double-click `Immich_Frame.exe`.
 - Screensaver - Rename `Immich_Frame.exe` to `Immich_Frame.scr`. Right-click &rarr; Install. Configure screensaver settings and apply.
