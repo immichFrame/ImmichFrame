@@ -1,4 +1,5 @@
-﻿using Avalonia.Controls;
+﻿using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Interactivity;
 using ImmichFrame.Helpers;
 using ImmichFrame.ViewModels;
@@ -14,12 +15,11 @@ public partial class MainView : BaseView
     public MainView()
     {
         InitializeComponent();
-        this.Loaded += OnLoaded;
+        this.AttachedToVisualTree += OnAttachedToVisualTree;
     }
-
-    private async void OnLoaded(object? sender, RoutedEventArgs e)
-    {       
-        if(PlatformDetector.IsAndroid())
+    private async void OnAttachedToVisualTree(object? sender, VisualTreeAttachmentEventArgs e)
+    {
+        if (PlatformDetector.IsAndroid())
         {
             var insetsManager = TopLevel.GetTopLevel(this)?.InsetsManager;
             if (insetsManager != null)
