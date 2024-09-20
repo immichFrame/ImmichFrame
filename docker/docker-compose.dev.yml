@@ -16,4 +16,5 @@ services:
       - 5173:5173
     volumes:
       - ~/immichFrame_Config:/app/Config
+      - ../immichFrame.Web/src:/app/src
       # - PATH/TO/CONFIG:/app/Config
