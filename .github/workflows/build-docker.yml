@@ -1,24 +1,79 @@
 name: Build and Publish image to Docker Hub
-on: [workflow_dispatch]
-
+on:
+  [workflow_dispatch]
+  push:
+    # Publish semver tags as releases.
+    tags: [ 'v*']
+  pull_request:
+    branches: [ $default-branch ]
+env:
+  # Use docker.io for Docker Hub if empty
+  REGISTRY: ghcr.io
+  # github.repository as <account>/<repo>
+  IMAGE_NAME_API: ${{ github.repository }}/${{ github.repository }}_api
+  IMAGE_NAME_WEB: ${{ github.repository }}/${{ github.repository }}_web
 jobs:
   publish_images:
     runs-on: ubuntu-latest
     steps:
-      - name: checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
-      - name: build image
-        run: |
-          REGISTRY_NAME="ghcr.io"
-          API_REPOSITORY=${{ github.repository_owner }}/immich-machine-learning
-          WEB_REPOSITORY=${{ github.repository_owner }}/immichframe_web
-          docker build . -t $REGISTRY_NAME/$API_REPOSITORY:latest
-          docker build -t $REGISTRY_NAME/$WEB_REPOSITORY:latest -f immichFrame.Web/dockerfile --target prod immichFrame.Web
-      - name: push image to docker hub
-        run: |
-          REGISTRY_NAME="ghcr.io"
-          API_REPOSITORY=${{ github.repository_owner }}/immich-machine-learning
-          WEB_REPOSITORY=${{ github.repository_owner }}/immichframe_web
-          docker login --username ${{ github.repository_owner }} --password ${{ secrets.GH_PAT }} ghcr.io
-          docker push $REGISTRY_NAME/$API_REPOSITORY:latest
-          docker push $REGISTRY_NAME/$WEB_REPOSITORY:latest
+
+      # Login against a Docker registry except on PR
+      # https://github.com/docker/login-action
+      - name: Log into registry ${{ env.REGISTRY }}
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.TOKEN_GITHUB }}
+
+      # Extract metadata (tags, labels) for Docker
+      # https://github.com/docker/metadata-action
+      - name: Extract Docker metadata (${{ env.IMAGE_NAME_API }})
+        id: meta_api
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_API }}
+
+      - name: Extract Docker metadata (${{ env.IMAGE_NAME_WEB }})
+        id: meta_web
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_WEB }}
+
+      # Build and push Docker image with Buildx (don't push on PR)
+      # https://github.com/docker/build-push-action
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta_api.outputs.tags }}
+          labels: ${{ steps.meta_api.outputs.labels }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: immichFrame.Web
+          target: prod
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta_web.outputs.tags }}
+          labels: ${{ steps.meta_web.outputs.labels }}
+
+      # - name: build image
+      #   run: |
+      #     REGISTRY_NAME="ghcr.io"
+      #     API_REPOSITORY=${{ github.repository_owner }}/immich-machine-learning
+      #     WEB_REPOSITORY=${{ github.repository_owner }}/immichframe_web
+      #     docker build . -t $REGISTRY_NAME/$API_REPOSITORY:latest
+      #     docker build -t $REGISTRY_NAME/$WEB_REPOSITORY:latest -f immichFrame.Web/dockerfile --target prod immichFrame.Web
+      # - name: push image to docker hub
+      #   run: |
+      #     REGISTRY_NAME="ghcr.io"
+      #     API_REPOSITORY=${{ github.repository_owner }}/immich-machine-learning
+      #     WEB_REPOSITORY=${{ github.repository_owner }}/immichframe_web
+      #     docker login --username ${{ github.repository_owner }} --password ${{ secrets.TOKEN_GITHUB }} ghcr.io
+      #     docker push $REGISTRY_NAME/$API_REPOSITORY:latest
+      #     docker push $REGISTRY_NAME/$WEB_REPOSITORY:latest
