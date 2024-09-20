@@ -9,10 +9,16 @@ jobs:
         uses: actions/checkout@v4
       - name: build image
         run: |
-          docker build . -t ghcr.io/immichframe/immichframe_api:latest
-          docker build -t ghcr.io/immichframe/immichframe_web:latest -f immichFrame.Web/dockerfile --target prod immichFrame.Web
+          REGISTRY_NAME="ghcr.io"
+          API_REPOSITORY=${{ github.repository_owner }}/immich-machine-learning
+          WEB_REPOSITORY=${{ github.repository_owner }}/immichframe_web
+          docker build . -t $REGISTRY_NAME/$API_REPOSITORY:latest
+          docker build -t $REGISTRY_NAME/$WEB_REPOSITORY:latest -f immichFrame.Web/dockerfile --target prod immichFrame.Web
       - name: push image to docker hub
         run: |
-          docker login --username immichframe --password ${{ secrets.GH_PAT }} ghcr.io
-          docker push ghcr.io/immichframe/immichframe_api:latest
-          docker push ghcr.io/immichframe/immichframe_web:latest
+          REGISTRY_NAME="ghcr.io"
+          API_REPOSITORY=${{ github.repository_owner }}/immich-machine-learning
+          WEB_REPOSITORY=${{ github.repository_owner }}/immichframe_web
+          docker login --username ${{ github.repository_owner }} --password ${{ secrets.GH_PAT }} ghcr.io
+          docker push $REGISTRY_NAME/$API_REPOSITORY:latest
+          docker push $REGISTRY_NAME/$WEB_REPOSITORY:latest
