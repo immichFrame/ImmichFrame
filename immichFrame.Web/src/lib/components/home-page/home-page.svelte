@@ -21,7 +21,6 @@
 	let unsubscribeStop: () => void;
 
 	async function loadImage() {
-		console.log('loading image');
 		let assetRequest = await api.getAsset();
 
 		if (assetRequest.status != 200) {
@@ -52,7 +51,6 @@
 			}
 		});
 
-		console.log('mount load');
 		await loadImage();
 	});
 
@@ -67,8 +65,8 @@
 	});
 
 	const handleDone = async () => {
-		console.log('done load');
 		await loadImage();
+		progressBar.restart(true);
 	};
 </script>
 
@@ -77,14 +75,12 @@
 		<Clock />
 		<ImageOverlay
 			on:next={async () => {
-				progressBar.restart(true);
-				console.log('next load');
 				await loadImage();
+				progressBar.restart(true);
 			}}
 			on:back={async () => {
-				progressBar.restart(true);
-				console.log('back load');
 				await loadImage();
+				progressBar.restart(true);
 			}}
 		/>
 		<ThumbHashImage thumbHash={assetData.thumbhash ?? ''} />
