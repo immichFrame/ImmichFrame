@@ -10,8 +10,8 @@ env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
-  IMAGE_NAME_API: ${{ github.repository }}/${{ github.repository }}_api
-  IMAGE_NAME_WEB: ${{ github.repository }}/${{ github.repository }}_web
+  IMAGE_NAME_API: ${{ github.repository }}_api
+  IMAGE_NAME_WEB: ${{ github.repository }}_web
 jobs:
   publish_images:
     runs-on: ubuntu-latest
