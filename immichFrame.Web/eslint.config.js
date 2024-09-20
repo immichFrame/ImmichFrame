@@ -3,6 +3,7 @@ import ts from 'typescript-eslint';
 import svelte from 'eslint-plugin-svelte';
 import prettier from 'eslint-config-prettier';
 import globals from 'globals';
+import parser from 'svelte-eslint-parser';
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
@@ -22,12 +23,22 @@ export default [
 	{
 		files: ['**/*.svelte'],
 		languageOptions: {
+			parser: parser,
+			ecmaVersion: 5,
+			sourceType: 'script',
+
 			parserOptions: {
-				parser: ts.parser
+				parser: '@typescript-eslint/parser'
 			}
 		}
 	},
 	{
 		ignores: ['build/', '.svelte-kit/', 'dist/']
+	},
+	{
+		files: ['*.ts'],
+		rules: {
+			'no-undef': 'off'
+		}
 	}
 ];
