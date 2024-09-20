@@ -1,11 +1,11 @@
 name: Build and Publish image to Docker Hub
 on:
   [workflow_dispatch]
-  push:
-    # Publish semver tags as releases.
-    tags: [ 'v*']
-  pull_request:
-    branches: [ $default-branch ]
+  # push:
+  #   # Publish semver tags as releases.
+  #   tags: [ 'v*']
+  # pull_request:
+  #   branches: [ $default-branch ]
 env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
