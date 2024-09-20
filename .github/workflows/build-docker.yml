@@ -10,9 +10,9 @@ jobs:
       - name: build image
         run: |
           docker build ./ -t ghcr.io/immichframe/immichframe_api:latest
-          docker build ./immichFrame.Web/ -t ghcr.io/immichFrame/immichframe_web:latest
+          docker build ./immichframe.Web/ -t ghcr.io/immichframe/immichframe_web:latest
       - name: push image to docker hub
         run: |
           docker login --username immichframe --password ${{ secrets.GH_PAT }} ghcr.io
-          docker push ghcr.io/immichFrame/immichframe_api:latest
-          docker push ghcr.io/immichFrame/immichframe_web:latest
+          docker push ghcr.io/immichframe/immichframe_api:latest
+          docker push ghcr.io/immichframe/immichframe_web:latest
