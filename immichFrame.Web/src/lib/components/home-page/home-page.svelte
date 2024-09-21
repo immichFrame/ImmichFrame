@@ -7,7 +7,7 @@
 	import ProgressBar, { ProgressBarStatus } from '$lib/components/elements/progress-bar.svelte';
 	import { slideshowStore } from '$lib/stores/slideshow.store';
 	import { onDestroy, onMount } from 'svelte';
-	api.defaults.baseUrl = 'http://localhost:8080/'; // TODO: replace configurable settings
+	api.defaults.baseUrl = 'http://localhost/api'; // TODO: replace configurable settings
 
 	let imageData: Blob | null;
 	let assetData: api.AssetResponseDto | null;

@@ -15,6 +15,7 @@ ENTRYPOINT ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
 FROM builder AS prod
 RUN npm run build
 RUN npm prune --omit=dev
+ENTRYPOINT ["node", "build/index.js"]
 
 FROM base
 ENV NODE_ENV=production
@@ -24,4 +25,5 @@ COPY --from=prod /app/build ./build
 
 COPY package.json package-lock.json ./
 EXPOSE 3000
-ENTRYPOINT ["node", "build"]
+RUN npm run build
+ENTRYPOINT ["node", "build/index.js"]

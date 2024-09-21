@@ -61,19 +61,3 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta_web.outputs.tags }}
           labels: ${{ steps.meta_web.outputs.labels }}
-
-      # - name: build image
-      #   run: |
-      #     REGISTRY_NAME="ghcr.io"
-      #     API_REPOSITORY=${{ github.repository_owner }}/immich-machine-learning
-      #     WEB_REPOSITORY=${{ github.repository_owner }}/immichframe_web
-      #     docker build . -t $REGISTRY_NAME/$API_REPOSITORY:latest
-      #     docker build -t $REGISTRY_NAME/$WEB_REPOSITORY:latest -f immichFrame.Web/dockerfile --target prod immichFrame.Web
-      # - name: push image to docker hub
-      #   run: |
-      #     REGISTRY_NAME="ghcr.io"
-      #     API_REPOSITORY=${{ github.repository_owner }}/immich-machine-learning
-      #     WEB_REPOSITORY=${{ github.repository_owner }}/immichframe_web
-      #     docker login --username ${{ github.repository_owner }} --password ${{ secrets.TOKEN_GITHUB }} ghcr.io
-      #     docker push $REGISTRY_NAME/$API_REPOSITORY:latest
-      #     docker push $REGISTRY_NAME/$WEB_REPOSITORY:latest

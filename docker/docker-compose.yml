@@ -1,17 +1,32 @@
+networks:
+  dev:
+    driver: bridge
+
 services:
+  nginx:
+    image: nginx:stable-alpine
+    restart: always
+    ports:
+      - "80:80"
+    volumes: 
+      - ~/nginx_Config:/etc/nginx/conf.d/
+    networks:
+      - dev
   immichframe_api:
-    build:
-      context: ..
-      # target: final
+    image: ghcr.io/immichframe/immichframe_api:main
+    restart: always
     ports:
       - 8080:8080
     volumes:
-      - PATH/TO/CONFIG:/app/Config
+      - ~/immichFrame_Config:/app/Config
+    networks:
+      - dev
   immichframe_web:
-    build:
-      context: ../immichFrame.Web
-      target: prod
+    image: ghcr.io/immichframe/immichframe_web:main
+    restart: always
     ports:
       - 3000:3000
     volumes:
-      - PATH/TO/CONFIG:/app/Config
+      - ~/immichFrame_Config:/app/Config
+    networks:
+      - dev
