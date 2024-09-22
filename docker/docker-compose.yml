@@ -3,20 +3,16 @@ networks:
     driver: bridge
 
 services:
-  nginx:
-    image: nginx:stable-alpine
+  immichframe_nginx:
+    image: ghcr.io/immichframe/immichframe_nginx:main
     restart: always
     ports:
       - "80:80"
-    volumes: 
-      - ~/nginx_Config:/etc/nginx/conf.d/
     networks:
       - dev
   immichframe_api:
     image: ghcr.io/immichframe/immichframe_api:main
     restart: always
-    ports:
-      - 8080:8080
     volumes:
       - ~/immichFrame_Config:/app/Config
     networks:
@@ -24,8 +20,6 @@ services:
   immichframe_web:
     image: ghcr.io/immichframe/immichframe_web:main
     restart: always
-    ports:
-      - 3000:3000
     volumes:
       - ~/immichFrame_Config:/app/Config
     networks:

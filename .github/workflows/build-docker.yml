@@ -12,6 +12,7 @@ env:
   # github.repository as <account>/<repo>
   IMAGE_NAME_API: ${{ github.repository }}_api
   IMAGE_NAME_WEB: ${{ github.repository }}_web
+  IMAGE_NAME_NGINX: ${{ github.repository }}_nginx
 jobs:
   publish_images:
     runs-on: ubuntu-latest
@@ -43,6 +44,12 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_WEB }}
 
+      - name: Extract Docker metadata (${{ env.IMAGE_NAME_WEB }})
+        id: meta_nginx
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_NGINX }}
+
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
       - name: Build and push Docker image
@@ -61,3 +68,11 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta_web.outputs.tags }}
           labels: ${{ steps.meta_web.outputs.labels }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: immichFrame.Web/reverse-proxy
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta_nginx.outputs.tags }}
+          labels: ${{ steps.meta_nginx.outputs.labels }}
