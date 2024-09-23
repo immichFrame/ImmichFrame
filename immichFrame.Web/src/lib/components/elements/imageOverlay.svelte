@@ -1,9 +1,12 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import { mdiChevronLeft, mdiChevronRight, mdiCog, mdiPause } from '@mdi/js';
+	import { mdiChevronLeft, mdiChevronRight, mdiPlay, mdiPause } from '@mdi/js';
 	import Icon from './icon.svelte';
+	import { ProgressBarStatus } from './progress-bar.svelte';
 
 	const dispatch = createEventDispatcher();
+
+	export let status: ProgressBarStatus;
 
 	function clickNext() {
 		dispatch('next');
@@ -27,11 +30,15 @@
 	</div>
 
 	<div class="overlay-item grid grid-rows-3 gap-2 content-stretch">
-		<button on:click={clickSettings} class="opacity-0 hover:opacity-100 frame-color"
-			><Icon title="Text" path={mdiCog} size="20em" /></button
-		>
+		<button on:click={clickSettings} class="opacity-0 hover:opacity-100 frame-color">
+			<!-- <Icon title="Text" path={mdiCog} size="20em" /> -->
+		</button>
 		<button on:click={clickPause} class="opacity-0 hover:opacity-100 frame-color"
-			><Icon title="Text" path={mdiPause} size="20em" /></button
+			><Icon
+				title="Text"
+				path={status == ProgressBarStatus.Paused ? mdiPlay : mdiPause}
+				size="20em"
+			/></button
 		>
 		<div></div>
 	</div>

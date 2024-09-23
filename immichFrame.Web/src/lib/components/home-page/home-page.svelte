@@ -82,6 +82,14 @@
 				await loadImage();
 				progressBar.restart(true);
 			}}
+			on:pause={async () => {
+				if (progressBarStatus == ProgressBarStatus.Paused) {
+					await progressBar.play();
+				} else {
+					await progressBar.pause();
+				}
+			}}
+			bind:status={progressBarStatus}
 		/>
 		<ThumbHashImage thumbHash={assetData.thumbhash ?? ''} />
 		<Image data={imageData} />
@@ -95,7 +103,15 @@
 		/>
 	{:else}
 		<!-- maybe show immich logo?-->
-		<p class="text-white">LOADING ...</p>
+		<div>
+			<img
+				id="logo"
+				class="h-[50vh] sm:h-[50vh] md:h-[40vh] lg:h-[30vh]"
+				src="/logo.svg"
+				alt="logo"
+			/>
+			<p class="text-white text-center">LOADING ...</p>
+		</div>
 	{/if}
 </section>
 
