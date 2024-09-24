@@ -227,9 +227,26 @@ namespace ImmichFrame.Core.Logic
                 {
                     try
                     {
-                        var personInfo = await immichApi.GetPersonAssetsAsync(personId);
+                        int page = 1;
+                        int batchSize = 1000;
+                        int total = 0;
+                        do
+                        {
+                            var metadataBody = new MetadataSearchDto
+                            {
+                                Page = page,
+                                Size = batchSize,
+                                PersonIds = new []{ personId },
+                                Type = AssetTypeEnum.IMAGE
+                            };
+                            var personInfo = await immichApi.SearchMetadataAsync(metadataBody);
 
-                        allAssets.AddRange(personInfo);
+                            total = personInfo.Assets.Total;
+
+                            allAssets.AddRange(personInfo.Assets.Items);
+                            page++;
+                        }
+                        while ( total == batchSize);
                     }
                     catch (ApiException ex)
                     {
