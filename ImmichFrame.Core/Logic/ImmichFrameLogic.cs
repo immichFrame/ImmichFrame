@@ -161,7 +161,7 @@ namespace ImmichFrame.Core.Logic
                 foreach (var lane in memoryLane)
                 {
                     var assets = lane.Assets.ToList();
-                    assets.ForEach(asset => asset.ImageDesc =  $"{lane.YearsAgo} {(lane.YearsAgo == 1 ? "year" : "years")} ago");
+                    assets.ForEach(asset => asset.ImageDesc = $"{lane.YearsAgo} {(lane.YearsAgo == 1 ? "year" : "years")} ago");
 
                     allAssets.AddRange(assets);
                 }
@@ -263,7 +263,14 @@ namespace ImmichFrame.Core.Logic
                 var immichApi = new ImmichApi(_settings.ImmichServerUrl, client);
                 try
                 {
-                    var randomAssets = await immichApi.GetRandomAsync(null);
+                    var searchBody = new RandomSearchDto
+                    {
+                        Size = 1,
+                        Page = 1
+                    };
+                    var searchResponse = await immichApi.SearchRandomAsync(searchBody);
+
+                    var randomAssets = searchResponse.Assets.Items;
 
                     if (randomAssets.Any())
                     {

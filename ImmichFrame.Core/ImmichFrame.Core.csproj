@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <OpenApiReference Include="OpenAPIs\immich-openapi-specs.json" CodeGenerator="NSwagCSharp" Namespace="ImmichFrame.Core.Api" ClassName="ImmichApi">
+    <OpenApiReference Include="OpenAPIs\immich-openapi-specs.json" CodeGenerator="NSwagCSharp" Namespace="ImmichFrame.Core.Api" ClassName="ImmichApi" Options="/GenerateOptionalPropertiesAsNullable:true">
       <SourceUri>https://raw.githubusercontent.com/immich-app/immich/main/open-api/immich-openapi-specs.json</SourceUri>
     </OpenApiReference>
   </ItemGroup>
