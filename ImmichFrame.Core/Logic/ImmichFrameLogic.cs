@@ -236,7 +236,7 @@ namespace ImmichFrame.Core.Logic
                             {
                                 Page = page,
                                 Size = batchSize,
-                                PersonIds = new []{ personId },
+                                PersonIds = new[] { personId },
                                 Type = AssetTypeEnum.IMAGE
                             };
                             var personInfo = await immichApi.SearchMetadataAsync(metadataBody);
@@ -246,7 +246,7 @@ namespace ImmichFrame.Core.Logic
                             allAssets.AddRange(personInfo.Assets.Items);
                             page++;
                         }
-                        while ( total == batchSize);
+                        while (total == batchSize);
                     }
                     catch (ApiException ex)
                     {
@@ -271,8 +271,24 @@ namespace ImmichFrame.Core.Logic
 
             return filteredAssetInfos.ElementAt(rnd).Value;
         }
+
+        List<AssetResponseDto> RandomAssetList = new List<AssetResponseDto>();
         private async Task<AssetResponseDto?> GetRandomAsset()
         {
+            if (RandomAssetList.Any())
+            {
+                // TODO: Check somehow for excluded albums?
+
+                var randomAsset = RandomAssetList.First();
+                RandomAssetList.Remove(randomAsset);
+
+                // Skip this asset
+                if (randomAsset.Thumbhash == null)
+                    return await GetRandomAsset();
+
+                return randomAsset;
+            }
+
             using (var client = new HttpClient())
             {
                 client.UseApiKey(_settings.ApiKey);
@@ -282,8 +298,9 @@ namespace ImmichFrame.Core.Logic
                 {
                     var searchBody = new RandomSearchDto
                     {
-                        Size = 1,
-                        Page = 1
+                        Size = 250,
+                        Page = 1,
+                        Type = AssetTypeEnum.IMAGE
                     };
                     var searchResponse = await immichApi.SearchRandomAsync(searchBody);
 
@@ -291,24 +308,9 @@ namespace ImmichFrame.Core.Logic
 
                     if (randomAssets.Any())
                     {
-                        var asset = randomAssets.First();
+                        RandomAssetList.AddRange(randomAssets);
 
-                        if (asset.Type == AssetTypeEnum.VIDEO)
-                            return await GetRandomAsset();
-
-                        var albumIds = (await immichApi.GetAllAlbumsAsync(Guid.Parse(asset.Id), true)).Select(x => Guid.Parse(x.Id));
-
-                        // Reload if exclude album is configured
-                        if (_settings.ExcludedAlbums.Any(x => albumIds.Contains(x)))
-                        {
-                            return await GetRandomAsset();
-                        }
-
-                        // do not return with no thumbnail
-                        if (asset.Thumbhash == null)
-                            return await GetRandomAsset();
-
-                        return randomAssets.First();
+                        return await GetRandomAsset();
                     }
                 }
                 catch (ApiException ex)
