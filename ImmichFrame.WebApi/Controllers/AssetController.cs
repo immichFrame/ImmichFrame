@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ImmichFrame.WebApi.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class AssetController : ControllerBase
     {
         private readonly ILogger<AssetController> _logger;

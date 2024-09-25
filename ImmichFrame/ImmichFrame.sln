@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImmichFrame.Core", "..\Immi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImmichFrame.WebApi", "..\ImmichFrame.WebApi\ImmichFrame.WebApi.csproj", "{4E550CF5-E5D1-4D1F-8438-A55C5C7AC93F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "immichFrame.Web", "..\immichFrame.Web\immichFrame.webApi.esproj", "{4E550CF5-E5D1-4D1F-8438-A55C5C7AC93F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
