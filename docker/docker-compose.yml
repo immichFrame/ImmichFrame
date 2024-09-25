@@ -1,26 +1,6 @@
-networks:
-  dev:
-    driver: bridge
-
 services:
-  immichframe_nginx:
-    image: ghcr.io/immichframe/immichframe_nginx:main
+  immichframe:
+    image: ghcr.io/immichframe/immichframe:main
     restart: always
     ports:
-      - "80:80"
-    networks:
-      - dev
-  immichframe_api:
-    image: ghcr.io/immichframe/immichframe_api:main
-    restart: always
-    volumes:
-      - ~/immichFrame_Config:/app/Config
-    networks:
-      - dev
-  immichframe_web:
-    image: ghcr.io/immichframe/immichframe_web:main
-    restart: always
-    volumes:
-      - ~/immichFrame_Config:/app/Config
-    networks:
-      - dev
+      - "8080:8080"

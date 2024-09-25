@@ -1,36 +1,10 @@
-networks:
-  dev:
-    driver: bridge
-
 services:
-  immichframe_nginx:
-    build:
-      context: ../immichFrame.Web/reverse-proxy
-      target: dev
-    ports:
-      - "1337:80"
-    networks:
-      - dev
-  immichframe_api:
+  immichframe:
     build:
       context: ..
-      # target: final
+      target: dev
     ports:
       - 8080:8080
     volumes:
       - ~/immichFrame_Config:/app/Config
       # - PATH/TO/CONFIG:/app/Config
-    networks:
-      - dev
-  immichframe_web:
-    build:
-      context: ../immichFrame.Web
-      target: dev
-    ports:
-      - 5173:5173
-    volumes:
-      - ~/immichFrame_Config:/app/Config
-      - ../immichFrame.Web/src:/app/src
-      # - PATH/TO/CONFIG:/app/Config
-    networks:
-      - dev

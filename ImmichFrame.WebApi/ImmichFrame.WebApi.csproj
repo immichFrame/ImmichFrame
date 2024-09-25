@@ -16,10 +16,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ImmichFrame.Core\ImmichFrame.Core.csproj" />
-    
-    <ProjectReference Include="..\immichFrame.Web\immichFrame.Web.esproj">
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
   </ItemGroup>
 
 </Project>
