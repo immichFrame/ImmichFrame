@@ -1,3 +1,4 @@
+name: immichFrame
 services:
   immichframe:
     image: ghcr.io/immichframe/immichframe:main
