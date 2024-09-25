@@ -35,7 +35,7 @@
 		position: absolute;
 		background-color: rgba(0, 0, 0, 0.4);
 		padding: 2%;
-		bottom: 0;
+		top: 0;
 		left: 0;
 		z-index: 1;
 	}

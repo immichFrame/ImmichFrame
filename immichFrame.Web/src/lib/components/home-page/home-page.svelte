@@ -7,10 +7,13 @@
 	import ProgressBar, { ProgressBarStatus } from '$lib/components/elements/progress-bar.svelte';
 	import { slideshowStore } from '$lib/stores/slideshow.store';
 	import { onDestroy, onMount } from 'svelte';
+	import AssetInfo from '../elements/asset-info.svelte';
 	api.defaults.baseUrl = '/api'; // TODO: replace configurable settings
 
 	let imageData: Blob | null;
 	let assetData: api.AssetResponseDto | null;
+
+	let imageUrl: string;
 
 	const { restartProgress, stopProgress } = slideshowStore;
 
@@ -28,14 +31,16 @@
 			return;
 		}
 
-		assetData = assetRequest.data;
 		let imageRequest = await api.getImage(assetRequest.data.id);
 
 		if (imageRequest.status != 200) {
 			imageData = null;
 			return;
 		}
+
 		imageData = imageRequest.data;
+		imageUrl = URL.createObjectURL(imageData);
+		assetData = assetRequest.data;
 	}
 
 	onMount(async () => {
@@ -73,12 +78,15 @@
 <section id="home-page" class="fixed grid h-screen w-screen bg-black">
 	{#if imageData && assetData}
 		<Clock />
+		<AssetInfo asset={assetData} />
 		<ImageOverlay
 			on:next={async () => {
+				progressBar.restart(false);
 				await loadImage();
 				progressBar.restart(true);
 			}}
 			on:back={async () => {
+				progressBar.restart(false);
 				await loadImage();
 				progressBar.restart(true);
 			}}
@@ -92,7 +100,7 @@
 			bind:status={progressBarStatus}
 		/>
 		<ThumbHashImage thumbHash={assetData.thumbhash ?? ''} />
-		<Image data={imageData} />
+		<Image dataUrl={imageUrl} />
 		<ProgressBar
 			autoplay
 			hidden={false}
