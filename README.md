@@ -65,9 +65,10 @@ ImmichFrame is easy to run on your desired plattform. Get the latest stable rele
 #### Compose
 
 ```yaml
+name: immichframe
 services:
   immichframe:
-    container_name: immichFrame
+    container_name: immichframe
     image: ghcr.io/immichframe/immichframe:main
     restart: on-failure
     volumes:

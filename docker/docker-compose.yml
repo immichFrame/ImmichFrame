@@ -1,6 +1,6 @@
 services:
   immichframe:
-    container_name: immichFrame
+    container_name: immichframe
     image: ghcr.io/immichframe/immichframe:main
     restart: on-failure
     volumes:

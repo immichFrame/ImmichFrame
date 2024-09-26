@@ -25,18 +25,8 @@
 	});
 </script>
 
-<div id="clock-overlay" class="text-white">
-	<p class="mt-2 text-lg">{selectedDate}</p>
+<div
+	class="absolute bottom-0 left-0 z-10 text-primary bg-secondary bg-opacity-40 rounded-tr-2xl p-3"
+>
+	<p class="mt-2 text-xl">{selectedDate}</p>
 </div>
-
-<style>
-	#clock-overlay {
-		color: wheat;
-		position: absolute;
-		background-color: rgba(0, 0, 0, 0.4);
-		padding: 2%;
-		top: 0;
-		left: 0;
-		z-index: 1;
-	}
-</style>

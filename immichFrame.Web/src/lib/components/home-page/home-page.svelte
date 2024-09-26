@@ -7,8 +7,9 @@
 	import ProgressBar, { ProgressBarStatus } from '$lib/components/elements/progress-bar.svelte';
 	import { slideshowStore } from '$lib/stores/slideshow.store';
 	import { onDestroy, onMount } from 'svelte';
-	import AssetInfo from '../elements/asset-info.svelte';
-	api.defaults.baseUrl = '/api'; // TODO: replace configurable settings
+	import LocationInfo from '../elements/location-info.svelte';
+	import AssetDate from '../elements/asset-date.svelte';
+	api.defaults.baseUrl = '/api';
 
 	let imageData: Blob | null;
 	let assetData: api.AssetResponseDto | null;
@@ -78,7 +79,8 @@
 <section id="home-page" class="fixed grid h-screen w-screen bg-black">
 	{#if imageData && assetData}
 		<Clock />
-		<AssetInfo asset={assetData} />
+		<AssetDate asset={assetData} />
+		<LocationInfo asset={assetData} />
 		<ImageOverlay
 			on:next={async () => {
 				progressBar.restart(false);
