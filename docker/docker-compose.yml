@@ -1,3 +1,4 @@
+name: immichframe
 services:
   immichframe:
     container_name: immichframe
