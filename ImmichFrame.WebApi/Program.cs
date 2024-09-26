@@ -1,5 +1,6 @@
 using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Core.Interfaces;
+using ImmichFrame.Core.Logic;
 using ImmichFrame.WebApi.Models;
 using System.Text.Json;
 
@@ -20,14 +21,14 @@ catch (Exception ex)
     throw new SettingsNotValidException($"Problem with parsing the settings: {ex.Message}", ex);
 }
 
-builder.Services.AddSingleton<IBaseSettings>(srv =>
+builder.Services.AddSingleton(srv =>
 {
     var settings = JsonSerializer.Deserialize<Settings>(doc);
 
     if (settings == null)
         throw new FileNotFoundException();
 
-    return settings;
+    return new ImmichFrameLogic(settings);
 });
 
 builder.Services.AddControllers();

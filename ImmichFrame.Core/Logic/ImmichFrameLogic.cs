@@ -18,6 +18,20 @@ namespace ImmichFrame.Core.Logic
         private DateTime lastFilteredAssetRefesh;
         private List<Guid> ImmichFrameAlbumAssets = new List<Guid>();
         private static AlbumResponseDto immichFrameAlbum = new AlbumResponseDto();
+
+
+        private Task<IEnumerable<Guid>> _excludedAlbumAssets;
+        private Task<IEnumerable<Guid>> ExcludedAlbumAssets
+        {
+            get
+            {
+                if(_excludedAlbumAssets == null)
+                    _excludedAlbumAssets = GetExcludedAlbumAssets();
+
+                return _excludedAlbumAssets;
+            }
+        }
+
         private Task<Dictionary<Guid, AssetResponseDto>?> FilteredAssetInfos
         {
             get
@@ -125,11 +139,11 @@ namespace ImmichFrame.Core.Logic
                 // Exclude videos
                 list = list.Where(x => x.Type != AssetTypeEnum.VIDEO);
 
-                var excludedalbumAssetIds = (await GetExcludedAlbumAssets()).Select(x => x.Id);
+                var excludedList = await ExcludedAlbumAssets;
 
                 // Exclude assets if configured
-                if (excludedalbumAssetIds.Any())
-                    list = list.Where(x => !excludedalbumAssetIds.Contains(x.Id));
+                if (excludedList.Any())
+                    list = list.Where(x => !excludedList.Contains(Guid.Parse(x.Id)));
 
                 // return only unique assets, no duplicates, only with Thumbnail
                 return list.Where(x => x.Thumbhash != null).DistinctBy(x => x.Id).ToDictionary(x => Guid.Parse(x.Id));
@@ -161,7 +175,7 @@ namespace ImmichFrame.Core.Logic
                 foreach (var lane in memoryLane)
                 {
                     var assets = lane.Assets.ToList();
-                    assets.ForEach(asset => asset.ImageDesc =  $"{lane.YearsAgo} {(lane.YearsAgo == 1 ? "year" : "years")} ago");
+                    assets.ForEach(asset => asset.ImageDesc = $"{lane.YearsAgo} {(lane.YearsAgo == 1 ? "year" : "years")} ago");
 
                     allAssets.AddRange(assets);
                 }
@@ -198,7 +212,7 @@ namespace ImmichFrame.Core.Logic
 
             return allAssets;
         }
-        private async Task<IEnumerable<AssetResponseDto>> GetExcludedAlbumAssets()
+        private async Task<IEnumerable<Guid>> GetExcludedAlbumAssets()
         {
             using var client = new HttpClient();
 
@@ -212,7 +226,7 @@ namespace ImmichFrame.Core.Logic
                 allAssets.AddRange(await GetAlbumAssets(albumId, immichApi));
             }
 
-            return allAssets;
+            return allAssets.Select(x=>Guid.Parse(x.Id));
         }
         private async Task<IEnumerable<AssetResponseDto>> GetPeopleAssets()
         {
@@ -227,9 +241,26 @@ namespace ImmichFrame.Core.Logic
                 {
                     try
                     {
-                        var personInfo = await immichApi.GetPersonAssetsAsync(personId);
+                        int page = 1;
+                        int batchSize = 1000;
+                        int total = 0;
+                        do
+                        {
+                            var metadataBody = new MetadataSearchDto
+                            {
+                                Page = page,
+                                Size = batchSize,
+                                PersonIds = new[] { personId },
+                                Type = AssetTypeEnum.IMAGE
+                            };
+                            var personInfo = await immichApi.SearchMetadataAsync(metadataBody);
 
-                        allAssets.AddRange(personInfo);
+                            total = personInfo.Assets.Total;
+
+                            allAssets.AddRange(personInfo.Assets.Items);
+                            page++;
+                        }
+                        while (total == batchSize);
                     }
                     catch (ApiException ex)
                     {
@@ -254,8 +285,22 @@ namespace ImmichFrame.Core.Logic
 
             return filteredAssetInfos.ElementAt(rnd).Value;
         }
+
+        List<AssetResponseDto> RandomAssetList = new List<AssetResponseDto>();
         private async Task<AssetResponseDto?> GetRandomAsset()
         {
+            if (RandomAssetList.Any())
+            {
+                var randomAsset = RandomAssetList.First();
+                RandomAssetList.Remove(randomAsset);
+
+                // Skip this asset
+                if (randomAsset.Thumbhash == null)
+                    return await GetRandomAsset();
+
+                return randomAsset;
+            }
+
             using (var client = new HttpClient())
             {
                 client.UseApiKey(_settings.ApiKey);
@@ -263,28 +308,25 @@ namespace ImmichFrame.Core.Logic
                 var immichApi = new ImmichApi(_settings.ImmichServerUrl, client);
                 try
                 {
-                    var randomAssets = await immichApi.GetRandomAsync(null);
+                    var searchBody = new RandomSearchDto
+                    {
+                        Size = 250,
+                        Page = 1,
+                        Type = AssetTypeEnum.IMAGE
+                    };
+                    var searchResponse = await immichApi.SearchRandomAsync(searchBody);
+
+                    var randomAssets = searchResponse.Assets.Items;
 
                     if (randomAssets.Any())
                     {
-                        var asset = randomAssets.First();
+                        var excludedList = await ExcludedAlbumAssets;
 
-                        if (asset.Type == AssetTypeEnum.VIDEO)
-                            return await GetRandomAsset();
+                        randomAssets = randomAssets.Where(x => !excludedList.Contains(Guid.Parse(x.Id))).ToList();
 
-                        var albumIds = (await immichApi.GetAllAlbumsAsync(Guid.Parse(asset.Id), true)).Select(x => Guid.Parse(x.Id));
+                        RandomAssetList.AddRange(randomAssets);
 
-                        // Reload if exclude album is configured
-                        if (_settings.ExcludedAlbums.Any(x => albumIds.Contains(x)))
-                        {
-                            return await GetRandomAsset();
-                        }
-
-                        // do not return with no thumbnail
-                        if (asset.Thumbhash == null)
-                            return await GetRandomAsset();
-
-                        return randomAssets.First();
+                        return await GetRandomAsset();
                     }
                 }
                 catch (ApiException ex)

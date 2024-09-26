@@ -10,12 +10,12 @@ namespace ImmichFrame.WebApi.Controllers
     public class AssetController : ControllerBase
     {
         private readonly ILogger<AssetController> _logger;
-        private IImmichFrameLogic _logic;
+        private readonly IImmichFrameLogic _logic;
 
-        public AssetController(ILogger<AssetController> logger, IBaseSettings settings)
+        public AssetController(ILogger<AssetController> logger, ImmichFrameLogic logic)
         {
             _logger = logger;
-            _logic = new ImmichFrameLogic(settings);
+            _logic = logic;
         }
 
         [HttpGet(Name = "GetAsset")]
