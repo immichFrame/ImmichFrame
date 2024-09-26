@@ -7,10 +7,14 @@
 	import ProgressBar, { ProgressBarStatus } from '$lib/components/elements/progress-bar.svelte';
 	import { slideshowStore } from '$lib/stores/slideshow.store';
 	import { onDestroy, onMount } from 'svelte';
-	api.defaults.baseUrl = '/api'; // TODO: replace configurable settings
+	import LocationInfo from '../elements/location-info.svelte';
+	import AssetDate from '../elements/asset-date.svelte';
+	api.defaults.baseUrl = '/api';
 
 	let imageData: Blob | null;
 	let assetData: api.AssetResponseDto | null;
+
+	let imageUrl: string;
 
 	const { restartProgress, stopProgress } = slideshowStore;
 
@@ -28,14 +32,16 @@
 			return;
 		}
 
-		assetData = assetRequest.data;
 		let imageRequest = await api.getImage(assetRequest.data.id);
 
 		if (imageRequest.status != 200) {
 			imageData = null;
 			return;
 		}
+
 		imageData = imageRequest.data;
+		imageUrl = URL.createObjectURL(imageData);
+		assetData = assetRequest.data;
 	}
 
 	onMount(async () => {
@@ -73,18 +79,30 @@
 <section id="home-page" class="fixed grid h-screen w-screen bg-black">
 	{#if imageData && assetData}
 		<Clock />
+		<AssetDate asset={assetData} />
+		<LocationInfo asset={assetData} />
 		<ImageOverlay
 			on:next={async () => {
+				progressBar.restart(false);
 				await loadImage();
 				progressBar.restart(true);
 			}}
 			on:back={async () => {
+				progressBar.restart(false);
 				await loadImage();
 				progressBar.restart(true);
 			}}
+			on:pause={async () => {
+				if (progressBarStatus == ProgressBarStatus.Paused) {
+					await progressBar.play();
+				} else {
+					await progressBar.pause();
+				}
+			}}
+			bind:status={progressBarStatus}
 		/>
 		<ThumbHashImage thumbHash={assetData.thumbhash ?? ''} />
-		<Image data={imageData} />
+		<Image dataUrl={imageUrl} />
 		<ProgressBar
 			autoplay
 			hidden={false}
@@ -95,7 +113,15 @@
 		/>
 	{:else}
 		<!-- maybe show immich logo?-->
-		<p class="text-white">LOADING ...</p>
+		<div>
+			<img
+				id="logo"
+				class="h-[50vh] sm:h-[50vh] md:h-[40vh] lg:h-[30vh]"
+				src="/logo.svg"
+				alt="logo"
+			/>
+			<p class="text-white text-center">LOADING ...</p>
+		</div>
 	{/if}
 </section>
 

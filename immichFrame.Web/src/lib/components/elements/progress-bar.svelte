@@ -89,13 +89,7 @@
 
 {#if !hidden}
 	<span
-		class="absolute left-0 bottom-0 h-[3px] framebg-color"
+		class="absolute left-0 bottom-0 h-[3px] bg-primary z-[1000]"
 		style:width={`${$progress * 100}%`}
 	/>
 {/if}
-
-<style>
-	.framebg-color {
-		background-color: wheat;
-	}
-</style>

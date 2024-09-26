@@ -1,13 +1,9 @@
 <script lang="ts">
-	export let data: Blob;
-	const getUrl = (data: Blob) => {
-		let url = URL.createObjectURL(data);
-		return url;
-	};
+	export let dataUrl: string;
 </script>
 
 <div>
-	<img class="imageView" src={getUrl(data)} alt="data" />
+	<img class="imageView" src={dataUrl} alt="data" />
 </div>
 
 <style>
