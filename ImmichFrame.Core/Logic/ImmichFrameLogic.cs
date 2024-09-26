@@ -18,6 +18,20 @@ namespace ImmichFrame.Core.Logic
         private DateTime lastFilteredAssetRefesh;
         private List<Guid> ImmichFrameAlbumAssets = new List<Guid>();
         private static AlbumResponseDto immichFrameAlbum = new AlbumResponseDto();
+
+
+        private Task<IEnumerable<Guid>> _excludedAlbumAssets;
+        private Task<IEnumerable<Guid>> ExcludedAlbumAssets
+        {
+            get
+            {
+                if(_excludedAlbumAssets == null)
+                    _excludedAlbumAssets = GetExcludedAlbumAssets();
+
+                return _excludedAlbumAssets;
+            }
+        }
+
         private Task<Dictionary<Guid, AssetResponseDto>?> FilteredAssetInfos
         {
             get
@@ -125,11 +139,11 @@ namespace ImmichFrame.Core.Logic
                 // Exclude videos
                 list = list.Where(x => x.Type != AssetTypeEnum.VIDEO);
 
-                var excludedalbumAssetIds = (await GetExcludedAlbumAssets()).Select(x => x.Id);
+                var excludedList = await ExcludedAlbumAssets;
 
                 // Exclude assets if configured
-                if (excludedalbumAssetIds.Any())
-                    list = list.Where(x => !excludedalbumAssetIds.Contains(x.Id));
+                if (excludedList.Any())
+                    list = list.Where(x => !excludedList.Contains(Guid.Parse(x.Id)));
 
                 // return only unique assets, no duplicates, only with Thumbnail
                 return list.Where(x => x.Thumbhash != null).DistinctBy(x => x.Id).ToDictionary(x => Guid.Parse(x.Id));
@@ -198,7 +212,7 @@ namespace ImmichFrame.Core.Logic
 
             return allAssets;
         }
-        private async Task<IEnumerable<AssetResponseDto>> GetExcludedAlbumAssets()
+        private async Task<IEnumerable<Guid>> GetExcludedAlbumAssets()
         {
             using var client = new HttpClient();
 
@@ -212,7 +226,7 @@ namespace ImmichFrame.Core.Logic
                 allAssets.AddRange(await GetAlbumAssets(albumId, immichApi));
             }
 
-            return allAssets;
+            return allAssets.Select(x=>Guid.Parse(x.Id));
         }
         private async Task<IEnumerable<AssetResponseDto>> GetPeopleAssets()
         {
@@ -277,8 +291,6 @@ namespace ImmichFrame.Core.Logic
         {
             if (RandomAssetList.Any())
             {
-                // TODO: Check somehow for excluded albums?
-
                 var randomAsset = RandomAssetList.First();
                 RandomAssetList.Remove(randomAsset);
 
@@ -308,6 +320,10 @@ namespace ImmichFrame.Core.Logic
 
                     if (randomAssets.Any())
                     {
+                        var excludedList = await ExcludedAlbumAssets;
+
+                        randomAssets = randomAssets.Where(x => !excludedList.Contains(Guid.Parse(x.Id))).ToList();
+
                         RandomAssetList.AddRange(randomAssets);
 
                         return await GetRandomAsset();
