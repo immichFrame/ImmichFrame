@@ -5,16 +5,8 @@
 	export let thumbHash: string;
 </script>
 
-<img class="thumbHashImage" src={thumbHashToDataURL(decodeBase64(thumbHash))} alt="data" />
-
-<style>
-	.thumbHashImage {
-		position: absolute;
-		top: 0;
-		left: 0;
-		display: flex;
-		width: 100%;
-		height: 100%;
-		z-index: -1;
-	}
-</style>
+<img
+	class="absolute top-0 left-0 flex w-full h-full z-[-1]"
+	src={thumbHashToDataURL(decodeBase64(thumbHash))}
+	alt="data"
+/>
