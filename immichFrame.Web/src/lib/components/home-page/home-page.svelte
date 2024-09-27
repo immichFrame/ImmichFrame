@@ -106,7 +106,7 @@
 		<ProgressBar
 			autoplay
 			hidden={false}
-			duration={5}
+			duration={45}
 			bind:this={progressBar}
 			bind:status={progressBarStatus}
 			on:done={handleDone}
