@@ -46,7 +46,7 @@ namespace ImmichFrame.WebApi.Models
 
                     if (propertyInfo != null)
                     {
-                        this.SetValue(propertyInfo, env[key].ToString() ?? string.Empty);
+                        this.SetValue(propertyInfo, env[key]?.ToString() ?? string.Empty);
                     }
 
                 }

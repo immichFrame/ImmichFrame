@@ -17,7 +17,7 @@ namespace ImmichFrame.WebApi.Controllers
         }
 
         [HttpGet(Name = "GetConfig")]
-        public async Task<IClientSettings> GetConfig()
+        public IClientSettings GetConfig()
         {
             return _settings;
         }
