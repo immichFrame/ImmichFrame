@@ -42,11 +42,11 @@ namespace ImmichFrame.WebApi.Models
                 {
                     if (key == null) continue;
 
-                    var propertyInfo = typeof(ClientSettings).GetProperty(key.ToString());
+                    var propertyInfo = typeof(ClientSettings).GetProperty(key.ToString() ?? string.Empty);
 
                     if (propertyInfo != null)
                     {
-                        this.SetValue(propertyInfo, env[key].ToString());
+                        this.SetValue(propertyInfo, env[key].ToString() ?? string.Empty);
                     }
 
                 }
