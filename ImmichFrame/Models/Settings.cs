@@ -37,7 +37,7 @@ namespace ImmichFrame.Models
         public string ApiKey { get; set; } = string.Empty;
         public string ImageStretch { get; set; } = "Uniform";
         public string Margin { get; set; } = "0,0,0,0";
-        public int Interval { get; set; } = 8;
+        public int Interval { get; set; } = 45;
         public double TransitionDuration { get; set; } = 1;
         public bool DownloadImages { get; set; } = false;
         public bool ShowMemories { get; set; } = false;

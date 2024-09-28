@@ -1,6 +1,9 @@
 ﻿namespace ImmichFrame.Core.Interfaces
 {
-    public interface IBaseSettings
+    public interface IFullSettings : IServerSettings, IClientSettings
+    { }
+
+    public interface IServerSettings
     {
         public string ImmichServerUrl { get; set; }
         public string ApiKey { get; set; }
@@ -11,7 +14,8 @@
         public int RefreshAlbumPeopleInterval { get; set; }
         public string ImmichFrameAlbumName { get; set; }
     }
-    public interface IFullSettings : IBaseSettings
+
+    public interface IClientSettings
     {
         public string ImageStretch { get; set; }
         public string Margin { get; set; }

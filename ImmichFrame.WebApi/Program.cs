@@ -1,5 +1,6 @@
 using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Core.Helpers;
+using ImmichFrame.Core.Interfaces;
 using ImmichFrame.Core.Logic;
 using ImmichFrame.WebApi.Models;
 using System.Text.Json;
@@ -13,7 +14,8 @@ var settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config",
 
 Console.WriteLine(settingsPath);
 
-Settings? settings = null;
+ServerSettings? serverSettings = null;
+ClientSettings? clientSettings = null;
 
 if (File.Exists(settingsPath))
 {
@@ -28,15 +30,24 @@ if (File.Exists(settingsPath))
         throw new SettingsNotValidException($"Problem with parsing the settings: {ex.Message}", ex);
     }
 
-    settings = JsonSerializer.Deserialize<Settings>(doc);
+    serverSettings = JsonSerializer.Deserialize<ServerSettings>(doc);
+    clientSettings = JsonSerializer.Deserialize<ClientSettings>(doc);
 }
 
 builder.Services.AddSingleton(srv =>
 {
-    if (settings == null)
-        settings = new Settings();
+    if (serverSettings == null)
+        serverSettings = new ServerSettings();
 
-    return new ImmichFrameLogic(settings);
+    return new ImmichFrameLogic(serverSettings);
+});
+
+builder.Services.AddSingleton<IClientSettings>(srv =>
+{
+    if (clientSettings == null)
+        clientSettings = new ClientSettings();
+
+    return clientSettings;
 });
 
 builder.Services.AddControllers();
@@ -47,7 +58,7 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsProduction())
+if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
