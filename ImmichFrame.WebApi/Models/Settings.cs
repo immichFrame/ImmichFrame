@@ -25,7 +25,7 @@ namespace ImmichFrame.WebApi.Models
                 Albums = env["Albums"]?.ToString()?.Split(',').Select(x => new Guid(x)).ToList() ?? new();
                 ExcludedAlbums = env["ExcludedAlbums"]?.ToString()?.Split(',').Select(x => new Guid(x)).ToList() ?? new();
                 People = env["People"]?.ToString()?.Split(',').Select(x => new Guid(x)).ToList() ?? new();
-                RefreshAlbumPeopleInterval = Convert.ToInt32(env["RefreshAlbumPeopleInterval"]);
+                RefreshAlbumPeopleInterval = Convert.ToInt32(env["RefreshAlbumPeopleInterval"] ?? 12);
                 ImmichFrameAlbumName = env["ImmichFrameAlbumName"]?.ToString() ?? string.Empty;
             }
             catch (Exception ex)

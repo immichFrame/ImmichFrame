@@ -4,9 +4,11 @@ services:
     container_name: immichframe
     image: ghcr.io/immichframe/immichframe:main
     restart: on-failure
-    volumes:
-      - PATH/TO/CONFIG:/app/Config
+    # volumes:
+    #   - PATH/TO/CONFIG:/app/Config
     ports:
       - "8080:8080"
+    env_file:
+      - .env
     environment:
       TZ: "Europe/Berlin"

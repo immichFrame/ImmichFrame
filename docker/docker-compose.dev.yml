@@ -5,6 +5,7 @@ services:
       target: dev
     ports:
       - 8080:8080
-    volumes:
-      - ~/immichFrame_Config:/app/Config
+    env_file:
+      - .env
+    # volumes:
       # - PATH/TO/CONFIG:/app/Config

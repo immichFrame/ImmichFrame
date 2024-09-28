@@ -100,6 +100,7 @@
 		<ProgressBar
 			autoplay
 			hidden={false}
+			location={ProgressBarLocation.Bottom}
 			duration={45}
 			bind:this={progressBar}
 			bind:status={progressBarStatus}
