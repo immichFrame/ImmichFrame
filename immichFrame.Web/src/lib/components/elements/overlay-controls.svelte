@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import { mdiChevronLeft, mdiChevronRight, mdiPlay, mdiPause } from '@mdi/js';
+	import { mdiChevronRight, mdiPlay, mdiPause } from '@mdi/js';
 	import Icon from './icon.svelte';
 	import { ProgressBarStatus } from './progress-bar.svelte';
 
@@ -12,13 +12,13 @@
 		dispatch('next');
 	}
 	function clickBack() {
-		dispatch('back');
+		// dispatch('back');
 	}
 	function clickPause() {
 		dispatch('pause');
 	}
 	function clickSettings() {
-		dispatch('settings');
+		// dispatch('settings');
 	}
 </script>
 
@@ -26,8 +26,10 @@
 	<div class="text-center group">
 		<button
 			class="flex justify-center items-center w-full h-full opacity-0 group-hover:opacity-100 text-primary"
-			on:click={clickBack}><Icon title="Back" path={mdiChevronLeft} size="20em" /></button
+			on:click={clickBack}
 		>
+			<!-- <Icon title="Back" path={mdiChevronLeft} size="20em" /> -->
+		</button>
 	</div>
 
 	<div class="text-center grid grid-rows-3 gap-2 content-stretch">
