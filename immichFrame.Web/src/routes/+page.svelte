@@ -5,5 +5,4 @@
 <svelte:head>
 	<title>immichFrame</title>
 </svelte:head>
-
 <HomePage />

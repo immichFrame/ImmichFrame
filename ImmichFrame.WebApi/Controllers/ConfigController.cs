@@ -1,4 +1,5 @@
 using ImmichFrame.Core.Interfaces;
+using ImmichFrame.WebApi.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ImmichFrame.WebApi.Controllers
@@ -17,9 +18,9 @@ namespace ImmichFrame.WebApi.Controllers
         }
 
         [HttpGet(Name = "GetConfig")]
-        public IClientSettings GetConfig()
+        public ClientSettings GetConfig()
         {
-            return _settings;
+            return (ClientSettings)_settings;
         }
     }
 }

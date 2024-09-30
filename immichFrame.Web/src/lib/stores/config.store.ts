@@ -1,24 +1,14 @@
-// import { writable } from 'svelte/store';
+import type { ClientSettings } from '$lib/immichFrameApi';
+import { writable } from 'svelte/store';
 
-function createConfigStore() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const config: any = fetchConfig();
+function createConfigStore(settings: ClientSettings) {
+  const { subscribe, set } = writable(settings);
 
-  return {
-    config
-  };
+  function ps(settings: ClientSettings) {
+    set(settings);
+  }
+
+  return { subscribe, ps }
 }
 
-const fetchConfig = async () => {
-  console.log('fetching');
-  const res = await fetch('../../../ImmichFrame.WebApi/settings.json');
-  let config;
-  if (res.ok) {
-    config = await res.json();
-    console.log(config);
-  } else {
-    console.error('Failed to load config file');
-  }
-};
-
-export const configStore = createConfigStore();
+export const configStore = createConfigStore({});

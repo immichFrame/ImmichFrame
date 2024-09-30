@@ -8,7 +8,7 @@
 	import { onDestroy, onMount } from 'svelte';
 	import OverlayControls from '../elements/overlay-controls.svelte';
 	import Image2 from '../elements/image2.svelte';
-	api.defaults.baseUrl = '/api';
+	import { configStore } from '$lib/stores/config.store';
 
 	let imageData: Blob | null;
 	let assetData: api.AssetResponseDto | null;
@@ -99,15 +99,14 @@
 
 		<ProgressBar
 			autoplay
+			duration={$configStore.interval}
 			hidden={false}
 			location={ProgressBarLocation.Bottom}
-			duration={45}
 			bind:this={progressBar}
 			bind:status={progressBarStatus}
 			on:done={handleDone}
 		/>
 	{:else}
-		<!-- maybe show immich logo?-->
 		<div>
 			<img
 				id="logo"
