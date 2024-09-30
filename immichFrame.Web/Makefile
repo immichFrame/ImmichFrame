@@ -11,7 +11,7 @@ prod:
 	docker compose -f ../docker/docker-compose.prod.yml up --build -V --remove-orphans
 
 api:
-	oazapfts https://localhost:7018/swagger/v1/swagger.json src/lib/immichFrameApi.ts
+	npm run api
 
 attach-server:
 	docker exec -it docker_immich-server_1 sh

@@ -8,8 +8,8 @@ namespace ImmichFrame.Core.Logic
 {
     public class ImmichFrameLogic : IImmichFrameLogic
     {
-        private IBaseSettings _settings;
-        public ImmichFrameLogic(IBaseSettings settings)
+        private IServerSettings _settings;
+        public ImmichFrameLogic(IServerSettings settings)
         {
             _settings = settings;
         }
@@ -251,7 +251,8 @@ namespace ImmichFrame.Core.Logic
                                 Page = page,
                                 Size = batchSize,
                                 PersonIds = new[] { personId },
-                                Type = AssetTypeEnum.IMAGE
+                                Type = AssetTypeEnum.IMAGE,
+                                WithExif = true
                             };
                             var personInfo = await immichApi.SearchMetadataAsync(metadataBody);
 
@@ -312,7 +313,8 @@ namespace ImmichFrame.Core.Logic
                     {
                         Size = 250,
                         Page = 1,
-                        Type = AssetTypeEnum.IMAGE
+                        Type = AssetTypeEnum.IMAGE,
+                        WithExif = true
                     };
                     var searchResponse = await immichApi.SearchRandomAsync(searchBody);
 

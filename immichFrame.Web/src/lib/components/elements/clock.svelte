@@ -1,23 +1,18 @@
 <script lang="ts">
-	import { fallbackLocale } from '$lib/constants';
 	import { onMount } from 'svelte';
+	import { format } from 'date-fns';
+	import { configStore } from '$lib/stores/config.store';
+
 	let time = new Date();
 
-	$: formattedDate = time.toLocaleString(fallbackLocale.code, {
-		year: 'numeric',
-		month: '2-digit',
-		day: '2-digit'
-	});
-	$: timePortion = time.toLocaleString(fallbackLocale.code, {
-		hour: '2-digit',
-		minute: '2-digit'
-	});
+	$: formattedDate = format(time, $configStore.photoDateFormat ?? 'dd.MM.yyyy');
+	$: timePortion = format(time, $configStore.clockFormat ?? 'HH:mm:ss');
 	$: selectedDate = `${formattedDate} ${timePortion}`;
 
 	onMount(() => {
 		const interval = setInterval(() => {
 			time = new Date();
-		}, 10000);
+		}, 1000);
 
 		return () => {
 			clearInterval(interval);

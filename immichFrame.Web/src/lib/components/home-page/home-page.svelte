@@ -1,20 +1,17 @@
 <script lang="ts">
 	import * as api from '$lib/immichFrameApi';
-	import Image from '../elements/image.svelte';
-	import ThumbHashImage from '../elements/thumbHashImage.svelte';
-	import ImageOverlay from '../elements/imageOverlay.svelte';
-	import Clock from '../elements/clock.svelte';
-	import ProgressBar, { ProgressBarStatus } from '$lib/components/elements/progress-bar.svelte';
+	import ProgressBar, {
+		ProgressBarLocation,
+		ProgressBarStatus
+	} from '$lib/components/elements/progress-bar.svelte';
 	import { slideshowStore } from '$lib/stores/slideshow.store';
 	import { onDestroy, onMount } from 'svelte';
-	import LocationInfo from '../elements/location-info.svelte';
-	import AssetDate from '../elements/asset-date.svelte';
-	api.defaults.baseUrl = '/api';
+	import OverlayControls from '../elements/overlay-controls.svelte';
+	import Image2 from '../elements/image2.svelte';
+	import { configStore } from '$lib/stores/config.store';
 
 	let imageData: Blob | null;
 	let assetData: api.AssetResponseDto | null;
-
-	let imageUrl: string;
 
 	const { restartProgress, stopProgress } = slideshowStore;
 
@@ -40,7 +37,6 @@
 		}
 
 		imageData = imageRequest.data;
-		imageUrl = URL.createObjectURL(imageData);
 		assetData = assetRequest.data;
 	}
 
@@ -76,12 +72,11 @@
 	};
 </script>
 
-<section id="home-page" class="fixed grid h-screen w-screen bg-black">
+<section class="fixed items-center justify-center grid h-screen w-screen bg-black">
 	{#if imageData && assetData}
-		<Clock />
-		<AssetDate asset={assetData} />
-		<LocationInfo asset={assetData} />
-		<ImageOverlay
+		<Image2 showClock={true} showLocation={true} showAssetInfo={true} {assetData} {imageData} />
+
+		<OverlayControls
 			on:next={async () => {
 				progressBar.restart(false);
 				await loadImage();
@@ -101,18 +96,17 @@
 			}}
 			bind:status={progressBarStatus}
 		/>
-		<ThumbHashImage thumbHash={assetData.thumbhash ?? ''} />
-		<Image dataUrl={imageUrl} />
+
 		<ProgressBar
 			autoplay
+			duration={$configStore.interval}
 			hidden={false}
-			duration={45}
+			location={ProgressBarLocation.Bottom}
 			bind:this={progressBar}
 			bind:status={progressBarStatus}
 			on:done={handleDone}
 		/>
 	{:else}
-		<!-- maybe show immich logo?-->
 		<div>
 			<img
 				id="logo"
@@ -120,15 +114,6 @@
 				src="/logo.svg"
 				alt="logo"
 			/>
-			<p class="text-white text-center">LOADING ...</p>
 		</div>
 	{/if}
 </section>
-
-<style>
-	#home-page {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-	}
-</style>

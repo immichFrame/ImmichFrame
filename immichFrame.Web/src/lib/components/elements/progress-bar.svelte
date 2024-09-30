@@ -3,6 +3,11 @@
 		Playing = 'playing',
 		Paused = 'paused'
 	}
+
+	export enum ProgressBarLocation {
+		Top = 'top',
+		Bottom = 'bottom'
+	}
 </script>
 
 <script lang="ts">
@@ -21,6 +26,8 @@
 	 * Progress bar status
 	 */
 	export let status: ProgressBarStatus = ProgressBarStatus.Paused;
+
+	export let location: ProgressBarLocation = ProgressBarLocation.Bottom;
 
 	export let hidden = false;
 
@@ -89,7 +96,8 @@
 
 {#if !hidden}
 	<span
-		class="absolute left-0 bottom-0 h-[3px] bg-primary z-[1000]"
+		class="absolute left-0 h-[3px] bg-primary z-[1000]
+		{location == ProgressBarLocation.Top ? 'top-0' : 'bottom-0'}"
 		style:width={`${$progress * 100}%`}
 	/>
 {/if}

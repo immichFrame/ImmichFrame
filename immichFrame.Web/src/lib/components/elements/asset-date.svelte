@@ -1,21 +1,15 @@
 <script lang="ts">
 	import { type AssetResponseDto } from '$lib/immichFrameApi';
-	import { fallbackLocale } from '$lib/constants';
+	import { configStore } from '$lib/stores/config.store';
+	import { format } from 'date-fns';
 	export let asset: AssetResponseDto;
 
 	$: assetDate = asset.exifInfo?.dateTimeOriginal ?? '';
 
 	$: time = new Date(assetDate);
 
-	$: formattedDate = time.toLocaleString(fallbackLocale.code, {
-		year: 'numeric',
-		month: '2-digit',
-		day: '2-digit'
-	});
-	$: timePortion = time.toLocaleString(fallbackLocale.code, {
-		hour: '2-digit',
-		minute: '2-digit'
-	});
+	$: formattedDate = format(time, $configStore.photoDateFormat ?? 'dd.MM.yyyy');
+	$: timePortion = format(time, $configStore.clockFormat ?? 'HH:mm:ss');
 	$: selectedDate = `${formattedDate} ${timePortion}`;
 </script>
 
