@@ -38,17 +38,6 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
-      # Determine the tag (version or branch)
-      - name: Set Docker image tag
-        id: docker_tag
-        run: |
-          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
-            TAG="${{ github.ref_name }}"
-          else
-            TAG="${{ github.ref_name }}-latest"
-          fi
-          echo "TAG=$TAG" >> $GITHUB_ENV
-
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
       - name: Build and push Docker image (${{ env.IMAGE_NAME }})
@@ -57,6 +46,5 @@ jobs:
           context: .
           target: final
           push: ${{ github.event_name != 'pull_request' }}
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
