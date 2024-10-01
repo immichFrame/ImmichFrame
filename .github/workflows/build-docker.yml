@@ -1,11 +1,10 @@
 name: Build and Publish image to Docker Hub
 on:
-  [workflow_dispatch]
-  # push:
-  #   # Publish semver tags as releases.
-  #   tags: [ 'v*']
-  # pull_request:
-  #   branches: [ $default-branch ]
+  workflow_dispatch:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - "v*" # Push events to matching v*, i.e. v1.0, v20.15.10
 env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
