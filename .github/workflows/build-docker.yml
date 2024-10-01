@@ -5,6 +5,7 @@ on:
     # Trigger on push to tags (for versioned releases)
     tags:
       - "v*" # Push events to matching v*, i.e. v1.0, v20.15.10
+      - "dev_*" # Push events to matching dev_*, i.e. dev_
 
 env:
   # Use docker.io for Docker Hub if empty
