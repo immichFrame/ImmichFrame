@@ -5,6 +5,7 @@ on:
     # Sequence of patterns matched against refs/tags
     tags:
       - "v*" # Push events to matching v*, i.e. v1.0, v20.15.10
+      - "dev_*" # Push events to matching dev_*, i.e. dev_jw
 
 env:
   # Use docker.io for Docker Hub if empty
