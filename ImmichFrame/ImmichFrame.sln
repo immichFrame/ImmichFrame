@@ -8,7 +8,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImmichFrame.Android", "..\I
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImmichFrame.Desktop", "..\ImmichFrame.Desktop\ImmichFrame.Desktop.csproj", "{2245B7BA-C59F-4670-92DF-A750F65EBDEE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImmichFrame.Core", "..\ImmichFrame.Core\ImmichFrame.Core.csproj", "{0C93BDBB-C505-4A71-84BC-51471D64FBFE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImmichFrame.Core", "..\ImmichFrame.Core\ImmichFrame.Core.csproj", "{0C93BDBB-C505-4A71-84BC-51471D64FBFE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImmichFrame.WebApi", "..\ImmichFrame.WebApi\ImmichFrame.WebApi.csproj", "{4E550CF5-E5D1-4D1F-8438-A55C5C7AC93F}"
 EndProject
