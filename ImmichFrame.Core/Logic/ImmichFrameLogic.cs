@@ -312,13 +312,12 @@ namespace ImmichFrame.Core.Logic
                     var searchBody = new RandomSearchDto
                     {
                         Size = 250,
-                        Page = 1,
                         Type = AssetTypeEnum.IMAGE,
                         WithExif = true
                     };
                     var searchResponse = await immichApi.SearchRandomAsync(searchBody);
 
-                    var randomAssets = searchResponse.Assets.Items;
+                    var randomAssets = searchResponse;
 
                     if (randomAssets.Any())
                     {
