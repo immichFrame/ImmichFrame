@@ -69,7 +69,7 @@ name: immichframe
 services:
   immichframe:
     container_name: immichframe
-    image: ghcr.io/immichframe/immichframe:main
+    image: ghcr.io/immichframe/immichframe:latest
     restart: on-failure
     volumes:
       - PATH/TO/CONFIG:/app/Config
@@ -88,7 +88,7 @@ docker run -td \
   -v PATH/TO/CONFIG:/app/Config \
   -p 8080:8080 \
   -e TZ="Europe/Berlin" \
-  ghcr.io/immichframe/immichframe:main
+  ghcr.io/immichframe/immichframe:latest
 ```
 
 ### Linux
