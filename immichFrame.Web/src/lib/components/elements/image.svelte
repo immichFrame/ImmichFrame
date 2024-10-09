@@ -13,7 +13,7 @@
 {#key dataUrl}
 	<img
 		transition:fade={{ duration: ($configStore.transitionDuration ?? 1) * 1000 }}
-		class="absolute h-screen max-w-full z-[100] m-0 object-contain place-self-center"
+		class="absolute h-screen max-w-full m-0 object-contain place-self-center"
 		src={dataUrl}
 		alt="data"
 	/>
