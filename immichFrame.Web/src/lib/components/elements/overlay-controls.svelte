@@ -22,40 +22,39 @@
 	}
 </script>
 
-<div class="absolute h-screen w-screen top-0 left-0 z-[100] grid grid-cols-3 gap-2 content-stretch">
-	<div class="text-center group">
-		<button
-			class="flex justify-center items-center w-full h-full opacity-0 group-hover:opacity-100 text-primary"
-			on:click={clickBack}
-		>
-			<!-- <Icon title="Back" path={mdiChevronLeft} size="20em" /> -->
-		</button>
+<div class="absolute h-full w-full top-0 left-0 z-[100] grid grid-cols-3 gap-2">
+	<div class="group text-center content-center">
+		<button class="opacity-0 group-hover:opacity-100 text-primary" on:click={clickBack}> </button>
 	</div>
 
-	<div class="text-center grid grid-rows-3 gap-2 content-stretch">
-		<button
-			class="flex justify-center items-center w-full h-full opacity-0 hover:opacity-100 text-primary"
-			on:click={clickSettings}
-		>
-			<!-- <Icon title="Text" path={mdiCog} size="20em" /> -->
-		</button>
-		<button
-			on:click={clickPause}
-			class="flex justify-center items-center w-full h-full opacity-0 hover:opacity-100 text-primary"
-			><Icon
-				title={status == ProgressBarStatus.Paused ? 'Play' : 'Pause'}
-				path={status == ProgressBarStatus.Paused ? mdiPlay : mdiPause}
-				size="20em"
-			/></button
-		>
-		<div></div>
+	<div class="grid grid-rows-3">
+		<div class="group text-center content-center">
+			<button
+				class="justify-center items-center opacity-0 hover:opacity-100 text-primary"
+				on:click={clickSettings}
+			>
+			</button>
+		</div>
+
+		<div class="group text-center content-center">
+			<button on:click={clickPause} class="opacity-0 group-hover:opacity-100 text-primary">
+				<Icon
+					title={status == ProgressBarStatus.Paused ? 'Play' : 'Pause'}
+					path={status == ProgressBarStatus.Paused ? mdiPlay : mdiPause}
+					size="33vh"
+				/>
+			</button>
+		</div>
+
+		<div class="group text-center content-center">
+			<button class="justify-center items-center opacity-0 hover:opacity-100 text-primary">
+			</button>
+		</div>
 	</div>
 
-	<div class="text-center group">
-		<button
-			class="flex justify-center items-center w-full h-full opacity-0 group-hover:opacity-100 text-primary"
-			on:click={clickNext}
-			><Icon title="Next" path={mdiChevronRight} size="20em" />
+	<div class="group text-center content-center">
+		<button class="opacity-0 group-hover:opacity-100 text-primary" on:click={clickNext}
+			><Icon title="Next" path={mdiChevronRight} size="33vh" />
 		</button>
 	</div>
 </div>
