@@ -74,7 +74,13 @@
 
 <section class="fixed items-center justify-center grid h-screen w-screen bg-black">
 	{#if imageData && assetData}
-		<Image2 showClock={true} showLocation={true} showAssetInfo={true} {assetData} {imageData} />
+		<Image2
+			showClock={$configStore.showClock}
+			showLocation={$configStore.showImageLocation}
+			showPhotoDate={$configStore.showPhotoDate}
+			{assetData}
+			{imageData}
+		/>
 
 		<OverlayControls
 			on:next={async () => {
