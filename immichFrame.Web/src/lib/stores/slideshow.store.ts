@@ -17,9 +17,6 @@ function createSlideshowStore() {
     restartProgress: {
       subscribe: restartState.subscribe,
       set: (value: boolean) => {
-
-        console.log('restartProgress value is: ')
-        console.log(value)
         // Trigger an action whenever the restartProgress is set to true. Automatically
         // reset the restart state after that
         if (value) {
@@ -31,8 +28,6 @@ function createSlideshowStore() {
     stopProgress: {
       subscribe: stopState.subscribe,
       set: (value: boolean) => {
-        console.log('stopProgress value is: ')
-        console.log(value)
         // Trigger an action whenever the stopProgress is set to true. Automatically
         // reset the stop state after that
         if (value) {

@@ -7,7 +7,7 @@
 	import { slideshowStore } from '$lib/stores/slideshow.store';
 	import { onDestroy, onMount } from 'svelte';
 	import OverlayControls from '../elements/overlay-controls.svelte';
-	import Image2 from '../elements/image2.svelte';
+	import ImageComponent from '../elements/image-component.svelte';
 	import { configStore } from '$lib/stores/config.store';
 
 	let imageData: Blob | null;
@@ -72,9 +72,9 @@
 	};
 </script>
 
-<section class="fixed items-center justify-center grid h-screen w-screen bg-black">
+<section class="fixed grid h-screen w-screen bg-black">
 	{#if imageData && assetData}
-		<Image2
+		<ImageComponent
 			showClock={$configStore.showClock}
 			showLocation={$configStore.showImageLocation}
 			showPhotoDate={$configStore.showPhotoDate}
@@ -113,7 +113,7 @@
 			on:done={handleDone}
 		/>
 	{:else}
-		<div>
+		<div class="place-self-center">
 			<img
 				id="logo"
 				class="h-[50vh] sm:h-[50vh] md:h-[40vh] lg:h-[30vh]"

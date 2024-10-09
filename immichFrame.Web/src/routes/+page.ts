@@ -7,7 +7,5 @@ export const load = async ({ fetch }) => {
 
   const config = configRequest.data;
 
-  console.log(config)
-
   configStore.ps(config);
 };
