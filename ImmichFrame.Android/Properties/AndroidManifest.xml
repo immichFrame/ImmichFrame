@@ -15,7 +15,7 @@
   <application
     android:label="ImmichFrame"
     android:icon="@mipmap/immich_frame"
-    android:banner="@drawable/play_store"
+    android:banner="@mipmap/immich_banner"
     android:usesCleartextTraffic="true">
 
     <activity android:name="com.immichframe.immichframe.MainActivity"
