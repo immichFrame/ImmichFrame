@@ -33,6 +33,14 @@ namespace ImmichFrame.WebApi.Helpers
             {
                 prop.SetValue(settings, Convert.ToInt32(value));
             }
+            else if (type == typeof(double))
+            {
+                prop.SetValue(settings, Convert.ToDouble(value));
+            }
+            else
+            {
+                throw new ArgumentException($"{type.Name} is not supported in {nameof(SettingsExtensions)}.{nameof(SetValue)}");
+            }
         }
     }
 }

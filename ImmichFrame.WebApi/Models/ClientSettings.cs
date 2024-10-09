@@ -15,7 +15,7 @@ namespace ImmichFrame.WebApi.Models
         public int RenewImagesDuration { get; set; } = 20;
         public bool ShowClock { get; set; } = true;
         public int ClockFontSize { get; set; } = 48;
-        public string? ClockFormat { get; set; } = "h:mm tt";
+        public string? ClockFormat { get; set; } = "hh:mm";
         public bool ShowPhotoDate { get; set; } = true;
         public int PhotoDateFontSize { get; set; } = 36;
         public string? PhotoDateFormat { get; set; } = "MM/dd/yyyy";

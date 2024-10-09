@@ -10,7 +10,7 @@
 
 	export let showClock: boolean = true;
 	export let showLocation: boolean = true;
-	export let showAssetInfo: boolean = true;
+	export let showPhotoDate: boolean = true;
 
 	let imageUrl: string;
 	$: imageUrl = URL.createObjectURL(imageData ?? '');
@@ -19,7 +19,7 @@
 {#if showClock}
 	<Clock />
 {/if}
-{#if showAssetInfo}
+{#if showPhotoDate}
 	<AssetDate asset={assetData} />
 {/if}
 {#if showLocation}
