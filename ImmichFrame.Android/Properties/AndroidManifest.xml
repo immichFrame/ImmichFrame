@@ -14,8 +14,8 @@
 
   <application
     android:label="ImmichFrame"
-    android:icon="@mipmap/ic_launcher"
-    android:banner="@drawable/play_store"
+    android:icon="@mipmap/immich_frame"
+    android:banner="@mipmap/immich_banner"
     android:usesCleartextTraffic="true">
 
     <activity android:name="com.immichframe.immichframe.MainActivity"
@@ -36,7 +36,7 @@
 
     <service android:name="com.immichframe.immichframe.ScreenSaverService"
              android:exported="true"
-             android:icon="@mipmap/ic_launcher"
+             android:icon="@mipmap/immich_frame"
              android:label="ImmichFrame"
              android:permission="android.permission.BIND_DREAM_SERVICE">
       <intent-filter>
