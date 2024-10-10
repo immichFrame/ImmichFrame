@@ -11,7 +11,6 @@ namespace ImmichFrame.WebApi.Models
         public int Interval { get; set; } = 45;
         public double TransitionDuration { get; set; } = 1;
         public bool DownloadImages { get; set; } = false;
-        public bool ShowMemories { get; set; } = false;
         public int RenewImagesDuration { get; set; } = 20;
         public bool ShowClock { get; set; } = true;
         public int ClockFontSize { get; set; } = 48;
@@ -25,12 +24,8 @@ namespace ImmichFrame.WebApi.Models
         public string? ImageLocationFormat { get; set; } = "City,State,Country";
         public int ImageLocationFontSize { get; set; } = 36;
         public string FontColor { get; set; } = "#FFFFFF";
-        public string? WeatherApiKey { get; set; } = string.Empty;
         public bool ShowWeatherDescription { get; set; } = true;
         public int WeatherFontSize { get; set; } = 36;
-        public string? UnitSystem { get; set; } = "";
-        public string? WeatherLatLong { get; set; } = "40.7128,74.0060";
-        public string Language { get; set; } = "en";
         public bool UnattendedMode { get; set; } = false;
         public bool ImageZoom { get; set; } = true;
 
