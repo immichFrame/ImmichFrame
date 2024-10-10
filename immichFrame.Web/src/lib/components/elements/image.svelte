@@ -6,8 +6,6 @@
 
 	export let thumbHash: string;
 	export let dataUrl: string;
-
-	console.log($configStore.transitionDuration);
 </script>
 
 {#key dataUrl}

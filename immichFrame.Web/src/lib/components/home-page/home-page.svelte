@@ -9,6 +9,7 @@
 	import OverlayControls from '../elements/overlay-controls.svelte';
 	import ImageComponent from '../elements/image-component.svelte';
 	import { configStore } from '$lib/stores/config.store';
+	import ErrorElement from '../elements/error-element.svelte';
 
 	let imageData: Blob | null;
 	let assetData: api.AssetResponseDto | null;
@@ -17,27 +18,38 @@
 
 	let progressBarStatus: ProgressBarStatus;
 	let progressBar: ProgressBar;
+	let error: boolean;
 
 	let unsubscribeRestart: () => void;
 	let unsubscribeStop: () => void;
 
 	async function loadImage() {
-		let assetRequest = await api.getAsset();
+		try {
+			let assetRequest = await api.getAsset();
+			console.log(assetRequest.status);
+			if (assetRequest.status != 200) {
+				assetData = null;
+				error = true;
+				return;
+			}
 
-		if (assetRequest.status != 200) {
-			assetData = null;
-			return;
+			let imageRequest = await api.getImage(assetRequest.data.id);
+
+			console.log(imageRequest.status);
+
+			if (imageRequest.status != 200) {
+				console.log(imageRequest);
+				error = true;
+				imageData = null;
+				return;
+			}
+
+			error = false;
+			imageData = imageRequest.data;
+			assetData = assetRequest.data;
+		} catch {
+			error = true;
 		}
-
-		let imageRequest = await api.getImage(assetRequest.data.id);
-
-		if (imageRequest.status != 200) {
-			imageData = null;
-			return;
-		}
-
-		imageData = imageRequest.data;
-		assetData = assetRequest.data;
 	}
 
 	onMount(async () => {
@@ -73,7 +85,9 @@
 </script>
 
 <section class="fixed grid h-screen w-screen bg-black">
-	{#if imageData && assetData}
+	{#if error}
+		<ErrorElement />
+	{:else if imageData && assetData}
 		<ImageComponent
 			showClock={$configStore.showClock}
 			showLocation={$configStore.showImageLocation}
