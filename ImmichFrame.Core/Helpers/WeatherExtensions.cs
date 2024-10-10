@@ -12,6 +12,7 @@ namespace ImmichFrame.Core.Helpers
 
             return new Weather
             {
+                Location = weatherInfo.CityName,
                 Description = $"{string.Join(',', weatherInfo.Weather.Select(x => x.Description))}",
                 Temperature = weatherInfo.Main.Temperature.Value,
                 Unit = Temperature.GetAbbreviation(weatherInfo.Main.Temperature.Unit),

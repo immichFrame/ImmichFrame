@@ -147,7 +147,6 @@ export type WebClientSettings = {
     interval?: number;
     transitionDuration?: number;
     downloadImages?: boolean;
-    showMemories?: boolean;
     renewImagesDuration?: number;
     showClock?: boolean;
     clockFontSize?: number;
@@ -161,14 +160,18 @@ export type WebClientSettings = {
     imageLocationFormat?: string | null;
     imageLocationFontSize?: number;
     fontColor?: string | null;
-    weatherApiKey?: string | null;
     showWeatherDescription?: boolean;
     weatherFontSize?: number;
-    unitSystem?: string | null;
-    weatherLatLong?: string | null;
-    language?: string | null;
     unattendedMode?: boolean;
     imageZoom?: boolean;
+};
+export type IWeather = {
+    location?: string | null;
+    temperature?: number;
+    unit?: string | null;
+    temperatureUnit?: string | null;
+    description?: string | null;
+    iconId?: string | null;
 };
 export function getAsset(opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
@@ -191,6 +194,14 @@ export function getConfig(opts?: Oazapfts.RequestOpts) {
         status: 200;
         data: WebClientSettings;
     }>("/api/Config", {
+        ...opts
+    });
+}
+export function getWeather(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: IWeather;
+    }>("/api/Weather", {
         ...opts
     });
 }

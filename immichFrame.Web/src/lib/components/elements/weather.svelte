@@ -1,14 +1,34 @@
 <script lang="ts">
+	import * as api from '$lib/immichFrameApi';
+	import { onMount } from 'svelte';
+
 	export let showWeather: boolean = true;
+	let weather: api.IWeather;
+	onMount(() => {
+		GetWeather();
+
+		const interval = setInterval(() => GetWeather, 1 * 60 * 1000);
+
+		return () => {
+			clearInterval(interval);
+		};
+	});
+
+	async function GetWeather() {
+		let weatherRequest = await api.getWeather();
+		if (weatherRequest.status == 200) {
+			weather = weatherRequest.data;
+		}
+	}
 </script>
 
-{#if showWeather}
+{#if showWeather && weather}
 	<div
-		class="absolute left-5 bottom-20 flex flex-col items-center p-8 bg-opacity-80 rounded-md w-60 sm:px-12 bg-gray-50 text-gray-800"
+		class="absolute left-5 bottom-20 flex flex-col items-center p-8 rounded-md w-60 sm:px-12 bg-secondary bg-opacity-40 text-primary"
 	>
 		<div class="text-center">
-			<h2 class="text-xl font-semibold">Dubai</h2>
-			<p class="text-sm dark:text-gray-600">July 29</p>
+			<h2 class="text-xl font-semibold">{weather.location}</h2>
+			<!-- <p class="text-sm dark:text-gray-600">July 29</p> -->
 		</div>
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
@@ -29,9 +49,8 @@
 			<rect width="45.255" height="32.001" x="393.373" y="80" transform="rotate(-45 416 96)"></rect>
 		</svg>
 		<div class="mb-2 text-3xl font-semibold">
-			32°
-			<span class="mx-1 font-normal">/</span>20°
+			{weather.temperatureUnit}
 		</div>
-		<p class="dark:text-gray-600">Partly cloudy</p>
+		<p>{weather.description}</p>
 	</div>
 {/if}
