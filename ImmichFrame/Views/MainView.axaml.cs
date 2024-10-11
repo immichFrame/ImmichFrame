@@ -1,4 +1,5 @@
 ﻿using Avalonia;
+using Avalonia.Animation;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using ImmichFrame.Helpers;
@@ -30,6 +31,10 @@ public partial class MainView : BaseView
         }
 
         _viewModel = (this.DataContext as MainViewModel)!;
+        if (transitioningControl.PageTransition is CrossFade crossFade)
+        {
+            crossFade.Duration = TimeSpan.FromSeconds(_viewModel.Settings.TransitionDuration);
+        }
         await InitializeViewModelAsync();
     }
     private async Task InitializeViewModelAsync()
