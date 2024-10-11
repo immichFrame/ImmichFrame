@@ -26,7 +26,6 @@
 	async function loadImage() {
 		try {
 			let assetRequest = await api.getAsset();
-			console.log(assetRequest.status);
 			if (assetRequest.status != 200) {
 				assetData = null;
 				error = true;
@@ -34,11 +33,7 @@
 			}
 
 			let imageRequest = await api.getImage(assetRequest.data.id);
-
-			console.log(imageRequest.status);
-
 			if (imageRequest.status != 200) {
-				console.log(imageRequest);
 				error = true;
 				imageData = null;
 				return;
@@ -92,6 +87,7 @@
 			showClock={$configStore.showClock}
 			showLocation={$configStore.showImageLocation}
 			showPhotoDate={$configStore.showPhotoDate}
+			showImageDesc={$configStore.showImageDesc}
 			{assetData}
 			{imageData}
 		/>
