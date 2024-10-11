@@ -7,7 +7,6 @@
 
 	$: formattedDate = format(time, $configStore.photoDateFormat ?? 'dd.MM.yyyy');
 	$: timePortion = format(time, $configStore.clockFormat ?? 'HH:mm:ss');
-	$: selectedDate = `${formattedDate} ${timePortion}`;
 
 	onMount(() => {
 		const interval = setInterval(() => {
@@ -20,8 +19,7 @@
 	});
 </script>
 
-<div
-	class="absolute bottom-0 left-0 z-10 text-primary bg-secondary bg-opacity-40 rounded-tr-2xl p-3"
->
-	<p class="mt-2 text-xl">{selectedDate}</p>
+<div class="absolute bottom-0 left-0 z-10 text-primary p-5">
+	<p class="mt-2 text-center text-xl font-thin">{formattedDate}</p>
+	<p class="mt-2 text-8xl font-bold">{timePortion}</p>
 </div>

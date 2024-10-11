@@ -14,9 +14,7 @@
 </script>
 
 {#if selectedDate}
-	<div
-		class="absolute bottom-0 right-0 z-10 text-primary bg-secondary bg-opacity-40 rounded-tl-2xl p-3"
-	>
+	<div class="absolute bottom-0 right-0 z-100 text-primary p-3">
 		<p class="mt-2 text-lg">{selectedDate}</p>
 	</div>
 {/if}
