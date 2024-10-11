@@ -12,18 +12,30 @@
 	export let showLocation: boolean;
 	export let showPhotoDate: boolean;
 	export let showImageDesc: boolean;
+
+	let transitionDuration = ($configStore.transitionDuration ?? 1) * 1000;
+
+	let interval = $configStore.interval ?? 1;
+	function zoomEffect() {
+		return 0.5 > Math.random();
+	}
 </script>
 
 {#key dataUrl}
 	<div
-		transition:fade={{ duration: ($configStore.transitionDuration ?? 1) * 1000 }}
-		class="absolute place-self-center"
+		transition:fade={{ duration: transitionDuration }}
+		class="absolute place-self-center overflow-hidden"
 	>
-		<img id="zoom" class="max-h-screen max-w-full object-contain" src={dataUrl} alt="data" />
+		<img
+			style="--interval: {interval + 2}s;"
+			class="max-h-screen max-w-full object-contain {zoomEffect() ? 'zoom-in' : 'zoom-out'}"
+			src={dataUrl}
+			alt="data"
+		/>
 		<AssetInfo {asset} {showLocation} {showPhotoDate} {showImageDesc} />
 	</div>
 	<img
-		transition:fade={{ duration: ($configStore.transitionDuration ?? 1) * 1000 }}
+		transition:fade={{ duration: transitionDuration }}
 		class="absolute top-0 left-0 flex w-full h-full z-[-1]"
 		src={thumbHashToDataURL(decodeBase64(thumbHash))}
 		alt="data"
@@ -31,9 +43,14 @@
 {/key}
 
 <style>
-	#zoom {
-		-webkit-animation: zoom-in 4s ease-out infinite normal;
-		animation: zoom-in 4s ease-out infinite normal;
+	.zoom-in {
+		-webkit-animation: zoom-in var(--interval) ease-out normal;
+		animation: zoom-in var(--interval) ease-out normal;
+		-webkit-font-smoothing: antialiased;
+	}
+	.zoom-out {
+		-webkit-animation: zoom-out var(--interval) ease-out normal;
+		animation: zoom-out var(--interval) ease-out normal;
 		-webkit-font-smoothing: antialiased;
 	}
 
