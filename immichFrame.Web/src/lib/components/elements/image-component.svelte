@@ -9,6 +9,7 @@
 	export let showClock: boolean = true;
 	export let showLocation: boolean = true;
 	export let showPhotoDate: boolean = true;
+	export let showImageDesc: boolean = true;
 
 	let imageUrl: string;
 	$: imageUrl = URL.createObjectURL(imageData ?? '');
@@ -23,5 +24,6 @@
 	asset={assetData}
 	{showLocation}
 	{showPhotoDate}
+	{showImageDesc}
 	thumbHash={assetData.thumbhash ?? ''}
 />

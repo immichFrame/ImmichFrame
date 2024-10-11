@@ -9,17 +9,18 @@
 	export let thumbHash: string;
 	export let dataUrl: string;
 	export let asset: AssetResponseDto;
-	export let showLocation: boolean = false;
-	export let showPhotoDate: boolean = false;
+	export let showLocation: boolean;
+	export let showPhotoDate: boolean;
+	export let showImageDesc: boolean;
 </script>
 
 {#key dataUrl}
 	<div
 		transition:fade={{ duration: ($configStore.transitionDuration ?? 1) * 1000 }}
-		class="absolute max-w-full max-h-screen place-self-center"
+		class="absolute place-self-center"
 	>
-		<img class="h-screen max-w-full object-contain" src={dataUrl} alt="data" />
-		<AssetInfo {asset} {showLocation} {showPhotoDate} />
+		<img class="max-h-screen max-w-full object-contain" src={dataUrl} alt="data" />
+		<AssetInfo {asset} {showLocation} {showPhotoDate} {showImageDesc} />
 	</div>
 	<img
 		transition:fade={{ duration: ($configStore.transitionDuration ?? 1) * 1000 }}

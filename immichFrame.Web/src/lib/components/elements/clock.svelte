@@ -19,7 +19,7 @@
 	});
 </script>
 
-<div class="absolute bottom-0 left-0 z-10 text-primary p-5">
+<div class="absolute bottom-0 left-0 z-10 text-primary p-5 drop-shadow-2xl">
 	<p class="mt-2 text-center text-xl font-thin">{formattedDate}</p>
 	<p class="mt-2 text-8xl font-bold">{timePortion}</p>
 </div>
