@@ -246,6 +246,7 @@ namespace ImmichFrame.Models
                     case "ShowImageLocation":
                     case "ShowWeatherDescription":
                     case "UnattendedMode":
+                    case "ImageZoom":
                         if (!bool.TryParse(value.ToString(), out var boolValue))
                             throw new SettingsNotValidException($"Value of '{SettingsValue.Key}' is not valid. ('{value}')");
                         property.SetValue(settings, boolValue);
@@ -322,6 +323,7 @@ namespace ImmichFrame.Models
                 ImmichServerUrl = "",
                 ApiKey = "",
                 ImageStretch = "Uniform",
+                ImageZoom = false,
                 Margin = "0,0,0,0",
                 Interval = 8,
                 TransitionDuration = 2,
