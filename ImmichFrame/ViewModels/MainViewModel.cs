@@ -91,21 +91,6 @@ public partial class MainViewModel : NavigatableViewModelBase
     {     
         await SetImage(asset.Asset, asset.Image);
     }
-    private async Task ZoomImage(CancellationToken token)
-    {
-        for (double scale = 1.00; scale < 1.25; scale += 0.0005)
-        {
-            if (token.IsCancellationRequested)
-            {
-                ImageScale = 1.0;
-                break;
-            }
-
-            ImageScale = scale;
-            await Task.Delay(10);
-        }
-    }
-
     public async Task SetImage(AssetResponseDto asset, Stream? preloadedAsset = null)
     {
         _zoomCancellationTokenSource?.Cancel();
@@ -142,11 +127,30 @@ public partial class MainViewModel : NavigatableViewModelBase
         {
             await _immichLogic.AddAssetToAlbum(asset!);
         }
-        //ImageScale = 1.0;
 
-        //await ZoomImage(token);
-
+        await ZoomImage(token);
     }
+    private async Task ZoomImage(CancellationToken token)
+    {
+        double targetScale = ImageScale > 1.0 ? 1.0 : 1.25;
+        double increment = ImageScale > 1.0 ? -0.0005 : 0.0005;
+
+        for (double scale = ImageScale;
+             (increment > 0 && scale < targetScale) || (increment < 0 && scale >= targetScale);
+             scale += increment)
+        {
+            if (token.IsCancellationRequested)
+            {
+                ImageScale = 1.0;
+                break;
+            }
+
+            ImageScale = scale;
+            await Task.Delay(10);
+        }       
+    }
+
+
     private void ShowSplash()
     {
         var uri = new Uri("avares://ImmichFrame/Assets/Immich.png");
