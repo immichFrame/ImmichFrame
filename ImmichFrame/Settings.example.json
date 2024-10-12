@@ -31,5 +31,6 @@
   "UnitSystem": "imperial",
   "WeatherLatLong": "",
   "Language": "en",
-  "UnattendedMode": false
+  "UnattendedMode": false,
+  "ImageZoom": true
 }

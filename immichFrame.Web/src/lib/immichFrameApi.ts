@@ -36,7 +36,7 @@ export type ExifResponseDto = {
     state?: string | null;
     timeZone?: string | null;
     additionalProperties?: {
-        [key: string]: any;
+        [key: string]: any | null;
     } | null;
 };
 export type UserAvatarColor = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
@@ -48,7 +48,7 @@ export type UserResponseDto = {
     profileChangedAt: string;
     profileImagePath: string;
     additionalProperties?: {
-        [key: string]: any;
+        [key: string]: any | null;
     } | null;
 };
 export type SourceType = 0 | 1;
@@ -62,7 +62,7 @@ export type AssetFaceWithoutPersonResponseDto = {
     imageWidth?: number;
     sourceType?: SourceType;
     additionalProperties?: {
-        [key: string]: any;
+        [key: string]: any | null;
     } | null;
 };
 export type PersonWithFacesResponseDto = {
@@ -74,14 +74,14 @@ export type PersonWithFacesResponseDto = {
     thumbnailPath: string;
     updatedAt?: string | null;
     additionalProperties?: {
-        [key: string]: any;
+        [key: string]: any | null;
     } | null;
 };
 export type SmartInfoResponseDto = {
     objects?: string[] | null;
     tags?: string[] | null;
     additionalProperties?: {
-        [key: string]: any;
+        [key: string]: any | null;
     } | null;
 };
 export type AssetStackResponseDto = {
@@ -89,7 +89,7 @@ export type AssetStackResponseDto = {
     id: string;
     primaryAssetId: string;
     additionalProperties?: {
-        [key: string]: any;
+        [key: string]: any | null;
     } | null;
 };
 export type TagResponseDto = {
@@ -101,7 +101,7 @@ export type TagResponseDto = {
     updatedAt: string;
     value: string;
     additionalProperties?: {
-        [key: string]: any;
+        [key: string]: any | null;
     } | null;
 };
 export type AssetTypeEnum = 0 | 1 | 2 | 3;
@@ -138,10 +138,10 @@ export type AssetResponseDto = {
     unassignedFaces?: AssetFaceWithoutPersonResponseDto[] | null;
     updatedAt: string;
     additionalProperties?: {
-        [key: string]: any;
+        [key: string]: any | null;
     } | null;
 };
-export type ClientSettings = {
+export type WebClientSettings = {
     imageStretch?: string | null;
     margin?: string | null;
     interval?: number;
@@ -168,6 +168,7 @@ export type ClientSettings = {
     weatherLatLong?: string | null;
     language?: string | null;
     unattendedMode?: boolean;
+    imageZoom?: boolean;
 };
 export function getAsset(opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
@@ -188,7 +189,7 @@ export function getImage(id: string, opts?: Oazapfts.RequestOpts) {
 export function getConfig(opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
         status: 200;
-        data: ClientSettings;
+        data: WebClientSettings;
     }>("/api/Config", {
         ...opts
     });

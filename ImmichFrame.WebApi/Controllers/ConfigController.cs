@@ -9,18 +9,18 @@ namespace ImmichFrame.WebApi.Controllers
     public class ConfigController : ControllerBase
     {
         private readonly ILogger<AssetController> _logger;
-        private readonly IClientSettings _settings;
+        private readonly IWebClientSettings _settings;
 
-        public ConfigController(ILogger<AssetController> logger, IClientSettings settings)
+        public ConfigController(ILogger<AssetController> logger, IWebClientSettings settings)
         {
             _logger = logger;
             _settings = settings;
         }
 
         [HttpGet(Name = "GetConfig")]
-        public ClientSettings GetConfig()
+        public WebClientSettings GetConfig()
         {
-            return (ClientSettings)_settings;
+            return (WebClientSettings)_settings;
         }
     }
 }

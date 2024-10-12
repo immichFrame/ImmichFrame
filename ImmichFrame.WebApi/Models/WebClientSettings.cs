@@ -4,7 +4,7 @@ using ImmichFrame.WebApi.Helpers;
 
 namespace ImmichFrame.WebApi.Models
 {
-    public class ClientSettings : IClientSettings
+    public class WebClientSettings : IWebClientSettings
     {
         public string ImageStretch { get; set; } = "Uniform";
         public string Margin { get; set; } = "0,0,0,0";
@@ -32,8 +32,9 @@ namespace ImmichFrame.WebApi.Models
         public string? WeatherLatLong { get; set; } = "40.7128,74.0060";
         public string Language { get; set; } = "en";
         public bool UnattendedMode { get; set; } = false;
+        public bool ImageZoom { get; set; } = true;
 
-        public ClientSettings()
+        public WebClientSettings()
         {
             var env = Environment.GetEnvironmentVariables();
             try
@@ -42,7 +43,7 @@ namespace ImmichFrame.WebApi.Models
                 {
                     if (key == null) continue;
 
-                    var propertyInfo = typeof(ClientSettings).GetProperty(key.ToString() ?? string.Empty);
+                    var propertyInfo = typeof(WebClientSettings).GetProperty(key.ToString() ?? string.Empty);
 
                     if (propertyInfo != null)
                     {
