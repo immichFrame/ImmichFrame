@@ -19,9 +19,9 @@
       <Setter Property="Opacity" Value="0"/>
       <Setter Property="HorizontalAlignment" Value="Stretch"/>
       <Setter Property="VerticalAlignment" Value="Stretch"/>
-    </Style>    
+    </Style>
   </UserControl.Styles>
-  
+
   <Grid ColumnDefinitions="*, *, *" RowDefinitions="*, *, *">
     <TransitioningContentControl x:Name="transitioningControl" Content="{Binding Images}" Grid.ColumnSpan="3" Grid.RowSpan="3" >
       <TransitioningContentControl.PageTransition>
@@ -35,7 +35,7 @@
               <Image.RenderTransform>
                 <ScaleTransform ScaleX="{Binding DataContext.ImageScale, RelativeSource={RelativeSource AncestorType={x:Type TransitioningContentControl}}}" ScaleY="{Binding DataContext.ImageScale, RelativeSource={RelativeSource AncestorType={x:Type TransitioningContentControl}}}" />
               </Image.RenderTransform>
-            </Image> 
+            </Image>
           </Grid>
         </DataTemplate>
       </TransitioningContentControl.ContentTemplate>

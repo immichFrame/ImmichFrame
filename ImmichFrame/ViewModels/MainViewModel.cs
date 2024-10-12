@@ -88,7 +88,7 @@ public partial class MainViewModel : NavigatableViewModelBase
     }
 
     public async Task SetImage(PreloadedAsset asset)
-    {     
+    {
         await SetImage(asset.Asset, asset.Image);
     }
     public async Task SetImage(AssetResponseDto asset, Stream? preloadedAsset = null)
@@ -127,7 +127,7 @@ public partial class MainViewModel : NavigatableViewModelBase
         {
             await _immichLogic.AddAssetToAlbum(asset!);
         }
-        if(Settings.ImageZoom)
+        if (Settings.ImageZoom)
         {
             await ZoomImage(token);
         }
@@ -149,7 +149,7 @@ public partial class MainViewModel : NavigatableViewModelBase
 
             ImageScale = scale;
             await Task.Delay(10);
-        }       
+        }
     }
 
 
