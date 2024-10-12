@@ -74,6 +74,8 @@ namespace ImmichFrame.Models
         public float WeatherLong => !string.IsNullOrWhiteSpace(WeatherLatLong) ? float.Parse(WeatherLatLong!.Split(',')[1]) : 0f;
         public string Language { get; set; } = "en";
         public bool UnattendedMode { get; set; } = false;
+        public bool ImageZoom { get; set; } = false;
+
         //public static string JsonSettingsPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Settings.json");
         public static string JsonSettingsPath
         {
