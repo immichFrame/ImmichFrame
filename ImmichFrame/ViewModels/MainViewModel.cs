@@ -14,6 +14,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Threading;
 
 namespace ImmichFrame.ViewModels;
 
@@ -29,6 +30,7 @@ public partial class MainViewModel : NavigatableViewModelBase
     System.Threading.Timer? timerImageSwitcher;
     System.Threading.Timer? timerLiveTime;
     System.Threading.Timer? timerWeather;
+    private CancellationTokenSource _zoomCancellationTokenSource;
 
     public ICommand NextImageCommand { get; set; }
     public ICommand PreviousImageCommand { get; set; }
@@ -86,12 +88,30 @@ public partial class MainViewModel : NavigatableViewModelBase
     }
 
     public async Task SetImage(PreloadedAsset asset)
-    {
+    {     
         await SetImage(asset.Asset, asset.Image);
+    }
+    private async Task ZoomImage(CancellationToken token)
+    {
+        for (double scale = 1.00; scale < 1.25; scale += 0.0005)
+        {
+            if (token.IsCancellationRequested)
+            {
+                ImageScale = 1.0;
+                break;
+            }
+
+            ImageScale = scale;
+            await Task.Delay(10);
+        }
     }
 
     public async Task SetImage(AssetResponseDto asset, Stream? preloadedAsset = null)
     {
+        _zoomCancellationTokenSource?.Cancel();
+        _zoomCancellationTokenSource = new CancellationTokenSource();
+        var token = _zoomCancellationTokenSource.Token;
+
         var thumbHash = asset.ThumbhashImage;
         if (thumbHash == null)
             return;
@@ -122,6 +142,9 @@ public partial class MainViewModel : NavigatableViewModelBase
         {
             await _immichLogic.AddAssetToAlbum(asset!);
         }
+        //ImageScale = 1.0;
+
+        //await ZoomImage(token);
 
     }
     private void ShowSplash()
@@ -298,6 +321,8 @@ public partial class MainViewModel : NavigatableViewModelBase
     private string? imageDesc;
     [ObservableProperty]
     private string? imageLocation;
+    [ObservableProperty]
+    private double imageScale = 1.0;
     [ObservableProperty]
     private string? liveTime;
     [ObservableProperty]
