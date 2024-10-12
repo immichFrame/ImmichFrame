@@ -15,7 +15,7 @@ var settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config",
 Console.WriteLine(settingsPath);
 
 ServerSettings? serverSettings = null;
-ClientSettings? clientSettings = null;
+WebClientSettings? clientSettings = null;
 
 if (File.Exists(settingsPath))
 {
@@ -31,7 +31,7 @@ if (File.Exists(settingsPath))
     }
 
     serverSettings = JsonSerializer.Deserialize<ServerSettings>(doc);
-    clientSettings = JsonSerializer.Deserialize<ClientSettings>(doc);
+    clientSettings = JsonSerializer.Deserialize<WebClientSettings>(doc);
 }
 
 builder.Services.AddSingleton(srv =>
@@ -42,10 +42,10 @@ builder.Services.AddSingleton(srv =>
     return new ImmichFrameLogic(serverSettings);
 });
 
-builder.Services.AddSingleton<IClientSettings>(srv =>
+builder.Services.AddSingleton<IWebClientSettings>(srv =>
 {
     if (clientSettings == null)
-        clientSettings = new ClientSettings();
+        clientSettings = new WebClientSettings();
 
     return clientSettings;
 });
