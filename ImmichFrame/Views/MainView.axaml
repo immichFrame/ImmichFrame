@@ -30,8 +30,8 @@
       <TransitioningContentControl.ContentTemplate>
         <DataTemplate>
           <Grid>
-            <Image  Stretch="Fill" Source="{Binding ThumbhashImage}"  />
-            <Image x:Name="MainImage" Stretch="{Binding ImageStretch}" Source="{Binding Image}">
+            <Image Stretch="Fill" Source="{Binding ThumbhashImage}"  />
+            <Image Stretch="{Binding ImageStretch}" Source="{Binding Image}">
               <Image.RenderTransform>
                 <ScaleTransform ScaleX="{Binding DataContext.ImageScale, RelativeSource={RelativeSource AncestorType={x:Type TransitioningContentControl}}}" ScaleY="{Binding DataContext.ImageScale, RelativeSource={RelativeSource AncestorType={x:Type TransitioningContentControl}}}" />
               </Image.RenderTransform>
