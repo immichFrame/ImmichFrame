@@ -30,7 +30,7 @@ public partial class MainViewModel : NavigatableViewModelBase
     System.Threading.Timer? timerImageSwitcher;
     System.Threading.Timer? timerLiveTime;
     System.Threading.Timer? timerWeather;
-    private CancellationTokenSource _zoomCancellationTokenSource;
+    private CancellationTokenSource? _zoomCancellationTokenSource;
 
     public ICommand NextImageCommand { get; set; }
     public ICommand PreviousImageCommand { get; set; }
@@ -127,8 +127,10 @@ public partial class MainViewModel : NavigatableViewModelBase
         {
             await _immichLogic.AddAssetToAlbum(asset!);
         }
-
-        await ZoomImage(token);
+        if(Settings.ImageZoom)
+        {
+            await ZoomImage(token);
+        }
     }
     private async Task ZoomImage(CancellationToken token)
     {
