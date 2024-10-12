@@ -28,7 +28,11 @@
 	>
 		<img
 			style="--interval: {interval + 2}s;"
-			class="max-h-screen max-w-full object-contain {zoomEffect() ? 'zoom-in' : 'zoom-out'}"
+			class="max-h-screen max-w-full object-contain {$configStore.imageZoom
+				? zoomEffect()
+					? 'zoom-in'
+					: 'zoom-out'
+				: ''}"
 			src={dataUrl}
 			alt="data"
 		/>
