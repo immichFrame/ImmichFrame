@@ -3,9 +3,9 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using CommunityToolkit.Mvvm.ComponentModel;
 using ImmichFrame.Core.Api;
+using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.Core.Logic;
-using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Helpers;
 using ImmichFrame.Models;
 using System;
@@ -14,7 +14,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using System.Threading;
 
 namespace ImmichFrame.ViewModels;
 
@@ -30,7 +29,10 @@ public partial class MainViewModel : NavigatableViewModelBase
     System.Threading.Timer? timerImageSwitcher;
     System.Threading.Timer? timerLiveTime;
     System.Threading.Timer? timerWeather;
-    private CancellationTokenSource? _zoomCancellationTokenSource;
+    System.Threading.Timer? timerZoom;
+    private bool zoomIncreasing = true;
+    private DateTime lastZoomTime = DateTime.MinValue;
+
 
     public ICommand NextImageCommand { get; set; }
     public ICommand PreviousImageCommand { get; set; }
@@ -75,6 +77,10 @@ public partial class MainViewModel : NavigatableViewModelBase
             {
                 timerWeather = new System.Threading.Timer(WeatherTick, null, 0, 10 * 60 * 1000); //every 10 minutes
             }
+            if (Settings.ImageZoom)
+            {
+                timerZoom = new System.Threading.Timer(ZoomTick, null, 0, 30); //every 10ms
+            }
             isInitialized = true;
         }
     }
@@ -93,10 +99,6 @@ public partial class MainViewModel : NavigatableViewModelBase
     }
     public async Task SetImage(AssetResponseDto asset, Stream? preloadedAsset = null)
     {
-        _zoomCancellationTokenSource?.Cancel();
-        _zoomCancellationTokenSource = new CancellationTokenSource();
-        var token = _zoomCancellationTokenSource.Token;
-
         var thumbHash = asset.ThumbhashImage;
         if (thumbHash == null)
             return;
@@ -127,31 +129,31 @@ public partial class MainViewModel : NavigatableViewModelBase
         {
             await _immichLogic.AddAssetToAlbum(asset!);
         }
-        if (Settings.ImageZoom)
-        {
-            await ZoomImage(token);
-        }
     }
-    private async Task ZoomImage(CancellationToken token)
+    private void ZoomTick(object? state)
     {
-        double targetScale = ImageScale > 1.0 ? 1.0 : 1.25;
-        double increment = ImageScale > 1.0 ? -0.0005 : 0.0005;
-
-        for (double scale = ImageScale;
-             (increment > 0 && scale < targetScale) || (increment < 0 && scale >= targetScale);
-             scale += increment)
+        if (!ImagePaused)
         {
-            if (token.IsCancellationRequested)
+            if ((DateTime.Now - lastZoomTime).TotalMilliseconds < 2000)
             {
-                ImageScale = 1.0;
-                break;
+                return;
             }
+            ImageScale += zoomIncreasing ? 0.001 : -0.001;
 
-            ImageScale = scale;
-            await Task.Delay(10);
+            if (ImageScale >= 1.25)
+            {
+                ImageScale = 1.25;
+                zoomIncreasing = false;
+                lastZoomTime = DateTime.Now;
+            }
+            else if (ImageScale <= 1.00)
+            {
+                ImageScale = 1.00;
+                zoomIncreasing = true;
+                lastZoomTime = DateTime.Now;
+            }
         }
     }
-
 
     private void ShowSplash()
     {
