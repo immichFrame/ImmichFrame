@@ -3,9 +3,9 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using CommunityToolkit.Mvvm.ComponentModel;
 using ImmichFrame.Core.Api;
+using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.Core.Logic;
-using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Helpers;
 using ImmichFrame.Models;
 using System;
@@ -29,6 +29,10 @@ public partial class MainViewModel : NavigatableViewModelBase
     System.Threading.Timer? timerImageSwitcher;
     System.Threading.Timer? timerLiveTime;
     System.Threading.Timer? timerWeather;
+    System.Threading.Timer? timerZoom;
+    private bool zoomIncreasing = true;
+    private DateTime lastZoomTime = DateTime.MinValue;
+
 
     public ICommand NextImageCommand { get; set; }
     public ICommand PreviousImageCommand { get; set; }
@@ -73,6 +77,10 @@ public partial class MainViewModel : NavigatableViewModelBase
             {
                 timerWeather = new System.Threading.Timer(WeatherTick, null, 0, 10 * 60 * 1000); //every 10 minutes
             }
+            if (Settings.ImageZoom)
+            {
+                timerZoom = new System.Threading.Timer(ZoomTick, null, 0, 30); //every 10ms
+            }
             isInitialized = true;
         }
     }
@@ -89,7 +97,6 @@ public partial class MainViewModel : NavigatableViewModelBase
     {
         await SetImage(asset.Asset, asset.Image);
     }
-
     public async Task SetImage(AssetResponseDto asset, Stream? preloadedAsset = null)
     {
         var thumbHash = asset.ThumbhashImage;
@@ -122,8 +129,32 @@ public partial class MainViewModel : NavigatableViewModelBase
         {
             await _immichLogic.AddAssetToAlbum(asset!);
         }
-
     }
+    private void ZoomTick(object? state)
+    {
+        if (!ImagePaused)
+        {
+            if ((DateTime.Now - lastZoomTime).TotalMilliseconds < 2000)
+            {
+                return;
+            }
+            ImageScale += zoomIncreasing ? 0.001 : -0.001;
+
+            if (ImageScale >= 1.25)
+            {
+                ImageScale = 1.25;
+                zoomIncreasing = false;
+                lastZoomTime = DateTime.Now;
+            }
+            else if (ImageScale <= 1.00)
+            {
+                ImageScale = 1.00;
+                zoomIncreasing = true;
+                lastZoomTime = DateTime.Now;
+            }
+        }
+    }
+
     private void ShowSplash()
     {
         var uri = new Uri("avares://ImmichFrame/Assets/Immich.png");
@@ -298,6 +329,8 @@ public partial class MainViewModel : NavigatableViewModelBase
     private string? imageDesc;
     [ObservableProperty]
     private string? imageLocation;
+    [ObservableProperty]
+    private double imageScale = 1.0;
     [ObservableProperty]
     private string? liveTime;
     [ObservableProperty]

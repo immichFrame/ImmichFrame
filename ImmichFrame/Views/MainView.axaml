@@ -21,6 +21,7 @@
       <Setter Property="VerticalAlignment" Value="Stretch"/>
     </Style>
   </UserControl.Styles>
+
   <Grid ColumnDefinitions="*, *, *" RowDefinitions="*, *, *">
     <TransitioningContentControl x:Name="transitioningControl" Content="{Binding Images}" Grid.ColumnSpan="3" Grid.RowSpan="3" >
       <TransitioningContentControl.PageTransition>
@@ -30,7 +31,11 @@
         <DataTemplate>
           <Grid>
             <Image Stretch="Fill" Source="{Binding ThumbhashImage}"  />
-            <Image Stretch="{Binding ImageStretch}" Source="{Binding Image}"  />
+            <Image Stretch="{Binding ImageStretch}" Source="{Binding Image}">
+              <Image.RenderTransform>
+                <ScaleTransform ScaleX="{Binding DataContext.ImageScale, RelativeSource={RelativeSource AncestorType={x:Type TransitioningContentControl}}}" ScaleY="{Binding DataContext.ImageScale, RelativeSource={RelativeSource AncestorType={x:Type TransitioningContentControl}}}" />
+              </Image.RenderTransform>
+            </Image>
           </Grid>
         </DataTemplate>
       </TransitioningContentControl.ContentTemplate>

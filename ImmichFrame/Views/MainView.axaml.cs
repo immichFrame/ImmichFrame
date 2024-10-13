@@ -47,7 +47,7 @@ public partial class MainView : BaseView
         {
             _viewModel!.Navigate(new ErrorViewModel(ex));
         }
-    }   
+    }
 
     public override void Dispose()
     {
@@ -55,5 +55,5 @@ public partial class MainView : BaseView
             _viewModel.TimerEnabled = false;
 
         base.Dispose();
-    }   
+    }
 }

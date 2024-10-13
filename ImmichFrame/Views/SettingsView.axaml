@@ -68,6 +68,8 @@
           <NumericUpDown Value="{Binding Settings.TransitionDuration}" KeyDown="NumericUpDown_KeyDown" />
           <TextBlock Text="DownloadImages"/>
           <CheckBox IsChecked="{Binding Settings.DownloadImages}" />
+          <TextBlock Text="ZoomImages"/>
+          <CheckBox IsChecked="{Binding Settings.ImageZoom}" />
           <TextBlock Text="RenewImagesDuration (days)"/>
           <NumericUpDown Value="{Binding Settings.RenewImagesDuration}" KeyDown="NumericUpDown_KeyDown" />
         </StackPanel>
