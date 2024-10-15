@@ -57,10 +57,10 @@ ImmichFrame is easy to run on your desired plattform. Get the latest stable rele
 ## 🔧 Usage / Installation
 
 ### 🌐 Browser
-- [Install ImmichFrame Web](/Install_Web.md)
+- [Install ImmichFrame Web](/Install_Web.md#-installation)
 
 ### 💻 Windows, Linux, MacOS, Android
-- [Install ImmichFrame Client](/Install_Client.md)
+- [Install ImmichFrame Client](/Install_Client.md#-installation)
 
 
 ## ⚙️ Configuration
