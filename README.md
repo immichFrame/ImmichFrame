@@ -98,8 +98,8 @@ ImmichFrame is easy to run on your desired plattform. Get the latest stable rele
 | [Metadata](#metadata)   | PhotoDateFontSize          | int                | 36                   | only client                                                                                          |
 | [Metadata](#metadata)   | PhotoDateFormat            | string             | yyyy-MM-dd           |                                                                                                      |
 | [UI](#ui)               | FontColor                  | #FF5733            | hh:mm                |                                                                                                      |
-| [Misc](#misc)           | ImmichFrameAlbumName       | string             |                      | Creates an  album and stores last 100 photos displayed                                                                                                     |
-| [Misc](#misc)           | Margin                     | string             | 0,0,0,0              | Can be used to fine tune margin to adjust for under/over scan                                                                                                     |
+| [Misc](#misc)           | ImmichFrameAlbumName       | string             |                      | Creates album and stores last 100 photos displayed                                                                                                     |
+| [Misc](#misc)           | Margin                     | string             | 0,0,0,0              | Optionally fine tune margins to adjust for under/over scan                                                                                                     |
 | [Misc](#misc)           | UnattendedMode             | boolean            | false                | Don't show error messages, silently keep trying (client only)                                                                                         |
 
 ### Filtering
