@@ -172,12 +172,12 @@ public partial class MainViewModel : NavigatableViewModelBase
     }
     public async void WeatherTick(object? state)
     {
-        var weatherInfo = await WeatherHelper.GetWeather();
-        if (weatherInfo != null)
+        var weather = await _immichLogic.GetWeather();
+        if (weather != null)
         {
-            WeatherTemperature = $"{weatherInfo.Main.Temperature.ToString("F0").Replace(" ", "")}";
-            WeatherCurrent = $"{string.Join(',', weatherInfo.Weather.Select(x => x.Description))}";
-            var iconId = $"{string.Join(',', weatherInfo.Weather.Select(x => x.IconId))}";
+            WeatherTemperature = $"{weather.Temperature.ToString("F1")} {weather.TemperatureUnit}";
+            WeatherCurrent = weather.Description;
+            var iconId = weather.IconId;
             WeatherImage = new Bitmap(AssetLoader.Open(AssetLoader.Exists(new Uri($"avares://ImmichFrame/Assets/WeatherIcons/{iconId}.png"))
            ? new Uri($"avares://ImmichFrame/Assets/WeatherIcons/{iconId}.png")
            : new Uri("avares://ImmichFrame/Assets/WeatherIcons/default.png")));

@@ -3,6 +3,8 @@ using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.Core.Exceptions;
 using System.Data;
+using OpenWeatherMap.Models;
+using OpenWeatherMap;
 
 namespace ImmichFrame.Core.Logic
 {
@@ -334,6 +336,40 @@ namespace ImmichFrame.Core.Logic
                 {
                     throw new PersonNotFoundException($"Asset was not found, check your settings file!{Environment.NewLine}{Environment.NewLine}{ex.Message}", ex);
                 }
+            }
+
+            return null;
+        }
+
+        public Task<IWeather?> GetWeather()
+        {
+            OpenWeatherMapOptions options = new OpenWeatherMapOptions
+            {
+                ApiKey = _settings.WeatherApiKey,
+                UnitSystem = _settings.UnitSystem,
+                Language = _settings.Language,
+            };
+
+            var weatherLatLong = _settings.WeatherLatLong;
+
+            var weatherLat = !string.IsNullOrWhiteSpace(weatherLatLong) ? float.Parse(weatherLatLong!.Split(',')[0]) : 0f;
+            var weatherLong = !string.IsNullOrWhiteSpace(weatherLatLong) ? float.Parse(weatherLatLong!.Split(',')[1]) : 0f;
+
+            return GetWeather(weatherLat, weatherLong, options);
+        }
+
+        public async Task<IWeather?> GetWeather(double latitude, double longitude, OpenWeatherMapOptions Options)
+        {
+            try
+            {
+                IOpenWeatherMapService openWeatherMapService = new OpenWeatherMapService(Options);
+                var weatherInfo = await openWeatherMapService.GetCurrentWeatherAsync(latitude, longitude);
+
+                return weatherInfo.ToWeather();
+            }
+            catch
+            {
+                //do nothing and return null
             }
 
             return null;
