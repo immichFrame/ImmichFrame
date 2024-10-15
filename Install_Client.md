@@ -2,10 +2,10 @@
 Go back to the [Full Readme](/README.md).
 
 ## 💻 ImmichFrame Client
-- [🔙 Back](#-back)
-- [💻 ImmichFrame Client](#-immichframe-client)
-- [✨ Demo](#-demo)
-- [🔧 Installation](#-installation)
+- [🔙 Back](#%F0%9F%94%99-back)
+- [💻 ImmichFrame Client](#%F0%9F%92%BB-immichframe-client)
+- [✨ Demo](#%E2%9C%A8-demo)
+- [🔧 Installation](#%F0%9F%94%A7-installation)
   - [Windows](#windows)
   - [Linux](#linux)
     - [Autostart on Raspberry Pi OS](#autostart-on-raspberry-pi-os)
@@ -13,12 +13,12 @@ Go back to the [Full Readme](/README.md).
   - [Android](#android)
     - [Android Screensaver](#android-screensaver)
     - [Android TV Screensaver](#android-tv-screensaver)
-- [⚙️ Configuration](#️-configuration)
-- [💬 Interactions](#-interactions)
+- [⚙️ Configuration](#%E2%9A%99%EF%B8%8F-configuration)
+- [💬 Interactions](#%F0%9F%92%AC-interactions)
   - [Touch/Mouse](#touchmouse)
   - [Keyboard:](#keyboard)
   - [Settings GUI](#settings-gui)
-- [🆘 Help](#-help)
+- [🆘 Help](#%F0%9F%86%98-help)
 
 ## ✨ Demo
 ![ImmichFrame Client](/design/demo/client_demo.png)
