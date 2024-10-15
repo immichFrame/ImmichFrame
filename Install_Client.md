@@ -69,16 +69,15 @@ echo "@/home/pi/{dir with Immich_Frame}/Immich_Frame" > sudo tee /home/pi/.confi
 - If you get a permissions error run `chmod +x Immich_Frame`.
   
 ### Android
-The Android-Version of ImmichFrame is available on the [Google Play Store][play-store-link]. Download it via the store for automatic updates.
+The Android-Version of ImmichFrame is available on the [Google Play Store][play-store-link]. Download it via the store for automatic updates. You can also sideload via APK available in Releases.
 
 #### Android Screensaver
 
 - Run the app normally and configure settings.
 - Go to Settings, Display, Advanced, Screen Saver, Current Screen Saver, choose ImmichFrame. Settings, Display, Advanced, Sleep, choose your sleep timeout. The menu options may differ slightly on different Android versions.
-
-#### Android TV Screensaver
-
-- If you are unable to set ImmichFrame as a screen saver you may need to run this ADB command `adb shell settings put secure screensaver_components com.immichframe.immichframe/.ScreenSaverService`
+  - If you are unable to set ImmichFrame as a screen saver you may need to run this ADB command `adb shell settings put secure screensaver_components com.immichframe.immichframe/.ScreenSaverService`
+  - To view screensaver timeout use this ADB command `adb shell settings get system screen_off_timeout`
+  - To set screensaver timeout use this ADB command `adb shell settings put system screen_off_timeout 60000` (timeout is is ms, so this would be 60 seconds).
 
 
 ## ⚙️ Configuration

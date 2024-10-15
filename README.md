@@ -57,10 +57,10 @@ ImmichFrame is easy to run on your desired plattform. Get the latest stable rele
 ## 🔧 Usage / Installation
 
 ### 🌐 Browser
-- [Install ImmichFrame Web](/Install_Web.md#-installation)
+- [ImmichFrame Web](/Install_Web.md#-installation)
 
 ### 💻 Windows, Linux, MacOS, Android
-- [Install ImmichFrame Client](/Install_Client.md#-installation)
+- [ImmichFrame Client](/Install_Client.md#-installation)
 
 
 ## ⚙️ Configuration
@@ -69,9 +69,9 @@ ImmichFrame is easy to run on your desired plattform. Get the latest stable rele
 | ----------------------- | -------------------------- | ------------------ | -------------------- | ---------------------------------------------------------------------------------------------------- |
 | **Required**            | **ImmichServerUrl**        | **string**         |                      | **The URL of your Immich server e.g. `http://photos.yourdomain.com` / `http://192.168.0.100:2283`.** |
 | **Required**            | **ApiKey**                 | **string**         |                      | **Read more about how to obtain an [immich API key][immich-api-url].**                               |
-| [Filtering](#filtering) | Albums                     | string[]           | []                   |                                                                                                      |
-| [Filtering](#filtering) | ExcludedAlbums             | string[]           | []                   |                                                                                                      |
-| [Filtering](#filtering) | People                     | string[]           | []                   |                                                                                                      |
+| [Filtering](#filtering) | Albums                     | string[]           | []                   | UUID of album(s)                                                                                                     |
+| [Filtering](#filtering) | ExcludedAlbums             | string[]           | []                   | UUID of excluded album(s)                                                                                                     |
+| [Filtering](#filtering) | People                     | string[]           | []                   | UUID of person(s)                                                                                                   |
 | [Filtering](#filtering) | ShowMemories               | boolean            | false                |                                                                                                      |
 | [Caching](#caching)     | RenewImagesDuration        | int                | 30                   |                                                                                                      |
 | [Caching](#caching)     | DownloadImages             | boolean            | false                |                                                                                                      |
@@ -98,9 +98,9 @@ ImmichFrame is easy to run on your desired plattform. Get the latest stable rele
 | [Metadata](#metadata)   | PhotoDateFontSize          | int                | 36                   | only client                                                                                          |
 | [Metadata](#metadata)   | PhotoDateFormat            | string             | yyyy-MM-dd           |                                                                                                      |
 | [UI](#ui)               | FontColor                  | #FF5733            | hh:mm                |                                                                                                      |
-| [Misc](#misc)           | ImmichFrameAlbumName       | string             |                      |                                                                                                      |
-| [Misc](#misc)           | Margin                     | string             | 0,0,0,0              |                                                                                                      |
-| [Misc](#misc)           | UnattendedMode             | boolean            | false                | only client                                                                                          |
+| [Misc](#misc)           | ImmichFrameAlbumName       | string             |                      | Creates an  album and stores last 100 photos displayed                                                                                                     |
+| [Misc](#misc)           | Margin                     | string             | 0,0,0,0              | Can be used to fine tune margin to adjust for under/over scan                                                                                                     |
+| [Misc](#misc)           | UnattendedMode             | boolean            | false                | Don't show error messages, silently keep trying (client only)                                                                                         |
 
 ### Filtering
 You can get the UUIDs from the URL of the album/person. For this URL: `https://demo.immich.app/albums/85c85b29-c95d-4a8b-90f7-c87da1d518ba` this is the UUID: `85c85b29-c95d-4a8b-90f7-c87da1d518ba`
