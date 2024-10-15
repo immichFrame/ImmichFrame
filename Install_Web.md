@@ -1,25 +1,25 @@
-## Back
+## 🔙 Back
 Go back to the [Full Readme](/README.md)
 
-## ImmichFrame Web
-- [Back](#back)
-- [ImmichFrame Web](#immichframe-web)
+## 🌐 ImmichFrame Web
+- [🔙 Back](#-back)
+- [🌐 ImmichFrame Web](#-immichframe-web)
 - [✨ Demo](#-demo)
-- [Installation](#installation)
-- [Docker Compose](#docker-compose)
+- [🔧 Installation](#-installation)
+- [🐋 Docker Compose](#-docker-compose)
   - [Docker Compose with environment variables](#docker-compose-with-environment-variables)
   - [Docker Compose with Settings.json](#docker-compose-with-settingsjson)
   - [Docker Compose with env file](#docker-compose-with-env-file)
-- [Configuration](#configuration)
-- [Help](#help)
+- [⚙️ Configuration](#️-configuration)
+- [🆘 Help](#-help)
 
 ## ✨ Demo
 ![ImmichFrame Web](/design/demo/web_demo.png)
 
-## Installation
+## 🔧 Installation
 ImmichFrame Web is installed via [Docker 🐋](#docker-compose)
 
-## Docker Compose
+## 🐋 Docker Compose
 ### Docker Compose with environment variables
 
 > [!NOTE]  
@@ -74,7 +74,7 @@ services:
 
 ### Docker Compose with Settings.json
 
-An example of the Settings.json can be found [here](/ImmichFrame/Settings.example.json)
+An example of the Settings.json can be found [here](/ImmichFrame/Settings.example.json).
 
 > [!IMPORTANT]  
 > Change `PATH/TO/CONFIG` to the correct path!
@@ -96,7 +96,7 @@ services:
 
 ### Docker Compose with env file
 
-An example of the .env can be found [here](/docker/example.env)
+An example of the .env can be found [here](/docker/example.env).
 
 ```yaml
 name: immichframe
@@ -113,10 +113,11 @@ services:
       TZ: "Europe/Berlin"
 ```
 
-## Configuration
-For more information, read [HERE](/README.md#configuration)
+## ⚙️ Configuration
 
-## Help
+For more information, read [here](/README.md#configuration).
+
+## 🆘 Help
 
 [Discord Channel][support-url]
 

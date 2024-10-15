@@ -31,39 +31,39 @@
 
 <!-- ABOUT THE PROJECT -->
 
-## About The Project
+## 🛈 About The Project
 
 This project is a digital photo frame application that interfaces with your [immich][immich-github-url] server. It is a cross-platform C# .NET 8 project that currently supports Android, Linux, macOS, and Windows.
 
 ## ✨ Demo
 ### Web Demo
-<img src="/design/demo/web_demo.png" alt="Web Demo" width="200" height="200">
+<img src="/design/demo/web_demo.png" alt="Web Demo" height="300">
 
 ### Client Demo
-<img src="/design/demo/client_demo.png" alt="Client Demo" width="200" height="200">
+<img src="/design/demo/client_demo.png" alt="Client Demo" height="200">
 
 <!-- GETTING STARTED -->
 
-## Getting Started
+## 🚀 Getting Started
 
 ImmichFrame is easy to run on your desired plattform. Get the latest stable release from the [release page][releases-url] and unzip to desired folder (Linux, macOS, Windows), or install APK (Android).
 
-### Prerequisites
+### 📋 Prerequisites
 
 - A set up and functioning immich server that is accessible by the network of the ImmichFrame device.
 
 <!-- USAGE EXAMPLES -->
 
-## Usage / Installation
+## 🔧 Usage / Installation
 
-### Browser
+### 🌐 Browser
 - [Install ImmichFrame Web](/Install_Web.md)
 
-### Windows, Linux, MacOS, Android
+### 💻 Windows, Linux, MacOS, Android
 - [Install ImmichFrame Client](/Install_Client.md)
 
 
-## Configuration
+## ⚙️ Configuration
 
 | **Section**             | **Config-Key**             | **Value**          | **Default**          | **Description**                                                                                      |
 | ----------------------- | -------------------------- | ------------------ | -------------------- | ---------------------------------------------------------------------------------------------------- |
@@ -126,7 +126,7 @@ Needs documentation
 ### Misc
 Needs documentation
 
-## Roadmap
+## 🛣️ Roadmap
 
 - [x] Display random assets
 - [x] Display Albums
@@ -138,7 +138,7 @@ Needs documentation
 
 See the [open issues](https://github.com/3rob3/ImmichFrame/issues) for a full list of proposed features (and known issues).
 
-## Contributing
+## ✍ Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
@@ -151,19 +151,19 @@ Don't forget to give the project a star! Thanks again!
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## License
+## 📜 License
 
 [GNU General Public License v3.0](LICENSE.txt)
 
-## Help
+## 🆘 Help
 
 [Discord Channel][support-url]
 
-## Acknowledgments
+## 🙏 Acknowledgments
 
 - BIG thanks to the [immich team][immich-github-url] for creating an awesome tool
 
-## Star History
+## 🌟 Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=3rob3/ImmichFrame&type=Date)](https://star-history.com/#3rob3/ImmichFrame&Date)
 
