@@ -25,12 +25,8 @@
         public string? ImageLocationFormat { get; set; }
         public int ImageLocationFontSize { get; set; }
         public string FontColor { get; set; }
-        public string? WeatherApiKey { get; set; }
         public bool ShowWeatherDescription { get; set; }
         public int WeatherFontSize { get; set; }
-        public string? UnitSystem { get; set; }
-        public string? WeatherLatLong { get; set; }
-        public string Language { get; set; }
         public bool UnattendedMode { get; set; }
         public bool ImageZoom { get; set; }
     }
