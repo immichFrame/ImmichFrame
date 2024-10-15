@@ -17,7 +17,7 @@ Go back to the [Full Readme](/README.md)
 ![ImmichFrame Web](/design/demo/web_demo.png)
 
 ## 🔧 Installation
-ImmichFrame Web is installed via [Docker 🐋](#docker-compose)
+ImmichFrame Web is installed via [Docker 🐋](#-docker-compose)
 
 ## 🐋 Docker Compose
 ### Docker Compose with environment variables
