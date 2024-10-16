@@ -175,7 +175,7 @@ public partial class MainViewModel : NavigatableViewModelBase
         var weather = await _immichLogic.GetWeather();
         if (weather != null)
         {
-            WeatherTemperature = $"{weather.Temperature.ToString("F1")} {weather.TemperatureUnit}";
+            WeatherTemperature = $"{weather.Temperature.ToString("F1")}{weather.Unit}";
             WeatherCurrent = weather.Description;
             var iconId = weather.IconId;
             WeatherImage = new Bitmap(AssetLoader.Open(AssetLoader.Exists(new Uri($"avares://ImmichFrame/Assets/WeatherIcons/{iconId}.png"))
