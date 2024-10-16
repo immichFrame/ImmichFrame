@@ -69,9 +69,9 @@ ImmichFrame is easy to run on your desired plattform. Get the latest stable rele
 | ----------------------- | -------------------------- | ------------------ | -------------------- | ---------------------------------------------------------------------------------------------------- |
 | **Required**            | **ImmichServerUrl**        | **string**         |                      | **The URL of your Immich server e.g. `http://photos.yourdomain.com` / `http://192.168.0.100:2283`.** |
 | **Required**            | **ApiKey**                 | **string**         |                      | **Read more about how to obtain an [immich API key][immich-api-url].**                               |
-| [Filtering](#filtering) | Albums                     | string[]           | []                   | UUID of album(s)                                                                                                     |
-| [Filtering](#filtering) | ExcludedAlbums             | string[]           | []                   | UUID of excluded album(s)                                                                                                     |
-| [Filtering](#filtering) | People                     | string[]           | []                   | UUID of person(s)                                                                                                   |
+| [Filtering](#filtering) | Albums                     | string[]           | []                   | UUID of album(s)                                                                                     |
+| [Filtering](#filtering) | ExcludedAlbums             | string[]           | []                   | UUID of excluded album(s)                                                                            |
+| [Filtering](#filtering) | People                     | string[]           | []                   | UUID of person(s)                                                                                    |
 | [Filtering](#filtering) | ShowMemories               | boolean            | false                |                                                                                                      |
 | [Caching](#caching)     | RenewImagesDuration        | int                | 30                   |                                                                                                      |
 | [Caching](#caching)     | DownloadImages             | boolean            | false                |                                                                                                      |
@@ -79,28 +79,28 @@ ImmichFrame is easy to run on your desired plattform. Get the latest stable rele
 | [Image](#image)         | ImageZoom                  | boolean            | true                 |                                                                                                      |
 | [Image](#image)         | Interval                   | int                | 45                   |                                                                                                      |
 | [Image](#image)         | TransitionDuration         | int                | 2                    |                                                                                                      |
-| [Image](#image)         | ImageStretch               | int                | Uniform              | \*Client only                                                                                          |
-| [Weather](#weather)     | WeatherApiKey              | string             |                      | Get api-key: [OpenWeatherMap][openweathermap-url]  |
+| [Image](#image)         | ImageStretch               | int                | Uniform              | \*Client only                                                                                        |
+| [Weather](#weather)     | WeatherApiKey              | string             |                      | Get api-key: [OpenWeatherMap][openweathermap-url]                                                    |
 | [Weather](#weather)     | UnitSystem                 | imperial \| metric | imperial             |                                                                                                      |
 | [Weather](#weather)     | Language                   | string             | en                   | 2 digit ISO code                                                                                     |
 | [Weather](#weather)     | ShowWeatherDescription     | boolean            | true                 |                                                                                                      |
-| [Weather](#weather)     | WeatherFontSize            | int                | 36                   | \*Client only                                                                                           |
+| [Weather](#weather)     | WeatherFontSize            | int                | 36                   | \*Client only                                                                                        |
 | [Weather](#weather)     | WeatherLatLong             | boolean            | 40.730610,-73.935242 |                                                                                                      |
 | [Clock](#clock)         | ShowClock                  | boolean            | true                 |                                                                                                      |
-| [Clock](#clock)         | ClockFontSize              | int                | 48                   | \*Client only                                                                                           |
+| [Clock](#clock)         | ClockFontSize              | int                | 48                   | \*Client only                                                                                        |
 | [Clock](#clock)         | ClockFormat                | string             | hh:mm                |                                                                                                      |
 | [Metadata](#metadata)   | ShowImageDesc              | boolean            | true                 |                                                                                                      |
-| [Metadata](#metadata)   | ImageDescFontSize          | int                | 3                    | \*Client only                                                                                           |
+| [Metadata](#metadata)   | ImageDescFontSize          | int                | 3                    | \*Client only                                                                                        |
 | [Metadata](#metadata)   | ShowImageLocation          | boolean            | true                 |                                                                                                      |
-| [Metadata](#metadata)   | ImageLocationFormat        | string             | City,State,Country   | \*Client only                                                                                          |
-| [Metadata](#metadata)   | ImageLocationFontSize      | int                | 36                   | \*Client only                                                                                          |
+| [Metadata](#metadata)   | ImageLocationFormat        | string             | City,State,Country   | \*Client only                                                                                        |
+| [Metadata](#metadata)   | ImageLocationFontSize      | int                | 36                   | \*Client only                                                                                        |
 | [Metadata](#metadata)   | ShowPhotoDate              | boolean            | true                 |                                                                                                      |
-| [Metadata](#metadata)   | PhotoDateFontSize          | int                | 36                   | \*Client only                                                                                          |
+| [Metadata](#metadata)   | PhotoDateFontSize          | int                | 36                   | \*Client only                                                                                        |
 | [Metadata](#metadata)   | PhotoDateFormat            | string             | yyyy-MM-dd           |                                                                                                      |
 | [UI](#ui)               | FontColor                  | #FF5733            | hh:mm                |                                                                                                      |
-| [Misc](#misc)           | ImmichFrameAlbumName       | string             |                      | Creates album and stores last 100 photos displayed                                                                                                     |
-| [Misc](#misc)           | Margin                     | string             | 0,0,0,0              | \*Client only. Optionally fine tune margins to adjust for under/over scan                                                                                                     |
-| [Misc](#misc)           | UnattendedMode             | boolean            | false                | \*Client only. Don't show error messages, silently keep trying                                                                                         |
+| [Misc](#misc)           | ImmichFrameAlbumName       | string             |                      | Creates album and stores last 100 photos displayed                                                   |
+| [Misc](#misc)           | Margin                     | string             | 0,0,0,0              | \*Client only. Optionally fine tune margins to adjust for under/over scan                            |
+| [Misc](#misc)           | UnattendedMode             | boolean            | false                | \*Client only. Don't show error messages, silently keep trying                                       |
 
 ### Filtering
 You can get the UUIDs from the URL of the album/person. For this URL: `https://demo.immich.app/albums/85c85b29-c95d-4a8b-90f7-c87da1d518ba` this is the UUID: `85c85b29-c95d-4a8b-90f7-c87da1d518ba`

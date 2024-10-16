@@ -12,7 +12,6 @@ Go back to the [Full Readme](/README.md).
   - [MacOS](#macos)
   - [Android](#android)
     - [Android Screensaver](#android-screensaver)
-    - [Android TV Screensaver](#android-tv-screensaver)
 - [⚙️ Configuration](#️-configuration)
 - [💬 Interactions](#-interactions)
   - [Touch/Mouse](#touchmouse)
