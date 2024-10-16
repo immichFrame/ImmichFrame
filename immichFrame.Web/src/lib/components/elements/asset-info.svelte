@@ -18,6 +18,8 @@
 	let location: string;
 
 	$: location = [asset.exifInfo?.city, asset.exifInfo?.country].filter((x) => x).join(', ');
+
+	$: availablePeople = asset.people?.filter((x) => x.name);
 </script>
 
 {#if showPhotoDate || showPhotoDate || showImageDesc}
@@ -28,12 +30,9 @@
 		{#if showImageDesc || desc}
 			<p class="text-base font-light">{desc}</p>
 		{/if}
-		{#if asset.people}
+		{#if availablePeople}
 			<p class="text-sm font-light">
-				{asset.people
-					?.filter((x) => x.name)
-					.map((x) => x.name)
-					.join(', ')}
+				{availablePeople.map((x) => x.name).join(', ')}
 			</p>
 		{/if}
 		{#if showLocation && location}
