@@ -52,7 +52,7 @@ services:
       ShowClock: "true"
       ClockFormat: "HH:mm"
       # Weather
-      WeatherApiKey: ""
+      WeatherApiKey: "API-KEY"
       UnitSystem: "imperial"
       Language: "en"
       ShowWeatherDescription: "true"
