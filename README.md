@@ -31,208 +31,114 @@
 
 <!-- ABOUT THE PROJECT -->
 
-## About The Project
+## 🛈 About The Project
 
 This project is a digital photo frame application that interfaces with your [immich][immich-github-url] server. It is a cross-platform C# .NET 8 project that currently supports Android, Linux, macOS, and Windows.
 
-### Built With
-
-- [![Avalonia][Avalonia]][Avalonia-url]
-
 ## ✨ Demo
+### Web Demo
+<img src="/design/demo/web_demo.png" alt="Web Demo" height="300">
 
-![Screenshot 2024-03-28 at 10 10 04 AM](https://github.com/3rob3/ImmichFrame/assets/156599986/75720456-4ccc-4323-af77-b72f34952f40)
+### Client Demo
+<img src="/design/demo/client_demo.png" alt="Client Demo" height="300">
 
 <!-- GETTING STARTED -->
 
-## Getting Started
+## 🚀 Getting Started
 
 ImmichFrame is easy to run on your desired plattform. Get the latest stable release from the [release page][releases-url] and unzip to desired folder (Linux, macOS, Windows), or install APK (Android).
 
-> [!TIP]
-> The Android-Version of ImmichFrame is available on the [Google Play Store][play-store-link]. Download it via the store for automatic updates.
-
-### Prerequisites
+### 📋 Prerequisites
 
 - A set up and functioning immich server that is accessible by the network of the ImmichFrame device.
 
 <!-- USAGE EXAMPLES -->
 
-## Usage
+## 🔧 Usage / Installation
 
-### Docker (WebApp)
+### 🌐 Browser
+- [ImmichFrame Web](/Install_Web.md#-installation)
 
-#### Compose
+### 💻 Windows, Linux, MacOS, Android
+- [ImmichFrame Client](/Install_Client.md#-installation)
 
-```yaml
-name: immichframe
-services:
-  immichframe:
-    container_name: immichframe
-    image: ghcr.io/immichframe/immichframe:latest
-    restart: on-failure
-    volumes:
-      - PATH/TO/CONFIG:/app/Config
-    ports:
-      - "8080:8080"
-    environment:
-      TZ: "Europe/Berlin"
-```
 
-#### Docker Run
+## ⚙️ Configuration
 
-```bash
-docker run -td \
-  --name immichFrame \
-  --restart on-failure \
-  -v PATH/TO/CONFIG:/app/Config \
-  -p 8080:8080 \
-  -e TZ="Europe/Berlin" \
-  ghcr.io/immichframe/immichframe:latest
-```
+| **Section**             | **Config-Key**             | **Value**          | **Default**          | **Description**                                                                                      |
+| ----------------------- | -------------------------- | ------------------ | -------------------- | ---------------------------------------------------------------------------------------------------- |
+| **Required**            | **ImmichServerUrl**        | **string**         |                      | **The URL of your Immich server e.g. `http://photos.yourdomain.com` / `http://192.168.0.100:2283`.** |
+| **Required**            | **ApiKey**                 | **string**         |                      | **Read more about how to obtain an [immich API key][immich-api-url].**                               |
+| [Filtering](#filtering) | Albums                     | string[]           | []                   | UUID of album(s)                                                                                     |
+| [Filtering](#filtering) | ExcludedAlbums             | string[]           | []                   | UUID of excluded album(s)                                                                            |
+| [Filtering](#filtering) | People                     | string[]           | []                   | UUID of person(s)                                                                                    |
+| [Filtering](#filtering) | ShowMemories               | boolean            | false                |                                                                                                      |
+| [Caching](#caching)     | RenewImagesDuration        | int                | 30                   |                                                                                                      |
+| [Caching](#caching)     | DownloadImages             | boolean            | false                |                                                                                                      |
+| [Caching](#caching)     | RefreshAlbumPeopleInterval | int                | 12                   |                                                                                                      |
+| [Image](#image)         | ImageZoom                  | boolean            | true                 |                                                                                                      |
+| [Image](#image)         | Interval                   | int                | 45                   |                                                                                                      |
+| [Image](#image)         | TransitionDuration         | int                | 2                    |                                                                                                      |
+| [Image](#image)         | ImageStretch               | int                | Uniform              | \*Client only.                                                                                       |
+| [Weather](#weather)     | WeatherApiKey              | string             |                      | Get api-key: [OpenWeatherMap][openweathermap-url]                                                    |
+| [Weather](#weather)     | UnitSystem                 | imperial \| metric | imperial             |                                                                                                      |
+| [Weather](#weather)     | Language                   | string             | en                   | 2 digit ISO code                                                                                     |
+| [Weather](#weather)     | ShowWeatherDescription     | boolean            | true                 |                                                                                                      |
+| [Weather](#weather)     | WeatherFontSize            | int                | 36                   | \*Client only.                                                                                       |
+| [Weather](#weather)     | WeatherLatLong             | boolean            | 40.730610,-73.935242 |                                                                                                      |
+| [Clock](#clock)         | ShowClock                  | boolean            | true                 |                                                                                                      |
+| [Clock](#clock)         | ClockFontSize              | int                | 48                   | \*Client only.                                                                                       |
+| [Clock](#clock)         | ClockFormat                | string             | hh:mm                |                                                                                                      |
+| [Metadata](#metadata)   | ShowImageDesc              | boolean            | true                 |                                                                                                      |
+| [Metadata](#metadata)   | ImageDescFontSize          | int                | 3                    | \*Client only.                                                                                       |
+| [Metadata](#metadata)   | ShowImageLocation          | boolean            | true                 |                                                                                                      |
+| [Metadata](#metadata)   | ImageLocationFormat        | string             | City,State,Country   | \*Client only.                                                                                       |
+| [Metadata](#metadata)   | ImageLocationFontSize      | int                | 36                   | \*Client only.                                                                                       |
+| [Metadata](#metadata)   | ShowPhotoDate              | boolean            | true                 |                                                                                                      |
+| [Metadata](#metadata)   | PhotoDateFontSize          | int                | 36                   | \*Client only.                                                                                       |
+| [Metadata](#metadata)   | PhotoDateFormat            | string             | yyyy-MM-dd           |                                                                                                      |
+| [UI](#ui)               | FontColor                  | string             | #FFFFFF              | \*Client only.                                                                                       |
+| [Misc](#misc)           | ImmichFrameAlbumName       | string             |                      | Creates album and stores last 100 photos displayed                                                   |
+| [Misc](#misc)           | Margin                     | string             | 0,0,0,0              | \*Client only. Optionally fine tune margins to adjust for under/over scan                            |
+| [Misc](#misc)           | UnattendedMode             | boolean            | false                | \*Client only. Don't show error messages, silently keep trying                                       |
 
-### Linux
+### Filtering
+You can get the UUIDs from the URL of the album/person. For this URL: `https://demo.immich.app/albums/85c85b29-c95d-4a8b-90f7-c87da1d518ba` this is the UUID: `85c85b29-c95d-4a8b-90f7-c87da1d518ba`
 
-- GUI - Double-click `Immich_Frame`.
-- CLI - CD into folder, and launch with `./Immich_Frame`.
-- SSH - CD into folder, and launch with `DISPLAY=:0.0 ./Immich_Frame`.
-- Ubuntu Desktop - Right-click Immich_Frame, properties, set 'Execute as program' to True, OK. Right-click Immich_Frame, Open with, choose 'Run Software', always use for this file type TRUE.
-- If you get a permissions error run `chmod +x Immich_Frame`.
+### Caching
+Needs documentation
 
-#### Autostart on Raspberry Pi OS
+### Image
+Needs documentation
 
-The latest Raspberry Pi OS, Bookworm uses Wayland as default, but also includes X11. The following assumes standard user is `pi` and you are working on a fresh install of "Raspberry Pi OS with desktop".
-To autostart ImmichFrame in Wayland, run `nano /home/pi/.config/wayfire.ini` in terminal, to add the following at the end.
+### Weather
+Weather is enabled by entering an API key. Get yours free from [OpenWeatherMap][openweathermap-url]
 
-```
-[autostart]
-immichframe=/home/pi/{dir with Immich_Frame}/Immich_Frame
-```
+### Clock
+Needs documentation
 
-Wayland does not have an easy way to hide the cursor. If you want that, then change to X11 as the default desktop session through running `sudo raspi-config` in terminal, then Advanced Options &rarr; Wayland &rarr; X11.
-Then install unclutter:
+### Metadata
+Needs documentation
 
-```
-sudo apt install -y unclutter-xfixes
-```
+### UI
+Needs documentation
 
-After this, copy the default autostart file to your home folder and add a line to enable autostart, by running the following in terminal:
+### Misc
+Needs documentation
 
-```
-cp /etc/xdg/lxsession/LXDE-pi/autostart /home/pi/.config/lxsession/LXDE-pi/autostart
-echo "@/home/pi/{dir with Immich_Frame}/Immich_Frame" > sudo tee /home/pi/.config/lxsession/LXDE-pi/autostart
-```
-
-### Windows
-
-- Double-click `Immich_Frame.exe`.
-- Screensaver - Rename `Immich_Frame.exe` to `Immich_Frame.scr`. Right-click &rarr; Install. Configure screensaver settings and apply.
-  - You will still have to click middle/bottom in the app to exit screensaver.
-
-### MacOS
-
-- GUI - Double-click `Immich_Frame`. Note: If nothing happens, right-click &rarr; open with &rarr; Utilities &rarr; Terminal. Check Always Open With.
-- CLI - CD into folder, and launch with `./Immich_Frame`.
-- If you get a permissions error run `chmod +x Immich_Frame`.
-
-### Android Screensaver
-
-- Run the app normally and configure settings.
-- Go to Settings, Display, Advanced, Screen Saver, Current Screen Saver, choose ImmichFrame. Settings, Display, Advanced, Sleep, choose your sleep timeout. The menu options may differ slightly on different Android versions.
-
-### Android TV Screensaver
-
-- If you are unable to set ImmichFrame as a screen saver you may need to run this ADB command `adb shell settings put secure screensaver_components com.immichframe.immichframe/.ScreenSaverService`
-
-## Settings
-
-There are two options for configuring ImmichFrame; Settings.json (Linux, macOS, Windows), or a GUI based settings screen (all platforms).
-
-### Settings.json
-
-> [!IMPORTANT]  
-> Make sure to copy the **Settings.example.json** and name it **Settings.json**.
-
-1. Rename the `Settings.example.json` file to `Settings.json`
-2. Change `ImmichServerUrl` to your domain or local ip
-   ```json
-   "ImmichServerUrl": "http://yourdomain.com",
-   or
-   "ImmichServerUrl": "192.168.0.100:2283",
-   ```
-3. Change `ApiKey`. Read more about how to obtain an [immich API key][immich-api-url]
-   ```json
-   "ApiKey": "YourApiKey",
-   ```
-4. _Optional:_ Choose albums you would like to display
-
-   ```json
-   "Albums": ["First Album UID","Second Album UID"],
-   ```
-
-   > [!TIP]  
-   > You can get the Album UID from the URL of the album. For this URL: `https://demo.immich.app/albums/85c85b29-c95d-4a8b-90f7-c87da1d518ba` this is the UID: `85c85b29-c95d-4a8b-90f7-c87da1d518ba`
-
-5. _Optional:_ Choose people you would like to display
-
-   ```json
-    "People": ["First Person UID","Second Person UID"],
-   ```
-
-   > [!TIP]  
-   > You can get the Person UID from the URL of the person. For this URL: `https://demo.immich.app/people/faff4d55-e859-4f6c-ae34-80f14da486c7` this is the UID: `faff4d55-e859-4f6c-ae34-80f14da486c7`
-
-6. _Optional:_ Weather is enabled by entering an API key. Get yours free from [OpenWeatherMap][openweathermap-url]
-
-```json
-    "WeatherApiKey": "YourApiKey",
-    "WeatherLatLong": "YourLatitude,YourLongitude",
-```
-
-7. Adjust other settings to your needs
-
-### Settings GUI
-
-The same information as in `Settings.json` will be enterred from this screen. Can be enterred at any time by clicking the upper middle quadrant of the screen (or Up arrow key), see `Interactions` section. Settings can also be backup/restored from here.
-
-<!-- INTERACTIONS -->
-
-## Interactions
-
-### Touch/Mouse
-
-The screen is configured in a 3x3 gird. You can touch or click:
-
-|         -         | **Settings** |         -         |
-| :---------------: | :----------: | :---------------: |
-| **Prev<br>image** |  **Pause**   | **Next<br>image** |
-|         -         |   **Quit**   |         -         |
-
-### Keyboard:
-
-**Settings** - Up arrow <br/>
-**Quit** - Down arrow <br/>
-**Prev Image** - Left arrow <br/>
-**Next Image** - Right arrow <br/>
-**Pause** - Enter/Return <br/>
-
-<!-- ROADMAP -->
-
-## Roadmap
+## 🛣️ Roadmap
 
 - [x] Display random assets
 - [x] Display Albums
 - [x] Display Memories
 - [x] Android build
 - [x] Add License
-- [ ] Web app
+- [x] Web app
 - [ ] Add Additional Templates w/ Examples
 
 See the [open issues](https://github.com/3rob3/ImmichFrame/issues) for a full list of proposed features (and known issues).
 
-<!-- CONTRIBUTING -->
-
-## Contributing
+## ✍ Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
@@ -245,27 +151,19 @@ Don't forget to give the project a star! Thanks again!
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-<!-- LICENSE -->
-
-## License
+## 📜 License
 
 [GNU General Public License v3.0](LICENSE.txt)
 
-<!-- Help -->
+## 🆘 Help
 
-## Help
+[Discord Channel][support-url]
 
-[Discord Channel](https://discord.com/channels/979116623879368755/1217843270244372480)
-
-<!-- ACKNOWLEDGMENTS -->
-
-## Acknowledgments
+## 🙏 Acknowledgments
 
 - BIG thanks to the [immich team][immich-github-url] for creating an awesome tool
-- [Img Shields](https://shields.io)
-- [GitHub Pages](https://pages.github.com)
 
-## Star History
+## 🌟 Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=3rob3/ImmichFrame&type=Date)](https://star-history.com/#3rob3/ImmichFrame&Date)
 
@@ -283,10 +181,7 @@ Don't forget to give the project a star! Thanks again!
 [license-shield]: https://img.shields.io/github/license/3rob3/ImmichFrame.svg?style=for-the-badge
 [license-url]: https://github.com/3rob3/ImmichFrame/blob/master/LICENSE.txt
 [releases-url]: https://github.com/3rob3/ImmichFrame/releases/latest
+[support-url]: https://discord.com/channels/979116623879368755/1217843270244372480
 [openweathermap-url]: https://openweathermap.org/
 [immich-github-url]: https://github.com/immich-app/immich
-[beach-screenshot]: https://github.com/3rob3/ImmichFrame/assets/156599986/a21a28d3-1111-4f35-8d4b-9d6ece84aac1
-[Avalonia]: https://img.shields.io/badge/avalonia-purple?style=for-the-badge&logo=avalonia&logoColor=white
-[Avalonia-url]: https://docs.avaloniaui.net/docs/welcome
 [immich-api-url]: https://immich.app/docs/features/command-line-interface#obtain-the-api-key
-[play-store-link]: https://play.google.com/store/apps/details?id=com.immichframe.immichframe
