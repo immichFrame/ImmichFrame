@@ -16,7 +16,7 @@ FROM base-api AS publish-api
 ARG TARGETARCH
 
 # Publish the app for the target architecture
-RUN dotnet publish --self-contained false -o /app
+RUN dotnet publish --runtime linux-${TARGETARCH} --self-contained false -o /app
 
 # Stage 3: Build frontend with Node.js
 FROM node:18-alpine AS build-node
