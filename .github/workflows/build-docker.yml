@@ -7,9 +7,8 @@ on:
       - "v*"  # Only triggers on versioned tags, e.g., v1.0, v20.15.10
 
 env:
-  # Use docker.io for Docker Hub if empty
-  REGISTRY: docker.io
-  # github.repository as <account>/<repo>
+  # Use ghcr.io
+  REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
 permissions:
@@ -27,7 +26,7 @@ jobs:
         with:
           install: true
 
-      # Login to Docker Hub (or other registry) except on PR
+      # Login to GHCR (or other registry) except on PR
       - name: Log into registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
