@@ -17,9 +17,18 @@ permissions:
 jobs:
   publish_images:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch:
+          - linux/amd64
+          - linux/arm/v7
+          - linux/arm64
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set TARGETARCH
+        run: echo "TARGETARCH=${{ matrix.arch }}" >> $GITHUB_ENV
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -47,7 +56,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          platforms: ${{ matrix.arch }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
