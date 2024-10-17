@@ -8,8 +8,7 @@ WORKDIR /source/ImmichFrame.WebApi
 ARG TARGETARCH
 
 # Restore dependencies with cache
-RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \
-    dotnet restore
+RUN dotnet restore
 
 # Stage 2: Publish .NET API
 FROM base-api AS publish-api
@@ -17,8 +16,7 @@ FROM base-api AS publish-api
 ARG TARGETARCH
 
 # Publish the app for the target architecture
-RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \
-    dotnet publish --runtime linux-${TARGETARCH} --self-contained false -o /app
+RUN dotnet publish --self-contained false -o /app
 
 # Stage 3: Build frontend with Node.js
 FROM node:18-alpine AS build-node
