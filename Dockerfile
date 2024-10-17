@@ -1,5 +1,5 @@
 # Stage 1: Base for building the .NET API
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS base-api
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS base-api
 
 COPY . /source
 WORKDIR /source/ImmichFrame.WebApi
@@ -16,7 +16,7 @@ FROM base-api AS publish-api
 
 # Publish the app for the target architecture
 RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \
-    dotnet publish -a ${TARGETARCH} --use-current-runtime --self-contained false -o /app
+    dotnet publish -a x64 --use-current-runtime --self-contained false -o /app
 
 # Stage 3: Build frontend with Node.js
 FROM node:18-alpine AS build-node
