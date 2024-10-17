@@ -5,7 +5,7 @@ COPY . /source
 WORKDIR /source/ImmichFrame.WebApi
 
 # Set default architecture argument for multi-arch builds
-ARG TARGETARCH=amd64
+ARG TARGETARCH
 
 # Restore dependencies with cache
 RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \
@@ -14,9 +14,11 @@ RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \
 # Stage 2: Publish .NET API
 FROM base-api AS publish-api
 
+ARG TARGETARCH
+
 # Publish the app for the target architecture
 RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \
-    dotnet publish -a arm64 --use-current-runtime --self-contained false -o /app
+    dotnet publish --runtime linux-${TARGETARCH} --self-contained false -o /app
 
 # Stage 3: Build frontend with Node.js
 FROM node:18-alpine AS build-node
