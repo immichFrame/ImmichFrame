@@ -16,7 +16,7 @@ FROM base-api AS publish-api
 
 # Publish the app for the target architecture
 RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \
-    dotnet publish -a x64 --use-current-runtime --self-contained false -o /app
+    dotnet publish -a arm64 --use-current-runtime --self-contained false -o /app
 
 # Stage 3: Build frontend with Node.js
 FROM node:18-alpine AS build-node
