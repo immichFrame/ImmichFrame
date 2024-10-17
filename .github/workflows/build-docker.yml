@@ -10,6 +10,7 @@ env:
   # Use ghcr.io
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  BUILDX_NO_DEFAULT_ATTESTATIONS: 1
 
 permissions:
   packages: write
