@@ -19,7 +19,7 @@ RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \
     dotnet publish -a ${TARGETARCH} --use-current-runtime --self-contained false -o /app
 
 # Stage 3: Build frontend with Node.js
-FROM node:iron-alpine3.18@sha256:53108f67824964a573ea435fed258f6cee4d88343e9859a99d356883e71b490c AS build-node
+FROM node:18-alpine AS build-node
 
 USER node
 WORKDIR /app
