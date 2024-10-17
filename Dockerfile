@@ -26,7 +26,7 @@ WORKDIR /app
 COPY --chown=node:node ./immichFrame.Web/package*.json ./
 
 # Cache npm dependencies
-RUN --mount=type=cache,target=/app/.npm npm ci
+RUN npm ci
 COPY --chown=node:node ./immichFrame.Web ./
 RUN npm run build && npm prune --omit=dev
 
