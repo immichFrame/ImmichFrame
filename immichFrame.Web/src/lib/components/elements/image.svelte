@@ -13,7 +13,7 @@
 	export let showPhotoDate: boolean;
 	export let showImageDesc: boolean;
 
-	let debug = true;
+	let debug = false;
 
 	let transitionDuration = ($configStore.transitionDuration ?? 1) * 1000;
 
@@ -125,13 +125,15 @@
 			{#each asset.people?.map((x) => x.name) ?? [] as _, i}
 				<div
 					class="face z-[900] bg-red-600 absolute"
-					style="top: {GetPosY(i)}%; left: {GetPosX(i)}%; width: {getWidth(i)}%; height: {getHeight(
-						i
-					)}%;"
+					style="top: {GetPosY(i)}%;
+					left: {GetPosX(i)}%;
+					width: {getWidth(i)}%;
+					height: {getHeight(i)}%;"
 				></div>
 				<div
 					class="centerface z-[999] w-1 h-1 bg-blue-600 absolute"
-					style="top: {getCenterY(i)}%; left: {getCenterX(i)}%;"
+					style="top: {getCenterY(i)}%;
+					left: {getCenterX(i)}%;"
 				></div>
 			{/each}
 		{/if}
