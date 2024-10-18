@@ -19,7 +19,7 @@
 
 	let interval = $configStore.interval ?? 1;
 
-	$: hasPerson = asset.people?.length ?? 0 > 0;
+	$: hasPerson = asset.people?.filter((x) => x.name).length ?? 0 > 0;
 
 	function GetFace(i: number) {
 		let person = asset.people as PersonWithFacesResponseDto[];
