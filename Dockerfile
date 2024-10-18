@@ -1,5 +1,5 @@
 # Stage 1: Base for building the .NET API
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS base-api
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS base-api
 
 COPY . /source
 WORKDIR /source/ImmichFrame.WebApi
@@ -31,7 +31,7 @@ COPY --chown=node:node ./immichFrame.Web ./
 RUN npm run build && npm prune --omit=dev
 
 # Stage 4: Final production stage
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS final
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy AS final
 
 WORKDIR /app
 

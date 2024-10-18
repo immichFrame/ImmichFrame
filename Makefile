@@ -14,7 +14,7 @@ dev-update:
 	docker compose -f ./docker/docker-compose.dev.yml up --build -V --remove-orphans
 
 docker-prod:
-	docker build . --target final -t ghcr.io/immichframe/immichframe:main
+	docker buildx build --platform linux/amd64 --no-cache . --target final -t ghcr.io/immichframe/immichframe:main
 	
 prod:
 	docker compose -f ./docker/docker-compose.yml up --build -V --remove-orphans

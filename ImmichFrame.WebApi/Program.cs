@@ -6,6 +6,7 @@ using ImmichFrame.WebApi.Models;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Logging.AddConsole();
 
 // Add services to the container.
 
