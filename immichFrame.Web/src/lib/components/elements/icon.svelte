@@ -17,8 +17,7 @@
 </script>
 
 <svg
-	width={size}
-	height={size}
+	{...size ? { width: size, height: size } : {}}
 	{viewBox}
 	class="{className} {flipped ? '-scale-x-100' : ''}"
 	{role}

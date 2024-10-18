@@ -7,6 +7,7 @@
 	const dispatch = createEventDispatcher();
 
 	export let status: ProgressBarStatus;
+	export let overlayVisible: boolean;
 
 	function clickNext() {
 		dispatch('next');
@@ -22,39 +23,42 @@
 	}
 </script>
 
-<div class="absolute h-full w-full top-0 left-0 z-[100] grid grid-cols-3 gap-2">
-	<div class="group text-center content-center">
-		<button class="opacity-0 group-hover:opacity-100 text-primary" on:click={clickBack}> </button>
-	</div>
-
-	<div class="grid grid-rows-3">
+{#if overlayVisible}
+	<div class="absolute h-full w-full top-0 left-0 z-[100] grid grid-cols-3 gap-2">
 		<div class="group text-center content-center">
-			<button
-				class="justify-center items-center opacity-0 hover:opacity-100 text-primary"
-				on:click={clickSettings}
-			>
-			</button>
+			<button class="opacity-0 group-hover:opacity-100 text-primary" on:click={clickBack}> </button>
+		</div>
+
+		<div class="grid grid-rows-3">
+			<div class="group text-center content-center">
+				<button class="opacity-0 hover:opacity-100 text-primary" on:click={clickSettings}> </button>
+			</div>
+
+			<div class="group text-center content-center">
+				<button on:click={clickPause} class="opacity-0 group-hover:opacity-100 text-primary">
+					<Icon
+						class="max-h-[min(10rem,33vh)] max-w-[min(10rem,33vh)] h-[33vh] w-[33vw]"
+						title={status == ProgressBarStatus.Paused ? 'Play' : 'Pause'}
+						path={status == ProgressBarStatus.Paused ? mdiPlay : mdiPause}
+						size=""
+					/>
+				</button>
+			</div>
+
+			<div class="group text-center content-center">
+				<button class="opacity-0 hover:opacity-100 text-primary"> </button>
+			</div>
 		</div>
 
 		<div class="group text-center content-center">
-			<button on:click={clickPause} class="opacity-0 group-hover:opacity-100 text-primary">
-				<Icon
-					title={status == ProgressBarStatus.Paused ? 'Play' : 'Pause'}
-					path={status == ProgressBarStatus.Paused ? mdiPlay : mdiPause}
-					size="33vh"
+			<button class="opacity-0 group-hover:opacity-100 text-primary" on:click={clickNext}
+				><Icon
+					title="Next"
+					class="max-h-[min(10rem,33vh)] max-w-[min(10rem,33vh)] h-[33vh] w-[33vw]top"
+					path={mdiChevronRight}
+					size=""
 				/>
 			</button>
 		</div>
-
-		<div class="group text-center content-center">
-			<button class="justify-center items-center opacity-0 hover:opacity-100 text-primary">
-			</button>
-		</div>
 	</div>
-
-	<div class="group text-center content-center">
-		<button class="opacity-0 group-hover:opacity-100 text-primary" on:click={clickNext}
-			><Icon title="Next" path={mdiChevronRight} size="33vh" />
-		</button>
-	</div>
-</div>
+{/if}

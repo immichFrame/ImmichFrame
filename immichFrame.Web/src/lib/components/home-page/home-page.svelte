@@ -10,6 +10,7 @@
 	import ImageComponent from '../elements/image-component.svelte';
 	import { configStore } from '$lib/stores/config.store';
 	import ErrorElement from '../elements/error-element.svelte';
+	import Clock from '../elements/clock.svelte';
 
 	let imageData: Blob | null;
 	let assetData: api.AssetResponseDto | null;
@@ -22,6 +23,19 @@
 
 	let unsubscribeRestart: () => void;
 	let unsubscribeStop: () => void;
+
+	let cursorVisible = true;
+	let timeoutId: number;
+
+	const hideCursor = () => {
+		cursorVisible = false;
+	};
+
+	const showCursor = () => {
+		cursorVisible = true;
+		clearTimeout(timeoutId);
+		timeoutId = setTimeout(hideCursor, 2000);
+	};
 
 	async function loadImage() {
 		try {
@@ -47,7 +61,9 @@
 		}
 	}
 
-	onMount(async () => {
+	onMount(() => {
+		window.addEventListener('mousemove', showCursor);
+		window.addEventListener('click', showCursor);
 		unsubscribeRestart = restartProgress.subscribe((value) => {
 			if (value) {
 				progressBar.restart(value);
@@ -60,7 +76,12 @@
 			}
 		});
 
-		await loadImage();
+		loadImage();
+
+		return () => {
+			window.removeEventListener('mousemove', showCursor);
+			window.removeEventListener('click', showCursor);
+		};
 	});
 
 	onDestroy(() => {
@@ -79,18 +100,21 @@
 	};
 </script>
 
-<section class="fixed grid h-screen w-screen bg-black">
+<section class="fixed grid h-screen w-screen bg-black" class:cursor-none={!cursorVisible}>
 	{#if error}
 		<ErrorElement />
 	{:else if imageData && assetData}
 		<ImageComponent
-			showClock={$configStore.showClock}
 			showLocation={$configStore.showImageLocation}
 			showPhotoDate={$configStore.showPhotoDate}
 			showImageDesc={$configStore.showImageDesc}
 			{assetData}
 			{imageData}
 		/>
+
+		{#if $configStore.showClock}
+			<Clock />
+		{/if}
 
 		<OverlayControls
 			on:next={async () => {
@@ -111,6 +135,7 @@
 				}
 			}}
 			bind:status={progressBarStatus}
+			overlayVisible={cursorVisible}
 		/>
 
 		<ProgressBar
