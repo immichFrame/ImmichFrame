@@ -13,46 +13,102 @@
 	export let showPhotoDate: boolean;
 	export let showImageDesc: boolean;
 
+	let debug = true;
+
 	let transitionDuration = ($configStore.transitionDuration ?? 1) * 1000;
 
 	let interval = $configStore.interval ?? 1;
 
 	$: hasPerson = asset.people?.length ?? 0 > 0;
 
-	function GetFace() {
+	function GetFace(i: number) {
 		let person = asset.people as PersonWithFacesResponseDto[];
 
 		person = person.filter((x) => x.name);
 
-		return person[0].faces[0];
+		return person[i].faces[0];
 	}
 
-	function GetPosX() {
+	function GetPosX(i: number) {
 		if (hasPerson) {
-			let face = GetFace();
+			let face = GetFace(i);
+			if (!face) return;
+			return calcPercent(face.boundingBoxX1 ?? 0, face.imageWidth ?? 1);
+		} else {
+			return 0;
+		}
+	}
 
-			let midX = (face.boundingBoxX2 ?? 0) - (face.boundingBoxX1 ?? 0);
+	function GetPosY(i: number) {
+		if (hasPerson) {
+			let face = GetFace(i);
+			if (!face) return;
+			return calcPercent(face.boundingBoxY1 ?? 0, face.imageHeight ?? 1);
+		} else {
+			return 0;
+		}
+	}
+
+	function getCenterX(i: number) {
+		if (hasPerson) {
+			let face = GetFace(i);
+			if (!face) return;
+
+			let midX = ((face.boundingBoxX2 ?? 0) - (face.boundingBoxX1 ?? 0)) / 2;
 
 			let part = (face.boundingBoxX1 ?? 0) + midX;
 
-			return (part / (face.imageWidth ?? 1)) * 100;
+			return calcPercent(part, face.imageWidth ?? 1);
 		} else {
 			return 0;
 		}
 	}
 
-	function GetPosY() {
+	function getCenterY(i: number) {
 		if (hasPerson) {
-			let face = GetFace();
+			let face = GetFace(i);
+			if (!face) return;
 
-			let midY = (face.boundingBoxY2 ?? 0) - (face.boundingBoxY1 ?? 0);
+			let midY = ((face.boundingBoxY2 ?? 0) - (face.boundingBoxY1 ?? 0)) / 2;
 
 			let part = (face.boundingBoxY1 ?? 0) + midY;
 
-			return (part / (face.imageHeight ?? 1)) * 100;
+			return calcPercent(part, face.imageHeight ?? 1);
 		} else {
 			return 0;
 		}
+	}
+
+	function getWidth(i: number) {
+		if (hasPerson) {
+			let face = GetFace(i);
+			if (!face) return;
+
+			return calcPercent(
+				(face.boundingBoxX2 ?? 0) - (face.boundingBoxX1 ?? 0),
+				face.imageWidth ?? 1
+			);
+		} else {
+			return 0;
+		}
+	}
+
+	function getHeight(i: number) {
+		if (hasPerson) {
+			let face = GetFace(i);
+			if (!face) return;
+
+			return calcPercent(
+				(face.boundingBoxY2 ?? 0) - (face.boundingBoxY1 ?? 0),
+				face.imageHeight ?? 1
+			);
+		} else {
+			return 0;
+		}
+	}
+
+	function calcPercent(number1: number, number2: number) {
+		return (number1 / number2) * 100;
 	}
 
 	function zoomEffect() {
@@ -65,8 +121,23 @@
 		transition:fade={{ duration: transitionDuration }}
 		class="absolute place-self-center overflow-hidden"
 	>
+		{#if debug}
+			{#each asset.people?.map((x) => x.name) ?? [] as _, i}
+				<div
+					class="face z-[900] bg-red-600 absolute"
+					style="top: {GetPosY(i)}%; left: {GetPosX(i)}%; width: {getWidth(i)}%; height: {getHeight(
+						i
+					)}%;"
+				></div>
+				<div
+					class="centerface z-[999] w-1 h-1 bg-blue-600 absolute"
+					style="top: {getCenterY(i)}%; left: {getCenterX(i)}%;"
+				></div>
+			{/each}
+		{/if}
+
 		<img
-			style="--interval: {interval + 2}s; --posX: {GetPosX()}%; --posY: {GetPosY()}%;"
+			style="--interval: {interval + 2}s; --posX: {getCenterX(0)}%; --posY: {getCenterY(0)}%;"
 			class="max-h-screen h-screen max-w-full object-contain {$configStore.imageZoom
 				? zoomEffect()
 					? hasPerson
