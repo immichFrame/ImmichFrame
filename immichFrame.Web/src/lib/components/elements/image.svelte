@@ -28,7 +28,7 @@
 	>
 		<img
 			style="--interval: {interval + 2}s;"
-			class="max-h-screen max-w-full object-contain {$configStore.imageZoom
+			class="max-h-screen h-screen max-w-full object-contain {$configStore.imageZoom
 				? zoomEffect()
 					? 'zoom-in'
 					: 'zoom-out'
