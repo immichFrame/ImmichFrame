@@ -254,7 +254,8 @@ namespace ImmichFrame.Core.Logic
                                 Size = batchSize,
                                 PersonIds = new[] { personId },
                                 Type = AssetTypeEnum.IMAGE,
-                                WithExif = true
+                                WithExif = true,
+                                WithPeople = true
                             };
                             var personInfo = await immichApi.SearchMetadataAsync(metadataBody);
 
@@ -315,7 +316,8 @@ namespace ImmichFrame.Core.Logic
                     {
                         Size = 250,
                         Type = AssetTypeEnum.IMAGE,
-                        WithExif = true
+                        WithExif = true,
+                        WithPeople = true
                     };
                     var searchResponse = await immichApi.SearchRandomAsync(searchBody);
 
