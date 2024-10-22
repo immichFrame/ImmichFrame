@@ -11,6 +11,7 @@ namespace ImmichFrame.WebApi.Helpers
             return new Appointment
             {
                 Summary = calEvent.Summary,
+                Description = calEvent.Description,
                 StartTime = calEvent.Start.AsSystemLocal,
                 Duration = calEvent.Duration,
                 EndTime = calEvent.End.AsSystemLocal,
