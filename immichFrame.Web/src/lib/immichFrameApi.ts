@@ -141,6 +141,13 @@ export type AssetResponseDto = {
         [key: string]: any | null;
     } | null;
 };
+export type IAppointment = {
+    startTime?: string;
+    duration?: string;
+    endTime?: string;
+    summary?: string | null;
+    location?: string | null;
+};
 export type WebClientSettings = {
     imageStretch?: string | null;
     margin?: string | null;
@@ -186,6 +193,14 @@ export function getImage(id: string, opts?: Oazapfts.RequestOpts) {
         status: 200;
         data: Blob;
     }>(`/api/Asset/${encodeURIComponent(id)}`, {
+        ...opts
+    });
+}
+export function getAppointments(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: IAppointment[];
+    }>("/api/Calendar", {
         ...opts
     });
 }

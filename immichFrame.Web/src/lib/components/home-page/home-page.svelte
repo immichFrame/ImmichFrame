@@ -11,6 +11,7 @@
 	import { configStore } from '$lib/stores/config.store';
 	import ErrorElement from '../elements/error-element.svelte';
 	import Clock from '../elements/clock.svelte';
+	import Appointments from '../elements/appointments.svelte';
 
 	let imageData: Blob | null;
 	let assetData: api.AssetResponseDto | null;
@@ -115,6 +116,8 @@
 		{#if $configStore.showClock}
 			<Clock />
 		{/if}
+
+		<Appointments />
 
 		<OverlayControls
 			on:next={async () => {
