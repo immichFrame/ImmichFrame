@@ -6,7 +6,6 @@
 
 	function formattedDate(time: string) {
 		let date = new Date(time);
-		console.log(date);
 		return format(date, $configStore.clockFormat ?? 'HH:mm');
 	}
 
@@ -34,12 +33,24 @@
 </script>
 
 {#if appointments}
-	<div class="absolute top-0 right-0 z-10 text-center text-primary">
-		<h2 class="text-4xl">calendar</h2>
-		{#each appointments as appointment}
-			<div>
-				{formattedDate(appointment.startTime ?? '')} - {formattedDate(appointment.endTime ?? '')}, {appointment.summary}
-			</div>
-		{/each}
+	<div
+		class="absolute top-0 right-0 w-auto z-10 text-center text-primary m-5 max-w-[20%] hidden lg:block md:min-w-[10%]"
+	>
+		<!-- <div class="text-4xl mx-8 font-bold">Appointments</div> -->
+		<div class="">
+			{#each appointments as appointment}
+				<div class="bg-gray-600 bg-opacity-90 mb-2 text-left rounded-md p-3">
+					<p class="text-xs">
+						{formattedDate(appointment.startTime ?? '')} - {formattedDate(
+							appointment.endTime ?? ''
+						)}
+					</p>
+					{appointment.summary}
+					{#if appointment.description}
+						<p class="text-xs font-light">{appointment.description}</p>
+					{/if}
+				</div>
+			{/each}
+		</div>
 	</div>
 {/if}

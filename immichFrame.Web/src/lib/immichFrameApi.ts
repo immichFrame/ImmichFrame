@@ -146,6 +146,7 @@ export type IAppointment = {
     duration?: string;
     endTime?: string;
     summary?: string | null;
+    description?: string | null;
     location?: string | null;
 };
 export type WebClientSettings = {
