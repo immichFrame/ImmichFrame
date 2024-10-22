@@ -19,7 +19,23 @@ namespace ImmichFrame.WebApi.Helpers
             var type = prop.PropertyType;
             if (type == typeof(List<Guid>))
             {
-                prop.SetValue(settings, value.ToString()?.Split(',').Select(x => new Guid(x)).ToList());
+                if (string.IsNullOrEmpty(value))
+                {
+                    prop.SetValue(settings, new List<Guid>());
+                    return;
+                }
+
+                prop.SetValue(settings, value.ToString()?.Split(',').Select(x => new Guid(x.Trim())).ToList());
+            }
+            else if (type == typeof(List<string>))
+            {
+                if (string.IsNullOrEmpty(value))
+                {
+                    prop.SetValue(settings, new List<string>());
+                    return;
+                }
+
+                prop.SetValue(settings, value.ToString()?.Split(',').Select(x => x.Trim()).ToList());
             }
             else if (type == typeof(string))
             {

@@ -45,6 +45,7 @@ namespace ImmichFrame.Models
         public List<Guid> Albums { get; set; } = new List<Guid>();
         public List<Guid> ExcludedAlbums { get; set; } = new List<Guid>();
         public List<Guid> People { get; set; } = new List<Guid>();
+        public List<string> Webcalendars { get; set; } = new List<string>();
         public int RefreshAlbumPeopleInterval { get; set; } = 12;
         [JsonIgnore]
         public bool UseImmichFrameAlbum => !string.IsNullOrWhiteSpace(ImmichFrameAlbumName);

@@ -11,6 +11,7 @@
   "Albums": [ "" ],
   "ExcludedAlbums": [ "" ],
   "People": [ "" ],
+  "Webcalendars": [ "" ],
   "RefreshAlbumPeopleInterval": 12,
   "ImmichFrameAlbumName": "",
   "ShowClock": true,

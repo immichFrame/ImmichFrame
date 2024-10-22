@@ -11,6 +11,7 @@
         public List<Guid> Albums { get; set; }
         public List<Guid> ExcludedAlbums { get; set; }
         public List<Guid> People { get; set; }
+        public List<string> Webcalendars { get; set; }
         public int RefreshAlbumPeopleInterval { get; set; }
         public string ImmichFrameAlbumName { get; set; }
         public string? WeatherApiKey { get; set; }
