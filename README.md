@@ -65,42 +65,43 @@ ImmichFrame is easy to run on your desired plattform. Get the latest stable rele
 
 ## ⚙️ Configuration
 
-| **Section**             | **Config-Key**             | **Value**          | **Default**          | **Description**                                                                                      |
-| ----------------------- | -------------------------- | ------------------ | -------------------- | ---------------------------------------------------------------------------------------------------- |
-| **Required**            | **ImmichServerUrl**        | **string**         |                      | **The URL of your Immich server e.g. `http://photos.yourdomain.com` / `http://192.168.0.100:2283`.** |
-| **Required**            | **ApiKey**                 | **string**         |                      | **Read more about how to obtain an [immich API key][immich-api-url].**                               |
-| [Filtering](#filtering) | Albums                     | string[]           | []                   | UUID of album(s)                                                                                     |
-| [Filtering](#filtering) | ExcludedAlbums             | string[]           | []                   | UUID of excluded album(s)                                                                            |
-| [Filtering](#filtering) | People                     | string[]           | []                   | UUID of person(s)                                                                                    |
-| [Filtering](#filtering) | ShowMemories               | boolean            | false                | If this is set, memories are displayed.                                                              |
-| [Caching](#caching)     | RenewImagesDuration        | int                | 30                   | Interval in hours.                                                                                   |
-| [Caching](#caching)     | DownloadImages             | boolean            | false                | \*Client only.                                                                                       |
-| [Caching](#caching)     | RefreshAlbumPeopleInterval | int                | 12                   | Interval in hours. Determines how often images are pulled from a person in immich.                   |
-| [Image](#image)         | ImageZoom                  | boolean            | true                 | Zooms into or out of an image and gives it a touch of life.                                          |
-| [Image](#image)         | Interval                   | int                | 45                   | Image interval in seconds. How long a image is displayed in the frame.                               |
-| [Image](#image)         | TransitionDuration         | int                | 2                    | Duration in seconds.                                                                                 |
-| [Image](#image)         | ImageStretch               | int                | Uniform              | \*Client only.                                                                                       |
-| [Weather](#weather)     | WeatherApiKey              | string             |                      | Get api-key: [OpenWeatherMap][openweathermap-url].                                                   |
-| [Weather](#weather)     | UnitSystem                 | imperial \| metric | imperial             | Imperial or metric system. (Fahrenheit or degrees)                                                   |
-| [Weather](#weather)     | Language                   | string             | en                   | 2 digit ISO code, sets the language of the weather description.                                      |
-| [Weather](#weather)     | ShowWeatherDescription     | boolean            | true                 | Displays the description of the current weather.                                                     |
-| [Weather](#weather)     | WeatherFontSize            | int                | 36                   | \*Client only.                                                                                       |
-| [Weather](#weather)     | WeatherLatLong             | boolean            | 40.730610,-73.935242 | Set the weather location with lat/lon.                                                               |
-| [Clock](#clock)         | ShowClock                  | boolean            | true                 | Displays the current time.                                                                           |
-| [Clock](#clock)         | ClockFontSize              | int                | 48                   | \*Client only.                                                                                       |
-| [Clock](#clock)         | ClockFormat                | string             | hh:mm                | Time format.                                                                                         |
-| [Metadata](#metadata)   | ShowImageDesc              | boolean            | true                 | Displays the description of the current image.                                                       |
-| [Metadata](#metadata)   | ImageDescFontSize          | int                | 3                    | \*Client only.                                                                                       |
-| [Metadata](#metadata)   | ShowImageLocation          | boolean            | true                 | Displays the location of the current image.                                                          |
-| [Metadata](#metadata)   | ImageLocationFormat        | string             | City,State,Country   | \*Client only.                                                                                       |
-| [Metadata](#metadata)   | ImageLocationFontSize      | int                | 36                   | \*Client only.                                                                                       |
-| [Metadata](#metadata)   | ShowPhotoDate              | boolean            | true                 | Displays the date of the current image.                                                              |
-| [Metadata](#metadata)   | PhotoDateFontSize          | int                | 36                   | \*Client only.                                                                                       |
-| [Metadata](#metadata)   | PhotoDateFormat            | string             | yyyy-MM-dd           | Date format.                                                                                         |
-| [UI](#ui)               | FontColor                  | string             | #FFFFFF              | \*Client only.                                                                                       |
-| [Misc](#misc)           | ImmichFrameAlbumName       | string             |                      | Creates album and stores last 100 photos displayed.                                                  |
-| [Misc](#misc)           | Margin                     | string             | 0,0,0,0              | \*Client only. Optionally fine tune margins to adjust for under/over scan.                           |
-| [Misc](#misc)           | UnattendedMode             | boolean            | false                | \*Client only. Don't show error messages, silently keep trying.                                      |
+| **Section**             | **Config-Key**             | **Value**          | **Default**          | **Description**                                                                                                       |
+| ----------------------- | -------------------------- | ------------------ | -------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| **Required**            | **ImmichServerUrl**        | **string**         |                      | **The URL of your Immich server e.g. `http://photos.yourdomain.com` / `http://192.168.0.100:2283`.**                  |
+| **Required**            | **ApiKey**                 | **string**         |                      | **Read more about how to obtain an [immich API key][immich-api-url].**                                                |
+| [Filtering](#filtering) | Albums                     | string[]           | []                   | UUID of album(s)                                                                                                      |
+| [Filtering](#filtering) | ExcludedAlbums             | string[]           | []                   | UUID of excluded album(s)                                                                                             |
+| [Filtering](#filtering) | People                     | string[]           | []                   | UUID of person(s)                                                                                                     |
+| [Filtering](#filtering) | ShowMemories               | boolean            | false                | If this is set, memories are displayed.                                                                               |
+| [Caching](#caching)     | RenewImagesDuration        | int                | 30                   | Interval in hours.                                                                                                    |
+| [Caching](#caching)     | DownloadImages             | boolean            | false                | \*Client only.                                                                                                        |
+| [Caching](#caching)     | RefreshAlbumPeopleInterval | int                | 12                   | Interval in hours. Determines how often images are pulled from a person in immich.                                    |
+| [Image](#image)         | ImageZoom                  | boolean            | true                 | Zooms into or out of an image and gives it a touch of life.                                                           |
+| [Image](#image)         | Interval                   | int                | 45                   | Image interval in seconds. How long a image is displayed in the frame.                                                |
+| [Image](#image)         | TransitionDuration         | int                | 2                    | Duration in seconds.                                                                                                  |
+| [Image](#image)         | ImageStretch               | int                | Uniform              | \*Client only.                                                                                                        |
+| [Weather](#weather)     | WeatherApiKey              | string             |                      | Get api-key: [OpenWeatherMap][openweathermap-url].                                                                    |
+| [Weather](#weather)     | UnitSystem                 | imperial \| metric | imperial             | Imperial or metric system. (Fahrenheit or degrees)                                                                    |
+| [Weather](#weather)     | Language                   | string             | en                   | 2 digit ISO code, sets the language of the weather description.                                                       |
+| [Weather](#weather)     | ShowWeatherDescription     | boolean            | true                 | Displays the description of the current weather.                                                                      |
+| [Weather](#weather)     | WeatherFontSize            | int                | 36                   | \*Client only.                                                                                                        |
+| [Weather](#weather)     | WeatherLatLong             | boolean            | 40.730610,-73.935242 | Set the weather location with lat/lon.                                                                                |
+| [Clock](#clock)         | ShowClock                  | boolean            | true                 | Displays the current time.                                                                                            |
+| [Clock](#clock)         | ClockFontSize              | int                | 48                   | \*Client only.                                                                                                        |
+| [Clock](#clock)         | ClockFormat                | string             | hh:mm                | Time format.                                                                                                          |
+| [Calendar](#calendar)   | Webcalendar                | string[]           | []                   | A list of webcalendar URIs in the .ics format. e.g. https://calendar.google.com/calendar/ical/XXXXXX/public/basic.ics |
+| [Metadata](#metadata)   | ShowImageDesc              | boolean            | true                 | Displays the description of the current image.                                                                        |
+| [Metadata](#metadata)   | ImageDescFontSize          | int                | 3                    | \*Client only.                                                                                                        |
+| [Metadata](#metadata)   | ShowImageLocation          | boolean            | true                 | Displays the location of the current image.                                                                           |
+| [Metadata](#metadata)   | ImageLocationFormat        | string             | City,State,Country   | \*Client only.                                                                                                        |
+| [Metadata](#metadata)   | ImageLocationFontSize      | int                | 36                   | \*Client only.                                                                                                        |
+| [Metadata](#metadata)   | ShowPhotoDate              | boolean            | true                 | Displays the date of the current image.                                                                               |
+| [Metadata](#metadata)   | PhotoDateFontSize          | int                | 36                   | \*Client only.                                                                                                        |
+| [Metadata](#metadata)   | PhotoDateFormat            | string             | yyyy-MM-dd           | Date format.                                                                                                          |
+| [UI](#ui)               | FontColor                  | string             | #FFFFFF              | \*Client only.                                                                                                        |
+| [Misc](#misc)           | ImmichFrameAlbumName       | string             |                      | Creates album and stores last 100 photos displayed.                                                                   |
+| [Misc](#misc)           | Margin                     | string             | 0,0,0,0              | \*Client only. Optionally fine tune margins to adjust for under/over scan.                                            |
+| [Misc](#misc)           | UnattendedMode             | boolean            | false                | \*Client only. Don't show error messages, silently keep trying.                                                       |
 
 ### Filtering
 You can get the UUIDs from the URL of the album/person. For this URL: `https://demo.immich.app/albums/85c85b29-c95d-4a8b-90f7-c87da1d518ba` this is the UUID: `85c85b29-c95d-4a8b-90f7-c87da1d518ba`
@@ -116,6 +117,9 @@ Weather is enabled by entering an API key. Get yours free from [OpenWeatherMap][
 
 ### Clock
 Needs documentation
+
+### Calendar
+If you are using Google Calendar, more information can be found [here](https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Cget-your-calendar-view-only).
 
 ### Metadata
 Needs documentation

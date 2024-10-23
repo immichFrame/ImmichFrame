@@ -5,6 +5,10 @@ using ImmichFrame.Core.Exceptions;
 using System.Data;
 using OpenWeatherMap.Models;
 using OpenWeatherMap;
+using Ical.Net;
+using Ical.Net.CalendarComponents;
+using ImmichFrame.WebApi.Helpers;
+using ImmichFrame.Core.Models;
 
 namespace ImmichFrame.Core.Logic
 {
@@ -27,7 +31,7 @@ namespace ImmichFrame.Core.Logic
         {
             get
             {
-                if(_excludedAlbumAssets == null)
+                if (_excludedAlbumAssets == null)
                     _excludedAlbumAssets = GetExcludedAlbumAssets();
 
                 return _excludedAlbumAssets;
@@ -228,7 +232,7 @@ namespace ImmichFrame.Core.Logic
                 allAssets.AddRange(await GetAlbumAssets(albumId, immichApi));
             }
 
-            return allAssets.Select(x=>Guid.Parse(x.Id));
+            return allAssets.Select(x => Guid.Parse(x.Id));
         }
         private async Task<IEnumerable<AssetResponseDto>> GetPeopleAssets()
         {
@@ -375,6 +379,55 @@ namespace ImmichFrame.Core.Logic
             }
 
             return null;
+        }
+
+        private (DateTime fetchDate, List<string> calendars)? lastCalendars;
+        public async Task<List<string>> GetCalendars()
+        {
+            if(lastCalendars != null && lastCalendars.Value.fetchDate.AddMinutes(15) > DateTime.Now)
+            {
+                return lastCalendars.Value.calendars;
+            }
+
+            var icals = new List<string>();
+
+            foreach (var webcal in _settings.Webcalendars)
+            {
+                string httpUrl = webcal.Replace("webcal://", "https://");
+
+                using (HttpClient client = new HttpClient())
+                {
+                    HttpResponseMessage response = await client.GetAsync(httpUrl);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        icals.Add(await response.Content.ReadAsStringAsync());
+                    }
+                    else
+                    {
+                        throw new Exception("Failed to load calendar data");
+                    }
+                }
+            }
+
+            lastCalendars = (DateTime.Now, icals);
+
+            return icals;
+        }
+
+        public async Task<List<IAppointment>> GetAppointments()
+        {
+            var appointments = new List<IAppointment>();
+
+            var icals = await GetCalendars();
+
+            foreach (var ical in icals)
+            {
+                var calendar = Calendar.Load(ical);
+
+                appointments.AddRange(calendar.Events.Where(x => x.DtStart.Date == DateTime.Today).Select(x => x.ToAppointment()).ToList());
+            }
+
+            return appointments;
         }
     }
 }
