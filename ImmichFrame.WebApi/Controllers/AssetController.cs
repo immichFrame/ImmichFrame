@@ -19,9 +19,9 @@ namespace ImmichFrame.WebApi.Controllers
         }
 
         [HttpGet(Name = "GetAsset")]
-        public async Task<AssetResponseDto> GetAsset()
+        public async Task<List<AssetResponseDto>> GetAsset()
         {
-            return await _logic.GetNextAsset();
+            return await _logic.GetAssets();
         }
 
         [HttpGet("{id}", Name = "GetImage")]
