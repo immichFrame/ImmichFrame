@@ -184,7 +184,7 @@ export type IWeather = {
 export function getAsset(opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
         status: 200;
-        data: AssetResponseDto;
+        data: AssetResponseDto[];
     }>("/api/Asset", {
         ...opts
     });
