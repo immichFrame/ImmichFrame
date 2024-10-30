@@ -12,9 +12,10 @@
 	import ErrorElement from '../elements/error-element.svelte';
 	import Clock from '../elements/clock.svelte';
 	import Appointments from '../elements/appointments.svelte';
+	import LoadingElement from '../elements/LoadingElement.svelte';
 
-	let imageData: Blob | null;
-	let assetData: api.AssetResponseDto | null;
+	let assetData: api.AssetResponseDto[];
+	let nextAssets: api.AssetResponseDto[];
 
 	const { restartProgress, stopProgress } = slideshowStore;
 
@@ -38,28 +39,49 @@
 		timeoutId = setTimeout(hideCursor, 2000);
 	};
 
-	async function loadImage() {
+	async function loadAssets() {
 		try {
 			let assetRequest = await api.getAsset();
 			if (assetRequest.status != 200) {
-				assetData = null;
 				error = true;
-				return;
-			}
-
-			let imageRequest = await api.getImage(assetRequest.data.id);
-			if (imageRequest.status != 200) {
-				error = true;
-				imageData = null;
 				return;
 			}
 
 			error = false;
-			imageData = imageRequest.data;
 			assetData = assetRequest.data;
 		} catch {
 			error = true;
 		}
+	}
+
+	const handleDone = async () => {
+		await getNextAssets();
+		progressBar.restart(true);
+	};
+
+	async function getNextAssets() {
+		if (!assetData || assetData.length < 10) {
+			await loadAssets();
+		}
+
+		let next: api.AssetResponseDto[];
+		if (isHorizontal(assetData[0]) && isHorizontal(assetData[1])) {
+			next = assetData.splice(0, 2);
+		} else {
+			next = assetData.splice(0, 1);
+		}
+		assetData = [...assetData];
+		nextAssets = next;
+	}
+
+	function isHorizontal(asset: api.AssetResponseDto) {
+		const isFlipped = (orientation: number) => [5, 6, 7, 8].includes(orientation);
+		let imageHeight = asset.exifInfo?.exifImageHeight ?? 0;
+		let imageWidth = asset.exifInfo?.exifImageWidth ?? 0;
+		if (isFlipped(Number(asset.exifInfo?.orientation ?? 0))) {
+			[imageHeight, imageWidth] = [imageWidth, imageHeight];
+		}
+		return imageHeight > imageWidth; // or imageHeight > imageWidth * 1.25;
 	}
 
 	onMount(() => {
@@ -77,7 +99,7 @@
 			}
 		});
 
-		loadImage();
+		getNextAssets();
 
 		return () => {
 			window.removeEventListener('mousemove', showCursor);
@@ -94,23 +116,17 @@
 			unsubscribeStop();
 		}
 	});
-
-	const handleDone = async () => {
-		await loadImage();
-		progressBar.restart(true);
-	};
 </script>
 
 <section class="fixed grid h-screen w-screen bg-black" class:cursor-none={!cursorVisible}>
 	{#if error}
 		<ErrorElement />
-	{:else if imageData && assetData}
+	{:else if nextAssets}
 		<ImageComponent
 			showLocation={$configStore.showImageLocation}
 			showPhotoDate={$configStore.showPhotoDate}
 			showImageDesc={$configStore.showImageDesc}
-			{assetData}
-			{imageData}
+			sourceAssets={nextAssets}
 		/>
 
 		{#if $configStore.showClock}
@@ -122,12 +138,12 @@
 		<OverlayControls
 			on:next={async () => {
 				progressBar.restart(false);
-				await loadImage();
+				await getNextAssets();
 				progressBar.restart(true);
 			}}
 			on:back={async () => {
 				progressBar.restart(false);
-				await loadImage();
+				await getNextAssets();
 				progressBar.restart(true);
 			}}
 			on:pause={async () => {
@@ -151,13 +167,6 @@
 			on:done={handleDone}
 		/>
 	{:else}
-		<div class="place-self-center">
-			<img
-				id="logo"
-				class="h-[50vh] sm:h-[50vh] md:h-[40vh] lg:h-[30vh]"
-				src="/logo.svg"
-				alt="logo"
-			/>
-		</div>
+		<LoadingElement />
 	{/if}
 </section>

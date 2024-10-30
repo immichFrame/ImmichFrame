@@ -3,12 +3,9 @@ using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.Core.Exceptions;
 using System.Data;
-using OpenWeatherMap.Models;
 using OpenWeatherMap;
 using Ical.Net;
-using Ical.Net.CalendarComponents;
 using ImmichFrame.WebApi.Helpers;
-using ImmichFrame.Core.Models;
 
 namespace ImmichFrame.Core.Logic
 {
@@ -51,6 +48,17 @@ namespace ImmichFrame.Core.Logic
 
                 return _filteredAssetInfos;
             }
+        }
+
+        private int _assetAmount = 250;
+        public async Task<List<AssetResponseDto>> GetAssets()
+        {
+            if ((await FilteredAssetInfos) != null)
+            {
+                return await GetRandomFilteredAssets();
+            }
+
+            return await GetRandomAssets();
         }
 
         public async Task<AssetResponseDto> GetNextAsset()
@@ -293,8 +301,34 @@ namespace ImmichFrame.Core.Logic
 
             return filteredAssetInfos.ElementAt(rnd).Value;
         }
+        private async Task<List<AssetResponseDto>> GetRandomFilteredAssets()
+        {
+            var filteredAssetInfos = await FilteredAssetInfos;
+            if (filteredAssetInfos == null || !filteredAssetInfos.Any())
+                return new List<AssetResponseDto>();
+
+            return filteredAssetInfos.OrderBy(asset => _random.Next(filteredAssetInfos.Count)).Take(_assetAmount).Select(x=>x.Value).ToList();
+        }
 
         List<AssetResponseDto> RandomAssetList = new List<AssetResponseDto>();
+        private async Task<List<AssetResponseDto>> GetRandomAssets()
+        {
+            if (RandomAssetList.Any())
+            {
+                var assets = new List<AssetResponseDto>(RandomAssetList);
+                RandomAssetList.Clear();
+
+                return assets;
+            }
+
+            if(await LoadRandomAssets())
+            {
+                return await GetRandomAssets();
+            }
+
+            return new List<AssetResponseDto>();
+        }
+
         private async Task<AssetResponseDto?> GetRandomAsset()
         {
             if (RandomAssetList.Any())
@@ -309,6 +343,16 @@ namespace ImmichFrame.Core.Logic
                 return randomAsset;
             }
 
+            if (await LoadRandomAssets())
+            {
+                return await GetRandomAsset();
+            }
+
+            return null;
+        }
+
+        private async Task<bool> LoadRandomAssets()
+        {
             using (var client = new HttpClient())
             {
                 client.UseApiKey(_settings.ApiKey);
@@ -318,7 +362,7 @@ namespace ImmichFrame.Core.Logic
                 {
                     var searchBody = new RandomSearchDto
                     {
-                        Size = 250,
+                        Size = _assetAmount,
                         Type = AssetTypeEnum.IMAGE,
                         WithExif = true,
                         WithPeople = true
@@ -335,17 +379,18 @@ namespace ImmichFrame.Core.Logic
 
                         RandomAssetList.AddRange(randomAssets);
 
-                        return await GetRandomAsset();
+                        return true;
                     }
                 }
                 catch (ApiException ex)
                 {
                     throw new PersonNotFoundException($"Asset was not found, check your settings file!{Environment.NewLine}{Environment.NewLine}{ex.Message}", ex);
                 }
-            }
 
-            return null;
+                return false;
+            }
         }
+
 
         public Task<IWeather?> GetWeather()
         {
