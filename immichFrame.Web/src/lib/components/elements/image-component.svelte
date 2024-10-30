@@ -66,18 +66,18 @@
 	<ErrorElement />
 {:else if loaded}
 	{#key images}
-		<div class="grid absolute h-full w-full" transition:fade={{ duration: transitionDuration }}>
+		<div class="grid absolute" transition:fade={{ duration: transitionDuration }}>
 			{#if split}
 				<div class="grid grid-cols-2">
-					<div class="grid border-r-2 border-primary">
+					<div class="relative grid border-r-2 border-primary h-screen">
 						<Image multi={true} image={images[0]} {showLocation} {showPhotoDate} {showImageDesc} />
 					</div>
-					<div class="grid border-l-2 border-primary">
+					<div class="relative grid border-l-2 border-primary h-screen">
 						<Image multi={true} image={images[1]} {showLocation} {showPhotoDate} {showImageDesc} />
 					</div>
 				</div>
 			{:else}
-				<div class="grid grid-cols-2">
+				<div class="relative grid h-screen w-screen">
 					<Image image={images[0]} {showLocation} {showPhotoDate} {showImageDesc} />
 				</div>
 			{/if}

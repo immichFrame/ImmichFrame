@@ -112,7 +112,7 @@
 	}
 </script>
 
-<div class="absolute place-self-center overflow-hidden">
+<div class="place-self-center overflow-hidden">
 	{#if debug}
 		{#each image[1].people?.map((x) => x.name) ?? [] as _, i}
 			<div
@@ -144,8 +144,8 @@
 		src={image[0]}
 		alt="data"
 	/>
-	<AssetInfo asset={image[1]} {showLocation} {showPhotoDate} {showImageDesc} />
 </div>
+<AssetInfo asset={image[1]} {showLocation} {showPhotoDate} {showImageDesc} />
 <img
 	class="absolute flex w-full h-full z-[-1]"
 	src={thumbHashToDataURL(decodeBase64(image[1].thumbhash ?? ''))}
