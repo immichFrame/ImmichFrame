@@ -39,7 +39,8 @@
 		<div>
 			<div class="text-3xl font-semibold">
 				{weather.location},
-				{weather.temperatureUnit}
+				{weather.temperature?.toFixed(1)}
+				{weather.unit}
 			</div>
 			{#if $configStore.showWeatherDescription}
 				<p>{weather.description}</p>
