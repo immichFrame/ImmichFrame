@@ -21,7 +21,43 @@
 	function clickSettings() {
 		// dispatch('settings');
 	}
+
+	function shortcuts(node: any, shortcutList: any[]) {
+		function handleKeyDown(event: { key: any; preventDefault: () => void }) {
+			const shortcut = shortcutList.find((s) => s.key === event.key);
+			if (shortcut && shortcut.action) {
+				event.preventDefault();
+				shortcut.action();
+			}
+		}
+
+		window.addEventListener('keydown', handleKeyDown);
+
+		return {
+			destroy() {
+				window.removeEventListener('keydown', handleKeyDown);
+			}
+		};
+	}
+
+	// Define your shortcut list
+	const shortcutList = [
+		{
+			key: 'ArrowRight',
+			action: clickNext
+		},
+		{
+			key: 'ArrowLeft',
+			action: clickBack
+		},
+		{
+			key: ' ',
+			action: clickPause
+		}
+	];
 </script>
+
+<svelte:window use:shortcuts={shortcutList} />
 
 {#if overlayVisible}
 	<div class="absolute h-full w-full top-0 left-0 z-[100] grid grid-cols-3 gap-2">
