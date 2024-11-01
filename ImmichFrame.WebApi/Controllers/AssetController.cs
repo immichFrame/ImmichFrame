@@ -1,4 +1,5 @@
 using ImmichFrame.Core.Api;
+using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.Core.Logic;
 using Microsoft.AspNetCore.Mvc;
@@ -21,7 +22,7 @@ namespace ImmichFrame.WebApi.Controllers
         [HttpGet(Name = "GetAsset")]
         public async Task<List<AssetResponseDto>> GetAsset()
         {
-            return await _logic.GetAssets();
+            return await _logic.GetNextAsset() ?? throw new AssetNotFoundException("No asset was found");
         }
 
         [HttpGet("{id}", Name = "GetImage")]
