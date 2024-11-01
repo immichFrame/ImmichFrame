@@ -1,7 +1,7 @@
 # This workflow will build a .NET project
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
 
-name: Build Desktop & Android
+name: Build Desktop
 
 on:
   push:
@@ -29,20 +29,3 @@ jobs:
     - name: Test ImmichFrame.Desktop
       run: dotnet test --no-build --verbosity normal
       working-directory: ImmichFrame.Desktop
-    - name: Set Up Android tools
-      run: |
-        ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager \
-        --sdk_root=$ANDROID_SDK_ROOT \
-        "platform-tools"
-    - name: Restore workload ImmichFrame.Android
-      run: dotnet workload restore
-      working-directory: ImmichFrame.Android
-    - name: Restore ImmichFrame.Android dependencies
-      run: dotnet restore
-      working-directory: ImmichFrame.Android
-    - name: Build ImmichFrame.Android
-      run: dotnet build --no-restore
-      working-directory: ImmichFrame.Android
-    - name: Test ImmichFrame.Android
-      run: dotnet test --no-build --verbosity normal
-      working-directory: ImmichFrame.Android

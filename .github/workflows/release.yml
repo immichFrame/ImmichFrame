@@ -46,12 +46,7 @@ jobs:
 
           # Build everything
           if [ "${{ matrix.kind }}" == "android" ]; then
-            # Android Build
-            ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager \
-            --sdk_root=$ANDROID_SDK_ROOT \
-            "platform-tools"
-            dotnet workload restore --project ./ImmichFrame.Android/ImmichFrame.Android.csproj
-            dotnet publish ./ImmichFrame.Android/ImmichFrame.Android.csproj -p:DebugType=None -c Release -o "$release_name"
+            # Do nothing for now
           else
             # Desktop Build
             dotnet publish ./ImmichFrame.Desktop/ImmichFrame.Desktop.csproj --runtime "${{ matrix.target }}" -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=None -c Release -o "$release_name" --self-contained true
@@ -62,8 +57,7 @@ jobs:
             # Pack to zip for Windows
             7z a -tzip "${release_name}.zip" "./${release_name}/*"
           elif [ "${{ matrix.target }}" == "android" ]; then
-            # Move apk
-            mv $release_name/* .
+            # Do nothing for now
           else
             tar czvf "${release_name}.tar.gz" "$release_name"
           fi
