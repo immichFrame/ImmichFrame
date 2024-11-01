@@ -60,12 +60,12 @@
 	};
 
 	async function getNextAssets() {
-		if (!assetData || assetData.length < 10) {
+		if (!assetData || assetData.length < 1) {
 			await loadAssets();
 		}
 
 		let next: api.AssetResponseDto[];
-		if (isHorizontal(assetData[0]) && isHorizontal(assetData[1])) {
+		if (assetData.length > 1 && isHorizontal(assetData[0]) && isHorizontal(assetData[1])) {
 			next = assetData.splice(0, 2);
 		} else {
 			next = assetData.splice(0, 1);
