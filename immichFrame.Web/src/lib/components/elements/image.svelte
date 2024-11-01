@@ -46,7 +46,7 @@
 	}
 
 	function getCenterX(i: number) {
-		if (hasPerson) {
+		if (hasPerson && $configStore.imageZoom) {
 			let face = GetFace(i);
 			if (!face) return;
 
@@ -61,7 +61,7 @@
 	}
 
 	function getCenterY(i: number) {
-		if (hasPerson) {
+		if (hasPerson && $configStore.imageZoom) {
 			let face = GetFace(i);
 			if (!face) return;
 
@@ -132,7 +132,9 @@
 
 	<img
 		style="--interval: {interval + 2}s; --posX: {getCenterX(0)}%; --posY: {getCenterY(0)}%;"
-		class="{multi ? '' : 'max-h-screen h-screen max-w-full'} object-contain {$configStore.imageZoom
+		class="{multi
+			? 'w-screen'
+			: 'max-h-screen h-screen max-w-full'} object-contain {$configStore.imageZoom
 			? zoomEffect()
 				? hasPerson
 					? 'zoom-in-person'
