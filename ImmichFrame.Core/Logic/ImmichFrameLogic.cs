@@ -307,6 +307,11 @@ namespace ImmichFrame.Core.Logic
             if (filteredAssetInfos == null || !filteredAssetInfos.Any())
                 return new List<AssetResponseDto>();
 
+            // If only memories, do not return random and order by date
+            if (_settings.ShowMemories && !_settings.Albums.Any() && !_settings.People.Any())
+                return filteredAssetInfos.OrderBy(x=>x.Value.ExifInfo.DateTimeOriginal).Select(x=>x.Value).ToList();
+
+            // Return randomly ordered list
             return filteredAssetInfos.OrderBy(asset => _random.Next(filteredAssetInfos.Count)).Take(_assetAmount).Select(x=>x.Value).ToList();
         }
 

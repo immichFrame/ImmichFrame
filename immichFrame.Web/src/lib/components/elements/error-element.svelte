@@ -1,3 +1,7 @@
+<script lang="ts">
+	export let message: string = '';
+</script>
+
 <div
 	class="place-self-center container flex flex-col items-center justify-center px-5 mx-auto my-8 space-y-8 text-center sm:max-w-md"
 >
@@ -17,7 +21,11 @@
 		></polygon>
 	</svg>
 	<p class="text-3xl text-gray-400">
-		Looks like your immich-server is offline or you misconfigured immichFrame, check the container
-		logs
+		{#if message}
+			{message}
+		{:else}
+			Looks like your immich-server is offline or you misconfigured immichFrame, check the container
+			logs
+		{/if}
 	</p>
 </div>
