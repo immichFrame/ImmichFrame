@@ -22,6 +22,7 @@
 	let progressBarStatus: ProgressBarStatus;
 	let progressBar: ProgressBar;
 	let error: boolean;
+	let errorMessage: string;
 
 	let unsubscribeRestart: () => void;
 	let unsubscribeStop: () => void;
@@ -62,6 +63,12 @@
 	async function getNextAssets() {
 		if (!assetData || assetData.length < 1) {
 			await loadAssets();
+		}
+
+		if (assetData.length == 0) {
+			error = true;
+			errorMessage = 'No assets were found! Check your configuration.';
+			return;
 		}
 
 		let next: api.AssetResponseDto[];
@@ -120,7 +127,7 @@
 
 <section class="fixed grid h-screen w-screen bg-black" class:cursor-none={!cursorVisible}>
 	{#if error}
-		<ErrorElement />
+		<ErrorElement message={errorMessage} />
 	{:else if nextAssets}
 		<ImageComponent
 			showLocation={$configStore.showImageLocation}
