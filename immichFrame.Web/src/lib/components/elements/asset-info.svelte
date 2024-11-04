@@ -27,12 +27,12 @@
     const locationParts: Set<string> = new Set();
 
     format.split(',').forEach(part => {
-        const trimmedPart = part.trim();
-        if (trimmedPart.toLowerCase() === 'city' && city) {
+        const trimmedPart = part.trim().toLowerCase();
+        if (trimmedPart === 'city' && city) {
             locationParts.add(city);
-        } else if (trimmedPart.toLowerCase() === 'state' && state) {
+        } else if (trimmedPart === 'state' && state) {
             locationParts.add(state);
-        } else if (trimmedPart.toLowerCase() === 'country' && country) {
+        } else if (trimmedPart === 'country' && country) {
             locationParts.add(country);
         }
     });
