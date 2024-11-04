@@ -28,11 +28,11 @@
 
     format.split(',').forEach(part => {
         const trimmedPart = part.trim();
-        if (trimmedPart === 'City' && city) {
+        if (trimmedPart.toLowerCase() === 'city' && city) {
             locationParts.add(city);
-        } else if (trimmedPart === 'State' && state) {
+        } else if (trimmedPart.toLowerCase() === 'state' && state) {
             locationParts.add(state);
-        } else if (trimmedPart === 'Country' && country) {
+        } else if (trimmedPart.toLowerCase() === 'country' && country) {
             locationParts.add(country);
         }
     });
