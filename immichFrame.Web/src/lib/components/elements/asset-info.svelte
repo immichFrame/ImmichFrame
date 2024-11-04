@@ -13,7 +13,7 @@
 
 	$: time = new Date(assetDate);
 
-	$: formattedDate = format(time, $configStore.photoDateFormat ?? 'dd.MM.yyyy');	
+	$: formattedDate = format(time, $configStore.photoDateFormat ?? 'dd.MM.yyyy');
 
 	$: location = formatLocation(
 		$configStore.imageLocationFormat ?? 'City,State,Country',
@@ -23,22 +23,23 @@
 	);
 
 	$: availablePeople = asset.people?.filter((x) => x.name);
+
 	function formatLocation(format: string, city?: string, state?: string, country?: string) {
-    const locationParts: Set<string> = new Set();
+		const locationParts: Array<string> = new Array();
 
-    format.split(',').forEach(part => {
-        const trimmedPart = part.trim().toLowerCase();
-        if (trimmedPart === 'city' && city) {
-            locationParts.add(city);
-        } else if (trimmedPart === 'state' && state) {
-            locationParts.add(state);
-        } else if (trimmedPart === 'country' && country) {
-            locationParts.add(country);
-        }
-    });
+		format.split(',').forEach((part) => {
+			const trimmedPart = part.trim().toLowerCase();
+			if (trimmedPart === 'city' && city) {
+				locationParts.push(city);
+			} else if (trimmedPart === 'state' && state) {
+				locationParts.push(state);
+			} else if (trimmedPart === 'country' && country) {
+				locationParts.push(country);
+			}
+		});
 
-    return Array.from(locationParts).join(', ');
-}
+		return Array.from(locationParts).join(', ');
+	}
 </script>
 
 {#if showPhotoDate || showPhotoDate || showImageDesc}
