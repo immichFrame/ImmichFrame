@@ -22,7 +22,7 @@ namespace ImmichFrame.WebApi.Controllers
         [HttpGet(Name = "GetAsset")]
         public async Task<List<AssetResponseDto>> GetAsset()
         {
-            return await _logic.GetNextAsset() ?? throw new AssetNotFoundException("No asset was found");
+            return await _logic.GetAssets() ?? throw new AssetNotFoundException("No asset was found");
         }
 
         [HttpGet("{id}", Name = "GetImage")]
