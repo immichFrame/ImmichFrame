@@ -24,12 +24,21 @@
 
 	$: availablePeople = asset.people?.filter((x) => x.name);
 	function formatLocation(format: string, city?: string, state?: string, country?: string) {
-		const locationParts: string[] = [];
-		if (format.includes('City') && city) locationParts.push(city);
-		if (format.includes('State') && state) locationParts.push(state);
-		if (format.includes('Country') && country) locationParts.push(country);
-		return locationParts.join(', ');
-	}
+    const locationParts: Set<string> = new Set();
+
+    format.split(',').forEach(part => {
+        const trimmedPart = part.trim();
+        if (trimmedPart === 'City' && city) {
+            locationParts.add(city);
+        } else if (trimmedPart === 'State' && state) {
+            locationParts.add(state);
+        } else if (trimmedPart === 'Country' && country) {
+            locationParts.add(country);
+        }
+    });
+
+    return Array.from(locationParts).join(', ');
+}
 </script>
 
 {#if showPhotoDate || showPhotoDate || showImageDesc}
