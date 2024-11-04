@@ -15,11 +15,31 @@
 
 	$: formattedDate = format(time, $configStore.photoDateFormat ?? 'dd.MM.yyyy');
 
-	let location: string;
-
-	$: location = [asset.exifInfo?.city, asset.exifInfo?.country].filter((x) => x).join(', ');
+	$: location = formatLocation(
+		$configStore.imageLocationFormat ?? 'City,State,Country',
+		asset.exifInfo?.city ?? '',
+		asset.exifInfo?.state ?? '',
+		asset.exifInfo?.country ?? ''
+	);
 
 	$: availablePeople = asset.people?.filter((x) => x.name);
+
+	function formatLocation(format: string, city?: string, state?: string, country?: string) {
+		const locationParts: Array<string> = new Array();
+
+		format.split(',').forEach((part) => {
+			const trimmedPart = part.trim().toLowerCase();
+			if (trimmedPart === 'city' && city) {
+				locationParts.push(city);
+			} else if (trimmedPart === 'state' && state) {
+				locationParts.push(state);
+			} else if (trimmedPart === 'country' && country) {
+				locationParts.push(country);
+			}
+		});
+
+		return Array.from(locationParts).join(', ');
+	}
 </script>
 
 {#if showPhotoDate || showPhotoDate || showImageDesc}
