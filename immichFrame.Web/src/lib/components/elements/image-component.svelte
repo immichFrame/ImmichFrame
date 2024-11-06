@@ -41,7 +41,6 @@
 			if (hasBday) break;
 		}
 
-		console.log(hasBday);
 		return hasBday;
 	}
 
