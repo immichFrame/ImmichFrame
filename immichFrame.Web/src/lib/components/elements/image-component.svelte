@@ -6,6 +6,7 @@
 	import LoadingElement from './LoadingElement.svelte';
 	import { fade } from 'svelte/transition';
 	import { configStore } from '$lib/stores/config.store';
+	import { Confetti } from 'svelte-confetti';
 
 	export let sourceAssets: AssetResponseDto[];
 
@@ -22,6 +23,27 @@
 	let images: [string, AssetResponseDto][];
 
 	$: loadImages(sourceAssets);
+
+	$: hasBday = hasBirthday(sourceAssets);
+
+	function hasBirthday(assets: AssetResponseDto[]) {
+		let today = new Date();
+		let hasBday: boolean = false;
+
+		for (let asset of assets) {
+			for (let person of asset.people ?? new Array()) {
+				let birthdate = new Date(person.birthDate ?? '');
+				if (birthdate.getDate() === today.getDate() && birthdate.getMonth() === today.getMonth()) {
+					hasBday = true;
+					break;
+				}
+			}
+			if (hasBday) break;
+		}
+
+		console.log(hasBday);
+		return hasBday;
+	}
 
 	function getImageUrl(image: Blob) {
 		return URL.createObjectURL(image);
@@ -61,6 +83,22 @@
 		return ['', a] as [string, AssetResponseDto];
 	}
 </script>
+
+{#if hasBday}
+	<div
+		class="	z-[1000] top-[-50px] fixed l-0 h-screen w-screen flex justify-center overflow-hidden pointer-events-none"
+	>
+		<Confetti
+			x={[-5, 5]}
+			y={[0, 0.1]}
+			delay={[500, 2000]}
+			infinite
+			duration={5000}
+			amount={200}
+			fallDistance="100vh"
+		/>
+	</div>
+{/if}
 
 {#if error}
 	<ErrorElement />
