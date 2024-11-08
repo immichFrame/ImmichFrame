@@ -278,6 +278,7 @@ namespace ImmichFrame.Models
                         break;
                     case "Language":
                     case "ImmichFrameAlbumName":
+                    case "Webcalendars":
                         property.SetValue(settings, value);
                         break;
                     case "ImageLocationFormat":

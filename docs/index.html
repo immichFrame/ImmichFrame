@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -9,27 +9,30 @@
 
 <body class="bg-gray-100 overflow-x-hidden">
     <section class="grid h-screen w-screen bg-gradient-to-b from-gray-200 to-gray-300 text-gray-800">
-        <div class="absolute top-[20%] text-center justify-self-center">Click here for the settings</div>
-        <div class="absolute top-0 justify-self-center border border-black min-h-[20%] min-w-[20%]"></div>
+        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 border border-black h-[12%] w-[40%] sm:h-[15%] sm:w-[30%] flex items-center justify-center">
+            <span class="text-sm sm:text-base md:text-lg font-medium">Click here for the settings</span>
+        </div>
 
-
-        <div class="absolute bottom-[20%] text-center justify-self-center">Click here to exit the app</div>
-        <div class="absolute bottom-0 justify-self-center border border-black min-h-[20%] min-w-[20%]"></div>
-
-
-        <div class="place-self-center justify-items-center">
-            <img id="logo" class="h-[50vh] sm:h-[50vh] md:h-[40vh] lg:h-[30vh]"
+        <div class="place-self-center text-center px-4">
+            <img id="logo" class="h-[30vh] sm:h-[40vh] md:h-[50vh] mx-auto"
                 src="https://raw.githubusercontent.com/immichFrame/ImmichFrame/refs/heads/main/design/immich-frame-icon.svg"
                 alt="logo" />
-            <h3 class="text-3xl">Welcome to ImmichFrame</h3>
-            <a class="text-sm text-blue-500 hover:underline" href="https://github.com/immichFrame/ImmichFrame">
+            <h3 class="text-2xl sm:text-3xl font-semibold mt-4">Welcome to ImmichFrame</h3>
+            <a class="text-xs sm:text-sm md:text-base text-blue-500 hover:underline mt-2 inline-block"
+                href="https://github.com/immichFrame/ImmichFrame">
                 If you haven't already, click here to install ImmichFrame Web
             </a>
         </div>
 
+        <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 border border-black h-[12%] w-[40%] sm:h-[15%] sm:w-[30%] flex items-center justify-center">
+            <span class="text-sm sm:text-base md:text-lg font-medium">Click here to exit the app</span>
+        </div>
     </section>
-    <section class="grid h-screen w-screen place-items-center">
-        <p>More information about ImmichFrame will be displayed here</p>
+
+    <section class="grid h-screen w-screen place-items-center text-center px-4">
+        <p class="text-sm sm:text-base md:text-lg">
+            More information about ImmichFrame will be displayed here
+        </p>
     </section>
 
 </body>
