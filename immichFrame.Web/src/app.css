@@ -41,6 +41,9 @@
 }
 
 :root {
+	/* Default colors */
+	--primary-color: #f5deb3;
+	--secondary-color: #000000;
 	font-family: 'Overpass', sans-serif;
 	/* Used by layouts to ensure proper spacing between navbar and content */
 }

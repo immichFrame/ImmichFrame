@@ -94,6 +94,11 @@
 	onMount(() => {
 		window.addEventListener('mousemove', showCursor);
 		window.addEventListener('click', showCursor);
+
+		if ($configStore.fontColor) {
+			document.documentElement.style.setProperty('--primary-color', $configStore.fontColor);
+		}
+
 		unsubscribeRestart = restartProgress.subscribe((value) => {
 			if (value) {
 				progressBar.restart(value);
