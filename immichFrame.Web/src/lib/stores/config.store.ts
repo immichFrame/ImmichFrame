@@ -5,6 +5,9 @@ function createConfigStore(settings: WebClientSettings) {
   const { subscribe, set } = writable(settings);
 
   function ps(settings: WebClientSettings) {
+    if (settings.fontColor && settings.fontColor !== '#FFFFFF') {
+      document.documentElement.style.setProperty('--primary-color', settings.fontColor);
+    }
     set(settings);
   }
 
