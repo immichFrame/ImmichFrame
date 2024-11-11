@@ -24,7 +24,7 @@
         public bool ShowImageLocation { get; set; }
         public string? ImageLocationFormat { get; set; }
         public int ImageLocationFontSize { get; set; }
-        public string FontColor { get; set; }
+        public string? FontColor { get; set; }
         public bool ShowWeatherDescription { get; set; }
         public int WeatherFontSize { get; set; }
         public bool UnattendedMode { get; set; }
