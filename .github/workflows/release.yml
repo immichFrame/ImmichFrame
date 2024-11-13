@@ -6,68 +6,15 @@ on:
 
 name: Release ImmichFrame
 
+permissions:
+  discussions: write
+
 jobs:
   release:
     name: Release
-    strategy:
-      matrix:
-        kind: ['linux-x64', 'linux-arm', 'linux-arm64', 'windows', 'macOS', 'android']
-        include:
-          - kind: linux-x64
-            os: ubuntu-latest
-            target: linux-x64
-          - kind: linux-arm
-            os: ubuntu-latest
-            target: linux-arm
-          - kind: linux-arm64
-            os: ubuntu-latest
-            target: linux-arm64
-          - kind: windows
-            os: windows-latest
-            target: win-x64
-          - kind: android
-            os: ubuntu-latest
-            target: android
-          - kind: macOS
-            os: macos-latest
-            target: osx-x64
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 8.0.x
-      - name: Build Desktop
-        shell: bash
-        run: |
-          tag=$(git describe --tags --abbrev=0)
-          release_name="ImmichFrame-$tag-${{ matrix.target }}"
-
-          # Build everything
-          if [ "${{ matrix.kind }}" == "android" ]; then
-            # Do nothing for now
-          else
-            # Desktop Build
-            dotnet publish ./ImmichFrame.Desktop/ImmichFrame.Desktop.csproj --runtime "${{ matrix.target }}" -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=None -c Release -o "$release_name" --self-contained true
-          fi
-
-          # Pack files
-          if [ "${{ matrix.target }}" == "win-x64" ]; then
-            # Pack to zip for Windows
-            7z a -tzip "${release_name}.zip" "./${release_name}/*"
-          elif [ "${{ matrix.target }}" == "android" ]; then
-            # Do nothing for now
-          else
-            tar czvf "${release_name}.tar.gz" "$release_name"
-          fi
-          
-          rm -r "$release_name"
       - name: Publish
         uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            ImmichFrame*
-            com.immichframe*
         env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
