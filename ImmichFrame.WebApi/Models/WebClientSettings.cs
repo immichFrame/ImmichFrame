@@ -23,7 +23,7 @@ namespace ImmichFrame.WebApi.Models
         public bool ShowImageLocation { get; set; } = true;
         public string? ImageLocationFormat { get; set; } = "City,State,Country";
         public int ImageLocationFontSize { get; set; } = 36;
-        public string FontColor { get; set; }
+        public string? FontColor { get; set; }
         public bool ShowWeatherDescription { get; set; } = true;
         public int WeatherFontSize { get; set; } = 36;
         public bool UnattendedMode { get; set; } = false;

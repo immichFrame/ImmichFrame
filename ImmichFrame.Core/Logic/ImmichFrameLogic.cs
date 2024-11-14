@@ -23,7 +23,7 @@ namespace ImmichFrame.Core.Logic
         private static AlbumResponseDto immichFrameAlbum = new AlbumResponseDto();
 
 
-        private Task<IEnumerable<Guid>> _excludedAlbumAssets;
+        private Task<IEnumerable<Guid>>? _excludedAlbumAssets;
         private Task<IEnumerable<Guid>> ExcludedAlbumAssets
         {
             get
@@ -61,7 +61,7 @@ namespace ImmichFrame.Core.Logic
             return await GetRandomAssets();
         }
 
-        public async Task<AssetResponseDto> GetNextAsset()
+        public async Task<AssetResponseDto?> GetNextAsset()
         {
             if ((await FilteredAssetInfos) != null)
             {
