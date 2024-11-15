@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import { mdiChevronRight, mdiPlay, mdiPause } from '@mdi/js';
+	import { mdiChevronRight, mdiPlay, mdiPause, mdiChevronLeft } from '@mdi/js';
 	import Icon from './icon.svelte';
 	import { ProgressBarStatus } from './progress-bar.svelte';
 
@@ -13,7 +13,7 @@
 		dispatch('next');
 	}
 	function clickBack() {
-		// dispatch('back');
+		dispatch('back');
 	}
 	function clickPause() {
 		dispatch('pause');
@@ -62,7 +62,14 @@
 {#if overlayVisible}
 	<div class="absolute h-full w-full top-0 left-0 z-[100] grid grid-cols-3 gap-2">
 		<div class="group text-center content-center">
-			<button class="opacity-0 group-hover:opacity-100 text-primary" on:click={clickBack}> </button>
+			<button class="opacity-0 group-hover:opacity-100 text-primary" on:click={clickBack}
+				><Icon
+					title="Back"
+					class="max-h-[min(10rem,33vh)] max-w-[min(10rem,33vh)] h-[33vh] w-[33vw]top"
+					path={mdiChevronLeft}
+					size=""
+				/></button
+			>
 		</div>
 
 		<div class="grid grid-rows-3">

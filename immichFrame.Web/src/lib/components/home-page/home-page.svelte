@@ -14,8 +14,9 @@
 	import Appointments from '../elements/appointments.svelte';
 	import LoadingElement from '../elements/LoadingElement.svelte';
 
-	let assetData: api.AssetResponseDto[];
-	let nextAssets: api.AssetResponseDto[];
+	let assetHistory: api.AssetResponseDto[] = [];
+	let assetBacklog: api.AssetResponseDto[] = [];
+	let displayingAssets: api.AssetResponseDto[];
 
 	const { restartProgress, stopProgress } = slideshowStore;
 
@@ -49,7 +50,7 @@
 			}
 
 			error = false;
-			assetData = assetRequest.data;
+			assetBacklog = assetRequest.data;
 		} catch {
 			error = true;
 		}
@@ -61,24 +62,60 @@
 	};
 
 	async function getNextAssets() {
-		if (!assetData || assetData.length < 1) {
+		if (!assetBacklog || assetBacklog.length < 1) {
 			await loadAssets();
 		}
 
-		if (assetData.length == 0) {
+		if (assetBacklog.length == 0) {
 			error = true;
 			errorMessage = 'No assets were found! Check your configuration.';
 			return;
 		}
 
 		let next: api.AssetResponseDto[];
-		if (assetData.length > 1 && isHorizontal(assetData[0]) && isHorizontal(assetData[1])) {
-			next = assetData.splice(0, 2);
+		if (assetBacklog.length > 1 && isHorizontal(assetBacklog[0]) && isHorizontal(assetBacklog[1])) {
+			next = assetBacklog.splice(0, 2);
 		} else {
-			next = assetData.splice(0, 1);
+			next = assetBacklog.splice(0, 1);
 		}
-		assetData = [...assetData];
-		nextAssets = next;
+		assetBacklog = [...assetBacklog];
+
+		if (displayingAssets) {
+			// Push to History
+			assetHistory.push(...displayingAssets);
+		}
+
+		// History max 250 Items
+		if (assetHistory.length > 250) {
+			assetHistory = assetHistory.splice(assetHistory.length - 250, 250);
+		}
+
+		displayingAssets = next;
+	}
+
+	function getPreviousAssets() {
+		if (!assetHistory || assetHistory.length < 1) {
+			return;
+		}
+
+		let next: api.AssetResponseDto[];
+		if (
+			assetHistory.length > 1 &&
+			isHorizontal(assetHistory[assetHistory.length - 1]) &&
+			isHorizontal(assetHistory[assetHistory.length - 2])
+		) {
+			next = assetHistory.splice(assetHistory.length - 2, 2);
+		} else {
+			next = assetHistory.splice(assetHistory.length - 1, 1);
+		}
+
+		assetHistory = [...assetHistory];
+
+		// Unshift to Backlog
+		if (displayingAssets) {
+			assetBacklog.unshift(...displayingAssets);
+		}
+		displayingAssets = next;
 	}
 
 	function isHorizontal(asset: api.AssetResponseDto) {
@@ -133,12 +170,12 @@
 <section class="fixed grid h-screen w-screen bg-black" class:cursor-none={!cursorVisible}>
 	{#if error}
 		<ErrorElement message={errorMessage} />
-	{:else if nextAssets}
+	{:else if displayingAssets}
 		<ImageComponent
 			showLocation={$configStore.showImageLocation}
 			showPhotoDate={$configStore.showPhotoDate}
 			showImageDesc={$configStore.showImageDesc}
-			sourceAssets={nextAssets}
+			sourceAssets={displayingAssets}
 		/>
 
 		{#if $configStore.showClock}
@@ -155,7 +192,7 @@
 			}}
 			on:back={async () => {
 				progressBar.restart(false);
-				await getNextAssets();
+				await getPreviousAssets();
 				progressBar.restart(true);
 			}}
 			on:pause={async () => {
