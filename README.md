@@ -8,7 +8,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/3rob3/ImmichFrame">
-    <img src="ImmichFrame/Assets/AppIcon.png" alt="Logo" width="200" height="200">
+    <img src="design/AppIcon.png" alt="Logo" width="200" height="200">
   </a>
 
   <h3 align="center">ImmichFrame</h3>
