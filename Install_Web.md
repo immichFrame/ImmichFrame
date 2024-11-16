@@ -74,7 +74,7 @@ services:
 
 ### Docker Compose with Settings.json
 
-An example of the Settings.json can be found [here](/ImmichFrame/Settings.example.json).
+An example of the Settings.json can be found [here](/docker/Settings.example.json).
 
 > [!IMPORTANT]  
 > Change `PATH/TO/CONFIG` to the correct path!
