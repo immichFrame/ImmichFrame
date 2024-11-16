@@ -487,7 +487,13 @@ namespace ImmichFrame.Core.Logic
 
             var httpClient = new HttpClient();
 
-            var json = JsonSerializer.Serialize(notification);
+            var options = new JsonSerializerOptions
+            {
+                Converters = { new PolymorphicJsonConverter<IWebhookNotification>() },
+                WriteIndented = true
+            };
+
+            string json = JsonSerializer.Serialize(notification, options);
             var data = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
 
             var response = await httpClient.PostAsync(_settings.Webhook, data);
