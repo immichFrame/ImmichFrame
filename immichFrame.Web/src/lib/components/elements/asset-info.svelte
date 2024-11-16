@@ -8,12 +8,12 @@
 	export let showPhotoDate: boolean;
 	export let showImageDesc: boolean;
 
-	$: assetDate = asset.exifInfo?.dateTimeOriginal ?? '';
+	$: assetDate = asset.exifInfo?.dateTimeOriginal;
 	$: desc = asset.exifInfo?.description ?? '';
 
-	$: time = new Date(assetDate);
+	$: time = assetDate ? new Date(assetDate) : null;
 
-	$: formattedDate = format(time, $configStore.photoDateFormat ?? 'dd.MM.yyyy');
+	$: formattedDate = time ? format(time, $configStore.photoDateFormat ?? 'dd.MM.yyyy') : null;
 
 	$: location = formatLocation(
 		$configStore.imageLocationFormat ?? 'City,State,Country',
