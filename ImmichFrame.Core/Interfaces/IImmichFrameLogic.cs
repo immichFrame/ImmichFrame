@@ -13,5 +13,6 @@ namespace ImmichFrame.Core.Interfaces
         public Task<List<IAppointment>> GetAppointments();
         public Task<IWeather?> GetWeather();
         public Task<IWeather?> GetWeather(double latitude, double longitude, OpenWeatherMapOptions Options);
+        public Task SendWebhookNotification(IWebhookNotification notification);
     }
 }

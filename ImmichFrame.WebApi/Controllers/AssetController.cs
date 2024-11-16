@@ -2,6 +2,7 @@ using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.Core.Logic;
+using ImmichFrame.WebApi.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ImmichFrame.WebApi.Controllers
@@ -40,6 +41,9 @@ namespace ImmichFrame.WebApi.Controllers
 
             var ext = contentType.ToLower() == "image/webp" ? "webp" : "jpeg";
             var fileName = $"{id}.{ext}";
+
+            var notification = new ImageRequestedNotification(id);
+            _ = _logic.SendWebhookNotification(notification);
 
             return File(data.Stream, contentType, fileName); // returns a FileStreamResult
         }

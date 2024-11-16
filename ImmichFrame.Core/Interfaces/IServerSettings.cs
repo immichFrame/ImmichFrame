@@ -18,5 +18,6 @@
         public string? WeatherLatLong { get; set; }
         public string? UnitSystem { get; set; }
         public string Language { get; set; }
+        public string? Webhook { get; set; }
     }
 }

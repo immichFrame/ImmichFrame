@@ -6,6 +6,7 @@ using System.Data;
 using OpenWeatherMap;
 using Ical.Net;
 using ImmichFrame.WebApi.Helpers;
+using System.Text.Json;
 
 namespace ImmichFrame.Core.Logic
 {
@@ -478,6 +479,26 @@ namespace ImmichFrame.Core.Logic
             }
 
             return appointments;
+        }
+
+        public async Task SendWebhookNotification(IWebhookNotification notification)
+        {
+            if (string.IsNullOrWhiteSpace(_settings.Webhook)) return;
+
+            var httpClient = new HttpClient();
+
+            var json = JsonSerializer.Serialize(notification);
+            var data = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+
+            var response = await httpClient.PostAsync(_settings.Webhook, data);
+
+            if (response.IsSuccessStatusCode) {
+                Console.WriteLine("Webhook successfully sent.");
+            }
+            else
+            {
+                Console.WriteLine($"Failed to send notification to webhook: {Convert.ToInt32(response.StatusCode)} {response.StatusCode}");
+            }
         }
     }
 }
