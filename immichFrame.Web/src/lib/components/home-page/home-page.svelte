@@ -73,12 +73,7 @@
 		}
 
 		let next: api.AssetResponseDto[];
-		if (
-			$configStore.layout == 'splitview' &&
-			assetBacklog.length > 1 &&
-			isHorizontal(assetBacklog[0]) &&
-			isHorizontal(assetBacklog[1])
-		) {
+		if (assetBacklog.length > 1 && isHorizontal(assetBacklog[0]) && isHorizontal(assetBacklog[1])) {
 			next = assetBacklog.splice(0, 2);
 		} else {
 			next = assetBacklog.splice(0, 1);
@@ -105,7 +100,6 @@
 
 		let next: api.AssetResponseDto[];
 		if (
-			$configStore.layout == 'splitview' &&
 			assetHistory.length > 1 &&
 			isHorizontal(assetHistory[assetHistory.length - 1]) &&
 			isHorizontal(assetHistory[assetHistory.length - 2])

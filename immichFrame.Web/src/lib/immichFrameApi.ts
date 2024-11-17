@@ -172,7 +172,6 @@ export type WebClientSettings = {
     weatherFontSize?: number;
     unattendedMode?: boolean;
     imageZoom?: boolean;
-    layout?: string | null;
 };
 export type IWeather = {
     location?: string | null;
