@@ -39,9 +39,6 @@ This project is a digital photo frame application that interfaces with your [imm
 ### Web Demo
 <img src="/design/demo/web_demo.png" alt="Web Demo" height="300">
 
-### Client Demo
-<img src="/design/demo/client_demo.png" alt="Client Demo" height="300">
-
 <!-- GETTING STARTED -->
 
 ## 🚀 Getting Started

@@ -19,8 +19,6 @@ Go back to the [Full Readme](/README.md).
   - [Settings GUI](#settings-gui)
 - [🆘 Help](#-help)
 
-## ✨ Demo
-![ImmichFrame Client](/design/demo/client_demo.png)
 
 ## 🔧 Installation
 
@@ -70,6 +68,7 @@ echo "@/home/pi/{dir with Immich_Frame}/Immich_Frame" > sudo tee /home/pi/.confi
 ### Android
 The Android-Version of ImmichFrame is available on the [Google Play Store][play-store-link]. Download it via the store for automatic updates. You can also sideload via APK available in Releases.
 
+
 #### Android Screensaver
 
 - Run the app normally and configure settings.
@@ -81,14 +80,18 @@ The Android-Version of ImmichFrame is available on the [Google Play Store][play-
 
 ## ⚙️ Configuration
 
-> [!IMPORTANT]  
-> Make sure to copy the **Settings.example.json** and name it **Settings.json**.
-
-For more information, read [here](/README.md#configuration).
+Simply enter the URL of ImmichFrame web Docker. All other configuration is handled in the Docker container. 
 
 ## 💬 Interactions
 
-### Touch/Mouse
+### Android
+Settings - swipe down.  
+Previous Image/Pause/Next Image - Touch the left side/center/or right side of screen
+### Android TV
+Settings - D-pad UP.  
+Previous Image/Pause/Next Image - D-pad left/D-pad center/D-pad right
+
+### Desktop (Windows, MacOS, Linux)
 
 The screen is configured in a 3x3 gird. You can touch or click:
 
@@ -103,10 +106,6 @@ The screen is configured in a 3x3 gird. You can touch or click:
 **Prev Image** - Left arrow <br/>
 **Next Image** - Right arrow <br/>
 **Pause** - Enter/Return <br/>
-
-### Settings GUI
-
-The same information as in `Settings.json` will be enterred from this screen. Can be enterred at any time by clicking the upper middle quadrant of the screen (or Up arrow key), see `Interactions` section. Settings can also be backup/restored from here.
 
 ## 🆘 Help
 
