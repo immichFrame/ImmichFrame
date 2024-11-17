@@ -1,37 +1,38 @@
 {
   "ImmichServerUrl": "",
   "ApiKey": "",
-  "ImageStretch": "Uniform",
   "Margin": "0,0,0,0",
   "Interval": 10,
   "TransitionDuration": 2,
   "DownloadImages": false,
   "ShowMemories": false,
   "RenewImagesDuration": 30,
-  "Albums": [ "" ],
-  "ExcludedAlbums": [ "" ],
-  "People": [ "" ],
-  "Webcalendars": [ "" ],
+  "Albums": [
+    ""
+  ],
+  "ExcludedAlbums": [
+    ""
+  ],
+  "People": [
+    ""
+  ],
+  "Webcalendars": [
+    ""
+  ],
   "RefreshAlbumPeopleInterval": 12,
-  "ImmichFrameAlbumName": "",
   "ShowClock": true,
-  "ClockFontSize": 36,
   "ClockFormat": "HH:mm:ss",
   "ShowPhotoDate": true,
-  "PhotoDateFontSize": 24,
   "PhotoDateFormat": "yyyy-MM-dd",
   "ShowImageDesc": true,
-  "ImageDescFontSize": 24,
   "ShowImageLocation": true,
   "ImageLocationFormat": "City,State,Country",
-  "ImageLocationFontSize": 16,
   "FontColor": "#FF5733",
   "WeatherApiKey": "",
   "ShowWeatherDescription": true,
-  "WeatherFontSize": 24,
   "UnitSystem": "imperial",
   "WeatherLatLong": "",
   "Language": "en",
-  "UnattendedMode": false,
-  "ImageZoom": true
+  "ImageZoom": true,
+  "Layout": "splitview"
 }
