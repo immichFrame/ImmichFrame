@@ -29,5 +29,6 @@
         public int WeatherFontSize { get; set; }
         public bool UnattendedMode { get; set; }
         public bool ImageZoom { get; set; }
+        public string Layout { get; set; }
     }
 }
