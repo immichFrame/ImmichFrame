@@ -74,7 +74,7 @@
 
 		let next: api.AssetResponseDto[];
 		if (
-			$configStore.layout == 'splitview' &&
+			$configStore.layout?.trim().toLowerCase() == 'splitview' &&
 			assetBacklog.length > 1 &&
 			isHorizontal(assetBacklog[0]) &&
 			isHorizontal(assetBacklog[1])
@@ -105,7 +105,7 @@
 
 		let next: api.AssetResponseDto[];
 		if (
-			$configStore.layout == 'splitview' &&
+			$configStore.layout?.trim().toLowerCase() == 'splitview' &&
 			assetHistory.length > 1 &&
 			isHorizontal(assetHistory[assetHistory.length - 1]) &&
 			isHorizontal(assetHistory[assetHistory.length - 2])
