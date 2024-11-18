@@ -8,6 +8,7 @@ name: Release ImmichFrame
 
 permissions:
   discussions: write
+  contents:  write
 
 jobs:
   release:
