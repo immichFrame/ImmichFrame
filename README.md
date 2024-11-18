@@ -93,7 +93,7 @@ ImmichFrame is easy to run on your desired plattform. Get the latest stable rele
 | [Metadata](#metadata)   | ShowPhotoDate              | boolean             | true                 | Displays the date of the current image.                                                                               |
 | [Metadata](#metadata)   | PhotoDateFormat            | string              | yyyy-MM-dd           | Date format.                                                                                                          |
 | UI                      | FontColor                  | string              | #FFFFFF              | Lets you choose a primary color for your UI.                                                                          |
-| UI                      | Splitview                  | single \| splitview | splitview            | Allow two portrait images to be displayed next to each other                                                          |
+| UI                      | Layout                     | single \| splitview | splitview            | Allow two portrait images to be displayed next to each other                                                          |
 | [Misc](#misc)           | ImmichFrameAlbumName       | string              |                      | \*Client only. Creates album and stores last 100 photos displayed.                                                    |
 | [Misc](#misc)           | Webhook                    | string              |                      | Webhook URL to be notified e.g. http://example.com/notify                                                             |
 
