@@ -66,7 +66,7 @@ services:
       RenewImagesDuration: "30"
       DownloadImages: "false"
       RefreshAlbumPeopleInterval: "12"
-      # UI (Not working right now)
+      # UI
       FontColor: "#FF5733"
       # Misc
       ImmichFrameAlbumName: ""
