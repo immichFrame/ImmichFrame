@@ -34,5 +34,6 @@
   "WeatherLatLong": "",
   "Language": "en",
   "ImageZoom": true,
-  "Layout": "splitview"
+  "Layout": "splitview",
+  "Webhook": ""
 }
