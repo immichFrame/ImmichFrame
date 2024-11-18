@@ -4,6 +4,9 @@
 [![Issues][issues-shield]][issues-url]
 [![MIT License][license-shield]][license-url]
 
+> [!NOTE]  
+> Instructions how to install ImmichFrame can be found [here](#-usage--installation)!
+
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
@@ -91,7 +94,8 @@ ImmichFrame is easy to run on your desired plattform. Get the latest stable rele
 | [Metadata](#metadata)   | PhotoDateFormat            | string              | yyyy-MM-dd           | Date format.                                                                                                          |
 | UI                      | FontColor                  | string              | #FFFFFF              | Lets you choose a primary color for your UI.                                                                          |
 | UI                      | Splitview                  | single \| splitview | splitview            | Allow two portrait images to be displayed next to each other                                                          |
-| Misc                    | ImmichFrameAlbumName       | string              |                      | \*Client only. Creates album and stores last 100 photos displayed.                                                    |
+| [Misc](#misc)           | ImmichFrameAlbumName       | string              |                      | \*Client only. Creates album and stores last 100 photos displayed.                                                    |
+| [Misc](#misc)           | Webhook                    | string              |                      | Webhook URL to be notified e.g. http://example.com/notify                                                             |
 
 ### Filtering
 You can get the UUIDs from the URL of the album/person. For this URL: `https://demo.immich.app/albums/85c85b29-c95d-4a8b-90f7-c87da1d518ba` this is the UUID: `85c85b29-c95d-4a8b-90f7-c87da1d518ba`
@@ -104,6 +108,17 @@ If you are using Google Calendar, more information can be found [here](https://s
 
 ### Metadata
 Needs documentation
+
+### Misc
+#### Webhook
+A webhook to notify an external service is available. This is only enabled when the `Webhook`-Setting is set in your configuration. Your configured Webhook will be notified via `HTTP POST`-request.
+
+#### Events
+Events will always contain a `Name` and a `DateTime` to differentiate, but can contain more information.
+
+| **Event**                  | **Description**                   | **Payload**                                                                                                        |
+| -------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| ImageRequestedNotification | Notifies, when a Image requested. | `{"Name":"ImageRequestedNotification", "DateTime":"2024-11-16T21:37:19.4933981+01:00", "RequestedImageId":"UUID"}` |
 
 ## 🛣️ Roadmap
 
