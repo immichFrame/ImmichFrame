@@ -9,6 +9,7 @@
 	export let showLocation: boolean;
 	export let showPhotoDate: boolean;
 	export let showImageDesc: boolean;
+	export let showPeopleDesc: boolean;
 	export let multi: boolean = false;
 
 	let debug = false;
@@ -147,7 +148,7 @@
 		alt="data"
 	/>
 </div>
-<AssetInfo asset={image[1]} {showLocation} {showPhotoDate} {showImageDesc} />
+<AssetInfo asset={image[1]} {showLocation} {showPhotoDate} {showImageDesc} {showPeopleDesc} />
 <img
 	class="absolute flex w-full h-full z-[-1]"
 	src={thumbHashToDataURL(decodeBase64(image[1].thumbhash ?? ''))}

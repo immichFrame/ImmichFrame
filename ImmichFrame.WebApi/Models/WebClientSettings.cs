@@ -13,19 +13,15 @@ namespace ImmichFrame.WebApi.Models
         public bool DownloadImages { get; set; } = false;
         public int RenewImagesDuration { get; set; } = 20;
         public bool ShowClock { get; set; } = true;
-        public int ClockFontSize { get; set; } = 48;
         public string? ClockFormat { get; set; } = "hh:mm";
         public bool ShowPhotoDate { get; set; } = true;
-        public int PhotoDateFontSize { get; set; } = 36;
         public string? PhotoDateFormat { get; set; } = "MM/dd/yyyy";
         public bool ShowImageDesc { get; set; } = true;
-        public int ImageDescFontSize { get; set; } = 36;
+        public bool ShowPeopleDesc { get; set; } = true;
         public bool ShowImageLocation { get; set; } = true;
         public string? ImageLocationFormat { get; set; } = "City,State,Country";
-        public int ImageLocationFontSize { get; set; } = 36;
         public string? FontColor { get; set; }
         public bool ShowWeatherDescription { get; set; } = true;
-        public int WeatherFontSize { get; set; } = 36;
         public bool UnattendedMode { get; set; } = false;
         public bool ImageZoom { get; set; } = true;
         public string Layout { get; set; } = "splitview";

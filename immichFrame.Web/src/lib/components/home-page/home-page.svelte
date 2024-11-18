@@ -181,6 +181,7 @@
 			showLocation={$configStore.showImageLocation}
 			showPhotoDate={$configStore.showPhotoDate}
 			showImageDesc={$configStore.showImageDesc}
+			showPeopleDesc={$configStore.showPeopleDesc}
 			sourceAssets={displayingAssets}
 		/>
 
