@@ -67,7 +67,7 @@ services:
       DownloadImages: "false"
       RefreshAlbumPeopleInterval: "12"
       # UI
-      FontColor: "#FF5733"
+      PrimaryColor: "#FF5733"
       # Misc
       ImmichFrameAlbumName: ""
 ```

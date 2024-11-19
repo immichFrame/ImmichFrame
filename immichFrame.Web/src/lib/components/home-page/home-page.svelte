@@ -138,8 +138,12 @@
 		window.addEventListener('mousemove', showCursor);
 		window.addEventListener('click', showCursor);
 
-		if ($configStore.fontColor) {
-			document.documentElement.style.setProperty('--primary-color', $configStore.fontColor);
+		if ($configStore.primaryColor) {
+			document.documentElement.style.setProperty('--primary-color', $configStore.primaryColor);
+		}
+
+		if ($configStore.secondaryColor) {
+			document.documentElement.style.setProperty('--secondary-color', $configStore.secondaryColor);
 		}
 
 		unsubscribeRestart = restartProgress.subscribe((value) => {

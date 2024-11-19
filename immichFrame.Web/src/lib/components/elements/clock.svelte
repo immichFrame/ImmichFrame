@@ -32,7 +32,13 @@
 	}
 </script>
 
-<div class="absolute bottom-0 left-0 z-10 text-center text-primary p-5 drop-shadow-2xl">
+<div
+	class="absolute bottom-0 left-0 z-10 text-center text-primary
+	{$configStore.style == 'solid' ? 'bg-secondary rounded-tr-2xl' : ''}
+	{$configStore.style == 'transition' ? 'bg-gradient-to-r from-secondary from-0% pr-10' : ''}
+	{$configStore.style == 'blur' ? 'backdrop-blur-lg rounded-tr-2xl' : ''}	
+	drop-shadow-2xl p-3"
+>
 	<p class="mt-2 text-sm sm:text-sm md:text-md lg:text-xl font-thin">{formattedDate}</p>
 	<p class="mt-2 text-4xl sm:text-4xl md:text-6xl lg:text-8xl font-bold">{timePortion}</p>
 	{#if weather}
