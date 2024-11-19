@@ -25,6 +25,7 @@
   "ShowPhotoDate": true,
   "PhotoDateFormat": "yyyy-MM-dd",
   "ShowImageDesc": true,
+  "ShowPeopleDesc": true,
   "ShowImageLocation": true,
   "ImageLocationFormat": "City,State,Country",
   "FontColor": "#FF5733",

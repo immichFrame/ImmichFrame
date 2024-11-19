@@ -13,6 +13,7 @@
 	export let showLocation: boolean = true;
 	export let showPhotoDate: boolean = true;
 	export let showImageDesc: boolean = true;
+	export let showPeopleDesc: boolean = true;
 	let split: boolean = true;
 
 	let transitionDuration = ($configStore.transitionDuration ?? 1) * 1000;
@@ -107,15 +108,35 @@
 			{#if split}
 				<div class="grid grid-cols-2">
 					<div class="relative grid border-r-2 border-primary h-screen">
-						<Image multi={true} image={images[0]} {showLocation} {showPhotoDate} {showImageDesc} />
+						<Image
+							multi={true}
+							image={images[0]}
+							{showLocation}
+							{showPhotoDate}
+							{showImageDesc}
+							{showPeopleDesc}
+						/>
 					</div>
 					<div class="relative grid border-l-2 border-primary h-screen">
-						<Image multi={true} image={images[1]} {showLocation} {showPhotoDate} {showImageDesc} />
+						<Image
+							multi={true}
+							image={images[1]}
+							{showLocation}
+							{showPhotoDate}
+							{showImageDesc}
+							{showPeopleDesc}
+						/>
 					</div>
 				</div>
 			{:else}
 				<div class="relative grid h-screen w-screen">
-					<Image image={images[0]} {showLocation} {showPhotoDate} {showImageDesc} />
+					<Image
+						image={images[0]}
+						{showLocation}
+						{showPhotoDate}
+						{showImageDesc}
+						{showPeopleDesc}
+					/>
 				</div>
 			{/if}
 		</div>

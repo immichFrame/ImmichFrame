@@ -7,6 +7,7 @@
 	export let showLocation: boolean;
 	export let showPhotoDate: boolean;
 	export let showImageDesc: boolean;
+	export let showPeopleDesc: boolean;
 
 	$: assetDate = asset.exifInfo?.dateTimeOriginal;
 	$: desc = asset.exifInfo?.description ?? '';
@@ -42,15 +43,15 @@
 	}
 </script>
 
-{#if showPhotoDate || showPhotoDate || showImageDesc}
+{#if showPhotoDate || showPhotoDate || showImageDesc || showPeopleDesc}
 	<div class="absolute bottom-0 right-0 z-100 text-primary p-1 text-right">
 		{#if showPhotoDate && formattedDate}
 			<p class="text-sm font-thin">{formattedDate}</p>
 		{/if}
-		{#if showImageDesc || desc}
+		{#if showImageDesc && desc}
 			<p class="text-base font-light">{desc}</p>
 		{/if}
-		{#if availablePeople}
+		{#if showPeopleDesc && availablePeople}
 			<p class="text-sm font-light">
 				{availablePeople.map((x) => x.name).join(', ')}
 			</p>
