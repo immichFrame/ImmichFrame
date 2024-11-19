@@ -21,7 +21,6 @@
                 public bool ShowPeopleDesc { get; set; }
                 public bool ShowImageLocation { get; set; }
                 public string? ImageLocationFormat { get; set; }
-                public int ImageLocationFontSize { get; set; }
                 public string? PrimaryColor { get; set; }
                 public string? SecondaryColor { get; set; }
                 public string Style { get; set; }

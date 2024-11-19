@@ -164,7 +164,6 @@ export type WebClientSettings = {
     showPeopleDesc?: boolean;
     showImageLocation?: boolean;
     imageLocationFormat?: string | null;
-    imageLocationFontSize?: number;
     primaryColor?: string | null;
     secondaryColor?: string | null;
     style?: string | null;
