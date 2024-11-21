@@ -20,7 +20,9 @@ namespace ImmichFrame.WebApi.Models
         public bool ShowPeopleDesc { get; set; } = true;
         public bool ShowImageLocation { get; set; } = true;
         public string? ImageLocationFormat { get; set; } = "City,State,Country";
-        public string? FontColor { get; set; }
+        public string? PrimaryColor { get; set; }
+        public string? SecondaryColor { get; set; }
+        public string Style { get; set; } = "none";
         public bool ShowWeatherDescription { get; set; } = true;
         public bool UnattendedMode { get; set; } = false;
         public bool ImageZoom { get; set; } = true;

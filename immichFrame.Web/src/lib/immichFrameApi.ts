@@ -164,7 +164,9 @@ export type WebClientSettings = {
     showPeopleDesc?: boolean;
     showImageLocation?: boolean;
     imageLocationFormat?: string | null;
-    fontColor?: string | null;
+    primaryColor?: string | null;
+    secondaryColor?: string | null;
+    style?: string | null;
     showWeatherDescription?: boolean;
     unattendedMode?: boolean;
     imageZoom?: boolean;
