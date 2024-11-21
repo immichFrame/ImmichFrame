@@ -57,7 +57,6 @@ namespace ImmichFrame.WebApi.Helpers
             }
             else if (type == typeof(DateTime) || type == typeof(DateTime?))
             {
-                Console.WriteLine("test");
                 prop.SetValue(settings, Convert.ToDateTime(value));
             }
             else
