@@ -6,6 +6,9 @@
   "TransitionDuration": 2,
   "DownloadImages": false,
   "ShowMemories": false,
+  "ImagesFromDays": 365,
+  "ImagesFromDate": "",
+  "ImagesUntilDate": "",
   "RenewImagesDuration": 30,
   "Albums": [
     ""

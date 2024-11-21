@@ -9,6 +9,9 @@ namespace ImmichFrame.WebApi.Models
         public string ImmichServerUrl { get; set; } = string.Empty;
         public string ApiKey { get; set; } = string.Empty;
         public bool ShowMemories { get; set; } = false;
+        public int? ImagesFromDays { get; set; }
+        public DateTime? ImagesFromDate { get; set; }
+        public DateTime? ImagesUntilDate { get; set; }
         public List<Guid> Albums { get; set; } = new List<Guid>();
         public List<Guid> ExcludedAlbums { get; set; } = new List<Guid>();
         public List<Guid> People { get; set; } = new List<Guid>();
@@ -20,9 +23,6 @@ namespace ImmichFrame.WebApi.Models
         public string? WeatherLatLong { get; set; } = "40.7128,74.0060";
         public string Language { get; set; } = "en";
         public string? Webhook { get; set; }
-        public int? ImagesFromDays { get; set; }
-        public DateTime? ImagesFromDate { get; set; }
-        public DateTime? ImagesUntilDate { get; set; }
 
         public ServerSettings()
         {
