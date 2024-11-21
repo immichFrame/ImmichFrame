@@ -19,5 +19,8 @@
         public string? UnitSystem { get; set; }
         public string Language { get; set; }
         public string? Webhook { get; set; }
+        public int? ImagesFromDays { get; set; }
+        public DateTime? ImagesFromDate { get; set; }
+        public DateTime? ImagesUntilDate { get; set; }
     }
 }

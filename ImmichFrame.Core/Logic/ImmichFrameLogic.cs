@@ -154,6 +154,18 @@ namespace ImmichFrame.Core.Logic
                 // Exclude videos
                 list = list.Where(x => x.Type != AssetTypeEnum.VIDEO);
 
+                var takenBefore = _settings.ImagesUntilDate.HasValue ? _settings.ImagesUntilDate : null;
+                if (takenBefore.HasValue)
+                {
+                    list = list.Where(x => x.FileCreatedAt < takenBefore.Value);
+                }
+
+                var takenAfter = _settings.ImagesFromDate.HasValue ? _settings.ImagesFromDate : _settings.ImagesFromDays.HasValue ? DateTime.Today.AddDays(-_settings.ImagesFromDays.Value) : null;
+                if (takenAfter.HasValue)
+                {
+                    list = list.Where(x => x.FileCreatedAt > takenAfter.Value);
+                }
+
                 var excludedList = await ExcludedAlbumAssets;
 
                 // Exclude assets if configured
@@ -270,6 +282,19 @@ namespace ImmichFrame.Core.Logic
                                 WithExif = true,
                                 WithPeople = true
                             };
+
+                            var takenBefore = _settings.ImagesUntilDate.HasValue ? _settings.ImagesUntilDate : null;
+                            if (takenBefore.HasValue)
+                            {
+                                metadataBody.TakenBefore = takenBefore.Value;
+                            }
+
+                            var takenAfter = _settings.ImagesFromDate.HasValue ? _settings.ImagesFromDate : _settings.ImagesFromDays.HasValue ? DateTime.Today.AddDays(-_settings.ImagesFromDays.Value) : null;
+                            if (takenAfter.HasValue)
+                            {
+                                metadataBody.TakenAfter = takenAfter.Value;
+                            }
+
                             var personInfo = await immichApi.SearchMetadataAsync(metadataBody);
 
                             total = personInfo.Assets.Total;
@@ -310,10 +335,10 @@ namespace ImmichFrame.Core.Logic
 
             // If only memories, do not return random and order by date
             if (_settings.ShowMemories && !_settings.Albums.Any() && !_settings.People.Any())
-                return filteredAssetInfos.OrderBy(x=>x.Value.ExifInfo.DateTimeOriginal).Select(x=>x.Value).ToList();
+                return filteredAssetInfos.OrderBy(x => x.Value.ExifInfo.DateTimeOriginal).Select(x => x.Value).ToList();
 
             // Return randomly ordered list
-            return filteredAssetInfos.OrderBy(asset => _random.Next(filteredAssetInfos.Count)).Take(_assetAmount).Select(x=>x.Value).ToList();
+            return filteredAssetInfos.OrderBy(asset => _random.Next(filteredAssetInfos.Count)).Take(_assetAmount).Select(x => x.Value).ToList();
         }
 
         List<AssetResponseDto> RandomAssetList = new List<AssetResponseDto>();
@@ -327,7 +352,7 @@ namespace ImmichFrame.Core.Logic
                 return assets;
             }
 
-            if(await LoadRandomAssets())
+            if (await LoadRandomAssets())
             {
                 return await GetRandomAssets();
             }
@@ -371,8 +396,21 @@ namespace ImmichFrame.Core.Logic
                         Size = _assetAmount,
                         Type = AssetTypeEnum.IMAGE,
                         WithExif = true,
-                        WithPeople = true
+                        WithPeople = true,
                     };
+
+                    var takenBefore = _settings.ImagesUntilDate.HasValue ? _settings.ImagesUntilDate : null;
+                    if (takenBefore.HasValue)
+                    {
+                        searchBody.TakenBefore = takenBefore.Value;
+                    }
+
+                    var takenAfter = _settings.ImagesFromDate.HasValue ? _settings.ImagesFromDate : _settings.ImagesFromDays.HasValue ? DateTime.Today.AddDays(-_settings.ImagesFromDays.Value) : null;
+                    if (takenAfter.HasValue)
+                    {
+                        searchBody.TakenAfter = takenAfter.Value;
+                    }
+
                     var searchResponse = await immichApi.SearchRandomAsync(searchBody);
 
                     var randomAssets = searchResponse;
@@ -435,7 +473,7 @@ namespace ImmichFrame.Core.Logic
         private (DateTime fetchDate, List<string> calendars)? lastCalendars;
         public async Task<List<string>> GetCalendars()
         {
-            if(lastCalendars != null && lastCalendars.Value.fetchDate.AddMinutes(15) > DateTime.Now)
+            if (lastCalendars != null && lastCalendars.Value.fetchDate.AddMinutes(15) > DateTime.Now)
             {
                 return lastCalendars.Value.calendars;
             }
@@ -498,7 +536,8 @@ namespace ImmichFrame.Core.Logic
 
             var response = await httpClient.PostAsync(_settings.Webhook, data);
 
-            if (response.IsSuccessStatusCode) {
+            if (response.IsSuccessStatusCode)
+            {
                 Console.WriteLine("Webhook successfully sent.");
             }
             else

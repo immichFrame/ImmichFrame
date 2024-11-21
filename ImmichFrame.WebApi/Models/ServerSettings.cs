@@ -20,6 +20,9 @@ namespace ImmichFrame.WebApi.Models
         public string? WeatherLatLong { get; set; } = "40.7128,74.0060";
         public string Language { get; set; } = "en";
         public string? Webhook { get; set; }
+        public int? ImagesFromDays { get; set; }
+        public DateTime? ImagesFromDate { get; set; }
+        public DateTime? ImagesUntilDate { get; set; }
 
         public ServerSettings()
         {
@@ -41,7 +44,8 @@ namespace ImmichFrame.WebApi.Models
             }
             catch (Exception ex)
             {
-                throw new SettingsNotValidException($"Problem with parsing the settings: {ex.Message}", ex);
+                var msg = $"Problem with parsing the settings: {ex.Message}";
+                throw new SettingsNotValidException(msg, ex);
             }
         }
     }

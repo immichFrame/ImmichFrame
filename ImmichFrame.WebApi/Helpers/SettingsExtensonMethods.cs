@@ -45,17 +45,24 @@ namespace ImmichFrame.WebApi.Helpers
             {
                 prop.SetValue(settings, bool.Parse(value.ToString() ?? "false"));
             }
-            else if (type == typeof(int))
+            else if (type == typeof(int) || type == typeof(int?))
             {
+                if (value == null) return;
+
                 prop.SetValue(settings, Convert.ToInt32(value));
             }
             else if (type == typeof(double))
             {
                 prop.SetValue(settings, Convert.ToDouble(value));
             }
+            else if (type == typeof(DateTime) || type == typeof(DateTime?))
+            {
+                Console.WriteLine("test");
+                prop.SetValue(settings, Convert.ToDateTime(value));
+            }
             else
             {
-                throw new ArgumentException($"{type.Name} is not supported in {nameof(SettingsExtensions)}.{nameof(SetValue)}");
+                throw new ArgumentException($"{prop.Name} could not be parsed: {type.Name} is not supported in {nameof(SettingsExtensions)}.{nameof(SetValue)}");
             }
         }
     }
