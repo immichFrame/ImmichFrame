@@ -9,6 +9,9 @@ namespace ImmichFrame.WebApi.Models
         public string ImmichServerUrl { get; set; } = string.Empty;
         public string ApiKey { get; set; } = string.Empty;
         public bool ShowMemories { get; set; } = false;
+        public int? ImagesFromDays { get; set; }
+        public DateTime? ImagesFromDate { get; set; }
+        public DateTime? ImagesUntilDate { get; set; }
         public List<Guid> Albums { get; set; } = new List<Guid>();
         public List<Guid> ExcludedAlbums { get; set; } = new List<Guid>();
         public List<Guid> People { get; set; } = new List<Guid>();
@@ -41,7 +44,8 @@ namespace ImmichFrame.WebApi.Models
             }
             catch (Exception ex)
             {
-                throw new SettingsNotValidException($"Problem with parsing the settings: {ex.Message}", ex);
+                var msg = $"Problem with parsing the settings: {ex.Message}";
+                throw new SettingsNotValidException(msg, ex);
             }
         }
     }

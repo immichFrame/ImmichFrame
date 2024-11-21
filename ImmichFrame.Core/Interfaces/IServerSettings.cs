@@ -8,6 +8,9 @@
         public string ImmichServerUrl { get; set; }
         public string ApiKey { get; set; }
         public bool ShowMemories { get; set; }
+        public int? ImagesFromDays { get; set; }
+        public DateTime? ImagesFromDate { get; set; }
+        public DateTime? ImagesUntilDate { get; set; }
         public List<Guid> Albums { get; set; }
         public List<Guid> ExcludedAlbums { get; set; }
         public List<Guid> People { get; set; }

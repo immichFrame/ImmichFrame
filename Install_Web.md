@@ -48,6 +48,9 @@ services:
       ExcludedAlbums: "ALBUM3,ALBUM4"
       People: "PERSON1,PERSON2"
       ShowMemories: "false"
+      ImagesFromDays: ""
+      ImagesFromDate: ""
+      ImagesUntilDate: ""
       # Clock
       ShowClock: "true"
       ClockFormat: "HH:mm"
