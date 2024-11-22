@@ -26,6 +26,15 @@ namespace ImmichFrame.WebApi.Controllers
             return await _logic.GetAssets() ?? throw new AssetNotFoundException("No asset was found");
         }
 
+        [HttpGet("random", Name = "GetRandom")]
+        [Produces("image/jpeg", "image/webp")]
+        [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status200OK)]
+        public async Task<FileResult> GetNextAsset()
+        {
+            var randomImage = await _logic.GetNextAsset() ?? throw new AssetNotFoundException("No asset was found");
+            return await GetImage(new Guid(randomImage.Id));
+        }
+
         [HttpGet("{id}", Name = "GetImage")]
         [Produces("image/jpeg", "image/webp")]
         [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status200OK)]
