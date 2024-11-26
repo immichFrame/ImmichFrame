@@ -19,7 +19,7 @@ ARG TARGETARCH
 RUN dotnet publish --runtime linux-${TARGETARCH} --self-contained false -o /app
 
 # Stage 3: Build frontend with Node.js
-FROM node:18-alpine AS build-node
+FROM node:23-alpine AS build-node
 
 USER node
 WORKDIR /app
