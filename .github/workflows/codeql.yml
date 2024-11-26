@@ -1,4 +1,4 @@
-name: Build Desktop
+name: CodeQL / Analyze (csharp)
 
 on:
   push:
@@ -11,8 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:    
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v2
+      uses: github/codeql-action/init@v3
       with:
         languages: csharp
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v2
+        build-mode: autobuild
