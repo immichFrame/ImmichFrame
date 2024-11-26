@@ -13,6 +13,7 @@
 	import Clock from '../elements/clock.svelte';
 	import Appointments from '../elements/appointments.svelte';
 	import LoadingElement from '../elements/LoadingElement.svelte';
+	import { mdiSizeXxxl } from '@mdi/js';
 
 	let assetHistory: api.AssetResponseDto[] = [];
 	let assetBacklog: api.AssetResponseDto[] = [];
@@ -136,14 +137,17 @@
 
 	onMount(() => {
 		window.addEventListener('mousemove', showCursor);
-		window.addEventListener('click', showCursor);
-
+		window.addEventListener('click', showCursor);		
 		if ($configStore.primaryColor) {
 			document.documentElement.style.setProperty('--primary-color', $configStore.primaryColor);
 		}
 
 		if ($configStore.secondaryColor) {
 			document.documentElement.style.setProperty('--secondary-color', $configStore.secondaryColor);
+		}
+
+		if ($configStore.baseFontSize) {
+			document.documentElement.style.fontSize = $configStore.baseFontSize;
 		}
 
 		unsubscribeRestart = restartProgress.subscribe((value) => {

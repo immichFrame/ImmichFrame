@@ -167,6 +167,7 @@ export type WebClientSettings = {
     primaryColor?: string | null;
     secondaryColor?: string | null;
     style?: string | null;
+    baseFontSize?: string | null;
     showWeatherDescription?: boolean;
     unattendedMode?: boolean;
     imageZoom?: boolean;
