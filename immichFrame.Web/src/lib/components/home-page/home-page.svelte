@@ -13,7 +13,6 @@
 	import Clock from '../elements/clock.svelte';
 	import Appointments from '../elements/appointments.svelte';
 	import LoadingElement from '../elements/LoadingElement.svelte';
-	import { mdiSizeXxxl } from '@mdi/js';
 
 	let assetHistory: api.AssetResponseDto[] = [];
 	let assetBacklog: api.AssetResponseDto[] = [];
