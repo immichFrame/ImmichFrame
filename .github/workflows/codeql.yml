@@ -15,3 +15,7 @@ jobs:
       with:
         languages: csharp
         build-mode: autobuild
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:csharp"
