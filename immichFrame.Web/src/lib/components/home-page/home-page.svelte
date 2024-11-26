@@ -136,14 +136,17 @@
 
 	onMount(() => {
 		window.addEventListener('mousemove', showCursor);
-		window.addEventListener('click', showCursor);
-
+		window.addEventListener('click', showCursor);		
 		if ($configStore.primaryColor) {
 			document.documentElement.style.setProperty('--primary-color', $configStore.primaryColor);
 		}
 
 		if ($configStore.secondaryColor) {
 			document.documentElement.style.setProperty('--secondary-color', $configStore.secondaryColor);
+		}
+
+		if ($configStore.baseFontSize) {
+			document.documentElement.style.fontSize = $configStore.baseFontSize;
 		}
 
 		unsubscribeRestart = restartProgress.subscribe((value) => {

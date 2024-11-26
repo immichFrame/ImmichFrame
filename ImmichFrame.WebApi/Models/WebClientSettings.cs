@@ -23,6 +23,7 @@ namespace ImmichFrame.WebApi.Models
         public string? PrimaryColor { get; set; }
         public string? SecondaryColor { get; set; }
         public string Style { get; set; } = "none";
+        public string? BaseFontSize { get; set; }
         public bool ShowWeatherDescription { get; set; } = true;
         public bool UnattendedMode { get; set; } = false;
         public bool ImageZoom { get; set; } = true;

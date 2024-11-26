@@ -71,6 +71,7 @@ services:
       RefreshAlbumPeopleInterval: "12"
       # UI
       PrimaryColor: "#FF5733"
+      BaseFontSize: "17px"
       # Misc
       ImmichFrameAlbumName: ""
 ```
