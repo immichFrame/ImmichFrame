@@ -7,11 +7,11 @@ namespace ImmichFrame.WebApi.Helpers
     {
         public static void SetValue(this ServerSettings s, PropertyInfo prop, string value)
         {
-            SetValue((object)s, prop, value);
+            SetValue((object)s, prop, value.Trim());
         }
         public static void SetValue(this WebClientSettings s, PropertyInfo prop, string value)
         {
-            SetValue((object)s, prop, value);
+            SetValue((object)s, prop, value.Trim());
         }
 
         private static void SetValue(object settings, PropertyInfo prop, string value)

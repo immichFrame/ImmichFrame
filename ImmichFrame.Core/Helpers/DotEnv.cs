@@ -10,12 +10,15 @@ namespace ImmichFrame.Core.Helpers
 
             foreach (var line in File.ReadAllLines(filePath))
             {
-                var parts = line.Split('=', StringSplitOptions.RemoveEmptyEntries);
+                var index = line.IndexOf('=');
 
-                if (parts.Length != 2)
+                if (index == -1)
                     continue;
 
-                Environment.SetEnvironmentVariable(parts[0], parts[1]);
+                var variable = line.Substring(0, index);
+                var value = line.Substring(index + 1);
+
+                Environment.SetEnvironmentVariable(variable, value);
             }
         }
     }
