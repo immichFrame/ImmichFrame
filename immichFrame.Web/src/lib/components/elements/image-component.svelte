@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import type { AssetResponseDto } from '$lib/immichFrameApi';
 	import * as api from '$lib/immichFrameApi';
 	import ErrorElement from './error-element.svelte';
@@ -8,24 +10,29 @@
 	import { configStore } from '$lib/stores/config.store';
 	import { Confetti } from 'svelte-confetti';
 
-	export let sourceAssets: AssetResponseDto[];
+	interface Props {
+		sourceAssets: AssetResponseDto[];
+		showLocation?: boolean;
+		showPhotoDate?: boolean;
+		showImageDesc?: boolean;
+		showPeopleDesc?: boolean;
+	}
 
-	export let showLocation: boolean = true;
-	export let showPhotoDate: boolean = true;
-	export let showImageDesc: boolean = true;
-	export let showPeopleDesc: boolean = true;
-	let split: boolean = true;
+	let {
+		sourceAssets,
+		showLocation = true,
+		showPhotoDate = true,
+		showImageDesc = true,
+		showPeopleDesc = true
+	}: Props = $props();
+	let split: boolean = $state(true);
 
 	let transitionDuration = ($configStore.transitionDuration ?? 1) * 1000;
 
-	let error: boolean;
-	let loaded: boolean;
+	let error: boolean = $state(false);
+	let loaded: boolean = $state(false);
 
-	let images: [string, AssetResponseDto][];
-
-	$: loadImages(sourceAssets);
-
-	$: hasBday = hasBirthday(sourceAssets);
+	let images: [string, AssetResponseDto][] = $state() as [string, AssetResponseDto][];
 
 	function hasBirthday(assets: AssetResponseDto[]) {
 		let today = new Date();
@@ -82,6 +89,10 @@
 		}
 		return ['', a] as [string, AssetResponseDto];
 	}
+	run(() => {
+		loadImages(sourceAssets);
+	});
+	let hasBday = $derived(hasBirthday(sourceAssets));
 </script>
 
 {#if hasBday}

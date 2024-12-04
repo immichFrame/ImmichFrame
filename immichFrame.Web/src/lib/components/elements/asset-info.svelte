@@ -3,27 +3,21 @@
 	import { format } from 'date-fns';
 	import { configStore } from '$lib/stores/config.store';
 
-	export let asset: AssetResponseDto;
-	export let showLocation: boolean;
-	export let showPhotoDate: boolean;
-	export let showImageDesc: boolean;
-	export let showPeopleDesc: boolean;
+	interface Props {
+		asset: AssetResponseDto;
+		showLocation: boolean;
+		showPhotoDate: boolean;
+		showImageDesc: boolean;
+		showPeopleDesc: boolean;
+	}
 
-	$: assetDate = asset.exifInfo?.dateTimeOriginal;
-	$: desc = asset.exifInfo?.description ?? '';
-
-	$: time = assetDate ? new Date(assetDate) : null;
-
-	$: formattedDate = time ? format(time, $configStore.photoDateFormat ?? 'dd.MM.yyyy') : null;
-
-	$: location = formatLocation(
-		$configStore.imageLocationFormat ?? 'City,State,Country',
-		asset.exifInfo?.city ?? '',
-		asset.exifInfo?.state ?? '',
-		asset.exifInfo?.country ?? ''
-	);
-
-	$: availablePeople = asset.people?.filter((x) => x.name);
+	let {
+		asset,
+		showLocation,
+		showPhotoDate,
+		showImageDesc,
+		showPeopleDesc
+	}: Props = $props();
 
 	function formatLocation(format: string, city?: string, state?: string, country?: string) {
 		const locationParts: Array<string> = new Array();
@@ -41,6 +35,17 @@
 
 		return Array.from(locationParts).join(', ');
 	}
+	let assetDate = $derived(asset.exifInfo?.dateTimeOriginal);
+	let desc = $derived(asset.exifInfo?.description ?? '');
+	let time = $derived(assetDate ? new Date(assetDate) : null);
+	let formattedDate = $derived(time ? format(time, $configStore.photoDateFormat ?? 'dd.MM.yyyy') : null);
+	let location = $derived(formatLocation(
+		$configStore.imageLocationFormat ?? 'City,State,Country',
+		asset.exifInfo?.city ?? '',
+		asset.exifInfo?.state ?? '',
+		asset.exifInfo?.country ?? ''
+	));
+	let availablePeople = $derived(asset.people?.filter((x) => x.name));
 </script>
 
 {#if showPhotoDate || showPhotoDate || showImageDesc || showPeopleDesc}

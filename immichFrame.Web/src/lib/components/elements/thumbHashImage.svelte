@@ -2,7 +2,11 @@
 	import { decodeBase64 } from '$lib/utils';
 	import { thumbHashToDataURL } from 'thumbhash';
 
-	export let thumbHash: string;
+	interface Props {
+		thumbHash: string;
+	}
+
+	let { thumbHash }: Props = $props();
 </script>
 
 <img

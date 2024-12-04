@@ -5,18 +5,29 @@
 	import { configStore } from '$lib/stores/config.store';
 	import AssetInfo from './asset-info.svelte';
 
-	export let image: [url: string, asset: AssetResponseDto];
-	export let showLocation: boolean;
-	export let showPhotoDate: boolean;
-	export let showImageDesc: boolean;
-	export let showPeopleDesc: boolean;
-	export let multi: boolean = false;
+	interface Props {
+		image: [url: string, asset: AssetResponseDto];
+		showLocation: boolean;
+		showPhotoDate: boolean;
+		showImageDesc: boolean;
+		showPeopleDesc: boolean;
+		multi?: boolean;
+	}
+
+	let {
+		image,
+		showLocation,
+		showPhotoDate,
+		showImageDesc,
+		showPeopleDesc,
+		multi = false
+	}: Props = $props();
 
 	let debug = false;
 
 	let interval = $configStore.interval ?? 1;
 
-	$: hasPerson = image[1].people?.filter((x) => x.name).length ?? 0 > 0;
+	let hasPerson = $derived(image[1].people?.filter((x) => x.name).length ?? 0 > 0);
 
 	function GetFace(i: number) {
 		let person = image[1].people as PersonWithFacesResponseDto[];
