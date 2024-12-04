@@ -105,7 +105,7 @@ namespace ImmichFrame.Core.Logic
 
                 var immichApi = new ImmichApi(_settings.ImmichServerUrl, client);
 
-                using var data = await immichApi.ViewAssetAsync(id, string.Empty, AssetMediaSize.Preview);
+                var data = await immichApi.ViewAssetAsync(id, string.Empty, AssetMediaSize.Preview);
 
                 if (data == null)
                     throw new AssetNotFoundException($"Asset {id} was not found!");
