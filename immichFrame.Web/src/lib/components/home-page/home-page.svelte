@@ -56,9 +56,11 @@
 		}
 	}
 
-	const handleDone = async () => {
-		await getNextAssets();
-		progressBar.restart(true);
+	const handleDone = async (previous: boolean = false) => {
+		progressBar.restart(false);
+		if (previous) await getPreviousAssets();
+		else await getNextAssets();
+		progressBar.play();
 	};
 
 	async function getNextAssets() {
@@ -200,14 +202,10 @@
 
 		<OverlayControls
 			on:next={async () => {
-				progressBar.restart(false);
-				await getNextAssets();
-				progressBar.restart(true);
+				await handleDone();
 			}}
 			on:back={async () => {
-				progressBar.restart(false);
-				await getPreviousAssets();
-				progressBar.restart(true);
+				await handleDone(true);
 			}}
 			on:pause={async () => {
 				if (progressBarStatus == ProgressBarStatus.Paused) {

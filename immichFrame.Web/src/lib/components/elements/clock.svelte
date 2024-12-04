@@ -5,7 +5,7 @@
 	import { configStore } from '$lib/stores/config.store';
 
 	let time = $state(new Date());
-	let weather: api.IWeather = $state();
+	let weather: api.IWeather = $state() as api.IWeather;
 
 	let formattedDate = $derived(format(time, $configStore.photoDateFormat ?? 'dd.MM.yyyy'));
 	let timePortion = $derived(format(time, $configStore.clockFormat ?? 'HH:mm:ss'));
