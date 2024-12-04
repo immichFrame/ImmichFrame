@@ -8,6 +8,8 @@
         public string ImmichServerUrl { get; set; }
         public string ApiKey { get; set; }
         public bool ShowMemories { get; set; }
+        public bool DownloadImages { get; set; }
+        public int RenewImagesDuration { get; set; }
         public int? ImagesFromDays { get; set; }
         public DateTime? ImagesFromDate { get; set; }
         public DateTime? ImagesUntilDate { get; set; }

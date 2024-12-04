@@ -31,21 +31,12 @@ namespace ImmichFrame.WebApi.Controllers
         [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status200OK)]
         public async Task<FileResult> GetImage(Guid id)
         {
-            var data = await _logic.GetImage(id);
-
-            var contentType = "";
-            if (data.Headers.ContainsKey("Content-Type"))
-            {
-                contentType = data.Headers["Content-Type"].First().ToString();
-            }
-
-            var ext = contentType.ToLower() == "image/webp" ? "webp" : "jpeg";
-            var fileName = $"{id}.{ext}";
+            var image = await _logic.GetImage(id);
 
             var notification = new ImageRequestedNotification(id);
             _ = _logic.SendWebhookNotification(notification);
 
-            return File(data.Stream, contentType, fileName); // returns a FileStreamResult
+            return File(image.fileStream, image.ContentType, image.fileName); // returns a FileStreamResult
         }
     }
 }

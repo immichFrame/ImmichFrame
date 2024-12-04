@@ -7,7 +7,7 @@ namespace ImmichFrame.Core.Interfaces
     {
         public Task<AssetResponseDto?> GetNextAsset();
         public Task<List<AssetResponseDto>> GetAssets();
-        public Task<FileResponse> GetImage(Guid id);
+        public Task<(string fileName, string ContentType, Stream fileStream)> GetImage(Guid id);
         public Task AddAssetToAlbum(AssetResponseDto assetToAdd);
         public Task DeleteAndCreateImmichFrameAlbum();
         public Task<List<IAppointment>> GetAppointments();
