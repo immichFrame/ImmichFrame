@@ -16,19 +16,19 @@
 
 	let assetHistory: api.AssetResponseDto[] = [];
 	let assetBacklog: api.AssetResponseDto[] = [];
-	let displayingAssets: api.AssetResponseDto[];
+	let displayingAssets: api.AssetResponseDto[] = $state() as api.AssetResponseDto[];
 
 	const { restartProgress, stopProgress } = slideshowStore;
 
-	let progressBarStatus: ProgressBarStatus;
-	let progressBar: ProgressBar;
-	let error: boolean;
-	let errorMessage: string;
+	let progressBarStatus: ProgressBarStatus = $state(ProgressBarStatus.Playing);
+	let progressBar: ProgressBar = $state() as ProgressBar;
+	let error: boolean = $state(false);
+	let errorMessage: string = $state() as string;
 
 	let unsubscribeRestart: () => void;
 	let unsubscribeStop: () => void;
 
-	let cursorVisible = true;
+	let cursorVisible = $state(true);
 	let timeoutId: number;
 
 	const hideCursor = () => {
@@ -136,7 +136,7 @@
 
 	onMount(() => {
 		window.addEventListener('mousemove', showCursor);
-		window.addEventListener('click', showCursor);		
+		window.addEventListener('click', showCursor);
 		if ($configStore.primaryColor) {
 			document.documentElement.style.setProperty('--primary-color', $configStore.primaryColor);
 		}
@@ -227,7 +227,7 @@
 			location={ProgressBarLocation.Bottom}
 			bind:this={progressBar}
 			bind:status={progressBarStatus}
-			on:done={handleDone}
+			onDone={handleDone}
 		/>
 	{:else}
 		<LoadingElement />

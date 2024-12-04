@@ -4,11 +4,11 @@
 	import { format } from 'date-fns';
 	import { configStore } from '$lib/stores/config.store';
 
-	let time = new Date();
-	let weather: api.IWeather;
+	let time = $state(new Date());
+	let weather: api.IWeather = $state();
 
-	$: formattedDate = format(time, $configStore.photoDateFormat ?? 'dd.MM.yyyy');
-	$: timePortion = format(time, $configStore.clockFormat ?? 'HH:mm:ss');
+	let formattedDate = $derived(format(time, $configStore.photoDateFormat ?? 'dd.MM.yyyy'));
+	let timePortion = $derived(format(time, $configStore.clockFormat ?? 'HH:mm:ss'));
 
 	onMount(() => {
 		const interval = setInterval(() => {
