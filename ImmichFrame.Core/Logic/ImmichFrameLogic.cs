@@ -72,15 +72,66 @@ namespace ImmichFrame.Core.Logic
             return await GetRandomAsset();
         }
 
-        public async Task<FileResponse> GetImage(Guid id)
+        string DownloadLocation = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ImageCache");
+        public async Task<(string fileName, string ContentType, Stream fileStream)> GetImage(Guid id)
         {
+            if (_settings.DownloadImages)
+            {
+                if (!Directory.Exists(DownloadLocation))
+                {
+                    Directory.CreateDirectory(DownloadLocation);
+                }
+
+                var file = Directory.GetFiles(DownloadLocation).FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == id.ToString());
+
+                if (!string.IsNullOrWhiteSpace(file))
+                {
+                    if (_settings.RenewImagesDuration > (DateTime.UtcNow - File.GetCreationTimeUtc(file)).Days)
+                    {
+                        var fs = File.OpenRead(file);
+
+                        var ext = Path.GetExtension(file);
+
+                        return (Path.GetFileName(file), $"image/{ext}", fs);
+                    }
+
+                    File.Delete(file);
+                }
+            }
+
             using (var client = new HttpClient())
             {
                 client.UseApiKey(_settings.ApiKey);
 
                 var immichApi = new ImmichApi(_settings.ImmichServerUrl, client);
 
-                return await immichApi.ViewAssetAsync(id, string.Empty, AssetMediaSize.Preview);
+                using var data = await immichApi.ViewAssetAsync(id, string.Empty, AssetMediaSize.Preview);
+
+                if (data == null)
+                    throw new AssetNotFoundException($"Asset {id} was not found!");
+
+                var contentType = "";
+                if (data.Headers.ContainsKey("Content-Type"))
+                {
+                    contentType = data.Headers["Content-Type"].FirstOrDefault()?.ToString() ?? "";
+                }
+                var ext = contentType.ToLower() == "image/webp" ? "webp" : "jpeg";
+                var fileName = $"{id}.{ext}";
+
+                if (_settings.DownloadImages)
+                {
+                    var stream = data.Stream;
+
+                    var filePath = Path.Combine(DownloadLocation, fileName);
+
+                    // save to folder
+                    var fs = File.Create(filePath);
+                    stream.CopyTo(fs);
+                    fs.Position = 0;
+                    return (Path.GetFileName(filePath), contentType, fs);
+                }
+
+                return (fileName, contentType, data.Stream);
             }
         }
 
