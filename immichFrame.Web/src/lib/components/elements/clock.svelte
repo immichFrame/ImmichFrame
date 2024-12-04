@@ -2,12 +2,20 @@
 	import * as api from '$lib/immichFrameApi';
 	import { onMount } from 'svelte';
 	import { format } from 'date-fns';
+	import * as locale from 'date-fns/locale';
 	import { configStore } from '$lib/stores/config.store';
 
 	let time = new Date();
 	let weather: api.IWeather;
 
-	$: formattedDate = format(time, $configStore.photoDateFormat ?? 'dd.MM.yyyy');
+	const selectedLocale = $configStore.language;
+
+	const localeToUse =
+		(selectedLocale && locale[selectedLocale as keyof typeof locale]) || locale.enUS;
+
+	$: formattedDate = format(time, $configStore.photoDateFormat ?? 'dd.MM.yyyy', {
+		locale: localeToUse
+	});
 	$: timePortion = format(time, $configStore.clockFormat ?? 'HH:mm:ss');
 
 	onMount(() => {

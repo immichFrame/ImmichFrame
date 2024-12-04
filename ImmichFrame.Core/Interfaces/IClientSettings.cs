@@ -29,5 +29,6 @@
         public bool UnattendedMode { get; set; }
         public bool ImageZoom { get; set; }
         public string Layout { get; set; }
+        public string Language { get; set; }
     }
 }

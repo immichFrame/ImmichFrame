@@ -172,6 +172,7 @@ export type WebClientSettings = {
     unattendedMode?: boolean;
     imageZoom?: boolean;
     layout?: string | null;
+    language?: string | null;
 };
 export type IWeather = {
     location?: string | null;
