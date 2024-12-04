@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { type AssetResponseDto } from '$lib/immichFrameApi';
 	import { format } from 'date-fns';
+	import * as locale from 'date-fns/locale';
 	import { configStore } from '$lib/stores/config.store';
 
 	export let asset: AssetResponseDto;
@@ -14,7 +15,14 @@
 
 	$: time = assetDate ? new Date(assetDate) : null;
 
-	$: formattedDate = time ? format(time, $configStore.photoDateFormat ?? 'dd.MM.yyyy') : null;
+	const selectedLocale = $configStore.language;
+
+	const localeToUse =
+		(selectedLocale && locale[selectedLocale as keyof typeof locale]) || locale.enUS;
+
+	$: formattedDate = time
+		? format(time, $configStore.photoDateFormat ?? 'dd.MM.yyyy', { locale: localeToUse })
+		: null;
 
 	$: location = formatLocation(
 		$configStore.imageLocationFormat ?? 'City,State,Country',
