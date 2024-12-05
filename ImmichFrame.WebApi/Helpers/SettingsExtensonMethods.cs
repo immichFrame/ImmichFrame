@@ -19,7 +19,7 @@ namespace ImmichFrame.WebApi.Helpers
             var type = prop.PropertyType;
             if (type == typeof(List<Guid>))
             {
-                if (string.IsNullOrEmpty(value))
+                if (string.IsNullOrWhiteSpace(value))
                 {
                     prop.SetValue(settings, new List<Guid>());
                     return;
@@ -29,7 +29,7 @@ namespace ImmichFrame.WebApi.Helpers
             }
             else if (type == typeof(List<string>))
             {
-                if (string.IsNullOrEmpty(value))
+                if (string.IsNullOrWhiteSpace(value))
                 {
                     prop.SetValue(settings, new List<string>());
                     return;
@@ -47,7 +47,7 @@ namespace ImmichFrame.WebApi.Helpers
             }
             else if (type == typeof(int) || type == typeof(int?))
             {
-                if (string.IsNullOrEmpty(value)) return;
+                if (string.IsNullOrWhiteSpace(value)) return;
 
                 prop.SetValue(settings, Convert.ToInt32(value));
             }
@@ -57,7 +57,7 @@ namespace ImmichFrame.WebApi.Helpers
             }
             else if (type == typeof(DateTime) || type == typeof(DateTime?))
             {
-                if (string.IsNullOrEmpty(value)) return;
+                if (string.IsNullOrWhiteSpace(value)) return;
 
                 prop.SetValue(settings, Convert.ToDateTime(value));
             }
