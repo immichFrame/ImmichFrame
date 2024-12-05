@@ -47,7 +47,7 @@ namespace ImmichFrame.WebApi.Helpers
             }
             else if (type == typeof(int) || type == typeof(int?))
             {
-                if (value == null) return;
+                if (string.IsNullOrEmpty(value)) return;
 
                 prop.SetValue(settings, Convert.ToInt32(value));
             }
@@ -57,6 +57,8 @@ namespace ImmichFrame.WebApi.Helpers
             }
             else if (type == typeof(DateTime) || type == typeof(DateTime?))
             {
+                if (string.IsNullOrEmpty(value)) return;
+
                 prop.SetValue(settings, Convert.ToDateTime(value));
             }
             else
