@@ -40,9 +40,9 @@ namespace ImmichFrame.WebApi.Controllers
             return File(image.fileStream, image.ContentType, image.fileName); // returns a FileStreamResult
         }
 
-        [HttpGet("RandomImage", Name = "GetRandomImage")]
+        [HttpGet("RandomImageAndInfo", Name = "GetRandomImageAndInfo")]
         [Produces("application/json")]
-        public async Task<object> GetRandomImage()
+        public async Task<IActionResult> GetRandomImageAndInfo()
         {
             var _settings = new WebClientSettings();
             var randomImage = await _logic.GetNextAsset() ?? throw new AssetNotFoundException("No asset was found");
