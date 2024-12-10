@@ -5,7 +5,6 @@ using ImmichFrame.Core.Interfaces;
 using ImmichFrame.Core.Logic;
 using ImmichFrame.WebApi.Models;
 using Microsoft.AspNetCore.Mvc;
-using ThumbHashes;
 
 namespace ImmichFrame.WebApi.Controllers
 {
