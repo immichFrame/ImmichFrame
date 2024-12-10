@@ -42,7 +42,7 @@ namespace ImmichFrame.WebApi.Controllers
 
         [HttpGet("RandomImage", Name = "GetRandomImage")]
         [Produces("application/json")]
-        public async Task<IActionResult> GetRandomImage()
+        public async Task<object> GetRandomImage()
         {
             var _settings = new WebClientSettings();
             var randomImage = await _logic.GetNextAsset() ?? throw new AssetNotFoundException("No asset was found");
@@ -59,22 +59,27 @@ namespace ImmichFrame.WebApi.Controllers
                 randomImageBase64 = Convert.ToBase64String(fileBytes);
             }
 
-            string thumbHashBase64;
-            using (var memoryStream = (MemoryStream)randomImage.ThumbhashImage!)
-            {
-                byte[] byteArray = memoryStream.ToArray();
-                thumbHashBase64 = Convert.ToBase64String(byteArray);
-            }
+            randomImage.ThumbhashImage!.Position = 0;
+            byte[] byteArray = new byte[randomImage.ThumbhashImage.Length];
+            randomImage.ThumbhashImage.Read(byteArray, 0, byteArray.Length);
+            string thumbHashBase64 = Convert.ToBase64String(byteArray);
+
             CultureInfo cultureInfo = new CultureInfo(_settings.Language);
             string photoDate = randomImage.LocalDateTime.ToString(_settings.PhotoDateFormat, cultureInfo) ?? string.Empty;
-            string imageDesc = randomImage.ImageDesc ?? string.Empty;
+
+            var locationParts = _settings.ImageLocationFormat?.Split(',') ?? Array.Empty<string>();
+            var city = locationParts.Length >= 1 ? randomImage.ExifInfo.City : string.Empty;
+            var state = locationParts.Length >= 2 ? (randomImage.ExifInfo.State?.Split(", ").Last() ?? string.Empty) : string.Empty;
+            var country = locationParts.Length >= 3 ? randomImage.ExifInfo.Country : string.Empty;
+
+            string imageLocation = string.Join(", ", new[] { city, state, country }.Where(part => !string.IsNullOrWhiteSpace(part)));
 
             return Ok(new
             {
                 RandomImageBase64 = randomImageBase64,
                 ThumbHashImageBase64 = thumbHashBase64,
                 PhotoDate = photoDate,
-                ImageDesc = imageDesc
+                ImageLocation = imageLocation
             });
         }
     }
