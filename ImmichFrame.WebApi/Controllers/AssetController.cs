@@ -5,9 +5,17 @@ using ImmichFrame.Core.Interfaces;
 using ImmichFrame.Core.Logic;
 using ImmichFrame.WebApi.Models;
 using Microsoft.AspNetCore.Mvc;
+using ThumbHashes;
 
 namespace ImmichFrame.WebApi.Controllers
 {
+    public class ImageResponse
+    {
+        public required string RandomImageBase64 { get; set; }
+        public required string ThumbHashImageBase64 { get; set; }
+        public required string PhotoDate { get; set; }
+        public required string ImageLocation { get; set; }
+    }
     [ApiController]
     [Route("api/[controller]")]
     public class AssetController : ControllerBase
@@ -42,7 +50,7 @@ namespace ImmichFrame.WebApi.Controllers
 
         [HttpGet("RandomImageAndInfo", Name = "GetRandomImageAndInfo")]
         [Produces("application/json")]
-        public async Task<IActionResult> GetRandomImageAndInfo()
+        public async Task<ImageResponse> GetRandomImageAndInfo()
         {
             var _settings = new WebClientSettings();
             var randomImage = await _logic.GetNextAsset() ?? throw new AssetNotFoundException("No asset was found");
@@ -74,13 +82,13 @@ namespace ImmichFrame.WebApi.Controllers
 
             string imageLocation = string.Join(", ", new[] { city, state, country }.Where(part => !string.IsNullOrWhiteSpace(part)));
 
-            return Ok(new
+            return new ImageResponse
             {
                 RandomImageBase64 = randomImageBase64,
                 ThumbHashImageBase64 = thumbHashBase64,
                 PhotoDate = photoDate,
                 ImageLocation = imageLocation
-            });
+            };
         }
     }
 }
