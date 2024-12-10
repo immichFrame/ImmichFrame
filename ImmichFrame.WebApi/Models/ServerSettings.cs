@@ -21,7 +21,7 @@ namespace ImmichFrame.WebApi.Models
         public int RefreshAlbumPeopleInterval { get; set; } = 12;
         public string ImmichFrameAlbumName { get; set; } = string.Empty;
         public string? WeatherApiKey { get; set; } = string.Empty;
-        public string? UnitSystem { get; set; } = "";
+        public string? UnitSystem { get; set; } = "imperial";
         public string? WeatherLatLong { get; set; } = "40.7128,74.0060";
         public string Language { get; set; } = "en";
         public string? Webhook { get; set; }
