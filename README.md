@@ -40,7 +40,10 @@ This project is a digital photo frame application that interfaces with your [imm
 
 ## ✨ Demo
 ### Web Demo
+<a href="https://demo.immichframe.online/">
+  <p>Visit the online demo</p>
 <img src="/design/demo/web_demo.png" alt="Web Demo" height="300">
+</a>
 
 <!-- GETTING STARTED -->
 
