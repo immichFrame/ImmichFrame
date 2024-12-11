@@ -61,18 +61,18 @@
 		{$configStore.style == 'blur' ? 'backdrop-blur-lg rounded-tl-2xl' : ''}	"
 	>
 		{#if showPhotoDate && formattedDate}
-			<p class="text-sm font-thin">{formattedDate}</p>
+			<p class="text-sm font-thin text-shadow-custom">{formattedDate}</p>
 		{/if}
 		{#if showImageDesc && desc}
-			<p class="text-base font-light">{desc}</p>
+			<p class="text-base font-light text-shadow-custom">{desc}</p>
 		{/if}
 		{#if showPeopleDesc && availablePeople}
-			<p class="text-sm font-light">
+			<p class="text-sm font-light text-shadow-custom">
 				{availablePeople.map((x) => x.name).join(', ')}
 			</p>
 		{/if}
 		{#if showLocation && location}
-			<p class="text-base font-light">{location}</p>
+			<p class="text-base font-light text-shadow-custom">{location}</p>
 		{/if}
 	</div>
 {/if}
