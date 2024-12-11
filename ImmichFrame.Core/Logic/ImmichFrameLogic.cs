@@ -7,6 +7,8 @@ using OpenWeatherMap;
 using Ical.Net;
 using ImmichFrame.WebApi.Helpers;
 using System.Text.Json;
+using Ical.Net.DataTypes;
+using System.Collections.Generic;
 
 namespace ImmichFrame.Core.Logic
 {
@@ -564,7 +566,7 @@ namespace ImmichFrame.Core.Logic
             {
                 var calendar = Calendar.Load(ical);
 
-                appointments.AddRange(calendar.Events.Where(x => x.DtStart.Date == DateTime.Today).Select(x => x.ToAppointment()).ToList());
+                appointments.AddRange(calendar.GetOccurrences(DateTime.UtcNow, DateTime.Today.AddDays(1)).Select(x => x.ToAppointment()));
             }
 
             return appointments;
