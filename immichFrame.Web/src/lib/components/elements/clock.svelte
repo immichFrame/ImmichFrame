@@ -6,16 +6,18 @@
 	import { configStore } from '$lib/stores/config.store';
 
 	let time = $state(new Date());
-	let weather: api.IWeather = $state();
+	let weather: api.IWeather = $state() as api.IWeather;
 
 	const selectedLocale = $configStore.language;
 
 	const localeToUse =
 		(selectedLocale && locale[selectedLocale as keyof typeof locale]) || locale.enUS;
 
-	let formattedDate = $derived(format(time, $configStore.photoDateFormat ?? 'dd.MM.yyyy'), {
-		locale: localeToUse
-	});
+	let formattedDate = $derived(
+		format(time, $configStore.photoDateFormat ?? 'dd.MM.yyyy', {
+			locale: localeToUse
+		})
+	);
 	let timePortion = $derived(format(time, $configStore.clockFormat ?? 'HH:mm:ss'));
 
 	onMount(() => {

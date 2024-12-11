@@ -9,7 +9,7 @@
 		return format(date, $configStore.clockFormat ?? 'HH:mm');
 	}
 
-	let appointments: api.IAppointment[] = $state();
+	let appointments: api.IAppointment[] = $state() as api.IAppointment[];
 
 	onMount(() => {
 		GetAppointments();

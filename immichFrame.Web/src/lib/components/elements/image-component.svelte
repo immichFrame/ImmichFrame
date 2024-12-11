@@ -10,7 +10,6 @@
 	import { configStore } from '$lib/stores/config.store';
 	import { Confetti } from 'svelte-confetti';
 
-
 	interface Props {
 		sourceAssets: AssetResponseDto[];
 		showLocation?: boolean;
@@ -30,12 +29,10 @@
 
 	let transitionDuration = ($configStore.transitionDuration ?? 1) * 1000;
 
-	let error: boolean = $state();
-	let loaded: boolean = $state();
+	let error: boolean = $state(false);
+	let loaded: boolean = $state(false);
 
-	let images: [string, AssetResponseDto][] = $state();
-
-
+	let images: [string, AssetResponseDto][] = $state() as [string, AssetResponseDto][];
 
 	function hasBirthday(assets: AssetResponseDto[]) {
 		let today = new Date();

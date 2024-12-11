@@ -12,7 +12,7 @@
 
 <script lang="ts">
 	import { handlePromiseError } from '$lib/utils';
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import { tweened } from 'svelte/motion';
 
 	interface Props {
@@ -57,7 +57,7 @@
 
 	$effect(() => {
 		if ($progress === 1) {
-			onDone();
+			untrack(() => onDone());
 		}
 	});
 
