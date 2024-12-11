@@ -56,14 +56,12 @@ namespace ImmichFrame.WebApi.Controllers
 
             //var randomImageUrl = Url.Action("GetRandomImage", null, new { id = randomImage.Id }, Request.Scheme);
             var image = await _logic.GetImage(new Guid(randomImage.Id));
+            
             string randomImageBase64;
-            using (MemoryStream memoryStream = new MemoryStream())
+            using (var memoryStream = new MemoryStream())
             {
                 await image.fileStream.CopyToAsync(memoryStream);
-
-                byte[] fileBytes = memoryStream.ToArray();
-
-                randomImageBase64 = Convert.ToBase64String(fileBytes);
+                randomImageBase64 = Convert.ToBase64String(memoryStream.ToArray());
             }
 
             randomImage.ThumbhashImage!.Position = 0;
