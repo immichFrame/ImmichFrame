@@ -21,11 +21,13 @@ namespace ImmichFrame.WebApi.Controllers
     {
         private readonly ILogger<AssetController> _logger;
         private readonly IImmichFrameLogic _logic;
+        private readonly IWebClientSettings _settings;
 
-        public AssetController(ILogger<AssetController> logger, ImmichFrameLogic logic)
+        public AssetController(ILogger<AssetController> logger, ImmichFrameLogic logic, IWebClientSettings settings)
         {
             _logger = logger;
             _logic = logic;
+            _settings = settings;
         }
 
         [HttpGet(Name = "GetAsset")]
@@ -51,7 +53,6 @@ namespace ImmichFrame.WebApi.Controllers
         [Produces("application/json")]
         public async Task<ImageResponse> GetRandomImageAndInfo()
         {
-            var _settings = new WebClientSettings();
             var randomImage = await _logic.GetNextAsset() ?? throw new AssetNotFoundException("No asset was found");
 
             var image = await _logic.GetImage(new Guid(randomImage.Id));
@@ -76,7 +77,7 @@ namespace ImmichFrame.WebApi.Controllers
             var locationFormat = _settings.ImageLocationFormat ?? "City,State,Country";
             var imageLocation = locationFormat
                 .Replace("City", randomImage.ExifInfo.City ?? string.Empty)
-                .Replace("State", randomImage.ExifInfo.State?.Split(", ").Last() ?? string.Empty)
+                .Replace("State", randomImage.ExifInfo.State ?? string.Empty)
                 .Replace("Country", randomImage.ExifInfo.Country ?? string.Empty);
 
             return new ImageResponse
