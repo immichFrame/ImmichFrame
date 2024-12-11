@@ -39,11 +39,11 @@ namespace ImmichFrame.WebApi.Controllers
         [HttpGet("{id}", Name = "GetImage")]
         [Produces("image/jpeg", "image/webp")]
         [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status200OK)]
-        public async Task<FileResult> GetImage(Guid id)
+        public async Task<FileResult> GetImage(Guid id, string clientIdentifier = "")
         {
             var image = await _logic.GetImage(id);
 
-            var notification = new ImageRequestedNotification(id);
+            var notification = new ImageRequestedNotification(id, clientIdentifier);
             _ = _logic.SendWebhookNotification(notification);
 
             return File(image.fileStream, image.ContentType, image.fileName); // returns a FileStreamResult
