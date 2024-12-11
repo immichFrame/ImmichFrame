@@ -54,9 +54,10 @@ namespace ImmichFrame.WebApi.Controllers
             var _settings = new WebClientSettings();
             var randomImage = await _logic.GetNextAsset() ?? throw new AssetNotFoundException("No asset was found");
 
-            //var randomImageUrl = Url.Action("GetRandomImage", null, new { id = randomImage.Id }, Request.Scheme);
             var image = await _logic.GetImage(new Guid(randomImage.Id));
-            
+            var notification = new ImageRequestedNotification(new Guid(randomImage.Id));
+            _ = _logic.SendWebhookNotification(notification);
+
             string randomImageBase64;
             using (var memoryStream = new MemoryStream())
             {
@@ -72,12 +73,11 @@ namespace ImmichFrame.WebApi.Controllers
             CultureInfo cultureInfo = new CultureInfo(_settings.Language);
             string photoDate = randomImage.LocalDateTime.ToString(_settings.PhotoDateFormat, cultureInfo) ?? string.Empty;
 
-            var locationParts = _settings.ImageLocationFormat?.Split(',') ?? Array.Empty<string>();
-            var city = locationParts.Length >= 1 ? randomImage.ExifInfo.City : string.Empty;
-            var state = locationParts.Length >= 2 ? (randomImage.ExifInfo.State?.Split(", ").Last() ?? string.Empty) : string.Empty;
-            var country = locationParts.Length >= 3 ? randomImage.ExifInfo.Country : string.Empty;
-
-            string imageLocation = string.Join(", ", new[] { city, state, country }.Where(part => !string.IsNullOrWhiteSpace(part)));
+            var locationFormat = _settings.ImageLocationFormat ?? "City,State,Country";
+            var imageLocation = locationFormat
+                .Replace("City", randomImage.ExifInfo.City ?? string.Empty)
+                .Replace("State", randomImage.ExifInfo.State?.Split(", ").Last() ?? string.Empty)
+                .Replace("Country", randomImage.ExifInfo.Country ?? string.Empty);
 
             return new ImageResponse
             {
