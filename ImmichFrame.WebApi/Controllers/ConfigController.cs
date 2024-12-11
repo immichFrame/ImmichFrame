@@ -18,7 +18,7 @@ namespace ImmichFrame.WebApi.Controllers
         }
 
         [HttpGet(Name = "GetConfig")]
-        public WebClientSettings GetConfig()
+        public WebClientSettings GetConfig(string clientIdentifier = "")
         {
             return (WebClientSettings)_settings;
         }

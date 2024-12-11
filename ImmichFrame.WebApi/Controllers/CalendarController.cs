@@ -18,7 +18,7 @@ namespace ImmichFrame.WebApi.Controllers
         }
 
         [HttpGet(Name = "GetAppointments")]
-        public async Task<List<IAppointment>> GetAppointments()
+        public async Task<List<IAppointment>> GetAppointments(string clientIdentifier = "")
         {
             return await _logic.GetAppointments();
         }

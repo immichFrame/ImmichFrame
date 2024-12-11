@@ -10,10 +10,7 @@ builder.Logging.AddConsole();
 
 // Add services to the container.
 
-
 var settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config", "Settings.json");
-
-Console.WriteLine(settingsPath);
 
 ServerSettings? serverSettings = null;
 WebClientSettings? clientSettings = null;

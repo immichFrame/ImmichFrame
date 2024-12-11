@@ -31,7 +31,7 @@ namespace ImmichFrame.WebApi.Controllers
         }
 
         [HttpGet(Name = "GetAsset")]
-        public async Task<List<AssetResponseDto>> GetAsset()
+        public async Task<List<AssetResponseDto>> GetAsset(string clientIdentifier = "")
         {
             return await _logic.GetAssets() ?? throw new AssetNotFoundException("No asset was found");
         }
