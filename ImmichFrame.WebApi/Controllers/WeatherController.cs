@@ -19,7 +19,7 @@ namespace ImmichFrame.WebApi.Controllers
         }
 
         [HttpGet(Name = "GetWeather")]
-        public async Task<IWeather?> GetWeather()
+        public async Task<IWeather?> GetWeather(string clientIdentifier = "")
         {
             return await _logic.GetWeather();
         }

@@ -6,6 +6,7 @@
  * See https://www.npmjs.com/package/oazapfts
  */
 import * as Oazapfts from "@oazapfts/runtime";
+import * as QS from "@oazapfts/runtime/query";
 export const defaults: Oazapfts.Defaults<Oazapfts.CustomHeaders> = {
     headers: {},
     baseUrl: "/",
@@ -182,43 +183,63 @@ export type IWeather = {
     description?: string | null;
     iconId?: string | null;
 };
-export function getAsset(opts?: Oazapfts.RequestOpts) {
+export function getAsset({ clientIdentifier }: {
+    clientIdentifier?: string;
+} = {}, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
         status: 200;
         data: AssetResponseDto[];
-    }>("/api/Asset", {
+    }>(`/api/Asset${QS.query(QS.explode({
+        clientIdentifier
+    }))}`, {
         ...opts
     });
 }
-export function getImage(id: string, opts?: Oazapfts.RequestOpts) {
+export function getImage(id: string, { clientIdentifier }: {
+    clientIdentifier?: string;
+} = {}, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchBlob<{
         status: 200;
         data: Blob;
-    }>(`/api/Asset/${encodeURIComponent(id)}`, {
+    }>(`/api/Asset/${encodeURIComponent(id)}${QS.query(QS.explode({
+        clientIdentifier
+    }))}`, {
         ...opts
     });
 }
-export function getAppointments(opts?: Oazapfts.RequestOpts) {
+export function getAppointments({ clientIdentifier }: {
+    clientIdentifier?: string;
+} = {}, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
         status: 200;
         data: IAppointment[];
-    }>("/api/Calendar", {
+    }>(`/api/Calendar${QS.query(QS.explode({
+        clientIdentifier
+    }))}`, {
         ...opts
     });
 }
-export function getConfig(opts?: Oazapfts.RequestOpts) {
+export function getConfig({ clientIdentifier }: {
+    clientIdentifier?: string;
+} = {}, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
         status: 200;
         data: WebClientSettings;
-    }>("/api/Config", {
+    }>(`/api/Config${QS.query(QS.explode({
+        clientIdentifier
+    }))}`, {
         ...opts
     });
 }
-export function getWeather(opts?: Oazapfts.RequestOpts) {
+export function getWeather({ clientIdentifier }: {
+    clientIdentifier?: string;
+} = {}, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
         status: 200;
         data: IWeather;
-    }>("/api/Weather", {
+    }>(`/api/Weather${QS.query(QS.explode({
+        clientIdentifier
+    }))}`, {
         ...opts
     });
 }

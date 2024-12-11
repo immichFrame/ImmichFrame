@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import { format, formatDate } from 'date-fns';
 	import { configStore } from '$lib/stores/config.store';
+	import { clientIdentifierStore } from '$lib/stores/identifier.store';
 
 	function formattedDate(time: string) {
 		let date = new Date(time);
@@ -21,7 +22,9 @@
 	});
 
 	async function GetAppointments() {
-		let appointmentRequest = await api.getAppointments();
+		let appointmentRequest = await api.getAppointments({
+			clientIdentifier: $clientIdentifierStore
+		});
 		if (appointmentRequest.status == 200) {
 			appointments = appointmentRequest.data;
 

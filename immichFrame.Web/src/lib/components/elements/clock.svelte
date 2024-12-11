@@ -4,6 +4,7 @@
 	import { format } from 'date-fns';
 	import * as locale from 'date-fns/locale';
 	import { configStore } from '$lib/stores/config.store';
+	import { clientIdentifierStore } from '$lib/stores/identifier.store';
 
 	let time = $state(new Date());
 	let weather: api.IWeather = $state() as api.IWeather;
@@ -35,7 +36,7 @@
 	});
 
 	async function GetWeather() {
-		let weatherRequest = await api.getWeather();
+		let weatherRequest = await api.getWeather({ clientIdentifier: $clientIdentifierStore });
 		if (weatherRequest.status == 200) {
 			weather = weatherRequest.data;
 		}

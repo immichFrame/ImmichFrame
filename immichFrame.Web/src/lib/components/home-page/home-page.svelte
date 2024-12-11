@@ -5,6 +5,7 @@
 		ProgressBarStatus
 	} from '$lib/components/elements/progress-bar.svelte';
 	import { slideshowStore } from '$lib/stores/slideshow.store';
+	import { clientIdentifierStore } from '$lib/stores/identifier.store';
 	import { onDestroy, onMount } from 'svelte';
 	import OverlayControls from '../elements/overlay-controls.svelte';
 	import ImageComponent from '../elements/image-component.svelte';
@@ -13,6 +14,7 @@
 	import Clock from '../elements/clock.svelte';
 	import Appointments from '../elements/appointments.svelte';
 	import LoadingElement from '../elements/LoadingElement.svelte';
+	import { page } from '$app/stores';
 
 	let assetHistory: api.AssetResponseDto[] = [];
 	let assetBacklog: api.AssetResponseDto[] = [];
@@ -30,6 +32,14 @@
 
 	let cursorVisible = $state(true);
 	let timeoutId: number;
+
+	const clientIdentifier = $page.url.searchParams.get('client');
+
+	$clientIdentifierStore;
+
+	if (clientIdentifier && clientIdentifier != $clientIdentifierStore) {
+		clientIdentifierStore.set(clientIdentifier);
+	}
 
 	const hideCursor = () => {
 		cursorVisible = false;

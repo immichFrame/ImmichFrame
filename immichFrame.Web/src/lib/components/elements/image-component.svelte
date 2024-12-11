@@ -9,6 +9,7 @@
 	import { fade } from 'svelte/transition';
 	import { configStore } from '$lib/stores/config.store';
 	import { Confetti } from 'svelte-confetti';
+	import { clientIdentifierStore } from '$lib/stores/identifier.store';
 
 	interface Props {
 		sourceAssets: AssetResponseDto[];
@@ -75,7 +76,7 @@
 
 	async function loadImage(a: AssetResponseDto) {
 		try {
-			let req = await api.getImage(a.id);
+			let req = await api.getImage(a.id, { clientIdentifier: $clientIdentifierStore });
 
 			if (req.status != 200) {
 				error = true;
