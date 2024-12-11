@@ -6,8 +6,12 @@
 
 	const dispatch = createEventDispatcher();
 
-	export let status: ProgressBarStatus;
-	export let overlayVisible: boolean;
+	interface Props {
+		status: ProgressBarStatus;
+		overlayVisible: boolean;
+	}
+
+	let { status = $bindable(), overlayVisible }: Props = $props();
 
 	function clickNext() {
 		dispatch('next');
@@ -62,7 +66,7 @@
 {#if overlayVisible}
 	<div class="absolute h-full w-full top-0 left-0 z-[100] grid grid-cols-3 gap-2">
 		<div class="group text-center content-center">
-			<button class="opacity-0 group-hover:opacity-100 text-primary" on:click={clickBack}
+			<button class="opacity-0 group-hover:opacity-100 text-primary" onclick={clickBack}
 				><Icon
 					title="Back"
 					class="max-h-[min(10rem,33vh)] max-w-[min(10rem,33vh)] h-[33vh] w-[33vw]top"
@@ -74,11 +78,11 @@
 
 		<div class="grid grid-rows-3">
 			<div class="group text-center content-center">
-				<button class="opacity-0 hover:opacity-100 text-primary" on:click={clickSettings}> </button>
+				<!-- <button class="opacity-0 hover:opacity-100 text-primary" onclick={clickSettings}> </button> -->
 			</div>
 
 			<div class="group text-center content-center">
-				<button on:click={clickPause} class="opacity-0 group-hover:opacity-100 text-primary">
+				<button onclick={clickPause} class="opacity-0 group-hover:opacity-100 text-primary">
 					<Icon
 						class="max-h-[min(10rem,33vh)] max-w-[min(10rem,33vh)] h-[33vh] w-[33vw]"
 						title={status == ProgressBarStatus.Paused ? 'Play' : 'Pause'}
@@ -89,12 +93,12 @@
 			</div>
 
 			<div class="group text-center content-center">
-				<button class="opacity-0 hover:opacity-100 text-primary"> </button>
+				<!-- <button class="opacity-0 hover:opacity-100 text-primary"> </button> -->
 			</div>
 		</div>
 
 		<div class="group text-center content-center">
-			<button class="opacity-0 group-hover:opacity-100 text-primary" on:click={clickNext}
+			<button class="opacity-0 group-hover:opacity-100 text-primary" onclick={clickNext}
 				><Icon
 					title="Next"
 					class="max-h-[min(10rem,33vh)] max-w-[min(10rem,33vh)] h-[33vh] w-[33vw]top"

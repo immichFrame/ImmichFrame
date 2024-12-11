@@ -1,19 +1,36 @@
 <script lang="ts">
 	import type { AriaRole } from 'svelte/elements';
 
-	export let size: string | number = '1em';
-	export let color = 'currentColor';
-	export let path: string;
-	export let title: string | null = null;
-	export let desc = '';
-	export let flipped = false;
-	let className = '';
-	export { className as class };
-	export let viewBox = '0 0 24 24';
-	export let role: AriaRole = 'img';
-	export let ariaHidden: boolean | undefined = undefined;
-	export let ariaLabel: string | undefined = undefined;
-	export let ariaLabelledby: string | undefined = undefined;
+	
+	interface Props {
+		size?: string | number;
+		color?: string;
+		path: string;
+		title?: string | null;
+		desc?: string;
+		flipped?: boolean;
+		class?: string;
+		viewBox?: string;
+		role?: AriaRole;
+		ariaHidden?: boolean | undefined;
+		ariaLabel?: string | undefined;
+		ariaLabelledby?: string | undefined;
+	}
+
+	let {
+		size = '1em',
+		color = 'currentColor',
+		path,
+		title = null,
+		desc = '',
+		flipped = false,
+		class: className = '',
+		viewBox = '0 0 24 24',
+		role = 'img',
+		ariaHidden = undefined,
+		ariaLabel = undefined,
+		ariaLabelledby = undefined
+	}: Props = $props();
 </script>
 
 <svg

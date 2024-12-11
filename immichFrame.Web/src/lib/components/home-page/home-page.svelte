@@ -16,19 +16,19 @@
 
 	let assetHistory: api.AssetResponseDto[] = [];
 	let assetBacklog: api.AssetResponseDto[] = [];
-	let displayingAssets: api.AssetResponseDto[];
+	let displayingAssets: api.AssetResponseDto[] = $state() as api.AssetResponseDto[];
 
 	const { restartProgress, stopProgress } = slideshowStore;
 
-	let progressBarStatus: ProgressBarStatus;
-	let progressBar: ProgressBar;
-	let error: boolean;
-	let errorMessage: string;
+	let progressBarStatus: ProgressBarStatus = $state(ProgressBarStatus.Playing);
+	let progressBar: ProgressBar = $state() as ProgressBar;
+	let error: boolean = $state(false);
+	let errorMessage: string = $state() as string;
 
 	let unsubscribeRestart: () => void;
 	let unsubscribeStop: () => void;
 
-	let cursorVisible = true;
+	let cursorVisible = $state(true);
 	let timeoutId: number;
 
 	const hideCursor = () => {
@@ -56,9 +56,11 @@
 		}
 	}
 
-	const handleDone = async () => {
-		await getNextAssets();
-		progressBar.restart(true);
+	const handleDone = async (previous: boolean = false) => {
+		progressBar.restart(false);
+		if (previous) await getPreviousAssets();
+		else await getNextAssets();
+		progressBar.play();
 	};
 
 	async function getNextAssets() {
@@ -136,7 +138,7 @@
 
 	onMount(() => {
 		window.addEventListener('mousemove', showCursor);
-		window.addEventListener('click', showCursor);		
+		window.addEventListener('click', showCursor);
 		if ($configStore.primaryColor) {
 			document.documentElement.style.setProperty('--primary-color', $configStore.primaryColor);
 		}
@@ -200,14 +202,10 @@
 
 		<OverlayControls
 			on:next={async () => {
-				progressBar.restart(false);
-				await getNextAssets();
-				progressBar.restart(true);
+				await handleDone();
 			}}
 			on:back={async () => {
-				progressBar.restart(false);
-				await getPreviousAssets();
-				progressBar.restart(true);
+				await handleDone(true);
 			}}
 			on:pause={async () => {
 				if (progressBarStatus == ProgressBarStatus.Paused) {
@@ -227,7 +225,7 @@
 			location={ProgressBarLocation.Bottom}
 			bind:this={progressBar}
 			bind:status={progressBarStatus}
-			on:done={handleDone}
+			onDone={handleDone}
 		/>
 	{:else}
 		<LoadingElement />
