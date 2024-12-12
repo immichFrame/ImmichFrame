@@ -4,19 +4,22 @@
 	import { format } from 'date-fns';
 	import * as locale from 'date-fns/locale';
 	import { configStore } from '$lib/stores/config.store';
+	import { clientIdentifierStore } from '$lib/stores/identifier.store';
 
-	let time = new Date();
-	let weather: api.IWeather;
+	let time = $state(new Date());
+	let weather: api.IWeather = $state() as api.IWeather;
 
 	const selectedLocale = $configStore.language;
 
 	const localeToUse =
 		(selectedLocale && locale[selectedLocale as keyof typeof locale]) || locale.enUS;
 
-	$: formattedDate = format(time, $configStore.photoDateFormat ?? 'dd.MM.yyyy', {
-		locale: localeToUse
-	});
-	$: timePortion = format(time, $configStore.clockFormat ?? 'HH:mm:ss');
+	let formattedDate = $derived(
+		format(time, $configStore.photoDateFormat ?? 'dd.MM.yyyy', {
+			locale: localeToUse
+		})
+	);
+	let timePortion = $derived(format(time, $configStore.clockFormat ?? 'HH:mm:ss'));
 
 	onMount(() => {
 		const interval = setInterval(() => {
@@ -33,7 +36,7 @@
 	});
 
 	async function GetWeather() {
-		let weatherRequest = await api.getWeather();
+		let weatherRequest = await api.getWeather({ clientIdentifier: $clientIdentifierStore });
 		if (weatherRequest.status == 200) {
 			weather = weatherRequest.data;
 		}
@@ -47,8 +50,8 @@
 	{$configStore.style == 'blur' ? 'backdrop-blur-lg rounded-tr-2xl' : ''}	
 	drop-shadow-2xl p-3"
 >
-	<p class="mt-2 text-sm sm:text-sm md:text-md lg:text-xl font-thin">{formattedDate}</p>
-	<p class="mt-2 text-4xl sm:text-4xl md:text-6xl lg:text-8xl font-bold">{timePortion}</p>
+	<p class="mt-2 text-sm sm:text-sm md:text-md lg:text-xl font-thin text-shadow-sm">{formattedDate}</p>
+	<p class="mt-2 text-4xl sm:text-4xl md:text-6xl lg:text-8xl font-bold text-shadow-lg">{timePortion}</p>
 	{#if weather}
 		<div>
 			<div class="text-xl sm:text-xl md:text-2xl lg:text-3xl font-semibold">
@@ -57,7 +60,7 @@
 				{weather.unit}
 			</div>
 			{#if $configStore.showWeatherDescription}
-				<p class="text-sm sm:text-sm md:text-md lg:text-xl">{weather.description}</p>
+				<p class="text-sm sm:text-sm md:text-md lg:text-xl text-shadow-sm">{weather.description}</p>
 			{/if}
 		</div>
 	{/if}
