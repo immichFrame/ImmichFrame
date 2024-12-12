@@ -4,6 +4,9 @@
 [![Issues][issues-shield]][issues-url]
 [![MIT License][license-shield]][license-url]
 
+> [!Tip]  
+> Try out the ImmichFrame demo [here](https://demo.immichframe.online)!
+
 > [!NOTE]  
 > Instructions how to install ImmichFrame can be found [here](#-usage--installation)!
 
@@ -40,7 +43,7 @@ This project is a digital photo frame application that interfaces with your [imm
 
 ## ✨ Demo
 ### Web Demo
-<a href="https://demo.immichframe.online/" target="_blank">
+<a href="https://demo.immichframe.online" target="_blank">
   <p>Visit the online demo</p>
 <img src="/design/demo/web_demo.png" alt="Web Demo" height="300">
 </a>
