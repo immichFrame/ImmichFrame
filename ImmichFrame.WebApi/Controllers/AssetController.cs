@@ -79,6 +79,7 @@ namespace ImmichFrame.WebApi.Controllers
                 .Replace("City", randomImage.ExifInfo.City ?? string.Empty)
                 .Replace("State", randomImage.ExifInfo.State ?? string.Empty)
                 .Replace("Country", randomImage.ExifInfo.Country ?? string.Empty);
+            imageLocation = string.Join(",", imageLocation.Split(',').Where(s => !string.IsNullOrWhiteSpace(s)));
 
             return new ImageResponse
             {
