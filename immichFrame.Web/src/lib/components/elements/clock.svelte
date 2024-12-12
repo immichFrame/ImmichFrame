@@ -50,8 +50,8 @@
 	{$configStore.style == 'blur' ? 'backdrop-blur-lg rounded-tr-2xl' : ''}	
 	drop-shadow-2xl p-3"
 >
-	<p class="mt-2 text-sm sm:text-sm md:text-md lg:text-xl font-thin">{formattedDate}</p>
-	<p class="mt-2 text-4xl sm:text-4xl md:text-6xl lg:text-8xl font-bold">{timePortion}</p>
+	<p class="mt-2 text-sm sm:text-sm md:text-md lg:text-xl font-thin text-shadow-sm">{formattedDate}</p>
+	<p class="mt-2 text-4xl sm:text-4xl md:text-6xl lg:text-8xl font-bold text-shadow-lg">{timePortion}</p>
 	{#if weather}
 		<div>
 			<div class="text-xl sm:text-xl md:text-2xl lg:text-3xl font-semibold">
@@ -60,7 +60,7 @@
 				{weather.unit}
 			</div>
 			{#if $configStore.showWeatherDescription}
-				<p class="text-sm sm:text-sm md:text-md lg:text-xl">{weather.description}</p>
+				<p class="text-sm sm:text-sm md:text-md lg:text-xl text-shadow-sm">{weather.description}</p>
 			{/if}
 		</div>
 	{/if}
