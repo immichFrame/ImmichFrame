@@ -35,8 +35,6 @@
 
 	const clientIdentifier = $page.url.searchParams.get('client');
 
-	$clientIdentifierStore;
-
 	if (clientIdentifier && clientIdentifier != $clientIdentifierStore) {
 		clientIdentifierStore.set(clientIdentifier);
 	}
