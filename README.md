@@ -126,12 +126,14 @@ Needs documentation
 #### Webhook
 A webhook to notify an external service is available. This is only enabled when the `Webhook`-Setting is set in your configuration. Your configured Webhook will be notified via `HTTP POST`-request.
 
-#### Events
-Events will always contain a `Name` and a `DateTime` to differentiate, but can contain more information.
+A client can be identified by the `ClientIdentifier`. You can set/overwrite the `ClientIdentifier` by adding `?client=MyClient` to your ImmichFrame-URL. This only needs to be called once and is persisted. Delete the cache to reset the `ClientIdentifier`.
 
-| **Event**                  | **Description**                   | **Payload**                                                                                                        |
-| -------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| ImageRequestedNotification | Notifies, when a Image requested. | `{"Name":"ImageRequestedNotification", "DateTime":"2024-11-16T21:37:19.4933981+01:00", "RequestedImageId":"UUID"}` |
+#### Events
+Events will always contain a `Name`, `ClientIdentifier` and a `DateTime` to differentiate, but can contain more information.
+
+| **Event**                  | **Description**                   | **Payload**                                                                                                                                             |
+| -------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ImageRequestedNotification | Notifies, when a Image requested. | `{"Name":"ImageRequestedNotification", "ClientIdentifier": "Frame_Kitchen", "DateTime":"2024-11-16T21:37:19.4933981+01:00", "RequestedImageId":"UUID"}` |
 
 ## 🛣️ Roadmap
 
