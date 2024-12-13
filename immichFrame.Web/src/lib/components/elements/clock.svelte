@@ -54,7 +54,7 @@
 	<p class="mt-2 text-4xl sm:text-4xl md:text-6xl lg:text-8xl font-bold text-shadow-lg">{timePortion}</p>
 	{#if weather}
 		<div>
-			<div class="text-xl sm:text-xl md:text-2xl lg:text-3xl font-semibold">
+			<div class="text-xl sm:text-xl md:text-2xl lg:text-3xl font-semibold text-shadow-sm">
 				{weather.location},
 				{weather.temperature?.toFixed(1)}
 				{weather.unit}
