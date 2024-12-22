@@ -119,6 +119,15 @@ Weather is enabled by entering an API key. Get yours free from [OpenWeatherMap][
 ### Calendar
 If you are using Google Calendar, more information can be found [here](https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Cget-your-calendar-view-only).
 
+### Caching
+
+This will download new images into a ImageCache-Folder. Images will be refreshed after the number of days configured in the RenewImagesDuration-Setting. You can enable this features with the DownloadImages-Setting.
+
+To make it work you will need to uncomment `# - PATH/TO/ImageCacheFolder:/app/ImageCache` in your installation file.
+
+> [!NOTE]
+> If you enable the DownloadImages option to True without setting volumes for ImageCacheFolder it will cause an error! 
+
 ### Metadata
 Needs documentation
 
