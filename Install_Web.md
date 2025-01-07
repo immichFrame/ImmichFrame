@@ -92,6 +92,8 @@ services:
     restart: on-failure
     volumes:
       - PATH/TO/CONFIG:/app/Config
+  #   - PATH/TO/ImageCacheFolder:/app/ImageCache #(this is optional. See https://github.com/immichFrame/ImmichFrame#caching)
+
     ports:
       - "8080:8080"
     environment:

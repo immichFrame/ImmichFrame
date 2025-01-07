@@ -9,3 +9,4 @@ services:
       - .env
     # volumes:
       # - PATH/TO/CONFIG:/app/Config
+      #   - PATH/TO/ImageCacheFolder:/app/ImageCache #(this is optional. See https://github.com/immichFrame/ImmichFrame#caching)

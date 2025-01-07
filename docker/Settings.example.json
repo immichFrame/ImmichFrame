@@ -5,11 +5,11 @@
   "Interval": 10,
   "TransitionDuration": 2,
   "DownloadImages": false,
+  "RenewImagesDuration": 30,
   "ShowMemories": false,
   "ImagesFromDays": 365,
   "ImagesFromDate": "",
   "ImagesUntilDate": "",
-  "RenewImagesDuration": 30,
   "Albums": [
     ""
   ],
