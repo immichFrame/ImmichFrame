@@ -38,6 +38,18 @@ namespace ImmichFrame.Core.Logic
             }
         }
 
+        private Task<IEnumerable<Guid>>? _excludedPeopleAssets;
+        private Task<IEnumerable<Guid>> ExcludedPeopleAssets
+        {
+            get
+            {
+                if (_excludedPeopleAssets == null)
+                    _excludedPeopleAssets = GetExcludedPeopleAssets();
+
+                return _excludedPeopleAssets;
+            }
+        }
+
         private Task<Dictionary<Guid, AssetResponseDto>?> FilteredAssetInfos
         {
             get
@@ -219,11 +231,16 @@ namespace ImmichFrame.Core.Logic
                     list = list.Where(x => x.FileCreatedAt > takenAfter.Value);
                 }
 
-                var excludedList = await ExcludedAlbumAssets;
-
                 // Exclude assets if configured
-                if (excludedList.Any())
-                    list = list.Where(x => !excludedList.Contains(Guid.Parse(x.Id)));
+                var excludedAlbumList = await ExcludedAlbumAssets;
+
+                if (excludedAlbumList.Any())
+                    list = list.Where(x => !excludedAlbumList.Contains(Guid.Parse(x.Id)));
+
+                var excludedPeopleList = await ExcludedPeopleAssets;
+
+                if (excludedPeopleList.Any())
+                    list = list.Where(x => !excludedPeopleList.Contains(Guid.Parse(x.Id)));
 
                 // return only unique assets, no duplicates, only with Thumbnail
                 return list.Where(x => x.Thumbhash != null).DistinctBy(x => x.Id).ToDictionary(x => Guid.Parse(x.Id));
@@ -308,66 +325,91 @@ namespace ImmichFrame.Core.Logic
 
             return allAssets.Select(x => Guid.Parse(x.Id));
         }
+
+        private async Task<IEnumerable<AssetResponseDto>> GetPeopleAssets(Guid personId, ImmichApi immichApi)
+        {
+            var allAssets = new List<AssetResponseDto>();
+
+            try
+            {
+                int page = 1;
+                int batchSize = 1000;
+                int total = 0;
+                do
+                {
+                    var metadataBody = new MetadataSearchDto
+                    {
+                        Page = page,
+                        Size = batchSize,
+                        PersonIds = new[] { personId },
+                        Type = AssetTypeEnum.IMAGE,
+                        WithExif = true,
+                        WithPeople = true
+                    };
+
+                    var takenBefore = _settings.ImagesUntilDate.HasValue ? _settings.ImagesUntilDate : null;
+                    if (takenBefore.HasValue)
+                    {
+                        metadataBody.TakenBefore = takenBefore.Value;
+                    }
+
+                    var takenAfter = _settings.ImagesFromDate.HasValue ? _settings.ImagesFromDate : _settings.ImagesFromDays.HasValue ? DateTime.Today.AddDays(-_settings.ImagesFromDays.Value) : null;
+                    if (takenAfter.HasValue)
+                    {
+                        metadataBody.TakenAfter = takenAfter.Value;
+                    }
+
+                    var personInfo = await immichApi.SearchMetadataAsync(metadataBody);
+
+                    total = personInfo.Assets.Total;
+
+                    allAssets.AddRange(personInfo.Assets.Items);
+                    page++;
+                }
+                while (total == batchSize);
+            }
+            catch (ApiException ex)
+            {
+                throw new PersonNotFoundException($"Person '{personId}' was not found, check your settings file!{Environment.NewLine}{Environment.NewLine}{ex.Message}", ex);
+            }
+
+            // Remove duplicates
+            var uniqueAssets = allAssets.DistinctBy(x => x.Id);
+
+            return uniqueAssets;
+        }
         private async Task<IEnumerable<AssetResponseDto>> GetPeopleAssets()
         {
-            using (var client = new HttpClient())
+            var client = new HttpClient();
+            var allAssets = new List<AssetResponseDto>();
+
+            var immichApi = new ImmichApi(_settings.ImmichServerUrl, client);
+
+            client.UseApiKey(_settings.ApiKey);
+            foreach (var personId in _settings.People!)
             {
-                var allAssets = new List<AssetResponseDto>();
-
-                var immichApi = new ImmichApi(_settings.ImmichServerUrl, client);
-
-                client.UseApiKey(_settings.ApiKey);
-                foreach (var personId in _settings.People!)
-                {
-                    try
-                    {
-                        int page = 1;
-                        int batchSize = 1000;
-                        int total = 0;
-                        do
-                        {
-                            var metadataBody = new MetadataSearchDto
-                            {
-                                Page = page,
-                                Size = batchSize,
-                                PersonIds = new[] { personId },
-                                Type = AssetTypeEnum.IMAGE,
-                                WithExif = true,
-                                WithPeople = true
-                            };
-
-                            var takenBefore = _settings.ImagesUntilDate.HasValue ? _settings.ImagesUntilDate : null;
-                            if (takenBefore.HasValue)
-                            {
-                                metadataBody.TakenBefore = takenBefore.Value;
-                            }
-
-                            var takenAfter = _settings.ImagesFromDate.HasValue ? _settings.ImagesFromDate : _settings.ImagesFromDays.HasValue ? DateTime.Today.AddDays(-_settings.ImagesFromDays.Value) : null;
-                            if (takenAfter.HasValue)
-                            {
-                                metadataBody.TakenAfter = takenAfter.Value;
-                            }
-
-                            var personInfo = await immichApi.SearchMetadataAsync(metadataBody);
-
-                            total = personInfo.Assets.Total;
-
-                            allAssets.AddRange(personInfo.Assets.Items);
-                            page++;
-                        }
-                        while (total == batchSize);
-                    }
-                    catch (ApiException ex)
-                    {
-                        throw new PersonNotFoundException($"Person '{personId}' was not found, check your settings file!{Environment.NewLine}{Environment.NewLine}{ex.Message}", ex);
-                    }
-                }
-
-                // Remove duplicates
-                var uniqueAssets = allAssets.DistinctBy(x => x.Id);
-
-                return uniqueAssets;
+                allAssets.AddRange(await GetPeopleAssets(personId, immichApi));
             }
+
+            return allAssets;
+        }
+
+
+        private async Task<IEnumerable<Guid>> GetExcludedPeopleAssets()
+        {
+            using var client = new HttpClient();
+
+            var allAssets = new List<AssetResponseDto>();
+
+            var immichApi = new ImmichApi(_settings.ImmichServerUrl, client);
+
+            client.UseApiKey(_settings.ApiKey);
+            foreach (var personId in _settings.ExcludedPeople!)
+            {
+                allAssets.AddRange(await GetPeopleAssets(personId, immichApi));
+            }
+
+            return allAssets.Select(x => Guid.Parse(x.Id));
         }
         private Random _random = new Random();
         private async Task<AssetResponseDto?> GetRandomFilteredAsset()
@@ -470,9 +512,10 @@ namespace ImmichFrame.Core.Logic
 
                     if (randomAssets.Any())
                     {
-                        var excludedList = await ExcludedAlbumAssets;
+                        var excludedAlbumList = await ExcludedAlbumAssets;
+                        var excludedPeopleList = await ExcludedPeopleAssets;
 
-                        randomAssets = randomAssets.Where(x => !excludedList.Contains(Guid.Parse(x.Id))).ToList();
+                        randomAssets = randomAssets.Where(x => !excludedAlbumList.Contains(Guid.Parse(x.Id)) && !excludedPeopleList.Contains(Guid.Parse(x.Id))).ToList();
 
                         RandomAssetList.AddRange(randomAssets);
 

@@ -47,6 +47,7 @@ services:
       Albums: "ALBUM1,ALBUM2"
       ExcludedAlbums: "ALBUM3,ALBUM4"
       People: "PERSON1,PERSON2"
+      ExcludedPeople: "PERSON1,PERSON2"
       ShowMemories: "false"
       ImagesFromDays: ""
       ImagesFromDate: ""
