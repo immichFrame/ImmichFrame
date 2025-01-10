@@ -6,6 +6,7 @@ services:
     restart: on-failure
     # volumes:
     #   - PATH/TO/CONFIG:/app/Config
+    #   - PATH/TO/CUSTOMCSS/custom.css:/app/wwwroot/static/custom.css
     ports:
       - "8080:8080"
     env_file:

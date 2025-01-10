@@ -5,7 +5,8 @@ export default defineConfig({
 	plugins: [sveltekit()],
 	server: {
 		proxy: {
-			'/api': 'http://localhost:5217'
+			'/api': 'http://localhost:5217',
+			'/static': 'http://localhost:5217'
 		}
 	}
 });

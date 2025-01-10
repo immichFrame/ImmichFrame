@@ -55,7 +55,7 @@
 
 {#if showPhotoDate || showPhotoDate || showImageDesc || showPeopleDesc}
 	<div
-		class="absolute bottom-0 right-0 z-100 text-primary p-1 text-right
+		class="immichframe_image_metadata absolute bottom-0 right-0 z-100 text-primary p-1 text-right
 		{$configStore.style == 'solid' ? 'bg-secondary rounded-tl-2xl' : ''}
 		{$configStore.style == 'transition' ? 'bg-gradient-to-l from-secondary from-0% pl-10' : ''}
 		{$configStore.style == 'blur' ? 'backdrop-blur-lg rounded-tl-2xl' : ''}	"
