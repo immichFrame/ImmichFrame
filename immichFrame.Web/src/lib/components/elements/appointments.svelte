@@ -11,6 +11,7 @@
 	}
 
 	let appointments: api.IAppointment[] = $state() as api.IAppointment[];
+	let webCalendarPosition = $derived($configStore.webCalendarPosition ?? 'top-0 right-0');
 
 	onMount(() => {
 		GetAppointments();
@@ -37,7 +38,7 @@
 
 {#if appointments}
 	<div
-		class="absolute top-0 right-0 w-auto z-10 text-center text-primary m-5 max-w-[20%] hidden lg:block md:min-w-[10%]"
+		class="absolute {webCalendarPosition} w-auto z-10 text-center text-primary m-5 max-w-[20%] hidden lg:block md:min-w-[10%]"
 	>
 		<!-- <div class="text-4xl mx-8 font-bold">Appointments</div> -->
 		<div class="">

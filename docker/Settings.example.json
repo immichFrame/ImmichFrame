@@ -22,15 +22,18 @@
   "Webcalendars": [
     ""
   ],
+  "WebCalendarPosition": "top-0 right-0",
   "RefreshAlbumPeopleInterval": 12,
   "ShowClock": true,
   "ClockFormat": "HH:mm:ss",
+  "ClockPosition": "bottom-0 left-0",
   "ShowPhotoDate": true,
   "PhotoDateFormat": "yyyy-MM-dd",
   "ShowImageDesc": true,
   "ShowPeopleDesc": true,
   "ShowImageLocation": true,
   "ImageLocationFormat": "City,State,Country",
+  "ImageInfoPosition": "bottom-0 right-0",
   "PrimaryColor": "#FF5733",
   "SecondaryColor": "#000000",
   "Style": "none",

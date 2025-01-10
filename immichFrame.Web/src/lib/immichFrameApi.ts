@@ -159,12 +159,15 @@ export type WebClientSettings = {
     renewImagesDuration?: number;
     showClock?: boolean;
     clockFormat?: string | null;
+    clockPosition?: string | null;
     showPhotoDate?: boolean;
     photoDateFormat?: string | null;
     showImageDesc?: boolean;
     showPeopleDesc?: boolean;
     showImageLocation?: boolean;
     imageLocationFormat?: string | null;
+    imageInfoPosition?: string | null;
+    webCalendarPosition?: string | null;
     primaryColor?: string | null;
     secondaryColor?: string | null;
     style?: string | null;

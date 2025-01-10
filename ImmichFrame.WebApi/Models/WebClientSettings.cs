@@ -14,12 +14,15 @@ namespace ImmichFrame.WebApi.Models
         public int RenewImagesDuration { get; set; } = 20;
         public bool ShowClock { get; set; } = true;
         public string? ClockFormat { get; set; } = "hh:mm";
+        public string? ClockPosition { get; set; } = "bottom-0 left-0";
         public bool ShowPhotoDate { get; set; } = true;
         public string? PhotoDateFormat { get; set; } = "MM/dd/yyyy";
         public bool ShowImageDesc { get; set; } = true;
         public bool ShowPeopleDesc { get; set; } = true;
         public bool ShowImageLocation { get; set; } = true;
         public string? ImageLocationFormat { get; set; } = "City,State,Country";
+        public string? ImageInfoPosition { get; set; } = "bottom-0 right-0";
+        public string? WebCalendarPosition { get; set; } = "top-0 right-0";
         public string? PrimaryColor { get; set; }
         public string? SecondaryColor { get; set; }
         public string Style { get; set; } = "none";
