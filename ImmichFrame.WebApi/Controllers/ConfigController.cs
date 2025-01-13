@@ -1,11 +1,13 @@
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.WebApi.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ImmichFrame.WebApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class ConfigController : ControllerBase
     {
         private readonly ILogger<AssetController> _logger;
