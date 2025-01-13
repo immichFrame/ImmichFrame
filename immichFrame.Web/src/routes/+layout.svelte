@@ -7,4 +7,6 @@
 	let { children }: Props = $props();
 </script>
 
+<link rel="stylesheet" href="/static/custom.css" />
+
 {@render children?.()}

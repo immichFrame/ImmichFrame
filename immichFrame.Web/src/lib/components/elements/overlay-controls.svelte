@@ -65,7 +65,7 @@
 
 {#if overlayVisible}
 	<div class="absolute h-full w-full top-0 left-0 z-[100] grid grid-cols-3 gap-2">
-		<div class="group text-center content-center">
+		<div id="overlayback" class="group text-center content-center">
 			<button class="opacity-0 group-hover:opacity-100 text-primary" onclick={clickBack}
 				><Icon
 					title="Back"
@@ -77,11 +77,11 @@
 		</div>
 
 		<div class="grid grid-rows-3">
-			<div class="group text-center content-center">
+			<div id="overlaysettings" class="group text-center content-center">
 				<!-- <button class="opacity-0 hover:opacity-100 text-primary" onclick={clickSettings}> </button> -->
 			</div>
 
-			<div class="group text-center content-center">
+			<div id="overlaypause" class="group text-center content-center">
 				<button onclick={clickPause} class="opacity-0 group-hover:opacity-100 text-primary">
 					<Icon
 						class="max-h-[min(10rem,33vh)] max-w-[min(10rem,33vh)] h-[33vh] w-[33vw]"
@@ -97,7 +97,7 @@
 			</div>
 		</div>
 
-		<div class="group text-center content-center">
+		<div id="overlaynext" class="group text-center content-center">
 			<button class="opacity-0 group-hover:opacity-100 text-primary" onclick={clickNext}
 				><Icon
 					title="Next"

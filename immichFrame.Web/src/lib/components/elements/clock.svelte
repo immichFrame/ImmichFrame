@@ -44,23 +44,33 @@
 </script>
 
 <div
+	id="clock"
 	class="absolute bottom-0 left-0 z-10 text-center text-primary
 	{$configStore.style == 'solid' ? 'bg-secondary rounded-tr-2xl' : ''}
 	{$configStore.style == 'transition' ? 'bg-gradient-to-r from-secondary from-0% pr-10' : ''}
 	{$configStore.style == 'blur' ? 'backdrop-blur-lg rounded-tr-2xl' : ''}	
 	drop-shadow-2xl p-3"
 >
-	<p class="mt-2 text-sm sm:text-sm md:text-md lg:text-xl font-thin text-shadow-sm">{formattedDate}</p>
-	<p class="mt-2 text-4xl sm:text-4xl md:text-6xl lg:text-8xl font-bold text-shadow-lg">{timePortion}</p>
+	<p id="clockdate" class="mt-2 text-sm sm:text-sm md:text-md lg:text-xl font-thin text-shadow-sm">
+		{formattedDate}
+	</p>
+	<p
+		id="clocktime"
+		class="mt-2 text-4xl sm:text-4xl md:text-6xl lg:text-8xl font-bold text-shadow-lg"
+	>
+		{timePortion}
+	</p>
 	{#if weather}
-		<div>
-			<div class="text-xl sm:text-xl md:text-2xl lg:text-3xl font-semibold text-shadow-sm">
+		<div id="clockweather">
+			<div id="clockweatherinfo" class="text-xl sm:text-xl md:text-2xl lg:text-3xl font-semibold">
 				{weather.location},
 				{weather.temperature?.toFixed(1)}
 				{weather.unit}
 			</div>
 			{#if $configStore.showWeatherDescription}
-				<p class="text-sm sm:text-sm md:text-md lg:text-xl text-shadow-sm">{weather.description}</p>
+				<p id="clockweatherdesc" class="text-sm sm:text-sm md:text-md lg:text-xl text-shadow-sm">
+					{weather.description}
+				</p>
 			{/if}
 		</div>
 	{/if}

@@ -62,10 +62,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseStaticFiles();
 if (app.Environment.IsProduction())
 {
     app.UseDefaultFiles();
-    app.UseStaticFiles();
 }
 
 if (app.Environment.IsDevelopment())
