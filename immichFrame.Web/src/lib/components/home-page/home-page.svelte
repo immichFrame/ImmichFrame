@@ -1,11 +1,11 @@
 <script lang="ts">
-	import * as api from '$lib/immichFrameApi';
+	import * as api from '$lib/index';
 	import ProgressBar, {
 		ProgressBarLocation,
 		ProgressBarStatus
 	} from '$lib/components/elements/progress-bar.svelte';
 	import { slideshowStore } from '$lib/stores/slideshow.store';
-	import { clientIdentifierStore } from '$lib/stores/identifier.store';
+	import { clientIdentifierStore, authSecretStore } from '$lib/stores/persist.store';
 	import { onDestroy, onMount } from 'svelte';
 	import OverlayControls from '../elements/overlay-controls.svelte';
 	import ImageComponent from '../elements/image-component.svelte';
@@ -16,8 +16,11 @@
 	import LoadingElement from '../elements/LoadingElement.svelte';
 	import { page } from '$app/stores';
 
+	api.init();
+
 	let assetHistory: api.AssetResponseDto[] = [];
 	let assetBacklog: api.AssetResponseDto[] = [];
+
 	let displayingAssets: api.AssetResponseDto[] = $state() as api.AssetResponseDto[];
 
 	const { restartProgress, stopProgress } = slideshowStore;
@@ -25,6 +28,7 @@
 	let progressBarStatus: ProgressBarStatus = $state(ProgressBarStatus.Playing);
 	let progressBar: ProgressBar = $state() as ProgressBar;
 	let error: boolean = $state(false);
+	let authError: boolean = $state(false);
 	let errorMessage: string = $state() as string;
 
 	let unsubscribeRestart: () => void;
@@ -34,9 +38,15 @@
 	let timeoutId: number;
 
 	const clientIdentifier = $page.url.searchParams.get('client');
+	const authsecret = $page.url.searchParams.get('authsecret');
 
 	if (clientIdentifier && clientIdentifier != $clientIdentifierStore) {
 		clientIdentifierStore.set(clientIdentifier);
+	}
+
+	if (authsecret && authsecret != $authSecretStore) {
+		authSecretStore.set(authsecret);
+		api.init();
 	}
 
 	const hideCursor = () => {
@@ -52,7 +62,11 @@
 	async function loadAssets() {
 		try {
 			let assetRequest = await api.getAsset();
+
 			if (assetRequest.status != 200) {
+				if (assetRequest.status == 401) {
+					authError = true;
+				}
 				error = true;
 				return;
 			}
@@ -76,7 +90,7 @@
 			await loadAssets();
 		}
 
-		if (assetBacklog.length == 0) {
+		if (!error && assetBacklog.length == 0) {
 			error = true;
 			errorMessage = 'No assets were found! Check your configuration.';
 			return;
@@ -192,7 +206,7 @@
 
 <section class="fixed grid h-screen w-screen bg-black" class:cursor-none={!cursorVisible}>
 	{#if error}
-		<ErrorElement message={errorMessage} />
+		<ErrorElement {authError} message={errorMessage} />
 	{:else if displayingAssets}
 		<ImageComponent
 			showLocation={$configStore.showImageLocation}

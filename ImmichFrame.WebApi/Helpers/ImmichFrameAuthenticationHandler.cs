@@ -1,5 +1,6 @@
 using ImmichFrame.Core.Interfaces;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
@@ -22,7 +23,10 @@ public class ImmichFrameAuthenticationHandler : AuthenticationHandler<Authentica
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        if (_authenticationSecret == null)
+        var endpoint = Context.GetEndpoint();
+        var authorizeAttribute = endpoint?.Metadata?.GetMetadata<IAuthorizeData>();
+
+        if (_authenticationSecret == null || authorizeAttribute == null)
         {
             // No auth is required
             var claims = new[] { new Claim(ClaimTypes.NameIdentifier, "anonymous") };

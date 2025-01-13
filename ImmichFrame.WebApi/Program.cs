@@ -67,7 +67,7 @@ builder.Services.AddAuthorization(options =>
     });
 
 builder.Services.AddAuthentication("ImmichFrameScheme")
-    .AddScheme<AuthenticationSchemeOptions, ImmichFrameAuthenticationHandler>("ImmichFrameScheme", options => { });
+     .AddScheme<AuthenticationSchemeOptions, ImmichFrameAuthenticationHandler>("ImmichFrameScheme", options => { });
 
 var app = builder.Build();
 

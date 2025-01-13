@@ -7,7 +7,6 @@ namespace ImmichFrame.WebApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
     public class ConfigController : ControllerBase
     {
         private readonly ILogger<AssetController> _logger;

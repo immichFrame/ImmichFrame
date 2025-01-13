@@ -1,14 +1,14 @@
 
 import { writable } from 'svelte/store';
 
-function persistStore(key: string, defaultValue: string) {
-    const storedValue = localStorage.getItem(key);
+function persistStore(key: string, defaultValue: string | null) {
+    const storedValue = localStorage?.getItem(key);
     const initialValue: string = storedValue ? JSON.parse(storedValue) : defaultValue;
 
     const store = writable(initialValue);
 
     store.subscribe((value) => {
-        localStorage.setItem(key, JSON.stringify(value));
+        localStorage?.setItem(key, JSON.stringify(value));
     });
 
     return store;
@@ -23,3 +23,4 @@ function generateGUID() {
 }
 
 export const clientIdentifierStore = persistStore('clientIdentifier', generateGUID());
+export const authSecretStore = persistStore('authSecret', null);

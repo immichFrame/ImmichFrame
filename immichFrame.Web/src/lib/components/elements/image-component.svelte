@@ -2,14 +2,16 @@
 	import { run } from 'svelte/legacy';
 
 	import type { AssetResponseDto } from '$lib/immichFrameApi';
-	import * as api from '$lib/immichFrameApi';
+	import * as api from '$lib/index';
 	import ErrorElement from './error-element.svelte';
 	import Image from './image.svelte';
 	import LoadingElement from './LoadingElement.svelte';
 	import { fade } from 'svelte/transition';
 	import { configStore } from '$lib/stores/config.store';
 	import { Confetti } from 'svelte-confetti';
-	import { clientIdentifierStore } from '$lib/stores/identifier.store';
+	import { clientIdentifierStore } from '$lib/stores/persist.store';
+
+	api.init();
 
 	interface Props {
 		sourceAssets: AssetResponseDto[];

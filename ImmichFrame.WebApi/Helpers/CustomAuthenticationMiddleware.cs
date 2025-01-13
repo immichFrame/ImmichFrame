@@ -1,6 +1,4 @@
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
 
 public class CustomAuthenticationMiddleware
 {

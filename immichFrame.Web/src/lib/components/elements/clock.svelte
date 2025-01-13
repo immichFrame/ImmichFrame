@@ -1,10 +1,12 @@
 <script lang="ts">
-	import * as api from '$lib/immichFrameApi';
+	import * as api from '$lib/index';
 	import { onMount } from 'svelte';
 	import { format } from 'date-fns';
 	import * as locale from 'date-fns/locale';
 	import { configStore } from '$lib/stores/config.store';
-	import { clientIdentifierStore } from '$lib/stores/identifier.store';
+	import { clientIdentifierStore } from '$lib/stores/persist.store';
+
+	api.init();
 
 	let time = $state(new Date());
 	let weather: api.IWeather = $state() as api.IWeather;
