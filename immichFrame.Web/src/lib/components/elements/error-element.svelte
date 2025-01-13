@@ -44,7 +44,7 @@
 				bind:value={authSecret}
 			/>
 			<button class="text-xl border-gray-400 border-2 rounded-md p-2 m-2" onclick={Authenticate}
-				>Authenticate now</button
+				>Authenticate</button
 			>
 		{:else if message}
 			<p>
