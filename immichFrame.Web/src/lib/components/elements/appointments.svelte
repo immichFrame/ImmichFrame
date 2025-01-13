@@ -14,7 +14,7 @@
 
 	onMount(() => {
 		GetAppointments();
-		const appointmentInterval = setInterval(() => GetAppointments, 1 * 60 * 10000);
+		const appointmentInterval = setInterval(() => GetAppointments(), 10 * 60 * 1000); //every 10 minutes
 
 		return () => {
 			clearInterval(appointmentInterval);
