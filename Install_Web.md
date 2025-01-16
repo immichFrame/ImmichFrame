@@ -48,6 +48,7 @@ services:
       ExcludedAlbums: "ALBUM3,ALBUM4"
       People: "PERSON1,PERSON2"
       ShowMemories: "false"
+      ShowFavorites: "false"
       ImagesFromDays: ""
       ImagesFromDate: ""
       ImagesUntilDate: ""

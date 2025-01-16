@@ -190,6 +190,12 @@ namespace ImmichFrame.Core.Logic
                 list = list.Union(await GetMemoryAssets());
             }
 
+            if (_settings.ShowFavorites)
+            {
+                assetsAdded = true;
+                list = list.Union(await GetRandomAssets());
+            }
+
             if (_settings.Albums?.Any() ?? false)
             {
                 assetsAdded = true;
@@ -451,6 +457,11 @@ namespace ImmichFrame.Core.Logic
                         WithExif = true,
                         WithPeople = true,
                     };
+
+                    if (_settings.ShowFavorites)
+                    {
+                        searchBody.IsFavorite = true;
+                    }
 
                     var takenBefore = _settings.ImagesUntilDate.HasValue ? _settings.ImagesUntilDate : null;
                     if (takenBefore.HasValue)
