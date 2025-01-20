@@ -24,5 +24,6 @@
         public string? UnitSystem { get; set; }
         public string Language { get; set; }
         public string? Webhook { get; set; }
+        public string? AuthenticationSecret { get; set; }
     }
 }

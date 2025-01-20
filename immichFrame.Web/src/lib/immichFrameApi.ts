@@ -142,6 +142,12 @@ export type AssetResponseDto = {
         [key: string]: any | null;
     } | null;
 };
+export type ImageResponse = {
+    randomImageBase64: string | null;
+    thumbHashImageBase64: string | null;
+    photoDate: string | null;
+    imageLocation: string | null;
+};
 export type IAppointment = {
     startTime?: string;
     duration?: string;
@@ -202,6 +208,18 @@ export function getImage(id: string, { clientIdentifier }: {
         status: 200;
         data: Blob;
     }>(`/api/Asset/${encodeURIComponent(id)}${QS.query(QS.explode({
+        clientIdentifier
+    }))}`, {
+        ...opts
+    });
+}
+export function getRandomImageAndInfo({ clientIdentifier }: {
+    clientIdentifier?: string;
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: ImageResponse;
+    }>(`/api/Asset/RandomImageAndInfo${QS.query(QS.explode({
         clientIdentifier
     }))}`, {
         ...opts

@@ -4,6 +4,7 @@ using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.Core.Logic;
 using ImmichFrame.WebApi.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ImmichFrame.WebApi.Controllers
@@ -15,8 +16,11 @@ namespace ImmichFrame.WebApi.Controllers
         public required string PhotoDate { get; set; }
         public required string ImageLocation { get; set; }
     }
+
+
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class AssetController : ControllerBase
     {
         private readonly ILogger<AssetController> _logger;

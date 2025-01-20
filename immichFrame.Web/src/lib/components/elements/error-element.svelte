@@ -1,9 +1,18 @@
 <script lang="ts">
+	import { authSecretStore } from '$lib/stores/persist.store';
 	interface Props {
 		message?: string;
+		authError?: boolean;
 	}
 
-	let { message = '' }: Props = $props();
+	let authSecret: string = $state('');
+	function Authenticate() {
+		if (!authSecret) return;
+		authSecretStore.set(authSecret);
+		location.reload();
+	}
+
+	let { message = '', authError: authError = false }: Props = $props();
 </script>
 
 <div
@@ -24,12 +33,28 @@
 			points="383.958 182.63 360.042 161.37 338.671 185.412 314.63 164.042 293.37 187.958 317.412 209.329 296.042 233.37 319.958 254.63 341.329 230.588 365.37 251.958 386.63 228.042 362.588 206.671 383.958 182.63"
 		></polygon>
 	</svg>
-	<p class="text-3xl text-gray-400">
-		{#if message}
-			{message}
+	<div class="text-3xl text-gray-400">
+		{#if authError}
+			<p>Could not authenticate client</p>
+			<br />
+			<input
+				type="text"
+				class="text-center bg-transparent border-gray-400 border-2"
+				placeholder="add secret..."
+				bind:value={authSecret}
+			/>
+			<button class="text-xl border-gray-400 border-2 rounded-md p-2 m-2" onclick={Authenticate}
+				>Authenticate</button
+			>
+		{:else if message}
+			<p>
+				{message}
+			</p>
 		{:else}
-			Looks like your immich-server is offline or you misconfigured immichFrame, check the container
-			logs
+			<p>
+				Looks like your immich-server is offline or you misconfigured immichFrame, check the
+				container logs
+			</p>
 		{/if}
-	</p>
+	</div>
 </div>

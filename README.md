@@ -75,6 +75,7 @@ ImmichFrame is easy to run on your desired plattform. Get the latest stable rele
 | ----------------------- | -------------------------- | ----------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | **Required**            | **ImmichServerUrl**        | **string**                          |                      | **The URL of your Immich server e.g. `http://photos.yourdomain.com` / `http://192.168.0.100:2283`.**                                  |
 | **Required**            | **ApiKey**                 | **string**                          |                      | **Read more about how to obtain an [immich API key][immich-api-url].**                                                                |
+| [Security](#security)   | AuthenticationSecret       | string                              |                      | When set, every client needs to authenticate via Bearer Token and this value.                                                         |
 | [Filtering](#filtering) | Albums                     | string[]                            | []                   | UUID of album(s)                                                                                                                      |
 | [Filtering](#filtering) | ExcludedAlbums             | string[]                            | []                   | UUID of excluded album(s)                                                                                                             |
 | [Filtering](#filtering) | People                     | string[]                            | []                   | UUID of person(s)                                                                                                                     |
@@ -109,6 +110,11 @@ ImmichFrame is easy to run on your desired plattform. Get the latest stable rele
 | UI                      | BaseFontSize               | string                              | 17px                 | Sets the base font size, uses [standard CSS formats](https://developer.mozilla.org/en-US/docs/Web/CSS/font-size).                     |
 | [Misc](#misc)           | ImmichFrameAlbumName       | string                              |                      | \*Client only. Creates album and stores last 100 photos displayed.                                                                    |
 | [Misc](#misc)           | Webhook                    | string                              |                      | Webhook URL to be notified e.g. http://example.com/notify                                                                             |
+
+### Security
+Basic authentication can be added via this setting. It is **NOT** recommended to expose immichFrame to the public web, if you still choose to do so, you can set this to a secure secret. Every client needs to authenticate itself with this secret. This can be done in the Webclient via input field or via URL-Parameter. The URL-Parameter will look like this: `?authsecret=[MYSECRET]`
+
+If this is enabled, the web api required the `Authorization`-Header with `Bearer [MYSECRET]`.
 
 ### Filtering
 You can get the UUIDs from the URL of the album/person. For this URL: `https://demo.immich.app/albums/85c85b29-c95d-4a8b-90f7-c87da1d518ba` this is the UUID: `85c85b29-c95d-4a8b-90f7-c87da1d518ba`

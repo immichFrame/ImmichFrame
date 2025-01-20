@@ -3,6 +3,7 @@ using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.Core.Logic;
 using ImmichFrame.WebApi.Models;
+using Microsoft.AspNetCore.Authentication;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -32,12 +33,19 @@ if (File.Exists(settingsPath))
     clientSettings = JsonSerializer.Deserialize<WebClientSettings>(doc);
 }
 
-builder.Services.AddSingleton(srv =>
+builder.Services.AddSingleton<IServerSettings>(srv =>
 {
     if (serverSettings == null)
         serverSettings = new ServerSettings();
 
-    return new ImmichFrameLogic(serverSettings);
+    return serverSettings;
+});
+
+builder.Services.AddSingleton(srv =>
+{
+    var settings = srv.GetRequiredService<IServerSettings>();
+
+    return new ImmichFrameLogic(settings);
 });
 
 builder.Services.AddSingleton<IWebClientSettings>(srv =>
@@ -52,6 +60,14 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddAuthorization(options =>
+    {
+        options.AddPolicy("AllowAnonymous", policy => policy.RequireAssertion(context => true));
+    });
+
+builder.Services.AddAuthentication("ImmichFrameScheme")
+     .AddScheme<AuthenticationSchemeOptions, ImmichFrameAuthenticationHandler>("ImmichFrameScheme", options => { });
 
 var app = builder.Build();
 
@@ -78,7 +94,9 @@ if (app.Environment.IsDevelopment())
 }
 
 // app.UseHttpsRedirection();
+app.UseMiddleware<CustomAuthenticationMiddleware>();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
@@ -86,3 +104,5 @@ app.MapControllers();
 app.MapFallbackToFile("/index.html");
 
 app.Run();
+
+

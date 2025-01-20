@@ -1,9 +1,11 @@
 <script lang="ts">
-	import * as api from '$lib/immichFrameApi';
+	import * as api from '$lib/index';
 	import { onMount } from 'svelte';
 	import { format, formatDate } from 'date-fns';
 	import { configStore } from '$lib/stores/config.store';
-	import { clientIdentifierStore } from '$lib/stores/identifier.store';
+	import { clientIdentifierStore } from '$lib/stores/persist.store';
+
+	api.init();
 
 	function formattedDate(time: string) {
 		let date = new Date(time);
