@@ -39,6 +39,8 @@ services:
       # Required
       ImmichServerUrl: "URL"
       ApiKey: "KEY"
+      #Security
+      AuthenticationSecret: "test"
       # Image
       ImageZoom: "true"  
       Interval: "10"
