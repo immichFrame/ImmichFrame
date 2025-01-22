@@ -6,6 +6,7 @@
   "TransitionDuration": 2,
   "DownloadImages": false,
   "ShowMemories": false,
+  "ShowFavorites": false,
   "ImagesFromDays": 365,
   "ImagesFromDate": "",
   "ImagesUntilDate": "",
