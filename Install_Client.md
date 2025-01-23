@@ -77,6 +77,23 @@ The Android-Version of ImmichFrame is available on the [Google Play Store][play-
   - To view screensaver timeout use this ADB command `adb shell settings get system screen_off_timeout`
   - To set screensaver timeout use this ADB command `adb shell settings put system screen_off_timeout 60000` (timeout is is ms, so this would be 60 seconds).
 
+#### Frameo
+ImmichFrame can be run on inexpensive Frameo digital photo frames with some additional effort. You can typically find these for ~$40 USD. These devices are low powered and run a very old Android version, so they cannot run the full WebView version of the app. Go to ImmichFrame settings (swipe down) and disable WebView. If you have not already, you will need to install ADB on your PC ([ADB instructions][ADB-link]).
+ADB is often enabled on these devices by default, if it is not go to Frameo Settings-About-Enable Beta Program. Toggle ADB Access On-Off-On. Use the ADB commands below to sideload ImmichFrame APK, configure it to your liking, then disable the Frameo app to to set ImmichFrame as defualt Home app:
+  - Sideload ImmichFrame: adb install /path/to/ImmichFrame_vXX.apk
+  - Start ImmichFrame: adb shell am start com.immichframe.immichframe/.MainActivity
+  - Start Frameo: adb shell am start net.frameo.frame
+  - Disable Frameo: 
+      - adb shell su
+      - pm disable net.frameo.frame
+      - exit
+        - If this doesn't stick on reboot, repeat the commands but power cycle after exit command
+  - Some other useful ADB commands:
+    - Reboot: adb reboot
+    - Access Android Settings: adb shell am start -a android.settings.SETTINGS
+    - Re-enable Frameo: repeat disable commands above but replace "disable" with "enable"
+    - Start Frameo app: adb shell am start net.frameo.frame
+    - Uninstall ImmichFrame: adb uninstall com.immichframe.immichframe
 
 ## ⚙️ Configuration
 
@@ -116,3 +133,4 @@ The screen is configured in a 3x3 gird. You can touch or click:
 [support-url]: https://discord.com/channels/979116623879368755/1217843270244372480
 [play-store-link]: https://play.google.com/store/apps/details?id=com.immichframe.immichframe
 [releases-url]: https://github.com/3rob3/ImmichFrame/releases/latest
+[ADB-link]: https://www.xda-developers.com/install-adb-windows-macos-linux/
