@@ -1,12 +1,14 @@
-﻿using Ical.Net;
-using ImmichFrame.Core.Api;
-using ImmichFrame.Core.Exceptions;
+﻿using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
-using ImmichFrame.WebApi.Helpers;
-using OpenWeatherMap;
+using ImmichFrame.Core.Exceptions;
 using System.Data;
+using OpenWeatherMap;
+using Ical.Net;
+using ImmichFrame.WebApi.Helpers;
 using System.Text.Json;
+using Ical.Net.DataTypes;
+using System.Collections.Generic;
 
 namespace ImmichFrame.Core.Logic
 {
@@ -352,7 +354,7 @@ namespace ImmichFrame.Core.Logic
                                 metadataBody.TakenAfter = takenAfter.Value;
                             }
 
-                            var personInfo = await immichApi.SearchAssetsAsync(metadataBody);
+                            var personInfo = await immichApi.SearchMetadataAsync(metadataBody);
 
                             total = personInfo.Assets.Total;
 

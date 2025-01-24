@@ -1424,6 +1424,7 @@
     },
     "/assets/bulk-upload-check": {
       "post": {
+        "description": "Checks if assets exist by checksums",
         "operationId": "checkBulkUpload",
         "parameters": [],
         "requestBody": {
@@ -1459,7 +1460,6 @@
             "api_key": []
           }
         ],
-        "summary": "Checks if assets exist by checksums",
         "tags": [
           "Assets"
         ]
@@ -1467,6 +1467,7 @@
     },
     "/assets/device/{deviceId}": {
       "get": {
+        "description": "Get all asset of a device that are in the database, ID only.",
         "operationId": "getAllUserAssetsByDeviceId",
         "parameters": [
           {
@@ -1504,7 +1505,6 @@
             "api_key": []
           }
         ],
-        "summary": "Get all asset of a device that are in the database, ID only.",
         "tags": [
           "Assets"
         ]
@@ -1512,6 +1512,7 @@
     },
     "/assets/exist": {
       "post": {
+        "description": "Checks if multiple assets exist on the server and returns all existing - used by background backup",
         "operationId": "checkExistingAssets",
         "parameters": [],
         "requestBody": {
@@ -1547,7 +1548,6 @@
             "api_key": []
           }
         ],
-        "summary": "Checks if multiple assets exist on the server and returns all existing - used by background backup",
         "tags": [
           "Assets"
         ]
@@ -1903,6 +1903,7 @@
         ]
       },
       "put": {
+        "description": "Replace the asset with new file, without changing its id",
         "operationId": "replaceAsset",
         "parameters": [
           {
@@ -1956,7 +1957,6 @@
             "api_key": []
           }
         ],
-        "summary": "Replace the asset with new file, without changing its id",
         "tags": [
           "Assets"
         ],
@@ -3430,57 +3430,6 @@
         ]
       }
     },
-    "/notifications/templates/{name}": {
-      "post": {
-        "operationId": "getNotificationTemplate",
-        "parameters": [
-          {
-            "name": "name",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TemplateDto"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TemplateResponseDto"
-                }
-              }
-            },
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          },
-          {
-            "cookie": []
-          },
-          {
-            "api_key": []
-          }
-        ],
-        "tags": [
-          "Notifications"
-        ]
-      }
-    },
     "/notifications/test-email": {
       "post": {
         "operationId": "sendTestEmail",
@@ -3847,24 +3796,6 @@
         "operationId": "getAllPeople",
         "parameters": [
           {
-            "name": "closestAssetId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "closestPersonId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
             "name": "page",
             "required": false,
             "in": "query",
@@ -4097,6 +4028,57 @@
         "tags": [
           "People"
         ]
+      }
+    },
+    "/people/{id}/assets": {
+      "get": {
+        "deprecated": true,
+        "description": "This property was deprecated in v1.113.0",
+        "operationId": "getPersonAssets",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AssetResponseDto"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          },
+          {
+            "api_key": []
+          }
+        ],
+        "tags": [
+          "People",
+          "Deprecated"
+        ],
+        "x-immich-lifecycle": {
+          "deprecatedAt": "v1.113.0"
+        }
       }
     },
     "/people/{id}/merge": {
@@ -4478,7 +4460,7 @@
     },
     "/search/metadata": {
       "post": {
-        "operationId": "searchAssets",
+        "operationId": "searchMetadata",
         "parameters": [],
         "requestBody": {
           "content": {
@@ -7454,7 +7436,7 @@
   "info": {
     "title": "Immich",
     "description": "Immich API",
-    "version": "1.125.1",
+    "version": "1.117.0",
     "contact": {}
   },
   "tags": [],
@@ -7492,7 +7474,6 @@
             "items": {
               "$ref": "#/components/schemas/Permission"
             },
-            "minItems": 1,
             "type": "array"
           }
         },
@@ -7573,11 +7554,7 @@
             "type": "string"
           },
           "type": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ReactionType"
-              }
-            ]
+            "$ref": "#/components/schemas/ReactionType"
           }
         },
         "required": [
@@ -7604,11 +7581,7 @@
             "type": "string"
           },
           "type": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ReactionType"
-              }
-            ]
+            "$ref": "#/components/schemas/ReactionType"
           },
           "user": {
             "$ref": "#/components/schemas/UserResponseDto"
@@ -7640,7 +7613,6 @@
             "items": {
               "$ref": "#/components/schemas/AlbumUserAddDto"
             },
-            "minItems": 1,
             "type": "array"
           }
         },
@@ -7709,11 +7681,7 @@
             "type": "string"
           },
           "order": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AssetOrder"
-              }
-            ]
+            "$ref": "#/components/schemas/AssetOrder"
           },
           "owner": {
             "$ref": "#/components/schemas/UserResponseDto"
@@ -7773,12 +7741,7 @@
       "AlbumUserAddDto": {
         "properties": {
           "role": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AlbumUserRole"
-              }
-            ],
-            "default": "editor"
+            "$ref": "#/components/schemas/AlbumUserRole"
           },
           "userId": {
             "format": "uuid",
@@ -7793,11 +7756,7 @@
       "AlbumUserCreateDto": {
         "properties": {
           "role": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AlbumUserRole"
-              }
-            ]
+            "$ref": "#/components/schemas/AlbumUserRole"
           },
           "userId": {
             "format": "uuid",
@@ -7813,11 +7772,7 @@
       "AlbumUserResponseDto": {
         "properties": {
           "role": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AlbumUserRole"
-              }
-            ]
+            "$ref": "#/components/schemas/AlbumUserRole"
           },
           "user": {
             "$ref": "#/components/schemas/UserResponseDto"
@@ -7839,9 +7794,6 @@
       "AllJobStatusResponseDto": {
         "properties": {
           "backgroundTask": {
-            "$ref": "#/components/schemas/JobStatusDto"
-          },
-          "backupDatabase": {
             "$ref": "#/components/schemas/JobStatusDto"
           },
           "duplicateDetection": {
@@ -7886,7 +7838,6 @@
         },
         "required": [
           "backgroundTask",
-          "backupDatabase",
           "duplicateDetection",
           "faceDetection",
           "facialRecognition",
@@ -8114,11 +8065,7 @@
             "nullable": true
           },
           "sourceType": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/SourceType"
-              }
-            ]
+            "$ref": "#/components/schemas/SourceType"
           }
         },
         "required": [
@@ -8189,11 +8136,7 @@
             "type": "integer"
           },
           "sourceType": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/SourceType"
-              }
-            ]
+            "$ref": "#/components/schemas/SourceType"
           }
         },
         "required": [
@@ -8272,9 +8215,8 @@
       },
       "AssetJobName": {
         "enum": [
-          "refresh-faces",
-          "refresh-metadata",
           "regenerate-thumbnail",
+          "refresh-metadata",
           "transcode-video"
         ],
         "type": "string"
@@ -8289,11 +8231,7 @@
             "type": "array"
           },
           "name": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AssetJobName"
-              }
-            ]
+            "$ref": "#/components/schemas/AssetJobName"
           }
         },
         "required": [
@@ -8391,11 +8329,7 @@
             "type": "string"
           },
           "status": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AssetMediaStatus"
-              }
-            ]
+            "$ref": "#/components/schemas/AssetMediaStatus"
           }
         },
         "required": [
@@ -8514,6 +8448,9 @@
             "description": "This property was deprecated in v1.113.0",
             "type": "boolean"
           },
+          "smartInfo": {
+            "$ref": "#/components/schemas/SmartInfoResponseDto"
+          },
           "stack": {
             "allOf": [
               {
@@ -8533,11 +8470,7 @@
             "type": "string"
           },
           "type": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AssetTypeEnum"
-              }
-            ]
+            "$ref": "#/components/schemas/AssetTypeEnum"
           },
           "unassignedFaces": {
             "items": {
@@ -8624,8 +8557,7 @@
         "enum": [
           "mp3",
           "aac",
-          "libopus",
-          "pcm_s16le"
+          "libopus"
         ],
         "type": "string"
       },
@@ -8650,11 +8582,7 @@
       "AvatarResponse": {
         "properties": {
           "color": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/UserAvatarColor"
-              }
-            ]
+            "$ref": "#/components/schemas/UserAvatarColor"
           }
         },
         "required": [
@@ -8665,11 +8593,7 @@
       "AvatarUpdate": {
         "properties": {
           "color": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/UserAvatarColor"
-              }
-            ]
+            "$ref": "#/components/schemas/UserAvatarColor"
           }
         },
         "type": "object"
@@ -8760,7 +8684,6 @@
             "items": {
               "type": "string"
             },
-            "minItems": 1,
             "type": "array"
           },
           "deviceId": {
@@ -8827,17 +8750,13 @@
             "items": {
               "type": "string"
             },
-            "maxItems": 128,
-            "type": "array",
-            "uniqueItems": true
+            "type": "array"
           },
           "importPaths": {
             "items": {
               "type": "string"
             },
-            "maxItems": 128,
-            "type": "array",
-            "uniqueItems": true
+            "type": "array"
           },
           "name": {
             "type": "string"
@@ -8881,26 +8800,6 @@
           "profileChangedAt",
           "profileImagePath",
           "userId"
-        ],
-        "type": "object"
-      },
-      "DatabaseBackupConfig": {
-        "properties": {
-          "cronExpression": {
-            "type": "string"
-          },
-          "enabled": {
-            "type": "boolean"
-          },
-          "keepLastAmount": {
-            "minimum": 1,
-            "type": "number"
-          }
-        },
-        "required": [
-          "cronExpression",
-          "enabled",
-          "keepLastAmount"
         ],
         "type": "object"
       },
@@ -9306,18 +9205,10 @@
             "type": "string"
           },
           "entityType": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/PathEntityType"
-              }
-            ]
+            "$ref": "#/components/schemas/PathEntityType"
           },
           "pathType": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/PathType"
-              }
-            ]
+            "$ref": "#/components/schemas/PathType"
           },
           "pathValue": {
             "type": "string"
@@ -9379,18 +9270,15 @@
       "JobCommandDto": {
         "properties": {
           "command": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/JobCommand"
-              }
-            ]
+            "$ref": "#/components/schemas/JobCommand"
           },
           "force": {
             "type": "boolean"
           }
         },
         "required": [
-          "command"
+          "command",
+          "force"
         ],
         "type": "object"
       },
@@ -9428,11 +9316,7 @@
       "JobCreateDto": {
         "properties": {
           "name": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ManualJobName"
-              }
-            ]
+            "$ref": "#/components/schemas/ManualJobName"
           }
         },
         "required": [
@@ -9455,8 +9339,7 @@
           "search",
           "sidecar",
           "library",
-          "notifications",
-          "backupDatabase"
+          "notifications"
         ],
         "type": "string"
       },
@@ -9620,7 +9503,6 @@
         "properties": {
           "email": {
             "example": "testuser@email.com",
-            "format": "email",
             "type": "string"
           },
           "password": {
@@ -9794,11 +9676,7 @@
             "type": "string"
           },
           "type": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/MemoryType"
-              }
-            ]
+            "$ref": "#/components/schemas/MemoryType"
           }
         },
         "required": [
@@ -9863,11 +9741,7 @@
             "type": "string"
           },
           "type": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/MemoryType"
-              }
-            ]
+            "$ref": "#/components/schemas/MemoryType"
           },
           "updatedAt": {
             "format": "date-time",
@@ -9996,12 +9870,7 @@
             "type": "string"
           },
           "order": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AssetOrder"
-              }
-            ],
-            "default": "desc"
+            "$ref": "#/components/schemas/AssetOrder"
           },
           "originalFileName": {
             "type": "string"
@@ -10052,11 +9921,7 @@
             "type": "string"
           },
           "type": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AssetTypeEnum"
-              }
-            ]
+            "$ref": "#/components/schemas/AssetTypeEnum"
           },
           "updatedAfter": {
             "format": "date-time",
@@ -10140,11 +10005,7 @@
       "PartnerResponseDto": {
         "properties": {
           "avatarColor": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/UserAvatarColor"
-              }
-            ]
+            "$ref": "#/components/schemas/UserAvatarColor"
           },
           "email": {
             "type": "string"
@@ -10662,11 +10523,7 @@
             "type": "string"
           },
           "type": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AssetTypeEnum"
-              }
-            ]
+            "$ref": "#/components/schemas/AssetTypeEnum"
           },
           "updatedAfter": {
             "format": "date-time",
@@ -10996,9 +10853,6 @@
           "oauthButtonText": {
             "type": "string"
           },
-          "publicUsers": {
-            "type": "boolean"
-          },
           "trashDays": {
             "type": "integer"
           },
@@ -11014,7 +10868,6 @@
           "mapDarkStyleUrl",
           "mapLightStyleUrl",
           "oauthButtonText",
-          "publicUsers",
           "trashDays",
           "userDeleteDelay"
         ],
@@ -11141,9 +10994,7 @@
               {
                 "photos": 1,
                 "videos": 1,
-                "diskUsageRaw": 2,
-                "usagePhotos": 1,
-                "usageVideos": 1
+                "diskUsageRaw": 1
               }
             ],
             "items": {
@@ -11151,16 +11002,6 @@
             },
             "title": "Array of usage for each user",
             "type": "array"
-          },
-          "usagePhotos": {
-            "default": 0,
-            "format": "int64",
-            "type": "integer"
-          },
-          "usageVideos": {
-            "default": 0,
-            "format": "int64",
-            "type": "integer"
           },
           "videos": {
             "default": 0,
@@ -11171,8 +11012,6 @@
           "photos",
           "usage",
           "usageByUser",
-          "usagePhotos",
-          "usageVideos",
           "videos"
         ],
         "type": "object"
@@ -11334,11 +11173,7 @@
             "type": "boolean"
           },
           "type": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/SharedLinkType"
-              }
-            ]
+            "$ref": "#/components/schemas/SharedLinkType"
           }
         },
         "required": [
@@ -11423,11 +11258,7 @@
             "type": "string"
           },
           "type": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/SharedLinkType"
-              }
-            ]
+            "$ref": "#/components/schemas/SharedLinkType"
           },
           "userId": {
             "type": "string"
@@ -11460,7 +11291,6 @@
         "properties": {
           "email": {
             "example": "testuser@email.com",
-            "format": "email",
             "type": "string"
           },
           "name": {
@@ -11477,6 +11307,25 @@
           "name",
           "password"
         ],
+        "type": "object"
+      },
+      "SmartInfoResponseDto": {
+        "properties": {
+          "objects": {
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
         "type": "object"
       },
       "SmartSearchDto": {
@@ -11577,11 +11426,7 @@
             "type": "string"
           },
           "type": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AssetTypeEnum"
-              }
-            ]
+            "$ref": "#/components/schemas/AssetTypeEnum"
           },
           "updatedAfter": {
             "format": "date-time",
@@ -11622,7 +11467,6 @@
               "format": "uuid",
               "type": "string"
             },
-            "minItems": 2,
             "type": "array"
           }
         },
@@ -11662,22 +11506,8 @@
         },
         "type": "object"
       },
-      "SystemConfigBackupsDto": {
-        "properties": {
-          "database": {
-            "$ref": "#/components/schemas/DatabaseBackupConfig"
-          }
-        },
-        "required": [
-          "database"
-        ],
-        "type": "object"
-      },
       "SystemConfigDto": {
         "properties": {
-          "backup": {
-            "$ref": "#/components/schemas/SystemConfigBackupsDto"
-          },
           "ffmpeg": {
             "$ref": "#/components/schemas/SystemConfigFFmpegDto"
           },
@@ -11723,9 +11553,6 @@
           "storageTemplate": {
             "$ref": "#/components/schemas/SystemConfigStorageTemplateDto"
           },
-          "templates": {
-            "$ref": "#/components/schemas/SystemConfigTemplatesDto"
-          },
           "theme": {
             "$ref": "#/components/schemas/SystemConfigThemeDto"
           },
@@ -11737,7 +11564,6 @@
           }
         },
         "required": [
-          "backup",
           "ffmpeg",
           "image",
           "job",
@@ -11753,7 +11579,6 @@
           "reverseGeocoding",
           "server",
           "storageTemplate",
-          "templates",
           "theme",
           "trash",
           "user"
@@ -11763,11 +11588,7 @@
       "SystemConfigFFmpegDto": {
         "properties": {
           "accel": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/TranscodeHWAccel"
-              }
-            ]
+            "$ref": "#/components/schemas/TranscodeHWAccel"
           },
           "accelDecode": {
             "type": "boolean"
@@ -11796,11 +11617,7 @@
             "type": "integer"
           },
           "cqMode": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/CQMode"
-              }
-            ]
+            "$ref": "#/components/schemas/CQMode"
           },
           "crf": {
             "maximum": 51,
@@ -11814,6 +11631,10 @@
           "maxBitrate": {
             "type": "string"
           },
+          "npl": {
+            "minimum": 0,
+            "type": "integer"
+          },
           "preferredHwDevice": {
             "type": "string"
           },
@@ -11826,21 +11647,13 @@
             "type": "integer"
           },
           "targetAudioCodec": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AudioCodec"
-              }
-            ]
+            "$ref": "#/components/schemas/AudioCodec"
           },
           "targetResolution": {
             "type": "string"
           },
           "targetVideoCodec": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/VideoCodec"
-              }
-            ]
+            "$ref": "#/components/schemas/VideoCodec"
           },
           "temporalAQ": {
             "type": "boolean"
@@ -11850,18 +11663,10 @@
             "type": "integer"
           },
           "tonemap": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ToneMapping"
-              }
-            ]
+            "$ref": "#/components/schemas/ToneMapping"
           },
           "transcode": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/TranscodePolicy"
-              }
-            ]
+            "$ref": "#/components/schemas/TranscodePolicy"
           },
           "twoPass": {
             "type": "boolean"
@@ -11878,6 +11683,7 @@
           "crf",
           "gopSize",
           "maxBitrate",
+          "npl",
           "preferredHwDevice",
           "preset",
           "refs",
@@ -11906,11 +11712,7 @@
       "SystemConfigGeneratedImageDto": {
         "properties": {
           "format": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ImageFormat"
-              }
-            ]
+            "$ref": "#/components/schemas/ImageFormat"
           },
           "quality": {
             "maximum": 100,
@@ -11932,11 +11734,7 @@
       "SystemConfigImageDto": {
         "properties": {
           "colorspace": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Colorspace"
-              }
-            ]
+            "$ref": "#/components/schemas/Colorspace"
           },
           "extractEmbedded": {
             "type": "boolean"
@@ -12054,11 +11852,7 @@
             "type": "boolean"
           },
           "level": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/LogLevel"
-              }
-            ]
+            "$ref": "#/components/schemas/LogLevel"
           }
         },
         "required": [
@@ -12082,18 +11876,7 @@
             "$ref": "#/components/schemas/FacialRecognitionConfig"
           },
           "url": {
-            "deprecated": true,
-            "description": "This property was deprecated in v1.122.0",
             "type": "string"
-          },
-          "urls": {
-            "format": "uri",
-            "items": {
-              "format": "uri",
-              "type": "string"
-            },
-            "minItems": 1,
-            "type": "array"
           }
         },
         "required": [
@@ -12101,21 +11884,19 @@
           "duplicateDetection",
           "enabled",
           "facialRecognition",
-          "urls"
+          "url"
         ],
         "type": "object"
       },
       "SystemConfigMapDto": {
         "properties": {
           "darkStyle": {
-            "format": "uri",
             "type": "string"
           },
           "enabled": {
             "type": "boolean"
           },
           "lightStyle": {
-            "format": "uri",
             "type": "string"
           }
         },
@@ -12190,7 +11971,6 @@
             "type": "boolean"
           },
           "mobileRedirectUri": {
-            "format": "uri",
             "type": "string"
           },
           "profileSigningAlgorithm": {
@@ -12253,20 +12033,15 @@
       "SystemConfigServerDto": {
         "properties": {
           "externalDomain": {
-            "format": "uri",
             "type": "string"
           },
           "loginPageMessage": {
             "type": "string"
-          },
-          "publicUsers": {
-            "type": "boolean"
           }
         },
         "required": [
           "externalDomain",
-          "loginPageMessage",
-          "publicUsers"
+          "loginPageMessage"
         ],
         "type": "object"
       },
@@ -12341,25 +12116,6 @@
         ],
         "type": "object"
       },
-      "SystemConfigTemplateEmailsDto": {
-        "properties": {
-          "albumInviteTemplate": {
-            "type": "string"
-          },
-          "albumUpdateTemplate": {
-            "type": "string"
-          },
-          "welcomeTemplate": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "albumInviteTemplate",
-          "albumUpdateTemplate",
-          "welcomeTemplate"
-        ],
-        "type": "object"
-      },
       "SystemConfigTemplateStorageOptionDto": {
         "properties": {
           "dayOptions": {
@@ -12420,17 +12176,6 @@
           "secondOptions",
           "weekOptions",
           "yearOptions"
-        ],
-        "type": "object"
-      },
-      "SystemConfigTemplatesDto": {
-        "properties": {
-          "email": {
-            "$ref": "#/components/schemas/SystemConfigTemplateEmailsDto"
-          }
-        },
-        "required": [
-          "email"
         ],
         "type": "object"
       },
@@ -12510,7 +12255,6 @@
       "TagCreateDto": {
         "properties": {
           "color": {
-            "pattern": "^#?([0-9A-F]{3}|[0-9A-F]{4}|[0-9A-F]{6}|[0-9A-F]{8})$",
             "type": "string"
           },
           "name": {
@@ -12566,7 +12310,6 @@
         "properties": {
           "color": {
             "nullable": true,
-            "pattern": "^#?([0-9A-F]{3}|[0-9A-F]{4}|[0-9A-F]{6}|[0-9A-F]{8})$",
             "type": "string"
           }
         },
@@ -12612,32 +12355,6 @@
             "type": "boolean"
           }
         },
-        "type": "object"
-      },
-      "TemplateDto": {
-        "properties": {
-          "template": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "template"
-        ],
-        "type": "object"
-      },
-      "TemplateResponseDto": {
-        "properties": {
-          "html": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "html",
-          "name"
-        ],
         "type": "object"
       },
       "TestEmailResponseDto": {
@@ -12729,11 +12446,7 @@
             "type": "boolean"
           },
           "order": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AssetOrder"
-              }
-            ]
+            "$ref": "#/components/schemas/AssetOrder"
           }
         },
         "type": "object"
@@ -12741,11 +12454,7 @@
       "UpdateAlbumUserDto": {
         "properties": {
           "role": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AlbumUserRole"
-              }
-            ]
+            "$ref": "#/components/schemas/AlbumUserRole"
           }
         },
         "required": [
@@ -12792,17 +12501,13 @@
             "items": {
               "type": "string"
             },
-            "maxItems": 128,
-            "type": "array",
-            "uniqueItems": true
+            "type": "array"
           },
           "importPaths": {
             "items": {
               "type": "string"
             },
-            "maxItems": 128,
-            "type": "array",
-            "uniqueItems": true
+            "type": "array"
           },
           "name": {
             "type": "string"
@@ -12835,14 +12540,6 @@
             "format": "int64",
             "type": "integer"
           },
-          "usagePhotos": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "usageVideos": {
-            "format": "int64",
-            "type": "integer"
-          },
           "userId": {
             "type": "string"
           },
@@ -12857,8 +12554,6 @@
           "photos",
           "quotaSizeInBytes",
           "usage",
-          "usagePhotos",
-          "usageVideos",
           "userId",
           "userName",
           "videos"
@@ -12868,7 +12563,6 @@
       "UserAdminCreateDto": {
         "properties": {
           "email": {
-            "format": "email",
             "type": "string"
           },
           "name": {
@@ -12912,11 +12606,7 @@
       "UserAdminResponseDto": {
         "properties": {
           "avatarColor": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/UserAvatarColor"
-              }
-            ]
+            "$ref": "#/components/schemas/UserAvatarColor"
           },
           "createdAt": {
             "format": "date-time",
@@ -12971,11 +12661,7 @@
             "type": "boolean"
           },
           "status": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/UserStatus"
-              }
-            ]
+            "$ref": "#/components/schemas/UserStatus"
           },
           "storageLabel": {
             "nullable": true,
@@ -13010,7 +12696,6 @@
       "UserAdminUpdateDto": {
         "properties": {
           "email": {
-            "format": "email",
             "type": "string"
           },
           "name": {
@@ -13148,11 +12833,7 @@
       "UserResponseDto": {
         "properties": {
           "avatarColor": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/UserAvatarColor"
-              }
-            ]
+            "$ref": "#/components/schemas/UserAvatarColor"
           },
           "email": {
             "type": "string"
@@ -13192,7 +12873,6 @@
       "UserUpdateMeDto": {
         "properties": {
           "email": {
-            "format": "email",
             "type": "string"
           },
           "name": {
@@ -13221,17 +12901,13 @@
             "items": {
               "type": "string"
             },
-            "maxItems": 128,
-            "type": "array",
-            "uniqueItems": true
+            "type": "array"
           },
           "importPaths": {
             "items": {
               "type": "string"
             },
-            "maxItems": 128,
-            "type": "array",
-            "uniqueItems": true
+            "type": "array"
           }
         },
         "type": "object"
