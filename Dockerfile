@@ -1,5 +1,5 @@
 # Stage 1: Base for building the .NET API
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS base-api
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0 AS base-api
 
 COPY . /source
 WORKDIR /source/ImmichFrame.WebApi
