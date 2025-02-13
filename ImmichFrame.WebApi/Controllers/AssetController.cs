@@ -76,7 +76,8 @@ namespace ImmichFrame.WebApi.Controllers
             string thumbHashBase64 = Convert.ToBase64String(byteArray);
 
             CultureInfo cultureInfo = new CultureInfo(_settings.Language);
-            string photoDate = randomImage.LocalDateTime.ToString(_settings.PhotoDateFormat, cultureInfo) ?? string.Empty;
+            string photoDateFormat = _settings.PhotoDateFormat!.Replace("''", "\\'"); 
+            string photoDate = randomImage.LocalDateTime.ToString(photoDateFormat, cultureInfo) ?? string.Empty;
 
             var locationFormat = _settings.ImageLocationFormat ?? "City,State,Country";
             var imageLocation = locationFormat
