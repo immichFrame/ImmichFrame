@@ -19,7 +19,10 @@ const config = {
 			fallback: 'index.html',
 			precompress: true,
 			strict: true
-		})
+		}),
+		paths: {
+			base: '/frame' // Basispfad auf /frame setzen
+		}
 	}
 };
 

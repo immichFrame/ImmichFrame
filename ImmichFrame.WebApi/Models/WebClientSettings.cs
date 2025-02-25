@@ -29,6 +29,7 @@ namespace ImmichFrame.WebApi.Models
         public bool ImageZoom { get; set; } = true;
         public string Layout { get; set; } = "splitview";
         public string Language { get; set; } = "en";
+        public string? Subpage { get; set; }
 
         public WebClientSettings()
         {

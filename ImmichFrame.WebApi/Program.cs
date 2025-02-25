@@ -33,11 +33,22 @@ if (File.Exists(settingsPath))
     clientSettings = JsonSerializer.Deserialize<WebClientSettings>(doc);
 }
 
+var root = Directory.GetCurrentDirectory();
+var dotenv = Path.Combine(root, "..", "docker", ".env");
+
+dotenv = Path.GetFullPath(dotenv);
+
+if (File.Exists(dotenv))
+    DotEnv.Load(dotenv);
+
+if (serverSettings == null)
+    serverSettings = new ServerSettings();
+
+if (clientSettings == null)
+    clientSettings = new WebClientSettings();
+
 builder.Services.AddSingleton<IServerSettings>(srv =>
 {
-    if (serverSettings == null)
-        serverSettings = new ServerSettings();
-
     return serverSettings;
 });
 
@@ -50,9 +61,6 @@ builder.Services.AddSingleton(srv =>
 
 builder.Services.AddSingleton<IWebClientSettings>(srv =>
 {
-    if (clientSettings == null)
-        clientSettings = new WebClientSettings();
-
     return clientSettings;
 });
 
@@ -78,19 +86,16 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+if (clientSettings is not null && !string.IsNullOrEmpty(clientSettings.Subpage))
+{
+    app.UsePathBase($"/{clientSettings.Subpage}");
+}
+
 app.UseStaticFiles();
+
 if (app.Environment.IsProduction())
 {
     app.UseDefaultFiles();
-}
-
-if (app.Environment.IsDevelopment())
-{
-    var root = Directory.GetCurrentDirectory();
-    var dotenv = Path.Combine(root, "..", "docker", ".env");
-
-    dotenv = Path.GetFullPath(dotenv);
-    DotEnv.Load(dotenv);
 }
 
 // app.UseHttpsRedirection();
