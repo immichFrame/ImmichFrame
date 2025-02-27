@@ -29,7 +29,7 @@
 		}, 1000);
 
 		GetWeather();
-		const weatherInterval = setInterval(() => GetWeather, 1 * 60 * 10000);
+		const weatherInterval = setInterval(() => GetWeather(), 10 * 60 * 1000);
 
 		return () => {
 			clearInterval(interval);
