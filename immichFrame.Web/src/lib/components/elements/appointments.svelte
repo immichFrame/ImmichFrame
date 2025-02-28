@@ -1,15 +1,26 @@
 <script lang="ts">
 	import * as api from '$lib/index';
 	import { onMount } from 'svelte';
-	import { format, formatDate } from 'date-fns';
+	import { format } from 'date-fns';
 	import { configStore } from '$lib/stores/config.store';
 	import { clientIdentifierStore } from '$lib/stores/persist.store';
 
 	api.init();
 
-	function formattedDate(time: string) {
-		let date = new Date(time);
-		return format(date, $configStore.clockFormat ?? 'HH:mm');
+	function formatDates(startTime: string, endTime: string) {
+		let startDate = new Date(startTime);
+		let endDate = new Date(endTime);
+		let sameDay = startDate.getDate() == endDate.getDate();
+
+		let clockFormat = $configStore.clockFormat ?? 'HH:mm';
+		let photoDateFormat = $configStore.photoDateFormat ?? 'dd.MM.yyyy';
+		let fullFormat = photoDateFormat + ' ' + clockFormat;
+
+		if (sameDay) {
+			return format(startDate, clockFormat) + ' - ' + format(endDate, clockFormat);
+		}
+
+		return format(startDate, fullFormat) + ' - ' + format(endDate, fullFormat);
 	}
 
 	let appointments: api.IAppointment[] = $state() as api.IAppointment[];
@@ -47,9 +58,7 @@
 			{#each appointments as appointment}
 				<div class="bg-gray-600 bg-opacity-90 mb-2 text-left rounded-md p-3">
 					<p class="text-xs">
-						{formattedDate(appointment.startTime ?? '')} - {formattedDate(
-							appointment.endTime ?? ''
-						)}
+						{formatDates(appointment.startTime ?? '', appointment.startTime ?? '')}
 					</p>
 					{appointment.summary}
 					{#if appointment.description}
