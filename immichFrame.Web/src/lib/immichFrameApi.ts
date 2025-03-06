@@ -52,7 +52,7 @@ export type UserResponseDto = {
         [key: string]: any | null;
     } | null;
 };
-export type SourceType = 0 | 1;
+export type SourceType = 0 | 1 | 2;
 export type AssetFaceWithoutPersonResponseDto = {
     boundingBoxX1?: number;
     boundingBoxX2?: number;
