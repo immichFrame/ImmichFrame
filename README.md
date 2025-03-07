@@ -65,7 +65,7 @@ ImmichFrame is easy to run on your desired plattform. Get the latest stable rele
 ### 🌐 Browser
 - [ImmichFrame Web](/Install_Web.md#-installation)
 
-### 💻 Windows, Linux, MacOS, Android
+### 💻 Clients (Windows, Linux, MacOS, Android, Apple TV, iOS)
 - [ImmichFrame Client](/Install_Client.md#-installation)
 
 
