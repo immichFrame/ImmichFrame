@@ -64,7 +64,13 @@ echo "@/home/pi/{dir with Immich_Frame}/Immich_Frame" > sudo tee /home/pi/.confi
 - GUI - Double-click `Immich_Frame`. Note: If nothing happens, right-click &rarr; open with &rarr; Utilities &rarr; Terminal. Check Always Open With.
 - CLI - CD into folder, and launch with `./Immich_Frame`.
 - If you get a permissions error run `chmod +x Immich_Frame`.
-  
+
+### iOS and iPadOS
+You can "install" ImmichFrame as a PWA by opening in a browser and going to Share Menu-Add to Homescreen.
+
+### Apple TV
+ImmichFrame is available on the [Apple TV App Store][app-store-link].
+
 ### Android
 The Android-Version of ImmichFrame is available on the [Google Play Store][play-store-link]. Download it via the store for automatic updates. You can also sideload via APK available in Releases.
 
@@ -108,7 +114,7 @@ Simply enter the URL of ImmichFrame web Docker. All other configuration is handl
 ### Android
 Settings - swipe down.  
 Previous Image/Pause/Next Image - Touch the left side/center/or right side of screen
-### Android TV
+### Android TV and Apple TV
 Settings - D-pad UP.  
 Previous Image/Pause/Next Image - D-pad left/D-pad center/D-pad right
 
@@ -136,5 +142,6 @@ The screen is configured in a 3x3 gird. You can touch or click:
 <!-- MARKDOWN LINKS & IMAGES -->
 [support-url]: https://discord.com/channels/979116623879368755/1217843270244372480
 [play-store-link]: https://play.google.com/store/apps/details?id=com.immichframe.immichframe
+[app-store-link]: https://apps.apple.com/us/app/immichframe/id6742748077
 [releases-url]: https://github.com/3rob3/ImmichFrame/releases/latest
 [ADB-link]: https://www.xda-developers.com/install-adb-windows-macos-linux/
