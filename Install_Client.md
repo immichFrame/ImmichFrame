@@ -10,6 +10,8 @@ Go back to the [Full Readme](/README.md).
   - [Linux](#linux)
     - [Autostart on Raspberry Pi OS](#autostart-on-raspberry-pi-os)
   - [MacOS](#macos)
+  - [iOS/iPadOS](#ios-and-ipados)
+  - [Apple TV](#apple-tv)
   - [Android](#android)
     - [Android Screensaver](#android-screensaver)
 - [⚙️ Configuration](#️-configuration)
