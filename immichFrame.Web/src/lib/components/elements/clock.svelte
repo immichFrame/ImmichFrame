@@ -12,16 +12,50 @@
 	let weather: api.IWeather = $state() as api.IWeather;
 
 	const selectedLocale = $configStore.language;
+	const localeToUse = locale[selectedLocale as keyof typeof locale] || locale.enUS;
 
-	const localeToUse =
-		(selectedLocale && locale[selectedLocale as keyof typeof locale]) || locale.enUS;
+	function splitFormat(formatStr: string) {
+		const dateRegex = /[yYMdEL]/;
+		const timeRegex = /[Hhmsa]/;
 
-	let formattedDate = $derived(
-		format(time, $configStore.photoDateFormat ?? 'dd.MM.yyyy', {
-			locale: localeToUse
-		})
-	);
-	let timePortion = $derived(format(time, $configStore.clockFormat ?? 'HH:mm:ss'));
+		let dateFormat = '';
+		let timeFormat = '';
+		let currentSection = '';
+		let isDate = false;
+		let isTime = false;
+
+		for (let char of formatStr) {
+			if (dateRegex.test(char)) {
+				if (!isDate && currentSection) {
+					timeFormat += currentSection;
+					currentSection = '';
+				}
+				isDate = true;
+				isTime = false;
+			} else if (timeRegex.test(char)) {
+				if (!isTime && currentSection) {
+					dateFormat += currentSection;
+					currentSection = '';
+				}
+				isTime = true;
+				isDate = false;
+			}
+			currentSection += char;
+		}
+
+		if (isDate) dateFormat += currentSection;
+		else timeFormat += currentSection;
+
+		return {
+			dateFormat: dateFormat.trim() || null,
+			timeFormat: timeFormat.trim() || null
+		};
+	}
+
+	let { dateFormat, timeFormat } = splitFormat($configStore.clockFormat ?? 'HH:mm:ss');
+
+	let formattedDate = $derived(dateFormat ? format(time, dateFormat, { locale: localeToUse }) : '');
+	let formattedTime = $derived(timeFormat ? format(time, timeFormat, { locale: localeToUse }) : '');
 
 	onMount(() => {
 		const interval = setInterval(() => {
@@ -53,14 +87,19 @@
 	{$configStore.style == 'blur' ? 'backdrop-blur-lg rounded-tr-2xl' : ''}	
 	drop-shadow-2xl p-3"
 >
-	<p id="clockdate" class="mt-2 text-sm sm:text-sm md:text-md lg:text-xl font-thin text-shadow-sm">
-		{formattedDate}
-	</p>
+	{#if formattedDate}
+		<p
+			id="clockdate"
+			class="mt-2 text-sm sm:text-sm md:text-md lg:text-xl font-thin text-shadow-sm"
+		>
+			{formattedDate}
+		</p>
+	{/if}
 	<p
 		id="clocktime"
 		class="mt-2 text-4xl sm:text-4xl md:text-6xl lg:text-8xl font-bold text-shadow-lg"
 	>
-		{timePortion}
+		{formattedTime}
 	</p>
 	{#if weather}
 		<div id="clockweather">
