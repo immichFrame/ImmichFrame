@@ -142,7 +142,7 @@ Events will always contain a `Name`, `ClientIdentifier` and a `DateTime` to diff
 | -------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ImageRequestedNotification | Notifies, when a Image requested. | `{"Name":"ImageRequestedNotification", "ClientIdentifier": "Frame_Kitchen", "DateTime":"2024-11-16T21:37:19.4933981+01:00", "RequestedImageId":"UUID"}` |
 
-#### Custom CSS
+### Custom CSS
 ImmichFrame can be customized even further using custom CSS. This will apply to browsers, and apps using WebView (i.e. everything but Frameo and AppleTV):
 - Create a custom.css file somewhere on your host server with your desired content, for example:  
 #progressbar {  
