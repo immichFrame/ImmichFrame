@@ -6,6 +6,7 @@ using ImmichFrame.Core.Logic;
 using ImmichFrame.WebApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Net.Http.Headers;
 
 namespace ImmichFrame.WebApi.Controllers
 {
@@ -50,6 +51,8 @@ namespace ImmichFrame.WebApi.Controllers
             var notification = new ImageRequestedNotification(id, clientIdentifier);
             _ = _logic.SendWebhookNotification(notification);
 
+            Response.Headers[HeaderNames.CacheControl] = "private, max-age=604800";
+
             return File(image.fileStream, image.ContentType, image.fileName); // returns a FileStreamResult
         }
 
@@ -62,6 +65,8 @@ namespace ImmichFrame.WebApi.Controllers
             var image = await _logic.GetImage(new Guid(randomImage.Id));
             var notification = new ImageRequestedNotification(new Guid(randomImage.Id), clientIdentifier);
             _ = _logic.SendWebhookNotification(notification);
+
+            Response.Headers[HeaderNames.CacheControl] = "private, max-age=604800";
 
             string randomImageBase64;
             using (var memoryStream = new MemoryStream())
@@ -76,7 +81,7 @@ namespace ImmichFrame.WebApi.Controllers
             string thumbHashBase64 = Convert.ToBase64String(byteArray);
 
             CultureInfo cultureInfo = new CultureInfo(_settings.Language);
-            string photoDateFormat = _settings.PhotoDateFormat!.Replace("''", "\\'"); 
+            string photoDateFormat = _settings.PhotoDateFormat!.Replace("''", "\\'");
             string photoDate = randomImage.LocalDateTime.ToString(photoDateFormat, cultureInfo) ?? string.Empty;
 
             var locationFormat = _settings.ImageLocationFormat ?? "City,State,Country";

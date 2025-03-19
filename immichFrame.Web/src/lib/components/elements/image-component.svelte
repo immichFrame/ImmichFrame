@@ -10,6 +10,7 @@
 	import { configStore } from '$lib/stores/config.store';
 	import { Confetti } from 'svelte-confetti';
 	import { clientIdentifierStore } from '$lib/stores/persist.store';
+	import { slideshowStore } from '$lib/stores/slideshow.store';
 
 	api.init();
 
@@ -29,8 +30,8 @@
 		showPeopleDesc = true
 	}: Props = $props();
 	let split: boolean = $state(true);
-
-	let transitionDuration = ($configStore.transitionDuration ?? 1) * 1000;
+	let instantTransition = slideshowStore.instantTransition;
+	let transitionDuration = $derived($instantTransition ? 0 : ($configStore.transitionDuration ?? 1) * 1000);
 
 	let error: boolean = $state(false);
 	let loaded: boolean = $state(false);

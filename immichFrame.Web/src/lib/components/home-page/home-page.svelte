@@ -23,7 +23,7 @@
 
 	let displayingAssets: api.AssetResponseDto[] = $state() as api.AssetResponseDto[];
 
-	const { restartProgress, stopProgress } = slideshowStore;
+	const { restartProgress, stopProgress, instantTransition } = slideshowStore;
 
 	let progressBarStatus: ProgressBarStatus = $state(ProgressBarStatus.Playing);
 	let progressBar: ProgressBar = $state() as ProgressBar;
@@ -78,8 +78,9 @@
 		}
 	}
 
-	const handleDone = async (previous: boolean = false) => {
+	const handleDone = async (previous: boolean = false, instant: boolean = false) => {
 		progressBar.restart(false);
+		$instantTransition = instant;
 		if (previous) await getPreviousAssets();
 		else await getNextAssets();
 		progressBar.play();
@@ -224,10 +225,10 @@
 
 		<OverlayControls
 			on:next={async () => {
-				await handleDone();
+				await handleDone(false, true);
 			}}
 			on:back={async () => {
-				await handleDone(true);
+				await handleDone(true, true);
 			}}
 			on:pause={async () => {
 				if (progressBarStatus == ProgressBarStatus.Paused) {
