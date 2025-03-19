@@ -55,24 +55,25 @@
 
 {#if showPhotoDate || showPhotoDate || showImageDesc || showPeopleDesc}
 	<div
+		id="imageinfo"
 		class="immichframe_image_metadata absolute bottom-0 right-0 z-100 text-primary p-1 text-right
 		{$configStore.style == 'solid' ? 'bg-secondary rounded-tl-2xl' : ''}
 		{$configStore.style == 'transition' ? 'bg-gradient-to-l from-secondary from-0% pl-10' : ''}
 		{$configStore.style == 'blur' ? 'backdrop-blur-lg rounded-tl-2xl' : ''}	"
 	>
 		{#if showPhotoDate && formattedDate}
-			<p class="text-sm font-thin text-shadow-sm">{formattedDate}</p>
+			<p id="photodate" class="text-sm font-thin text-shadow-sm">{formattedDate}</p>
 		{/if}
 		{#if showImageDesc && desc}
-			<p class="text-base font-light text-shadow-sm">{desc}</p>
+			<p id="imagedescription" class="text-base font-light text-shadow-sm">{desc}</p>
 		{/if}
 		{#if showPeopleDesc && availablePeople}
-			<p class="text-sm font-light text-shadow-sm">
+			<p id="peopledescription" class="text-sm font-light text-shadow-sm">
 				{availablePeople.map((x) => x.name).join(', ')}
 			</p>
 		{/if}
 		{#if showLocation && location}
-			<p class="text-base font-light text-shadow-sm">{location}</p>
+			<p id="imagelocation" class="text-base font-light text-shadow-sm">{location}</p>
 		{/if}
 	</div>
 {/if}

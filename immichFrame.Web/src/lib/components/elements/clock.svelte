@@ -57,9 +57,7 @@
 		{formattedDate}
 	</p>
 	<p
-		id="clocktime"
-		class="mt-2 text-4xl sm:text-4xl md:text-6xl lg:text-8xl font-bold text-shadow-lg"
-	>
+		id="clocktime" class="mt-2 text-4xl sm:text-4xl md:text-6xl lg:text-8xl font-bold text-shadow-lg">
 		{timePortion}
 	</p>
 	{#if weather}
