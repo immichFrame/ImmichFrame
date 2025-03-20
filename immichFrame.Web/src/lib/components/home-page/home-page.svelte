@@ -15,6 +15,7 @@
 	import Appointments from '../elements/appointments.svelte';
 	import LoadingElement from '../elements/LoadingElement.svelte';
 	import { page } from '$app/stores';
+	import { fade } from 'svelte/transition';
 
 	api.init();
 
@@ -27,9 +28,13 @@
 
 	let progressBarStatus: ProgressBarStatus = $state(ProgressBarStatus.Playing);
 	let progressBar: ProgressBar = $state() as ProgressBar;
+	
 	let error: boolean = $state(false);
 	let authError: boolean = $state(false);
 	let errorMessage: string = $state() as string;
+	let nextImagesState;
+
+	let transitionDuration = $derived($instantTransition ? 0 : ($configStore.transitionDuration ?? 1) * 1000);
 
 	let unsubscribeRestart: () => void;
 	let unsubscribeStop: () => void;
@@ -85,6 +90,25 @@
 		else await getNextAssets();
 		progressBar.play();
 	};
+
+	async function getFutureAssets() {
+		if (!assetBacklog || assetBacklog.length < displayingAssets.length) {
+			return;
+		}
+		let next: api.AssetResponseDto[];
+		if (
+			$configStore.layout?.trim().toLowerCase() == 'splitview' &&
+			assetBacklog.length > 1 &&
+			isHorizontal(assetBacklog[displayingAssets.length]) &&
+			isHorizontal(assetBacklog[displayingAssets.length + 1])
+		) {
+			next = assetBacklog.slice(displayingAssets.length, displayingAssets.length + 2);
+		} else {
+			next = assetBacklog.slice(displayingAssets.length, displayingAssets.length + 1);
+		}
+
+		nextImagesState = loadImages(next);
+	}
 
 	async function getNextAssets() {
 		if (!assetBacklog || assetBacklog.length < 1) {
@@ -159,6 +183,62 @@
 		return imageHeight > imageWidth; // or imageHeight > imageWidth * 1.25;
 	}
 
+	function hasBirthday(assets: api.AssetResponseDto[]) {
+		let today = new Date();
+		let hasBday: boolean = false;
+
+		for (let asset of assets) {
+			for (let person of asset.people ?? new Array()) {
+				let birthdate = new Date(person.birthDate ?? '');
+				if (birthdate.getDate() === today.getDate() && birthdate.getMonth() === today.getMonth()) {
+					hasBday = true;
+					break;
+				}
+			}
+			if (hasBday) break;
+		}
+
+		return hasBday;
+	}
+
+	async function loadImages(assets: api.AssetResponseDto[]) {
+		let newImages = [];
+		try {
+			for (let asset of assets) {
+				let img = await loadImage(asset);
+				newImages.push(img);
+			}
+			return {
+				images: newImages,
+				error: false,
+				loaded: true,
+				split: assets.length == 2,
+				hasBday: hasBirthday(assets)
+			};
+		} catch {
+			return {
+				images: [],
+				error: true,
+				loaded: false,
+				split: false,
+				hasBday: false
+			};
+		}
+	}
+
+	async function loadImage(a: api.AssetResponseDto) {
+		let req = await api.getImage(a.id, { clientIdentifier: $clientIdentifierStore });
+
+		if (req.status != 200) {
+			return ['', a] as [string, api.AssetResponseDto];
+		}
+		return [getImageUrl(req.data), a] as [string, api.AssetResponseDto];
+	}
+
+	function getImageUrl(image: Blob) {
+		return URL.createObjectURL(image);
+	}
+
 	onMount(() => {
 		window.addEventListener('mousemove', showCursor);
 		window.addEventListener('click', showCursor);
@@ -209,13 +289,17 @@
 	{#if error}
 		<ErrorElement {authError} message={errorMessage} />
 	{:else if displayingAssets}
-		<ImageComponent
-			showLocation={$configStore.showImageLocation}
-			showPhotoDate={$configStore.showPhotoDate}
-			showImageDesc={$configStore.showImageDesc}
-			showPeopleDesc={$configStore.showPeopleDesc}
-			sourceAssets={displayingAssets}
-		/>
+		{#await loadImages(displayingAssets) then imagesState}
+			<div style="width: 100%; height: 100%;" transition:fade={{ duration: transitionDuration }}>
+				<ImageComponent
+					showLocation={$configStore.showImageLocation}
+					showPhotoDate={$configStore.showPhotoDate}
+					showImageDesc={$configStore.showImageDesc}
+					showPeopleDesc={$configStore.showPeopleDesc}
+					{...imagesState}
+				/>
+			</div>
+		{/await}
 
 		{#if $configStore.showClock}
 			<Clock />
