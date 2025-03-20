@@ -146,7 +146,7 @@
 		style="--interval: {interval + 2}s; --posX: {getCenterX(0)}%; --posY: {getCenterY(0)}%;"
 		class="{multi
 			? 'w-screen'
-			: 'max-h-screen h-dvh max-w-full'} object-contain {$configStore.imageZoom
+			: 'full_height max-w-full'} object-contain {$configStore.imageZoom
 			? zoomEffect()
 				? hasPerson
 					? 'zoom-in-person'
@@ -167,6 +167,12 @@
 />
 
 <style>
+	.immichframe_image img.full_height {
+		max-height: 100vh;
+		height: 100vh;
+		height: 100dvh;
+	}
+
 	.zoom-in {
 		animation: zoom-in var(--interval) ease-out normal;
 	}
