@@ -204,7 +204,7 @@
 	});
 </script>
 
-<section class="fixed grid h-screen w-screen bg-black" class:cursor-none={!cursorVisible}>
+<section class="fixed grid h-dvh w-screen bg-black" class:cursor-none={!cursorVisible}>
 	{#if error}
 		<ErrorElement {authError} message={errorMessage} />
 	{:else if displayingAssets}

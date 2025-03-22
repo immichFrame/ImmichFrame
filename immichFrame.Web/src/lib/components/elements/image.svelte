@@ -146,7 +146,7 @@
 		style="--interval: {interval + 2}s; --posX: {getCenterX(0)}%; --posY: {getCenterY(0)}%;"
 		class="{multi
 			? 'w-screen'
-			: 'max-h-screen h-screen max-w-full'} object-contain {$configStore.imageZoom
+			: 'max-h-screen h-dvh max-w-full'} object-contain {$configStore.imageZoom
 			? zoomEffect()
 				? hasPerson
 					? 'zoom-in-person'
