@@ -12,6 +12,7 @@ function createSlideshowStore() {
   const stopState = writable<boolean>(false);
 
   const slideshowState = writable<SlideshowState>(SlideshowState.None);
+  const instantTransition = writable<boolean>(false);
 
   return {
     restartProgress: {
@@ -36,7 +37,8 @@ function createSlideshowStore() {
         }
       },
     },
-    slideshowState
+    slideshowState,
+    instantTransition,
   };
 }
 
