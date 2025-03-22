@@ -204,7 +204,7 @@
 	});
 </script>
 
-<section class="fixed grid w-screen bg-black" class:cursor-none={!cursorVisible}>
+<section class="fixed grid h-dvh w-screen bg-black" class:cursor-none={!cursorVisible}>
 	{#if error}
 		<ErrorElement {authError} message={errorMessage} />
 	{:else if displayingAssets}
@@ -253,10 +253,3 @@
 		<LoadingElement />
 	{/if}
 </section>
-
-<style>
-	section {
-		height: 100vh;
-		height: 100dvh;
-	}
-</style>

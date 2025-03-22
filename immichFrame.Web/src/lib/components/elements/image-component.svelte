@@ -100,8 +100,7 @@
 
 {#if hasBday}
 	<div
-		id="bday"
-		class="	z-[1000] top-[-50px] fixed l-0 w-screen flex justify-center overflow-hidden pointer-events-none"
+		class="	z-[1000] top-[-50px] fixed l-0 h-dvh w-screen flex justify-center overflow-hidden pointer-events-none"
 	>
 		<Confetti
 			x={[-5, 5]}
@@ -119,10 +118,10 @@
 	<ErrorElement />
 {:else if loaded}
 	{#key images}
-		<div class="image_container grid absolute w-screen" transition:fade={{ duration: transitionDuration }}>
+		<div class="grid absolute h-dvh w-screen" transition:fade={{ duration: transitionDuration }}>
 			{#if split}
 				<div class="grid grid-cols-2">
-					<div id="image_portrait_1" class="relative grid border-r-2 border-primary">
+					<div id="image_portrait_1" class="relative grid border-r-2 border-primary h-dvh">
 						<Image
 							multi={true}
 							image={images[0]}
@@ -132,7 +131,7 @@
 							{showPeopleDesc}
 						/>
 					</div>
-					<div id="image_portrait_2" class="relative grid border-l-2 border-primary">
+					<div id="image_portrait_2" class="relative grid border-l-2 border-primary h-dvh">
 						<Image
 							multi={true}
 							image={images[1]}
@@ -144,7 +143,7 @@
 					</div>
 				</div>
 			{:else}
-				<div id="image_default" class="relative grid w-screen">
+				<div id="image_default" class="relative grid h-dvh w-screen">
 					<Image
 						image={images[0]}
 						{showLocation}
@@ -159,18 +158,3 @@
 {:else}
 	<LoadingElement />
 {/if}
-
-<style>
-	#bday {
-		height: 100vh;
-		height: 100dvh;
-	}
-	.image_container {
-		height: 100vh;
-		height: 100dvh;
-	}
-	#image_default, #image_portrait_1, #image_portrait_2 {
-		height: 100vh;
-		height: 100dvh;
-	}
-</style>
