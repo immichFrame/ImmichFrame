@@ -32,9 +32,10 @@
 	let error: boolean = $state(false);
 	let authError: boolean = $state(false);
 	let errorMessage: string = $state() as string;
+	let imagesState = $state();
+	// TODO: types
 	let nextImagesState;
-
-	let transitionDuration = $derived($instantTransition ? 0 : ($configStore.transitionDuration ?? 1) * 1000);
+	let nextImagesStatePromise;
 
 	let unsubscribeRestart: () => void;
 	let unsubscribeStop: () => void;
@@ -91,26 +92,33 @@
 		progressBar.play();
 	};
 
+	// TODO: we could generalize this to n futureAssets's - consider
 	async function getFutureAssets() {
 		if (!assetBacklog || assetBacklog.length < displayingAssets.length) {
 			return;
 		}
+		// await nextImagesStatePromise;
 		let next: api.AssetResponseDto[];
 		if (
 			$configStore.layout?.trim().toLowerCase() == 'splitview' &&
 			assetBacklog.length > 1 &&
-			isHorizontal(assetBacklog[displayingAssets.length]) &&
-			isHorizontal(assetBacklog[displayingAssets.length + 1])
+			isHorizontal(assetBacklog[0]) &&
+			isHorizontal(assetBacklog[1])
 		) {
-			next = assetBacklog.slice(displayingAssets.length, displayingAssets.length + 2);
+			next = assetBacklog.slice(0, 2);
 		} else {
-			next = assetBacklog.slice(displayingAssets.length, displayingAssets.length + 1);
+			next = assetBacklog.slice(0, 1);
 		}
 
-		nextImagesState = loadImages(next);
+		nextImagesState = await loadImages(next);
 	}
 
 	async function getNextAssets() {
+		// TODO: actually handle the case of a getNextAssets() call while getFutureAssets() is pending
+		//       just returning is a regression from current behavior
+		if (nextImagesStatePromise && nextImagesStatePromise.status == 'pending') {
+			return;
+		}
 		if (!assetBacklog || assetBacklog.length < 1) {
 			await loadAssets();
 		}
@@ -145,9 +153,16 @@
 		}
 
 		displayingAssets = next;
+		if (nextImagesState) {
+			imagesState = nextImagesState;
+			nextImagesStatePromise = getFutureAssets();
+		} else {
+			nextImagesStatePromise = getFutureAssets();
+			imagesState = await loadImages(next);
+		}
 	}
 
-	function getPreviousAssets() {
+	async function getPreviousAssets() {
 		if (!assetHistory || assetHistory.length < 1) {
 			return;
 		}
@@ -170,7 +185,9 @@
 		if (displayingAssets) {
 			assetBacklog.unshift(...displayingAssets);
 		}
+		nextImagesState = imagesState;
 		displayingAssets = next;
+		imagesState = await loadImages(next);
 	}
 
 	function isHorizontal(asset: api.AssetResponseDto) {
@@ -289,17 +306,15 @@
 	{#if error}
 		<ErrorElement {authError} message={errorMessage} />
 	{:else if displayingAssets}
-		{#await loadImages(displayingAssets) then imagesState}
-			<div style="width: 100%; height: 100%;" transition:fade={{ duration: transitionDuration }}>
-				<ImageComponent
-					showLocation={$configStore.showImageLocation}
-					showPhotoDate={$configStore.showPhotoDate}
-					showImageDesc={$configStore.showImageDesc}
-					showPeopleDesc={$configStore.showPeopleDesc}
-					{...imagesState}
-				/>
-			</div>
-		{/await}
+		<div class="absolute h-screen w-screen">
+			<ImageComponent
+				showLocation={$configStore.showImageLocation}
+				showPhotoDate={$configStore.showPhotoDate}
+				showImageDesc={$configStore.showImageDesc}
+				showPeopleDesc={$configStore.showPeopleDesc}
+				{...imagesState}
+			/>
+		</div>
 
 		{#if $configStore.showClock}
 			<Clock />

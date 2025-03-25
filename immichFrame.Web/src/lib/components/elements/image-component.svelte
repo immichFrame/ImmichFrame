@@ -61,7 +61,7 @@
 	<ErrorElement />
 {:else if loaded}
 	{#key images}
-		<div class="grid absolute h-screen w-screen">
+		<div class="grid absolute h-screen w-screen" transition:fade={{ duration: transitionDuration }}>
 			{#if split}
 				<div class="grid grid-cols-2">
 					<div id="image_portrait_1" class="relative grid border-r-2 border-primary h-screen">
