@@ -168,16 +168,16 @@
 
 <style>
 	.zoom-in {
-		animation: zoom-in var(--interval) ease-out normal;
+		animation: zoom-in var(--interval) ease-out normal forwards;
 	}
 	.zoom-in-person {
-		animation: zoom-in-person var(--interval) ease-out normal;
+		animation: zoom-in-person var(--interval) ease-out normal forwards;
 	}
 	.zoom-out {
-		animation: zoom-out var(--interval) ease-out normal;
+		animation: zoom-out var(--interval) ease-out normal forwards;
 	}
 	.zoom-out-person {
-		animation: zoom-out-person var(--interval) ease-out normal;
+		animation: zoom-out-person var(--interval) ease-out normal forwards;
 	}
 
 	@keyframes zoom-in {
