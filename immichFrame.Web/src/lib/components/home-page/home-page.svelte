@@ -43,6 +43,31 @@
 	let cursorVisible = $state(true);
 	let timeoutId: number;
 
+	$effect(() => {
+		let output_str = "asset history:\n";
+		// last 10 items in assetHistory
+		if (assetHistory && assetHistory.length) {
+			for (let i = Math.max(0, assetHistory.length - 6); i < assetHistory.length; i++) {
+				output_str += assetHistory[i].deviceAssetId + "\n";
+			}
+		}
+		output_str += "\ndisplaying assets:\n";
+		if (displayingAssets) {
+			output_str += displayingAssets[0].deviceAssetId + "\n";
+			if (displayingAssets.length > 1) {
+				output_str += displayingAssets[1].deviceAssetId + "\n";
+			}
+		}
+		output_str += "\nasset backlog:\n";
+		// first 10 items in assetBacklog
+		if (assetBacklog && assetBacklog.length) {
+			for (let i = 0; i < 5; i++) {
+				output_str += assetBacklog[i].deviceAssetId + "\n";
+			}
+		}
+		console.log(output_str);
+	});
+
 	const clientIdentifier = $page.url.searchParams.get('client');
 	const authsecret = $page.url.searchParams.get('authsecret');
 
@@ -110,15 +135,13 @@
 			next = assetBacklog.slice(0, 1);
 		}
 
-		nextImagesState = await loadImages(next);
+		let tempImagesState = await loadImages(next);
+		if (nextImagesState == null) {
+			nextImagesState = tempImagesState;
+		}
 	}
 
 	async function getNextAssets() {
-		// TODO: actually handle the case of a getNextAssets() call while getFutureAssets() is pending
-		//       just returning is a regression from current behavior
-		if (nextImagesStatePromise && nextImagesStatePromise.status == 'pending') {
-			return;
-		}
 		if (!assetBacklog || assetBacklog.length < 1) {
 			await loadAssets();
 		}
@@ -155,6 +178,7 @@
 		displayingAssets = next;
 		if (nextImagesState) {
 			imagesState = nextImagesState;
+			nextImagesState = null;
 			nextImagesStatePromise = getFutureAssets();
 		} else {
 			nextImagesStatePromise = getFutureAssets();
