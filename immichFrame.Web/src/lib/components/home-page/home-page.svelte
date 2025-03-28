@@ -15,9 +15,19 @@
 	import Appointments from '../elements/appointments.svelte';
 	import LoadingElement from '../elements/LoadingElement.svelte';
 	import { page } from '$app/stores';
-	import { fade } from 'svelte/transition';
+
+	interface ImagesState {
+		images: [string, api.AssetResponseDto][];
+		error: boolean;
+		loaded: boolean;
+		split: boolean;
+		hasBday: boolean;
+	}
 
 	api.init();
+
+	// TODO: make this configurable?
+	const PRELOAD_IMAGES = 5;
 
 	let assetHistory: api.AssetResponseDto[] = [];
 	let assetBacklog: api.AssetResponseDto[] = [];
@@ -32,41 +42,20 @@
 	let error: boolean = $state(false);
 	let authError: boolean = $state(false);
 	let errorMessage: string = $state() as string;
-	let imagesState = $state();
-	// TODO: types
-	let nextImagesState;
-	let nextImagesStatePromise;
+	let imagesState: ImagesState = $state({
+		images: [],
+		error: false,
+		loaded: false,
+		split: false,
+		hasBday: false
+	});
+	let imagePromisesDict: Record<string, Promise<[string, api.AssetResponseDto]>> = {};
 
 	let unsubscribeRestart: () => void;
 	let unsubscribeStop: () => void;
 
 	let cursorVisible = $state(true);
 	let timeoutId: number;
-
-	$effect(() => {
-		let output_str = "asset history:\n";
-		// last 10 items in assetHistory
-		if (assetHistory && assetHistory.length) {
-			for (let i = Math.max(0, assetHistory.length - 6); i < assetHistory.length; i++) {
-				output_str += assetHistory[i].deviceAssetId + "\n";
-			}
-		}
-		output_str += "\ndisplaying assets:\n";
-		if (displayingAssets) {
-			output_str += displayingAssets[0].deviceAssetId + "\n";
-			if (displayingAssets.length > 1) {
-				output_str += displayingAssets[1].deviceAssetId + "\n";
-			}
-		}
-		output_str += "\nasset backlog:\n";
-		// first 10 items in assetBacklog
-		if (assetBacklog && assetBacklog.length) {
-			for (let i = 0; i < 5; i++) {
-				output_str += assetBacklog[i].deviceAssetId + "\n";
-			}
-		}
-		console.log(output_str);
-	});
 
 	const clientIdentifier = $page.url.searchParams.get('client');
 	const authsecret = $page.url.searchParams.get('authsecret');
@@ -89,6 +78,31 @@
 		clearTimeout(timeoutId);
 		timeoutId = setTimeout(hideCursor, 2000);
 	};
+
+	async function updateImagePromises() {
+		for (let asset of displayingAssets) {
+			if (!(asset.id in imagePromisesDict)) {
+				imagePromisesDict[asset.id] = loadImage(asset);
+			}
+		}
+		for (let i = 0; i < PRELOAD_IMAGES; i++) {
+			if (!(assetBacklog[i].id in imagePromisesDict)) {
+				imagePromisesDict[assetBacklog[i].id] = loadImage(assetBacklog[i]);
+			}
+		}
+		// originally just deleted displayingAssets after they were no longer needed
+		// but this is more bulletproof to edge cases I think
+		for (let key in imagePromisesDict) {
+			if (
+				!(
+					displayingAssets.find((item) => item.id == key) ||
+					assetBacklog.find((item) => item.id == key)
+				)
+			) {
+				delete imagePromisesDict[key];
+			}
+		}
+	}
 
 	async function loadAssets() {
 		try {
@@ -116,30 +130,6 @@
 		else await getNextAssets();
 		progressBar.play();
 	};
-
-	// TODO: we could generalize this to n futureAssets's - consider
-	async function getFutureAssets() {
-		if (!assetBacklog || assetBacklog.length < displayingAssets.length) {
-			return;
-		}
-		// await nextImagesStatePromise;
-		let next: api.AssetResponseDto[];
-		if (
-			$configStore.layout?.trim().toLowerCase() == 'splitview' &&
-			assetBacklog.length > 1 &&
-			isHorizontal(assetBacklog[0]) &&
-			isHorizontal(assetBacklog[1])
-		) {
-			next = assetBacklog.slice(0, 2);
-		} else {
-			next = assetBacklog.slice(0, 1);
-		}
-
-		let tempImagesState = await loadImages(next);
-		if (nextImagesState == null) {
-			nextImagesState = tempImagesState;
-		}
-	}
 
 	async function getNextAssets() {
 		if (!assetBacklog || assetBacklog.length < 1) {
@@ -176,14 +166,8 @@
 		}
 
 		displayingAssets = next;
-		if (nextImagesState) {
-			imagesState = nextImagesState;
-			nextImagesState = null;
-			nextImagesStatePromise = getFutureAssets();
-		} else {
-			nextImagesStatePromise = getFutureAssets();
-			imagesState = await loadImages(next);
-		}
+		updateImagePromises();
+		imagesState = await loadImages(next);
 	}
 
 	async function getPreviousAssets() {
@@ -209,8 +193,8 @@
 		if (displayingAssets) {
 			assetBacklog.unshift(...displayingAssets);
 		}
-		nextImagesState = imagesState;
 		displayingAssets = next;
+		updateImagePromises();
 		imagesState = await loadImages(next);
 	}
 
@@ -246,7 +230,7 @@
 		let newImages = [];
 		try {
 			for (let asset of assets) {
-				let img = await loadImage(asset);
+				let img = await imagePromisesDict[asset.id];
 				newImages.push(img);
 			}
 			return {
