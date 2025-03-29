@@ -55,11 +55,11 @@ namespace ImmichFrame.WebApi.Controllers
 
         [HttpGet("RandomImageAndInfo", Name = "GetRandomImageAndInfo")]
         [Produces("application/json")]
-        public async Task<ImageResponse> GetRandomImageAndInfo(string clientIdentifier = "")
+        public async Task<ImageResponse> GetRandomImageAndInfo(AssetMediaSize requestedSize = AssetMediaSize.Preview, string clientIdentifier = "")
         {
             var randomImage = await _logic.GetNextAsset() ?? throw new AssetNotFoundException("No asset was found");
 
-            var image = await _logic.GetImage(new Guid(randomImage.Id));
+            var image = await _logic.GetImage(new Guid(randomImage.Id), requestedSize);
             var notification = new ImageRequestedNotification(new Guid(randomImage.Id), clientIdentifier);
             _ = _logic.SendWebhookNotification(notification);
 

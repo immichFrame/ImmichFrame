@@ -75,9 +75,9 @@ namespace ImmichFrame.Core.Logic
         }
 
         string DownloadLocation = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ImageCache");
-        public async Task<(string fileName, string ContentType, Stream fileStream)> GetImage(Guid id)
+        public async Task<(string fileName, string ContentType, Stream fileStream)> GetImage(Guid id, AssetMediaSize requestedSize)
         {
-            if (_settings.DownloadImages)
+            if (_settings.DownloadImages && requestedSize == AssetMediaSize.Preview)
             {
                 if (!Directory.Exists(DownloadLocation))
                 {
@@ -120,7 +120,8 @@ namespace ImmichFrame.Core.Logic
                 var ext = contentType.ToLower() == "image/webp" ? "webp" : "jpeg";
                 var fileName = $"{id}.{ext}";
 
-                if (_settings.DownloadImages)
+                // only save if requested size is preview
+                if (_settings.DownloadImages && requestedSize == AssetMediaSize.Preview)
                 {
                     var stream = data.Stream;
 
