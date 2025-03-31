@@ -145,12 +145,16 @@ Events will always contain a `Name`, `ClientIdentifier` and a `DateTime` to diff
 ### Custom CSS
 ImmichFrame can be customized even further using CSS. This will apply to browsers, and apps using WebView (i.e. everything but Frameo and AppleTV):
 - Create a custom.css file somewhere on your host server with your desired content, for example:  
+```css
 #progressbar {  
   visibility: hidden;  
 }
+```
 - Add an entry in your immichframe compose pointing to it:  
+```
 volumes:  
-      \- /path/to/your/custom.css:/app/wwwroot/static/custom.css"
+      - /PATH/TO/YOUR/custom.css:/app/wwwroot/static/custom.css"
+```
 
 Valid ID's are "clock", "clockdate", "clocktime", "clockweather", "clockweatherinfo", "clockweatherdescription", "overlayback", "overlaypause", "overlaynext", "progressbar".
 
