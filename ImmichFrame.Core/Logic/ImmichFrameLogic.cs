@@ -1,4 +1,4 @@
-﻿using ImmichFrame.Core.Api;
+using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.Core.Exceptions;
@@ -499,9 +499,16 @@ namespace ImmichFrame.Core.Logic
             }
         }
 
+        private (DateTime fetchDate, IWeather? weather)? lastWeather;
 
-        public Task<IWeather?> GetWeather()
+        public async Task<IWeather?> GetWeather()
         {
+            // Check if cached weather data is still valid
+            if (lastWeather != null && lastWeather.Value.fetchDate.AddMinutes(5) > DateTime.Now)
+            {
+                return lastWeather.Value.weather;
+            }
+
             OpenWeatherMapOptions options = new OpenWeatherMapOptions
             {
                 ApiKey = _settings.WeatherApiKey,
@@ -514,7 +521,11 @@ namespace ImmichFrame.Core.Logic
             var weatherLat = !string.IsNullOrWhiteSpace(weatherLatLong) ? float.Parse(weatherLatLong!.Split(',')[0]) : 0f;
             var weatherLong = !string.IsNullOrWhiteSpace(weatherLatLong) ? float.Parse(weatherLatLong!.Split(',')[1]) : 0f;
 
-            return GetWeather(weatherLat, weatherLong, options);
+            var weather = await GetWeather(weatherLat, weatherLong, options);
+
+            lastWeather = (DateTime.Now, weather);
+
+            return weather;
         }
 
         public async Task<IWeather?> GetWeather(double latitude, double longitude, OpenWeatherMapOptions Options)
