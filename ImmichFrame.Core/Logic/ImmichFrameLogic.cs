@@ -1,4 +1,4 @@
-﻿using ImmichFrame.Core.Api;
+using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.Core.Exceptions;
@@ -504,7 +504,7 @@ namespace ImmichFrame.Core.Logic
         public async Task<IWeather?> GetWeather()
         {
             // Check if cached weather data is still valid
-            if (lastWeather != null && lastWeather.Value.fetchDate.AddMinutes(15) > DateTime.Now)
+            if (lastWeather != null && lastWeather.Value.fetchDate.AddMinutes(5) > DateTime.Now)
             {
                 return lastWeather.Value.weather;
             }
