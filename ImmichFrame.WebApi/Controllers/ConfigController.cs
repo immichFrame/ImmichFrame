@@ -23,7 +23,7 @@ namespace ImmichFrame.WebApi.Controllers
         {
             return (WebClientSettings)_settings;
         }
-        [HttpGet("version")]
+        [HttpGet("GetVersion")]
         public IActionResult GetVersion()
         {
             var version = System.Reflection.Assembly
