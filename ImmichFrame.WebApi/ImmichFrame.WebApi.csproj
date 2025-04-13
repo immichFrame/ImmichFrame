@@ -7,6 +7,7 @@
     <SpaRoot>..\immichFrame.Web</SpaRoot>
     <SpaProxyLaunchCommand>npm run dev -- --host</SpaProxyLaunchCommand>
     <SpaProxyServerUrl>https://localhost:5173</SpaProxyServerUrl>
+    <Version>1.0.24.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
