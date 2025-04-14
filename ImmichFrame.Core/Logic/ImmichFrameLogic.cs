@@ -1,4 +1,4 @@
-using Ical.Net;
+﻿using Ical.Net;
 using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Core.Helpers;
@@ -204,6 +204,12 @@ namespace ImmichFrame.Core.Logic
             {
                 assetsAdded = true;
                 list = list.Union(await GetPeopleAssets());
+            }
+
+            if (_settings.Rating.HasValue)
+            {
+                assetsAdded = true;
+                list = list.Where(x => x.ExifInfo.Rating >= _settings.Rating.Value);
             }
 
             if (assetsAdded)
@@ -460,6 +466,8 @@ namespace ImmichFrame.Core.Logic
                     {
                         searchBody.IsFavorite = true;
                     }
+
+                    // TODO: Implement rating filter??
 
                     var takenBefore = _settings.ImagesUntilDate.HasValue ? _settings.ImagesUntilDate : null;
                     if (takenBefore.HasValue)
