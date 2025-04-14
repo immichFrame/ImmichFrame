@@ -206,10 +206,9 @@ namespace ImmichFrame.Core.Logic
                 list = list.Union(await GetPeopleAssets());
             }
 
-            if (_settings.Rating.HasValue)
+            if (_settings.Rating.HasValue && list.Any())
             {
-                assetsAdded = true;
-                list = list.Where(x => x.ExifInfo.Rating >= _settings.Rating.Value);
+                list = list.Where(x => x.ExifInfo.Rating == _settings.Rating.Value);
             }
 
             if (assetsAdded)
