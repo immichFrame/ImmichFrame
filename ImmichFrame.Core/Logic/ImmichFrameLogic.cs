@@ -275,7 +275,7 @@ namespace ImmichFrame.Core.Logic
             {
                 var albumInfo = await immichApi.GetAlbumInfoAsync(albumId, null, null);
 
-                return albumInfo.Assets;
+                return albumInfo.Assets.Where(x => !x.IsArchived);
             }
             catch (ApiException ex)
             {
@@ -339,6 +339,7 @@ namespace ImmichFrame.Core.Logic
                                 PersonIds = new[] { personId },
                                 Type = AssetTypeEnum.IMAGE,
                                 WithExif = true,
+                                IsArchived = false,
                                 WithPeople = true
                             };
 
@@ -455,6 +456,7 @@ namespace ImmichFrame.Core.Logic
                         Size = _assetAmount,
                         Type = AssetTypeEnum.IMAGE,
                         WithExif = true,
+                        IsArchived = false,
                         WithPeople = true,
                     };
 
