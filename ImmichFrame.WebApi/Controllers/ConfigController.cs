@@ -23,5 +23,11 @@ namespace ImmichFrame.WebApi.Controllers
         {
             return (WebClientSettings)_settings;
         }
+
+        [HttpGet("GetVersion")]
+        public string GetVersion()
+        {
+            return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
+        }
     }
 }

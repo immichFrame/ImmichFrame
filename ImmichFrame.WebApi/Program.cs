@@ -5,9 +5,13 @@ using ImmichFrame.Core.Logic;
 using ImmichFrame.WebApi.Models;
 using Microsoft.AspNetCore.Authentication;
 using System.Text.Json;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Logging.AddConsole();
+//log the version number
+var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
+Console.WriteLine($"=== Version {version} ===");
 
 // Add services to the container.
 
