@@ -12,14 +12,6 @@ changelog:
       labels:
         - fix
 
-    - title: 🌐 immichFrame WebApp
-      labels:
-        - ImmichFrame_Web
-
-    - title: 💻📱 immichFrame ClientApp
-      labels:
-        - ImmichFrame_Client
-
     - title: 📓 Documentation
       labels:
         - documentation
