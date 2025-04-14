@@ -467,7 +467,10 @@ namespace ImmichFrame.Core.Logic
                         searchBody.IsFavorite = true;
                     }
 
-                    // TODO: Implement rating filter??
+                    if (_settings.Rating.HasValue)
+                    {
+                        searchBody.Rating = _settings.Rating.Value;
+                    }
 
                     var takenBefore = _settings.ImagesUntilDate.HasValue ? _settings.ImagesUntilDate : null;
                     if (takenBefore.HasValue)
