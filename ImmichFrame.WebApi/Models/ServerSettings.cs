@@ -18,6 +18,7 @@ namespace ImmichFrame.WebApi.Models
         public List<Guid> Albums { get; set; } = new List<Guid>();
         public List<Guid> ExcludedAlbums { get; set; } = new List<Guid>();
         public List<Guid> People { get; set; } = new List<Guid>();
+        public int? Rating { get; set; }
         public List<string> Webcalendars { get; set; } = new List<string>();
         public int RefreshAlbumPeopleInterval { get; set; } = 12;
         public string ImmichFrameAlbumName { get; set; } = string.Empty;

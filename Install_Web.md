@@ -49,6 +49,7 @@ services:
       Albums: "ALBUM1,ALBUM2"
       ExcludedAlbums: "ALBUM3,ALBUM4"
       People: "PERSON1,PERSON2"
+      Rating: "5"
       ShowMemories: "false"
       ShowFavorites: "false"
       ImagesFromDays: ""
