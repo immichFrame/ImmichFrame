@@ -63,9 +63,8 @@ echo "@/home/pi/{dir with Immich_Frame}/Immich_Frame" > sudo tee /home/pi/.confi
 
 ### MacOS
 
-- GUI - Double-click `Immich_Frame`. Note: If nothing happens, right-click &rarr; open with &rarr; Utilities &rarr; Terminal. Check Always Open With.
-- CLI - CD into folder, and launch with `./Immich_Frame`.
-- If you get a permissions error run `chmod +x Immich_Frame`.
+- Open DMG, drag immichframe.app to applications folder.
+- If you get an error that it is "damaged and can't be opened, you should move it to the trash" run `xattr -c /Applications/immichframe.app` in terminal.
 
 ### iOS and iPadOS
 You can "install" ImmichFrame as a PWA by opening in a browser and going to Share Menu-Add to Homescreen.
