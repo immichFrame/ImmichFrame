@@ -10,6 +10,7 @@ namespace ImmichFrame.WebApi.Models
         public string ApiKey { get; set; } = string.Empty;
         public bool ShowMemories { get; set; } = false;
         public bool ShowFavorites { get; set; } = false;
+        public bool ShowArchived { get; set; } = false;
         public bool DownloadImages { get; set; } = false;
         public int RenewImagesDuration { get; set; } = 30;
         public int? ImagesFromDays { get; set; }
