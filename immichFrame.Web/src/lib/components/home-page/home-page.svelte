@@ -16,7 +16,18 @@
 	import LoadingElement from '../elements/LoadingElement.svelte';
 	import { page } from '$app/stores';
 
+	interface ImagesState {
+		images: [string, api.AssetResponseDto][];
+		error: boolean;
+		loaded: boolean;
+		split: boolean;
+		hasBday: boolean;
+	}
+
 	api.init();
+
+	// TODO: make this configurable?
+	const PRELOAD_IMAGES = 5;
 
 	let assetHistory: api.AssetResponseDto[] = [];
 	let assetBacklog: api.AssetResponseDto[] = [];
@@ -27,9 +38,18 @@
 
 	let progressBarStatus: ProgressBarStatus = $state(ProgressBarStatus.Playing);
 	let progressBar: ProgressBar = $state() as ProgressBar;
+	
 	let error: boolean = $state(false);
 	let authError: boolean = $state(false);
 	let errorMessage: string = $state() as string;
+	let imagesState: ImagesState = $state({
+		images: [],
+		error: false,
+		loaded: false,
+		split: false,
+		hasBday: false
+	});
+	let imagePromisesDict: Record<string, Promise<[string, api.AssetResponseDto]>> = {};
 
 	let unsubscribeRestart: () => void;
 	let unsubscribeStop: () => void;
@@ -58,6 +78,31 @@
 		clearTimeout(timeoutId);
 		timeoutId = setTimeout(hideCursor, 2000);
 	};
+
+	async function updateImagePromises() {
+		for (let asset of displayingAssets) {
+			if (!(asset.id in imagePromisesDict)) {
+				imagePromisesDict[asset.id] = loadImage(asset);
+			}
+		}
+		for (let i = 0; i < PRELOAD_IMAGES; i++) {
+			if (!(assetBacklog[i].id in imagePromisesDict)) {
+				imagePromisesDict[assetBacklog[i].id] = loadImage(assetBacklog[i]);
+			}
+		}
+		// originally just deleted displayingAssets after they were no longer needed
+		// but this is more bulletproof to edge cases I think
+		for (let key in imagePromisesDict) {
+			if (
+				!(
+					displayingAssets.find((item) => item.id == key) ||
+					assetBacklog.find((item) => item.id == key)
+				)
+			) {
+				delete imagePromisesDict[key];
+			}
+		}
+	}
 
 	async function loadAssets() {
 		try {
@@ -121,9 +166,11 @@
 		}
 
 		displayingAssets = next;
+		updateImagePromises();
+		imagesState = await loadImages(next);
 	}
 
-	function getPreviousAssets() {
+	async function getPreviousAssets() {
 		if (!assetHistory || assetHistory.length < 1) {
 			return;
 		}
@@ -147,6 +194,8 @@
 			assetBacklog.unshift(...displayingAssets);
 		}
 		displayingAssets = next;
+		updateImagePromises();
+		imagesState = await loadImages(next);
 	}
 
 	function isHorizontal(asset: api.AssetResponseDto) {
@@ -157,6 +206,62 @@
 			[imageHeight, imageWidth] = [imageWidth, imageHeight];
 		}
 		return imageHeight > imageWidth; // or imageHeight > imageWidth * 1.25;
+	}
+
+	function hasBirthday(assets: api.AssetResponseDto[]) {
+		let today = new Date();
+		let hasBday: boolean = false;
+
+		for (let asset of assets) {
+			for (let person of asset.people ?? new Array()) {
+				let birthdate = new Date(person.birthDate ?? '');
+				if (birthdate.getDate() === today.getDate() && birthdate.getMonth() === today.getMonth()) {
+					hasBday = true;
+					break;
+				}
+			}
+			if (hasBday) break;
+		}
+
+		return hasBday;
+	}
+
+	async function loadImages(assets: api.AssetResponseDto[]) {
+		let newImages = [];
+		try {
+			for (let asset of assets) {
+				let img = await imagePromisesDict[asset.id];
+				newImages.push(img);
+			}
+			return {
+				images: newImages,
+				error: false,
+				loaded: true,
+				split: assets.length == 2,
+				hasBday: hasBirthday(assets)
+			};
+		} catch {
+			return {
+				images: [],
+				error: true,
+				loaded: false,
+				split: false,
+				hasBday: false
+			};
+		}
+	}
+
+	async function loadImage(a: api.AssetResponseDto) {
+		let req = await api.getImage(a.id, { clientIdentifier: $clientIdentifierStore });
+
+		if (req.status != 200) {
+			return ['', a] as [string, api.AssetResponseDto];
+		}
+		return [getImageUrl(req.data), a] as [string, api.AssetResponseDto];
+	}
+
+	function getImageUrl(image: Blob) {
+		return URL.createObjectURL(image);
 	}
 
 	onMount(() => {
@@ -209,13 +314,15 @@
 	{#if error}
 		<ErrorElement {authError} message={errorMessage} />
 	{:else if displayingAssets}
-		<ImageComponent
-			showLocation={$configStore.showImageLocation}
-			showPhotoDate={$configStore.showPhotoDate}
-			showImageDesc={$configStore.showImageDesc}
-			showPeopleDesc={$configStore.showPeopleDesc}
-			sourceAssets={displayingAssets}
-		/>
+		<div class="absolute h-screen w-screen">
+			<ImageComponent
+				showLocation={$configStore.showImageLocation}
+				showPhotoDate={$configStore.showPhotoDate}
+				showImageDesc={$configStore.showImageDesc}
+				showPeopleDesc={$configStore.showPeopleDesc}
+				{...imagesState}
+			/>
+		</div>
 
 		{#if $configStore.showClock}
 			<Clock />

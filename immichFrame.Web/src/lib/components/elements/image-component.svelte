@@ -15,7 +15,11 @@
 	api.init();
 
 	interface Props {
-		sourceAssets: AssetResponseDto[];
+		images: [string, AssetResponseDto][];
+		error?: boolean;
+		loaded?: boolean;
+		split?: boolean;
+		hasBday?: boolean;
 		showLocation?: boolean;
 		showPhotoDate?: boolean;
 		showImageDesc?: boolean;
@@ -23,80 +27,18 @@
 	}
 
 	let {
-		sourceAssets,
+		images,
+		error = false,
+		loaded = false,
+		split = false,
+		hasBday = false,
 		showLocation = true,
 		showPhotoDate = true,
 		showImageDesc = true,
 		showPeopleDesc = true
 	}: Props = $props();
-	let split: boolean = $state(true);
 	let instantTransition = slideshowStore.instantTransition;
 	let transitionDuration = $derived($instantTransition ? 0 : ($configStore.transitionDuration ?? 1) * 1000);
-
-	let error: boolean = $state(false);
-	let loaded: boolean = $state(false);
-
-	let images: [string, AssetResponseDto][] = $state() as [string, AssetResponseDto][];
-
-	function hasBirthday(assets: AssetResponseDto[]) {
-		let today = new Date();
-		let hasBday: boolean = false;
-
-		for (let asset of assets) {
-			for (let person of asset.people ?? new Array()) {
-				let birthdate = new Date(person.birthDate ?? '');
-				if (birthdate.getDate() === today.getDate() && birthdate.getMonth() === today.getMonth()) {
-					hasBday = true;
-					break;
-				}
-			}
-			if (hasBday) break;
-		}
-
-		return hasBday;
-	}
-
-	function getImageUrl(image: Blob) {
-		return URL.createObjectURL(image);
-	}
-
-	async function loadImages(assets: AssetResponseDto[]) {
-		let newImages = [];
-
-		for (let asset of assets) {
-			let img = await loadImage(asset);
-			newImages.push(img);
-		}
-
-		if (assets.length == 2) {
-			split = true;
-		} else {
-			split = false;
-		}
-		images = newImages;
-		loaded = true;
-	}
-
-	async function loadImage(a: AssetResponseDto) {
-		try {
-			let req = await api.getImage(a.id, { clientIdentifier: $clientIdentifierStore });
-
-			if (req.status != 200) {
-				error = true;
-				return ['', a] as [string, AssetResponseDto];
-			}
-
-			error = false;
-			return [getImageUrl(req.data), a] as [string, AssetResponseDto];
-		} catch {
-			error = true;
-		}
-		return ['', a] as [string, AssetResponseDto];
-	}
-	run(() => {
-		loadImages(sourceAssets);
-	});
-	let hasBday = $derived(hasBirthday(sourceAssets));
 </script>
 
 {#if hasBday}
