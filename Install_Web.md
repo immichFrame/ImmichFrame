@@ -52,6 +52,7 @@ services:
       Rating: "5"
       ShowMemories: "false"
       ShowFavorites: "false"
+      ShowArchived: "false"
       ImagesFromDays: ""
       ImagesFromDate: ""
       ImagesUntilDate: ""

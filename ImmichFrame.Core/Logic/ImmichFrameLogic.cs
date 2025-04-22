@@ -278,7 +278,7 @@ namespace ImmichFrame.Core.Logic
             {
                 var albumInfo = await immichApi.GetAlbumInfoAsync(albumId, null, null);
 
-                return albumInfo.Assets;
+                return _settings.ShowArchived ? albumInfo.Assets : albumInfo.Assets.Where(x => !x.IsArchived);
             }
             catch (ApiException ex)
             {
@@ -344,7 +344,10 @@ namespace ImmichFrame.Core.Logic
                                 WithExif = true,
                                 WithPeople = true
                             };
-
+                            if (!_settings.ShowArchived)
+                            {
+                                metadataBody.IsArchived = false;
+                            }
                             var takenBefore = _settings.ImagesUntilDate.HasValue ? _settings.ImagesUntilDate : null;
                             if (takenBefore.HasValue)
                             {
@@ -460,6 +463,11 @@ namespace ImmichFrame.Core.Logic
                         WithExif = true,
                         WithPeople = true,
                     };
+                    
+                    if (!_settings.ShowArchived)
+                    {
+                        searchBody.IsArchived = false;
+                    }
 
                     if (_settings.ShowFavorites)
                     {
