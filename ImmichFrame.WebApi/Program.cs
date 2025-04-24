@@ -45,11 +45,25 @@ builder.Services.AddSingleton<IServerSettings>(srv =>
     return serverSettings;
 });
 
-builder.Services.AddSingleton(srv =>
+builder.Services.AddSingleton<IWeatherService>(srv =>
 {
     var settings = srv.GetRequiredService<IServerSettings>();
 
-    return new ImmichFrameLogic(settings);
+    return new OpenWeatherMapService(settings);
+});
+
+builder.Services.AddSingleton<ICalendarService>(srv =>
+{
+    var settings = srv.GetRequiredService<IServerSettings>();
+
+    return new IcalCalendarService(settings);
+});
+
+builder.Services.AddSingleton<IImmichFrameLogic>(srv =>
+{
+    var settings = srv.GetRequiredService<IServerSettings>();
+
+    return new OptimizedImmichFrameLogic(settings);
 });
 
 builder.Services.AddSingleton<IWebClientSettings>(srv =>

@@ -1,12 +1,8 @@
-﻿using Ical.Net;
-using ImmichFrame.Core.Api;
+﻿using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
-using ImmichFrame.WebApi.Helpers;
-using OpenWeatherMap;
 using System.Data;
-using System.Text.Json;
 
 namespace ImmichFrame.Core.Logic
 {
@@ -463,7 +459,7 @@ namespace ImmichFrame.Core.Logic
                         WithExif = true,
                         WithPeople = true,
                     };
-                    
+
                     if (!_settings.ShowArchived)
                     {
                         searchBody.IsArchived = false;
@@ -515,126 +511,6 @@ namespace ImmichFrame.Core.Logic
             }
         }
 
-        private (DateTime fetchDate, IWeather? weather)? lastWeather;
-
-        public async Task<IWeather?> GetWeather()
-        {
-            // Check if cached weather data is still valid
-            if (lastWeather != null && lastWeather.Value.fetchDate.AddMinutes(5) > DateTime.Now)
-            {
-                return lastWeather.Value.weather;
-            }
-
-            OpenWeatherMapOptions options = new OpenWeatherMapOptions
-            {
-                ApiKey = _settings.WeatherApiKey,
-                UnitSystem = _settings.UnitSystem,
-                Language = _settings.Language,
-            };
-
-            var weatherLatLong = _settings.WeatherLatLong;
-
-            var weatherLat = !string.IsNullOrWhiteSpace(weatherLatLong) ? float.Parse(weatherLatLong!.Split(',')[0]) : 0f;
-            var weatherLong = !string.IsNullOrWhiteSpace(weatherLatLong) ? float.Parse(weatherLatLong!.Split(',')[1]) : 0f;
-
-            var weather = await GetWeather(weatherLat, weatherLong, options);
-
-            lastWeather = (DateTime.Now, weather);
-
-            return weather;
-        }
-
-        public async Task<IWeather?> GetWeather(double latitude, double longitude, OpenWeatherMapOptions Options)
-        {
-            try
-            {
-                IOpenWeatherMapService openWeatherMapService = new OpenWeatherMapService(Options);
-                var weatherInfo = await openWeatherMapService.GetCurrentWeatherAsync(latitude, longitude);
-
-                return weatherInfo.ToWeather();
-            }
-            catch
-            {
-                //do nothing and return null
-            }
-
-            return null;
-        }
-
-        private (DateTime fetchDate, List<string> calendars)? lastCalendars;
-        public async Task<List<string>> GetCalendars()
-        {
-            if (lastCalendars != null && lastCalendars.Value.fetchDate.AddMinutes(15) > DateTime.Now)
-            {
-                return lastCalendars.Value.calendars;
-            }
-
-            var icals = new List<string>();
-
-            foreach (var webcal in _settings.Webcalendars)
-            {
-                string httpUrl = webcal.Replace("webcal://", "https://");
-
-                using (HttpClient client = new HttpClient())
-                {
-                    HttpResponseMessage response = await client.GetAsync(httpUrl);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        icals.Add(await response.Content.ReadAsStringAsync());
-                    }
-                    else
-                    {
-                        throw new Exception("Failed to load calendar data");
-                    }
-                }
-            }
-
-            lastCalendars = (DateTime.Now, icals);
-
-            return icals;
-        }
-
-        public async Task<List<IAppointment>> GetAppointments()
-        {
-            var appointments = new List<IAppointment>();
-
-            var icals = await GetCalendars();
-
-            foreach (var ical in icals)
-            {
-                var calendar = Calendar.Load(ical);
-
-                appointments.AddRange(calendar.GetOccurrences(DateTime.UtcNow, DateTime.Today.AddDays(1)).Select(x => x.ToAppointment()));
-            }
-
-            return appointments;
-        }
-
-        public async Task SendWebhookNotification(IWebhookNotification notification)
-        {
-            if (string.IsNullOrWhiteSpace(_settings.Webhook)) return;
-
-            var httpClient = new HttpClient();
-
-            var options = new JsonSerializerOptions
-            {
-                Converters = { new PolymorphicJsonConverter<IWebhookNotification>() },
-                WriteIndented = true
-            };
-
-            string json = JsonSerializer.Serialize(notification, options);
-            var data = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-
-            var response = await httpClient.PostAsync(_settings.Webhook, data);
-
-            if (response.IsSuccessStatusCode)
-            {
-                Console.WriteLine("Webhook successfully sent.");
-            }
-            else
-            {
-                Console.WriteLine($"Failed to send notification to webhook: {Convert.ToInt32(response.StatusCode)} {response.StatusCode}");
-            }
-        }
+        public Task SendWebhookNotification(IWebhookNotification notification) => WebhookHelper.SendWebhookNotification(notification, _settings.Webhook);
     }
 }

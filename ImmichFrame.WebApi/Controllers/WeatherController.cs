@@ -11,18 +11,19 @@ namespace ImmichFrame.WebApi.Controllers
     public class WeatherController : ControllerBase
     {
         private readonly ILogger<AssetController> _logger;
-        private readonly IImmichFrameLogic _logic;
+        private readonly IWeatherService _weatherService;
 
-        public WeatherController(ILogger<AssetController> logger, ImmichFrameLogic logic)
+        public WeatherController(ILogger<AssetController> logger, IWeatherService weatherService)
         {
             _logger = logger;
-            _logic = logic;
+            _weatherService = weatherService;
         }
 
         [HttpGet(Name = "GetWeather")]
         public async Task<IWeather?> GetWeather(string clientIdentifier = "")
         {
-            return await _logic.GetWeather();
+            _logger.LogTrace($"Weather requested by {clientIdentifier}");
+            return await _weatherService.GetWeather();
         }
     }
 }
