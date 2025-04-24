@@ -37,6 +37,8 @@ namespace ImmichFrame.WebApi.Controllers
         [HttpGet(Name = "GetAsset")]
         public async Task<List<AssetResponseDto>> GetAsset(string clientIdentifier = "")
         {
+            var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
+            _logger.LogTrace("Assets requested by '{ClientIdentifier}'", sanitizedClientIdentifier);
             return await _logic.GetAssets() ?? throw new AssetNotFoundException("No asset was found");
         }
 
@@ -45,9 +47,11 @@ namespace ImmichFrame.WebApi.Controllers
         [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status200OK)]
         public async Task<FileResult> GetImage(Guid id, string clientIdentifier = "")
         {
+            var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
+            _logger.LogTrace("Image '{id}' requested by '{ClientIdentifier}'", id, sanitizedClientIdentifier);
             var image = await _logic.GetImage(id);
 
-            var notification = new ImageRequestedNotification(id, clientIdentifier);
+            var notification = new ImageRequestedNotification(id, sanitizedClientIdentifier);
             _ = _logic.SendWebhookNotification(notification);
 
             return File(image.fileStream, image.ContentType, image.fileName); // returns a FileStreamResult
@@ -57,10 +61,13 @@ namespace ImmichFrame.WebApi.Controllers
         [Produces("application/json")]
         public async Task<ImageResponse> GetRandomImageAndInfo(string clientIdentifier = "")
         {
+            var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
+            _logger.LogTrace("Random image requested by '{ClientIdentifier}'", sanitizedClientIdentifier);
+
             var randomImage = await _logic.GetNextAsset() ?? throw new AssetNotFoundException("No asset was found");
 
             var image = await _logic.GetImage(new Guid(randomImage.Id));
-            var notification = new ImageRequestedNotification(new Guid(randomImage.Id), clientIdentifier);
+            var notification = new ImageRequestedNotification(new Guid(randomImage.Id), sanitizedClientIdentifier);
             _ = _logic.SendWebhookNotification(notification);
 
             string randomImageBase64;

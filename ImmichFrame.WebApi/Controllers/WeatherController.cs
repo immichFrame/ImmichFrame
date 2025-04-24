@@ -22,7 +22,8 @@ namespace ImmichFrame.WebApi.Controllers
         [HttpGet(Name = "GetWeather")]
         public async Task<IWeather?> GetWeather(string clientIdentifier = "")
         {
-            _logger.LogTrace($"Weather requested by {clientIdentifier}");
+            var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
+            _logger.LogTrace("Weather requested by '{ClientIdentifier}'", sanitizedClientIdentifier);
             return await _weatherService.GetWeather();
         }
     }

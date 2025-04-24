@@ -22,7 +22,8 @@ namespace ImmichFrame.WebApi.Controllers
         [HttpGet(Name = "GetAppointments")]
         public async Task<List<IAppointment>> GetAppointments(string clientIdentifier = "")
         {
-            _logger.LogTrace($"Calendar requested by {clientIdentifier}");
+            var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
+            _logger.LogTrace("Calendar requested by '{ClientIdentifier}'", sanitizedClientIdentifier);
             return await _calendarService.GetAppointments();
         }
     }

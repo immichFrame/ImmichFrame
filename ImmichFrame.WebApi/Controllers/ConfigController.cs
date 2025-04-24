@@ -21,6 +21,8 @@ namespace ImmichFrame.WebApi.Controllers
         [HttpGet(Name = "GetConfig")]
         public WebClientSettings GetConfig(string clientIdentifier = "")
         {
+            var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
+            _logger.LogTrace("Config requested by '{ClientIdentifier}'", sanitizedClientIdentifier);
             return (WebClientSettings)_settings;
         }
 
