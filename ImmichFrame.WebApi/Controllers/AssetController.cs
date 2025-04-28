@@ -2,7 +2,6 @@ using System.Globalization;
 using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Core.Interfaces;
-using ImmichFrame.Core.Logic;
 using ImmichFrame.WebApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -39,7 +38,7 @@ namespace ImmichFrame.WebApi.Controllers
         {
             var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
             _logger.LogTrace("Assets requested by '{ClientIdentifier}'", sanitizedClientIdentifier);
-            return await _logic.GetAssets() ?? throw new AssetNotFoundException("No asset was found");
+            return (await _logic.GetAssets()).ToList() ?? throw new AssetNotFoundException("No asset was found");
         }
 
         [HttpGet("{id}", Name = "GetImage")]

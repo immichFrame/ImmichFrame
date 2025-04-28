@@ -1,5 +1,4 @@
 using ImmichFrame.Core.Interfaces;
-using ImmichFrame.Core.Logic;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

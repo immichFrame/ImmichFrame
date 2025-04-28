@@ -48,7 +48,7 @@ namespace ImmichFrame.Core.Logic
         }
 
         private int _assetAmount = 250;
-        public async Task<List<AssetResponseDto>> GetAssets()
+        public async Task<IEnumerable<AssetResponseDto>> GetAssets()
         {
             if ((await FilteredAssetInfos) != null)
             {

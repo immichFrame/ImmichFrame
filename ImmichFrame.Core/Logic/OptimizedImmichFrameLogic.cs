@@ -1,7 +1,7 @@
 using ImmichFrame.Core.Api;
+using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
-using OpenWeatherMap;
 
 public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
 {
@@ -21,19 +21,314 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
         _httpClient.Dispose();
     }
 
-    public Task<List<AssetResponseDto>> GetAssets()
+    private Queue<AssetResponseDto> _assetQueue = new();
+    private bool _isReloadingAssets = false;
+
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+    public async Task<AssetResponseDto?> GetNextAsset()
     {
-        throw new NotImplementedException();
+        if (_assetQueue.Count < 10 && !_isReloadingAssets)
+        {
+            // Fire-and-forget, reloading assets in the background
+            _ = ReloadAssetsAsync();
+        }
+
+        if (_assetQueue.Any())
+        {
+            return _assetQueue.Dequeue();
+        }
+
+        return null;
+    }
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+
+    private async Task ReloadAssetsAsync()
+    {
+        _isReloadingAssets = true;
+        try
+        {
+            var assets = await GetAssets();
+            foreach (var asset in assets)
+            {
+                _assetQueue.Enqueue(asset);
+            }
+        }
+        finally
+        {
+            _isReloadingAssets = false;
+        }
     }
 
-    public Task<(string fileName, string ContentType, Stream fileStream)> GetImage(Guid id)
+    private int _assetAmount = 250;
+    private Random _random = new Random();
+    public async Task<IEnumerable<AssetResponseDto>> GetAssets()
     {
-        throw new NotImplementedException();
+        if (!_settings.ShowFavorites && !_settings.ShowMemories && !_settings.Albums.Any() && !_settings.People.Any())
+        {
+            return await GetRandomAssets();
+        }
+
+        IEnumerable<AssetResponseDto> assets = new List<AssetResponseDto>();
+
+        if (_settings.ShowFavorites)
+            assets = assets.Concat(await GetFavoriteAssets());
+        if (_settings.ShowMemories)
+            assets = assets.Concat(await GetMemoryAssets());
+        if (_settings.Albums.Any())
+            assets = assets.Concat(await GetAlbumAssets());
+        if (_settings.People.Any())
+            assets = assets.Concat(await GetPeopleAssets());
+
+        // Display only Images
+        assets = assets.Where(x => x.Type == AssetTypeEnum.IMAGE);
+
+        if (!_settings.ShowArchived)
+            assets = assets.Where(x => x.IsArchived == false);
+
+        var takenBefore = _settings.ImagesUntilDate.HasValue ? _settings.ImagesUntilDate : null;
+        if (takenBefore.HasValue)
+        {
+            assets = assets.Where(x => x.ExifInfo.DateTimeOriginal <= takenBefore);
+        }
+
+        var takenAfter = _settings.ImagesFromDate.HasValue ? _settings.ImagesFromDate : _settings.ImagesFromDays.HasValue ? DateTime.Today.AddDays(-_settings.ImagesFromDays.Value) : null;
+        if (takenAfter.HasValue)
+        {
+            assets = assets.Where(x => x.ExifInfo.DateTimeOriginal >= takenAfter);
+        }
+
+        if (_settings.Rating is int rating)
+        {
+            assets = assets.Where(x => x.ExifInfo.Rating == rating);
+        }
+
+        // _settings.ExcludedAlbums
+        if (_settings.ExcludedAlbums.Any())
+        {
+            var excludedAssetList = await GetExcludedAlbumAssets();
+            var excludedAssetSet = excludedAssetList.Select(x => x.Id).ToHashSet();
+            assets = assets.Where(x => !excludedAssetSet.Contains(x.Id));
+        }
+
+        assets = assets.OrderBy(asset => _random.Next());
+
+        var assetsList = assets.ToList();
+        if (assetsList.Count > _assetAmount)
+        {
+            assetsList = assetsList.Take(_assetAmount).ToList();
+        }
+        return assetsList;
     }
 
-    public Task<AssetResponseDto?> GetNextAsset()
+    public async Task<IEnumerable<AssetResponseDto>> GetRandomAssets()
     {
-        throw new NotImplementedException();
+        var searchDto = new RandomSearchDto
+        {
+            Size = _assetAmount,
+            Type = AssetTypeEnum.IMAGE,
+            WithExif = true,
+            WithPeople = true
+        };
+
+        if (_settings.ShowArchived)
+        {
+            searchDto.IsArchived = true;
+        }
+
+        var takenBefore = _settings.ImagesUntilDate.HasValue ? _settings.ImagesUntilDate : null;
+        if (takenBefore.HasValue)
+        {
+            searchDto.TakenBefore = takenBefore;
+        }
+
+        var takenAfter = _settings.ImagesFromDate.HasValue ? _settings.ImagesFromDate : _settings.ImagesFromDays.HasValue ? DateTime.Today.AddDays(-_settings.ImagesFromDays.Value) : null;
+        if (takenAfter.HasValue)
+        {
+            searchDto.TakenAfter = takenAfter;
+        }
+
+        if (_settings.Rating is int rating)
+        {
+            searchDto.Rating = rating;
+        }
+
+        var assets = await _immichApi.SearchRandomAsync(searchDto);
+
+        if (_settings.ExcludedAlbums.Any())
+        {
+            var excludedAssetList = await GetExcludedAlbumAssets();
+            var excludedAssetSet = excludedAssetList.Select(x => x.Id).ToHashSet();
+            assets = assets.Where(x => !excludedAssetSet.Contains(x.Id)).ToList();
+        }
+
+        return assets;
+    }
+
+    public async Task<IEnumerable<AssetResponseDto>> GetMemoryAssets()
+    {
+        var today = DateTime.Today;
+        var memoryLane = await _immichApi.GetMemoryLaneAsync(today.Day, today.Month);
+
+        var memoryAssets = new List<AssetResponseDto>();
+        foreach (var lane in memoryLane)
+        {
+            var assets = lane.Assets.ToList();
+            assets.ForEach(asset => asset.ImageDesc = $"{lane.YearsAgo} {(lane.YearsAgo == 1 ? "year" : "years")} ago");
+
+            memoryAssets.AddRange(assets);
+        }
+
+        return memoryAssets;
+    }
+
+    public async Task<IEnumerable<AssetResponseDto>> GetFavoriteAssets()
+    {
+        var favoriteAssets = new List<AssetResponseDto>();
+
+        int page = 1;
+        int batchSize = 1000;
+        int total;
+        do
+        {
+            var metadataBody = new MetadataSearchDto
+            {
+                Page = page,
+                Size = batchSize,
+                IsFavorite = true,
+                Type = AssetTypeEnum.IMAGE,
+                WithExif = true,
+                WithPeople = true
+            };
+
+            var favoriteInfo = await _immichApi.SearchAssetsAsync(metadataBody);
+
+            total = favoriteInfo.Assets.Total;
+
+            favoriteAssets.AddRange(favoriteInfo.Assets.Items);
+            page++;
+        }
+        while (total == batchSize);
+
+        return favoriteAssets;
+    }
+
+    public async Task<IEnumerable<AssetResponseDto>> GetAlbumAssets()
+    {
+        var albumAssets = new List<AssetResponseDto>();
+
+        foreach (var albumId in _settings.Albums)
+        {
+            var albumInfo = await _immichApi.GetAlbumInfoAsync(albumId, null, null);
+
+            albumAssets.AddRange(albumInfo.Assets);
+        }
+
+        return albumAssets;
+    }
+
+    public async Task<IEnumerable<AssetResponseDto>> GetExcludedAlbumAssets()
+    {
+        var excludedAlbumAssets = new List<AssetResponseDto>();
+
+        foreach (var albumId in _settings.ExcludedAlbums)
+        {
+            var albumInfo = await _immichApi.GetAlbumInfoAsync(albumId, null, null);
+
+            excludedAlbumAssets.AddRange(albumInfo.Assets);
+        }
+
+        return excludedAlbumAssets;
+    }
+
+    public async Task<IEnumerable<AssetResponseDto>> GetPeopleAssets()
+    {
+        var personAssets = new List<AssetResponseDto>();
+
+        foreach (var personId in _settings.People)
+        {
+            int page = 1;
+            int batchSize = 1000;
+            int total;
+            do
+            {
+                var metadataBody = new MetadataSearchDto
+                {
+                    Page = page,
+                    Size = batchSize,
+                    PersonIds = new[] { personId },
+                    Type = AssetTypeEnum.IMAGE,
+                    WithExif = true,
+                    WithPeople = true
+                };
+
+                var personInfo = await _immichApi.SearchAssetsAsync(metadataBody);
+
+                total = personInfo.Assets.Total;
+
+                personAssets.AddRange(personInfo.Assets.Items);
+                page++;
+            }
+            while (total == batchSize);
+        }
+
+        return personAssets;
+    }
+
+    readonly string DownloadLocation = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ImageCache");
+    public async Task<(string fileName, string ContentType, Stream fileStream)> GetImage(Guid id)
+    {
+        // Check if the image is already downloaded
+        if (_settings.DownloadImages)
+        {
+            if (!Directory.Exists(DownloadLocation))
+            {
+                Directory.CreateDirectory(DownloadLocation);
+            }
+
+            var file = Directory.GetFiles(DownloadLocation).FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == id.ToString());
+
+            if (!string.IsNullOrWhiteSpace(file))
+            {
+                if (_settings.RenewImagesDuration > (DateTime.UtcNow - File.GetCreationTimeUtc(file)).Days)
+                {
+                    var fs = File.OpenRead(file);
+
+                    var ex = Path.GetExtension(file);
+
+                    return (Path.GetFileName(file), $"image/{ex}", fs);
+                }
+
+                File.Delete(file);
+            }
+        }
+
+        var data = await _immichApi.ViewAssetAsync(id, string.Empty, AssetMediaSize.Preview);
+
+        if (data == null)
+            throw new AssetNotFoundException($"Asset {id} was not found!");
+
+        var contentType = "";
+        if (data.Headers.ContainsKey("Content-Type"))
+        {
+            contentType = data.Headers["Content-Type"].FirstOrDefault()?.ToString() ?? "";
+        }
+        var ext = contentType.ToLower() == "image/webp" ? "webp" : "jpeg";
+        var fileName = $"{id}.{ext}";
+
+        if (_settings.DownloadImages)
+        {
+            var stream = data.Stream;
+
+            var filePath = Path.Combine(DownloadLocation, fileName);
+
+            // save to folder
+            var fs = File.Create(filePath);
+            stream.CopyTo(fs);
+            fs.Position = 0;
+            return (Path.GetFileName(filePath), contentType, fs);
+        }
+
+        return (fileName, contentType, data.Stream);
     }
 
     public Task SendWebhookNotification(IWebhookNotification notification) => WebhookHelper.SendWebhookNotification(notification, _settings.Webhook);
