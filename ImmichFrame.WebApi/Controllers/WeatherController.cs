@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ImmichFrame.WebApi.Controllers
 {
     [ApiController]
-    [Route("api/[controller]/[action]")]
+    [Route("api/[controller]")]
     [Authorize]
     public class WeatherController : ControllerBase
     {

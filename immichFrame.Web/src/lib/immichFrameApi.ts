@@ -189,7 +189,7 @@ export function getAsset({ clientIdentifier }: {
     return oazapfts.fetchJson<{
         status: 200;
         data: AssetResponseDto[];
-    }>(`/api/Asset/GetAsset${QS.query(QS.explode({
+    }>(`/api/Asset${QS.query(QS.explode({
         clientIdentifier
     }))}`, {
         ...opts
@@ -201,7 +201,7 @@ export function getAssetInfo(id: string, { clientIdentifier }: {
     return oazapfts.fetchJson<{
         status: 200;
         data: AssetResponseDto;
-    }>(`/api/Asset/GetAssetInfo/${encodeURIComponent(id)}${QS.query(QS.explode({
+    }>(`/api/Asset/${encodeURIComponent(id)}/AssetInfo${QS.query(QS.explode({
         clientIdentifier
     }))}`, {
         ...opts
@@ -213,7 +213,7 @@ export function getImage(id: string, { clientIdentifier }: {
     return oazapfts.fetchBlob<{
         status: 200;
         data: Blob;
-    }>(`/api/Asset/GetImage/${encodeURIComponent(id)}${QS.query(QS.explode({
+    }>(`/api/Asset/${encodeURIComponent(id)}/Image${QS.query(QS.explode({
         clientIdentifier
     }))}`, {
         ...opts
@@ -225,7 +225,7 @@ export function getRandomImageAndInfo({ clientIdentifier }: {
     return oazapfts.fetchJson<{
         status: 200;
         data: ImageResponse;
-    }>(`/api/Asset/GetRandomImageAndInfo${QS.query(QS.explode({
+    }>(`/api/Asset/RandomImageAndInfo${QS.query(QS.explode({
         clientIdentifier
     }))}`, {
         ...opts
@@ -255,11 +255,11 @@ export function getConfig({ clientIdentifier }: {
         ...opts
     });
 }
-export function getApiConfigGetVersion(opts?: Oazapfts.RequestOpts) {
+export function getVersion(opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
         status: 200;
         data: string;
-    }>("/api/Config/GetVersion", {
+    }>("/api/Config/Version", {
         ...opts
     });
 }
@@ -269,7 +269,7 @@ export function getWeather({ clientIdentifier }: {
     return oazapfts.fetchJson<{
         status: 200;
         data: IWeather;
-    }>(`/api/Weather/GetWeather${QS.query(QS.explode({
+    }>(`/api/Weather${QS.query(QS.explode({
         clientIdentifier
     }))}`, {
         ...opts

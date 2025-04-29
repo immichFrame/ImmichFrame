@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ImmichFrame.WebApi.Controllers
 {
     [ApiController]
-    [Route("api/[controller]/[action]")]
+    [Route("api/[controller]")]
     public class ConfigController : ControllerBase
     {
         private readonly ILogger<AssetController> _logger;
@@ -25,7 +25,7 @@ namespace ImmichFrame.WebApi.Controllers
             return (WebClientSettings)_settings;
         }
 
-        [HttpGet(Name = "GetVersion")]
+        [HttpGet("Version", Name = "GetVersion")]
         public string GetVersion()
         {
             return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";

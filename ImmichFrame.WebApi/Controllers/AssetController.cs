@@ -18,7 +18,7 @@ namespace ImmichFrame.WebApi.Controllers
 
 
     [ApiController]
-    [Route("api/[controller]/[action]")]
+    [Route("api/[controller]")]
     [Authorize]
     public class AssetController : ControllerBase
     {
@@ -41,7 +41,7 @@ namespace ImmichFrame.WebApi.Controllers
             return (await _logic.GetAssets()).ToList() ?? throw new AssetNotFoundException("No asset was found");
         }
 
-        [HttpGet("{id}", Name = "GetAssetInfo")]
+        [HttpGet("{id}/AssetInfo", Name = "GetAssetInfo")]
         public async Task<AssetResponseDto> GetAssetInfo(Guid id, string clientIdentifier = "")
         {
             var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
@@ -50,7 +50,7 @@ namespace ImmichFrame.WebApi.Controllers
             return await _logic.GetAssetInfoById(id);
         }
 
-        [HttpGet("{id}", Name = "GetImage")]
+        [HttpGet("{id}/Image", Name = "GetImage")]
         [Produces("image/jpeg", "image/webp")]
         [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status200OK)]
         public async Task<FileResult> GetImage(Guid id, string clientIdentifier = "")
@@ -65,7 +65,7 @@ namespace ImmichFrame.WebApi.Controllers
             return File(image.fileStream, image.ContentType, image.fileName); // returns a FileStreamResult
         }
 
-        [HttpGet(Name = "GetRandomImageAndInfo")]
+        [HttpGet("RandomImageAndInfo", Name = "GetRandomImageAndInfo")]
         [Produces("application/json")]
         public async Task<ImageResponse> GetRandomImageAndInfo(string clientIdentifier = "")
         {
