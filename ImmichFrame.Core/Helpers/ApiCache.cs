@@ -18,7 +18,7 @@ public class ApiCache<T> : IDisposable
             }
             else
             {
-                _cache.Remove(key); // Cache expired
+                Invalidate(key); // Cache expired
             }
         }
 
@@ -26,6 +26,11 @@ public class ApiCache<T> : IDisposable
         var data = await factory();
         _cache[key] = (DateTime.UtcNow, data);
         return data;
+    }
+
+    public void Invalidate(string key)
+    {
+        _cache.Remove(key);
     }
 
     public void Clear()

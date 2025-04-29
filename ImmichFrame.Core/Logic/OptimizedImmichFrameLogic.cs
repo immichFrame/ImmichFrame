@@ -20,8 +20,8 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
 
     public void Dispose()
     {
-        _httpClient.Dispose();
         _apiCache.Dispose();
+        _httpClient.Dispose();
     }
 
     private Queue<AssetResponseDto> _assetQueue = new();
@@ -166,7 +166,7 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
 
     public async Task<IEnumerable<AssetResponseDto>> GetMemoryAssets()
     {
-        return await _apiCache.GetOrAddAsync("AlbumAssets", async () =>
+        return await _apiCache.GetOrAddAsync("MemoryAssets", async () =>
         {
             var today = DateTime.Today;
             var memoryLane = await _immichApi.GetMemoryLaneAsync(today.Day, today.Month);
