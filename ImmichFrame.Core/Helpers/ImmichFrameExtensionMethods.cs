@@ -1,4 +1,7 @@
 
+using ImmichFrame.Core.Api;
+using Microsoft.Extensions.Logging;
+
 public static class ImmichFrameExtensionMethods
 {
     public static string SanitizeString(this string input)
@@ -22,6 +25,14 @@ public static class ImmichFrameExtensionMethods
         input = input.Replace("\n", string.Empty);
 
         return input;
+    }
+
+    public async static Task<AssetResponseDto> LoadAdditionalAssetInfo(this AssetResponseDto asset, ImmichApi api, ILogger logger)
+    {
+        logger.LogTrace($"Loading additional info for asset {asset.Id}");
+        var additional = await api.GetAssetInfoAsync(Guid.Parse(asset.Id), null);
+
+        return additional;
     }
 }
 

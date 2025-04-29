@@ -2,6 +2,7 @@ using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
+using Microsoft.Extensions.Logging;
 
 public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
 {
@@ -9,9 +10,11 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
     private readonly HttpClient _httpClient;
     private readonly ImmichApi _immichApi;
     private readonly ApiCache<IEnumerable<AssetResponseDto>> _apiCache;
-    public OptimizedImmichFrameLogic(IServerSettings settings)
+    private readonly ILogger<OptimizedImmichFrameLogic> _logger;
+    public OptimizedImmichFrameLogic(IServerSettings settings, ILogger<OptimizedImmichFrameLogic> logger)
     {
         _settings = settings;
+        _logger = logger;
         _httpClient = new HttpClient();
         _httpClient.UseApiKey(_settings.ApiKey);
         _immichApi = new ImmichApi(_settings.ImmichServerUrl, _httpClient);
@@ -58,6 +61,11 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
         {
             _isReloadingAssets = false;
         }
+    }
+
+    public Task<AssetResponseDto> GetAssetInfoById(Guid assetId)
+    {
+        return _immichApi.GetAssetInfoAsync(assetId, null);
     }
 
     private int _assetAmount = 250;
@@ -117,6 +125,15 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
         {
             assetsList = assetsList.Take(_assetAmount).ToList();
         }
+
+        // Do not use for now
+        // var updatedAssetsList = new List<AssetResponseDto>();
+        // foreach (var asset in assetsList)
+        // {
+        //     var updatedAsset = await asset.LoadAdditionalAssetInfo(_immichApi, _logger);
+        //     updatedAssetsList.Add(updatedAsset);
+        // }
+        // return updatedAssetsList;
         return assetsList;
     }
 

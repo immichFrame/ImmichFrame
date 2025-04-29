@@ -47,6 +47,17 @@ namespace ImmichFrame.Core.Logic
             }
         }
 
+        public Task<AssetResponseDto> GetAssetInfoById(Guid assetId)
+        {
+            using (var client = new HttpClient())
+            {
+                client.UseApiKey(_settings.ApiKey);
+                var immichApi = new ImmichApi(_settings.ImmichServerUrl, client);
+
+                return immichApi.GetAssetInfoAsync(assetId, null);
+            }
+        }
+
         private int _assetAmount = 250;
         public async Task<IEnumerable<AssetResponseDto>> GetAssets()
         {

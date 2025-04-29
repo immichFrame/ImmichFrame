@@ -68,19 +68,14 @@ export type AssetFaceWithoutPersonResponseDto = {
 };
 export type PersonWithFacesResponseDto = {
     birthDate?: string | null;
+    color?: string | null;
     faces: AssetFaceWithoutPersonResponseDto[];
     id: string;
+    isFavorite?: boolean | null;
     isHidden?: boolean;
     name: string;
     thumbnailPath: string;
     updatedAt?: string | null;
-    additionalProperties?: {
-        [key: string]: any | null;
-    } | null;
-};
-export type SmartInfoResponseDto = {
-    objects?: string[] | null;
-    tags?: string[] | null;
     additionalProperties?: {
         [key: string]: any | null;
     } | null;
@@ -131,7 +126,6 @@ export type AssetResponseDto = {
     ownerId: string;
     people?: PersonWithFacesResponseDto[] | null;
     resized?: boolean | null;
-    smartInfo?: SmartInfoResponseDto;
     stack?: AssetStackResponseDto;
     tags?: TagResponseDto[] | null;
     thumbhash?: string | null;
@@ -195,7 +189,19 @@ export function getAsset({ clientIdentifier }: {
     return oazapfts.fetchJson<{
         status: 200;
         data: AssetResponseDto[];
-    }>(`/api/Asset${QS.query(QS.explode({
+    }>(`/api/Asset/GetAsset${QS.query(QS.explode({
+        clientIdentifier
+    }))}`, {
+        ...opts
+    });
+}
+export function getAssetInfo(id: string, { clientIdentifier }: {
+    clientIdentifier?: string;
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: AssetResponseDto;
+    }>(`/api/Asset/GetAssetInfo/${encodeURIComponent(id)}${QS.query(QS.explode({
         clientIdentifier
     }))}`, {
         ...opts
@@ -207,7 +213,7 @@ export function getImage(id: string, { clientIdentifier }: {
     return oazapfts.fetchBlob<{
         status: 200;
         data: Blob;
-    }>(`/api/Asset/${encodeURIComponent(id)}${QS.query(QS.explode({
+    }>(`/api/Asset/GetImage/${encodeURIComponent(id)}${QS.query(QS.explode({
         clientIdentifier
     }))}`, {
         ...opts
@@ -219,7 +225,7 @@ export function getRandomImageAndInfo({ clientIdentifier }: {
     return oazapfts.fetchJson<{
         status: 200;
         data: ImageResponse;
-    }>(`/api/Asset/RandomImageAndInfo${QS.query(QS.explode({
+    }>(`/api/Asset/GetRandomImageAndInfo${QS.query(QS.explode({
         clientIdentifier
     }))}`, {
         ...opts
@@ -249,13 +255,21 @@ export function getConfig({ clientIdentifier }: {
         ...opts
     });
 }
+export function getApiConfigGetVersion(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: string;
+    }>("/api/Config/GetVersion", {
+        ...opts
+    });
+}
 export function getWeather({ clientIdentifier }: {
     clientIdentifier?: string;
 } = {}, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
         status: 200;
         data: IWeather;
-    }>(`/api/Weather${QS.query(QS.explode({
+    }>(`/api/Weather/GetWeather${QS.query(QS.explode({
         clientIdentifier
     }))}`, {
         ...opts

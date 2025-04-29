@@ -61,8 +61,9 @@ builder.Services.AddSingleton<ICalendarService>(srv =>
 builder.Services.AddSingleton<IImmichFrameLogic>(srv =>
 {
     var settings = srv.GetRequiredService<IServerSettings>();
+    var logger = srv.GetRequiredService<ILogger<OptimizedImmichFrameLogic>>();
 
-    return new OptimizedImmichFrameLogic(settings);
+    return new OptimizedImmichFrameLogic(settings, logger);
 });
 
 builder.Services.AddSingleton<IWebClientSettings>(srv =>
