@@ -8,17 +8,20 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
     private readonly IServerSettings _settings;
     private readonly HttpClient _httpClient;
     private readonly ImmichApi _immichApi;
+    private readonly ApiCache<IEnumerable<AssetResponseDto>> _apiCache;
     public OptimizedImmichFrameLogic(IServerSettings settings)
     {
         _settings = settings;
         _httpClient = new HttpClient();
         _httpClient.UseApiKey(_settings.ApiKey);
         _immichApi = new ImmichApi(_settings.ImmichServerUrl, _httpClient);
+        _apiCache = new ApiCache<IEnumerable<AssetResponseDto>>(TimeSpan.FromMinutes(_settings.RefreshAlbumPeopleInterval));
     }
 
     public void Dispose()
     {
         _httpClient.Dispose();
+        _apiCache.Dispose();
     }
 
     private Queue<AssetResponseDto> _assetQueue = new();
@@ -100,7 +103,6 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
             assets = assets.Where(x => x.ExifInfo.Rating == rating);
         }
 
-        // _settings.ExcludedAlbums
         if (_settings.ExcludedAlbums.Any())
         {
             var excludedAssetList = await GetExcludedAlbumAssets();
@@ -164,86 +166,30 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
 
     public async Task<IEnumerable<AssetResponseDto>> GetMemoryAssets()
     {
-        var today = DateTime.Today;
-        var memoryLane = await _immichApi.GetMemoryLaneAsync(today.Day, today.Month);
-
-        var memoryAssets = new List<AssetResponseDto>();
-        foreach (var lane in memoryLane)
+        return await _apiCache.GetOrAddAsync("AlbumAssets", async () =>
         {
-            var assets = lane.Assets.ToList();
-            assets.ForEach(asset => asset.ImageDesc = $"{lane.YearsAgo} {(lane.YearsAgo == 1 ? "year" : "years")} ago");
+            var today = DateTime.Today;
+            var memoryLane = await _immichApi.GetMemoryLaneAsync(today.Day, today.Month);
 
-            memoryAssets.AddRange(assets);
-        }
+            var memoryAssets = new List<AssetResponseDto>();
+            foreach (var lane in memoryLane)
+            {
+                var assets = lane.Assets.ToList();
+                assets.ForEach(asset => asset.ImageDesc = $"{lane.YearsAgo} {(lane.YearsAgo == 1 ? "year" : "years")} ago");
 
-        return memoryAssets;
+                memoryAssets.AddRange(assets);
+            }
+
+            return memoryAssets;
+        });
     }
 
     public async Task<IEnumerable<AssetResponseDto>> GetFavoriteAssets()
     {
-        var favoriteAssets = new List<AssetResponseDto>();
-
-        int page = 1;
-        int batchSize = 1000;
-        int total;
-        do
+        return await _apiCache.GetOrAddAsync("FavoriteAssets", async () =>
         {
-            var metadataBody = new MetadataSearchDto
-            {
-                Page = page,
-                Size = batchSize,
-                IsFavorite = true,
-                Type = AssetTypeEnum.IMAGE,
-                WithExif = true,
-                WithPeople = true
-            };
+            var favoriteAssets = new List<AssetResponseDto>();
 
-            var favoriteInfo = await _immichApi.SearchAssetsAsync(metadataBody);
-
-            total = favoriteInfo.Assets.Total;
-
-            favoriteAssets.AddRange(favoriteInfo.Assets.Items);
-            page++;
-        }
-        while (total == batchSize);
-
-        return favoriteAssets;
-    }
-
-    public async Task<IEnumerable<AssetResponseDto>> GetAlbumAssets()
-    {
-        var albumAssets = new List<AssetResponseDto>();
-
-        foreach (var albumId in _settings.Albums)
-        {
-            var albumInfo = await _immichApi.GetAlbumInfoAsync(albumId, null, null);
-
-            albumAssets.AddRange(albumInfo.Assets);
-        }
-
-        return albumAssets;
-    }
-
-    public async Task<IEnumerable<AssetResponseDto>> GetExcludedAlbumAssets()
-    {
-        var excludedAlbumAssets = new List<AssetResponseDto>();
-
-        foreach (var albumId in _settings.ExcludedAlbums)
-        {
-            var albumInfo = await _immichApi.GetAlbumInfoAsync(albumId, null, null);
-
-            excludedAlbumAssets.AddRange(albumInfo.Assets);
-        }
-
-        return excludedAlbumAssets;
-    }
-
-    public async Task<IEnumerable<AssetResponseDto>> GetPeopleAssets()
-    {
-        var personAssets = new List<AssetResponseDto>();
-
-        foreach (var personId in _settings.People)
-        {
             int page = 1;
             int batchSize = 1000;
             int total;
@@ -253,23 +199,94 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
                 {
                     Page = page,
                     Size = batchSize,
-                    PersonIds = new[] { personId },
+                    IsFavorite = true,
                     Type = AssetTypeEnum.IMAGE,
                     WithExif = true,
                     WithPeople = true
                 };
 
-                var personInfo = await _immichApi.SearchAssetsAsync(metadataBody);
+                var favoriteInfo = await _immichApi.SearchAssetsAsync(metadataBody);
 
-                total = personInfo.Assets.Total;
+                total = favoriteInfo.Assets.Total;
 
-                personAssets.AddRange(personInfo.Assets.Items);
+                favoriteAssets.AddRange(favoriteInfo.Assets.Items);
                 page++;
             }
             while (total == batchSize);
-        }
 
-        return personAssets;
+            return favoriteAssets;
+        });
+    }
+
+    public async Task<IEnumerable<AssetResponseDto>> GetAlbumAssets()
+    {
+        return await _apiCache.GetOrAddAsync("AlbumAssets", async () =>
+        {
+            var albumAssets = new List<AssetResponseDto>();
+
+            foreach (var albumId in _settings.Albums)
+            {
+                var albumInfo = await _immichApi.GetAlbumInfoAsync(albumId, null, null);
+
+                albumAssets.AddRange(albumInfo.Assets);
+            }
+
+            return albumAssets;
+        });
+    }
+
+    public async Task<IEnumerable<AssetResponseDto>> GetExcludedAlbumAssets()
+    {
+        return await _apiCache.GetOrAddAsync("ExcludedAlbumAssets", async () =>
+        {
+            var excludedAlbumAssets = new List<AssetResponseDto>();
+
+            foreach (var albumId in _settings.ExcludedAlbums)
+            {
+                var albumInfo = await _immichApi.GetAlbumInfoAsync(albumId, null, null);
+
+                excludedAlbumAssets.AddRange(albumInfo.Assets);
+            }
+
+            return excludedAlbumAssets;
+        });
+    }
+
+    public async Task<IEnumerable<AssetResponseDto>> GetPeopleAssets()
+    {
+        return await _apiCache.GetOrAddAsync("PeopleAssets", async () =>
+        {
+            var personAssets = new List<AssetResponseDto>();
+
+            foreach (var personId in _settings.People)
+            {
+                int page = 1;
+                int batchSize = 1000;
+                int total;
+                do
+                {
+                    var metadataBody = new MetadataSearchDto
+                    {
+                        Page = page,
+                        Size = batchSize,
+                        PersonIds = new[] { personId },
+                        Type = AssetTypeEnum.IMAGE,
+                        WithExif = true,
+                        WithPeople = true
+                    };
+
+                    var personInfo = await _immichApi.SearchAssetsAsync(metadataBody);
+
+                    total = personInfo.Assets.Total;
+
+                    personAssets.AddRange(personInfo.Assets.Items);
+                    page++;
+                }
+                while (total == batchSize);
+            }
+
+            return personAssets;
+        });
     }
 
     readonly string DownloadLocation = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ImageCache");
