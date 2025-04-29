@@ -24,8 +24,7 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
     private Queue<AssetResponseDto> _assetQueue = new();
     private bool _isReloadingAssets = false;
 
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-    public async Task<AssetResponseDto?> GetNextAsset()
+    public Task<AssetResponseDto?> GetNextAsset()
     {
         if (_assetQueue.Count < 10 && !_isReloadingAssets)
         {
@@ -35,12 +34,11 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
 
         if (_assetQueue.Any())
         {
-            return _assetQueue.Dequeue();
+            return Task.FromResult<AssetResponseDto?>(_assetQueue.Dequeue());
         }
 
-        return null;
+        return Task.FromResult<AssetResponseDto?>(null);
     }
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 
     private async Task ReloadAssetsAsync()
     {
