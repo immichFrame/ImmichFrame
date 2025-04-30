@@ -11,7 +11,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Logging.AddConsole();
 //log the version number
 var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
-Console.WriteLine($"=== Version {version} ===");
+Console.WriteLine($@"
+ _                     _      _    ______                        
+(_)                   (_)    | |   |  ___|                       
+ _ _ __ ___  _ __ ___  _  ___| |__ | |_ _ __ __ _ _ __ ___   ___ 
+| | '_ ` _ \| '_ ` _ \| |/ __| '_ \|  _| '__/ _` | '_ ` _ \ / _ \
+| | | | | | | | | | | | | (__| | | | | | | | (_| | | | | | |  __/
+|_|_| |_| |_|_| |_| |_|_|\___|_| |_\_| |_|  \__,_|_| |_| |_|\___| Version {version}");
+Console.WriteLine();
 
 // Add services to the container.
 
