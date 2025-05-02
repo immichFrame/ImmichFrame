@@ -62,7 +62,7 @@
 	</p>
 	{#if weather}
 		<div id="clockweather">
-			<div id="clockweatherinfo" class="text-xl sm:text-xl md:text-2xl lg:text-3xl font-semibold">
+			<div id="clockweatherinfo" class="text-xl sm:text-xl md:text-2xl lg:text-3xl font-semibold text-shadow-sm">
 				{weather.location},
 				{weather.temperature?.toFixed(1)}
 				{weather.unit}
