@@ -99,8 +99,8 @@ const config: Config = {
               to: 'https://demo.immichframe.online',
             },
             {
-              label: 'Setup Guide',
-              to: '/docs/getting-started/-installation',
+              label: 'Docker Setup',
+              to: '/docs/getting-started/installation/docker',
             },
             {
               label: 'Get immich',
