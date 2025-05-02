@@ -1,8 +1,14 @@
-# dev:
-# 	docker compose -f ./docker/docker-compose.dev.yml up --remove-orphans || make dev-down
+.PHONY: docs
+.PHONY: immichFrame.Web
 
 dev:
 	dotnet run --project ./ImmichFrame.WebApi
+
+docs:
+	npm --prefix docs run start
+
+api:
+	npm --prefix immichFrame.Web run api
 
 docker-dev:
 	docker build . --target dev -t ghcr.io/immichframe/immichframe:dev
