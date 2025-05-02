@@ -141,50 +141,6 @@ namespace ImmichFrame.Core.Logic
                 return (fileName, contentType, data.Stream);
             }
         }
-
-        public async Task AddAssetToAlbum(AssetResponseDto assetToAdd)
-        {
-            using (var client = new HttpClient())
-            {
-                client.UseApiKey(_settings.ApiKey);
-                var immichApi = new ImmichApi(_settings.ImmichServerUrl, client);
-                var itemsToAdd = new BulkIdsDto();
-                itemsToAdd.Ids.Add(new Guid(assetToAdd.Id));
-                await immichApi.AddAssetsToAlbumAsync(new Guid(immichFrameAlbum.Id), null, itemsToAdd);
-                ImmichFrameAlbumAssets.Add(new Guid(assetToAdd.Id));
-                //only keep 100 most recent assets in album
-                var albumInfo = await immichApi.GetAlbumInfoAsync(new Guid(immichFrameAlbum.Id), null, null);
-                if (albumInfo.AssetCount > 100)
-                {
-                    var itemToRemove = new BulkIdsDto();
-                    itemToRemove.Ids.Add(ImmichFrameAlbumAssets[0]);
-                    await immichApi.RemoveAssetFromAlbumAsync(new Guid(immichFrameAlbum.Id), itemToRemove);
-                    ImmichFrameAlbumAssets.RemoveAt(0);
-                }
-            }
-        }
-        public async Task DeleteAndCreateImmichFrameAlbum()
-        {
-            using (var client = new HttpClient())
-            {
-                client.UseApiKey(_settings.ApiKey);
-                var immichApi = new ImmichApi(_settings.ImmichServerUrl, client);
-                var immichAlbums = await immichApi.GetAllAlbumsAsync(null, null);
-                immichFrameAlbum = immichAlbums.FirstOrDefault(album => album.AlbumName == _settings.ImmichFrameAlbumName)!;
-                if (immichFrameAlbum != null)
-                {
-                    await immichApi.DeleteAlbumAsync(new Guid(immichFrameAlbum.Id));
-                }
-                var albumDto = new CreateAlbumDto
-                {
-                    AlbumName = _settings.ImmichFrameAlbumName,
-                    Description = "Recent ImmichFrame Photos"
-                };
-                var result = await immichApi.CreateAlbumAsync(albumDto);
-                immichFrameAlbum = new AlbumResponseDto { Id = result.Id };
-            }
-        }
-
         private async Task<Dictionary<Guid, AssetResponseDto>?> GetFilteredAssetIds()
         {
             bool assetsAdded = false;
