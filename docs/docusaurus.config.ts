@@ -100,7 +100,7 @@ const config: Config = {
             },
             {
               label: 'Setup Guide',
-              to: '/docs/getting-started/setup',
+              to: '/docs/getting-started/-installation',
             },
             {
               label: 'Get immich',
