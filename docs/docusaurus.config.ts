@@ -40,7 +40,7 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/immichFrame/ImmichFrame/tree/main/',
+            'https://github.com/immichFrame/ImmichFrame/tree/main/docs/',
         },
         blog: {
           showReadingTime: true,
@@ -51,7 +51,7 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/immichFrame/ImmichFrame/tree/main/',
+            'https://github.com/immichFrame/ImmichFrame/tree/main/docs/',
           // Useful options to enforce blogging best practices
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
@@ -102,6 +102,10 @@ const config: Config = {
               label: 'Setup Guide',
               to: '/docs/getting-started/setup',
             },
+            {
+              label: 'Get immich',
+              to: 'https://immich.app',
+            },
           ],
         },
         {
@@ -109,7 +113,7 @@ const config: Config = {
           items: [
             {
               label: 'Discord',
-              href: 'https://discordapp.com/invite/docusaurus',
+              href: 'https://discord.com/channels/979116623879368755/1217843270244372480',
             },
             {
               label: 'Github Discussions',
