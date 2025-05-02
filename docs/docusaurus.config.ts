@@ -82,6 +82,11 @@ const config: Config = {
         },
         // { to: '/blog', label: 'Blog', position: 'left' },
         {
+          href: 'https://demo.immichframe.online',
+          label: 'Demo',
+          position: 'left',
+        },
+        {
           href: 'https://github.com/immichFrame/ImmichFrame',
           label: 'GitHub',
           position: 'right',
