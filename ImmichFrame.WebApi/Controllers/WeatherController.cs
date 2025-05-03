@@ -1,5 +1,4 @@
 using ImmichFrame.Core.Interfaces;
-using ImmichFrame.Core.Logic;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,18 +10,20 @@ namespace ImmichFrame.WebApi.Controllers
     public class WeatherController : ControllerBase
     {
         private readonly ILogger<AssetController> _logger;
-        private readonly IImmichFrameLogic _logic;
+        private readonly IWeatherService _weatherService;
 
-        public WeatherController(ILogger<AssetController> logger, ImmichFrameLogic logic)
+        public WeatherController(ILogger<AssetController> logger, IWeatherService weatherService)
         {
             _logger = logger;
-            _logic = logic;
+            _weatherService = weatherService;
         }
 
         [HttpGet(Name = "GetWeather")]
         public async Task<IWeather?> GetWeather(string clientIdentifier = "")
         {
-            return await _logic.GetWeather();
+            var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
+            _logger.LogTrace("Weather requested by '{ClientIdentifier}'", sanitizedClientIdentifier);
+            return await _weatherService.GetWeather();
         }
     }
 }

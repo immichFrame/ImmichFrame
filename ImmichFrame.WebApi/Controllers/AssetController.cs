@@ -2,7 +2,6 @@ using System.Globalization;
 using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Core.Interfaces;
-using ImmichFrame.Core.Logic;
 using ImmichFrame.WebApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,7 +26,7 @@ namespace ImmichFrame.WebApi.Controllers
         private readonly IImmichFrameLogic _logic;
         private readonly IWebClientSettings _settings;
 
-        public AssetController(ILogger<AssetController> logger, ImmichFrameLogic logic, IWebClientSettings settings)
+        public AssetController(ILogger<AssetController> logger, IImmichFrameLogic logic, IWebClientSettings settings)
         {
             _logger = logger;
             _logic = logic;
@@ -37,17 +36,30 @@ namespace ImmichFrame.WebApi.Controllers
         [HttpGet(Name = "GetAsset")]
         public async Task<List<AssetResponseDto>> GetAsset(string clientIdentifier = "")
         {
-            return await _logic.GetAssets() ?? throw new AssetNotFoundException("No asset was found");
+            var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
+            _logger.LogTrace("Assets requested by '{ClientIdentifier}'", sanitizedClientIdentifier);
+            return (await _logic.GetAssets()).ToList() ?? throw new AssetNotFoundException("No asset was found");
         }
 
-        [HttpGet("{id}", Name = "GetImage")]
+        [HttpGet("{id}/AssetInfo", Name = "GetAssetInfo")]
+        public async Task<AssetResponseDto> GetAssetInfo(Guid id, string clientIdentifier = "")
+        {
+            var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
+            _logger.LogTrace("AssetInfo '{id}' requested by '{ClientIdentifier}'", id, sanitizedClientIdentifier);
+
+            return await _logic.GetAssetInfoById(id);
+        }
+
+        [HttpGet("{id}/Image", Name = "GetImage")]
         [Produces("image/jpeg", "image/webp")]
         [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status200OK)]
         public async Task<FileResult> GetImage(Guid id, string clientIdentifier = "")
         {
+            var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
+            _logger.LogTrace("Image '{id}' requested by '{ClientIdentifier}'", id, sanitizedClientIdentifier);
             var image = await _logic.GetImage(id);
 
-            var notification = new ImageRequestedNotification(id, clientIdentifier);
+            var notification = new ImageRequestedNotification(id, sanitizedClientIdentifier);
             _ = _logic.SendWebhookNotification(notification);
 
             return File(image.fileStream, image.ContentType, image.fileName); // returns a FileStreamResult
@@ -57,10 +69,13 @@ namespace ImmichFrame.WebApi.Controllers
         [Produces("application/json")]
         public async Task<ImageResponse> GetRandomImageAndInfo(string clientIdentifier = "")
         {
+            var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
+            _logger.LogTrace("Random image requested by '{ClientIdentifier}'", sanitizedClientIdentifier);
+
             var randomImage = await _logic.GetNextAsset() ?? throw new AssetNotFoundException("No asset was found");
 
             var image = await _logic.GetImage(new Guid(randomImage.Id));
-            var notification = new ImageRequestedNotification(new Guid(randomImage.Id), clientIdentifier);
+            var notification = new ImageRequestedNotification(new Guid(randomImage.Id), sanitizedClientIdentifier);
             _ = _logic.SendWebhookNotification(notification);
 
             string randomImageBase64;

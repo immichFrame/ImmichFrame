@@ -1,6 +1,5 @@
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.WebApi.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ImmichFrame.WebApi.Controllers
@@ -21,10 +20,12 @@ namespace ImmichFrame.WebApi.Controllers
         [HttpGet(Name = "GetConfig")]
         public WebClientSettings GetConfig(string clientIdentifier = "")
         {
+            var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
+            _logger.LogTrace("Config requested by '{ClientIdentifier}'", sanitizedClientIdentifier);
             return (WebClientSettings)_settings;
         }
 
-        [HttpGet("GetVersion")]
+        [HttpGet("Version", Name = "GetVersion")]
         public string GetVersion()
         {
             return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";

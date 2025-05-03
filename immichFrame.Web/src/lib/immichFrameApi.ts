@@ -68,19 +68,14 @@ export type AssetFaceWithoutPersonResponseDto = {
 };
 export type PersonWithFacesResponseDto = {
     birthDate?: string | null;
+    color?: string | null;
     faces: AssetFaceWithoutPersonResponseDto[];
     id: string;
+    isFavorite?: boolean | null;
     isHidden?: boolean;
     name: string;
     thumbnailPath: string;
     updatedAt?: string | null;
-    additionalProperties?: {
-        [key: string]: any | null;
-    } | null;
-};
-export type SmartInfoResponseDto = {
-    objects?: string[] | null;
-    tags?: string[] | null;
     additionalProperties?: {
         [key: string]: any | null;
     } | null;
@@ -131,7 +126,6 @@ export type AssetResponseDto = {
     ownerId: string;
     people?: PersonWithFacesResponseDto[] | null;
     resized?: boolean | null;
-    smartInfo?: SmartInfoResponseDto;
     stack?: AssetStackResponseDto;
     tags?: TagResponseDto[] | null;
     thumbhash?: string | null;
@@ -201,13 +195,25 @@ export function getAsset({ clientIdentifier }: {
         ...opts
     });
 }
+export function getAssetInfo(id: string, { clientIdentifier }: {
+    clientIdentifier?: string;
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: AssetResponseDto;
+    }>(`/api/Asset/${encodeURIComponent(id)}/AssetInfo${QS.query(QS.explode({
+        clientIdentifier
+    }))}`, {
+        ...opts
+    });
+}
 export function getImage(id: string, { clientIdentifier }: {
     clientIdentifier?: string;
 } = {}, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchBlob<{
         status: 200;
         data: Blob;
-    }>(`/api/Asset/${encodeURIComponent(id)}${QS.query(QS.explode({
+    }>(`/api/Asset/${encodeURIComponent(id)}/Image${QS.query(QS.explode({
         clientIdentifier
     }))}`, {
         ...opts
@@ -246,6 +252,14 @@ export function getConfig({ clientIdentifier }: {
     }>(`/api/Config${QS.query(QS.explode({
         clientIdentifier
     }))}`, {
+        ...opts
+    });
+}
+export function getVersion(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: string;
+    }>("/api/Config/Version", {
         ...opts
     });
 }

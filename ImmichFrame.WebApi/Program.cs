@@ -1,7 +1,6 @@
 using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
-using ImmichFrame.Core.Logic;
 using ImmichFrame.WebApi.Models;
 using Microsoft.AspNetCore.Authentication;
 using System.Text.Json;
@@ -52,11 +51,26 @@ builder.Services.AddSingleton<IServerSettings>(srv =>
     return serverSettings;
 });
 
-builder.Services.AddSingleton(srv =>
+builder.Services.AddSingleton<IWeatherService>(srv =>
 {
     var settings = srv.GetRequiredService<IServerSettings>();
 
-    return new ImmichFrameLogic(settings);
+    return new OpenWeatherMapService(settings);
+});
+
+builder.Services.AddSingleton<ICalendarService>(srv =>
+{
+    var settings = srv.GetRequiredService<IServerSettings>();
+
+    return new IcalCalendarService(settings);
+});
+
+builder.Services.AddSingleton<IImmichFrameLogic>(srv =>
+{
+    var settings = srv.GetRequiredService<IServerSettings>();
+    var logger = srv.GetRequiredService<ILogger<OptimizedImmichFrameLogic>>();
+
+    return new OptimizedImmichFrameLogic(settings, logger);
 });
 
 builder.Services.AddSingleton<IWebClientSettings>(srv =>

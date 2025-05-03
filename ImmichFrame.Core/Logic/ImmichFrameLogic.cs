@@ -1,12 +1,8 @@
-﻿using Ical.Net;
-using ImmichFrame.Core.Api;
+﻿using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
-using ImmichFrame.WebApi.Helpers;
-using OpenWeatherMap;
 using System.Data;
-using System.Text.Json;
 
 namespace ImmichFrame.Core.Logic
 {
@@ -51,8 +47,19 @@ namespace ImmichFrame.Core.Logic
             }
         }
 
+        public Task<AssetResponseDto> GetAssetInfoById(Guid assetId)
+        {
+            using (var client = new HttpClient())
+            {
+                client.UseApiKey(_settings.ApiKey);
+                var immichApi = new ImmichApi(_settings.ImmichServerUrl, client);
+
+                return immichApi.GetAssetInfoAsync(assetId, null);
+            }
+        }
+
         private int _assetAmount = 250;
-        public async Task<List<AssetResponseDto>> GetAssets()
+        public async Task<IEnumerable<AssetResponseDto>> GetAssets()
         {
             if ((await FilteredAssetInfos) != null)
             {
@@ -134,50 +141,6 @@ namespace ImmichFrame.Core.Logic
                 return (fileName, contentType, data.Stream);
             }
         }
-
-        public async Task AddAssetToAlbum(AssetResponseDto assetToAdd)
-        {
-            using (var client = new HttpClient())
-            {
-                client.UseApiKey(_settings.ApiKey);
-                var immichApi = new ImmichApi(_settings.ImmichServerUrl, client);
-                var itemsToAdd = new BulkIdsDto();
-                itemsToAdd.Ids.Add(new Guid(assetToAdd.Id));
-                await immichApi.AddAssetsToAlbumAsync(new Guid(immichFrameAlbum.Id), null, itemsToAdd);
-                ImmichFrameAlbumAssets.Add(new Guid(assetToAdd.Id));
-                //only keep 100 most recent assets in album
-                var albumInfo = await immichApi.GetAlbumInfoAsync(new Guid(immichFrameAlbum.Id), null, null);
-                if (albumInfo.AssetCount > 100)
-                {
-                    var itemToRemove = new BulkIdsDto();
-                    itemToRemove.Ids.Add(ImmichFrameAlbumAssets[0]);
-                    await immichApi.RemoveAssetFromAlbumAsync(new Guid(immichFrameAlbum.Id), itemToRemove);
-                    ImmichFrameAlbumAssets.RemoveAt(0);
-                }
-            }
-        }
-        public async Task DeleteAndCreateImmichFrameAlbum()
-        {
-            using (var client = new HttpClient())
-            {
-                client.UseApiKey(_settings.ApiKey);
-                var immichApi = new ImmichApi(_settings.ImmichServerUrl, client);
-                var immichAlbums = await immichApi.GetAllAlbumsAsync(null, null);
-                immichFrameAlbum = immichAlbums.FirstOrDefault(album => album.AlbumName == _settings.ImmichFrameAlbumName)!;
-                if (immichFrameAlbum != null)
-                {
-                    await immichApi.DeleteAlbumAsync(new Guid(immichFrameAlbum.Id));
-                }
-                var albumDto = new CreateAlbumDto
-                {
-                    AlbumName = _settings.ImmichFrameAlbumName,
-                    Description = "Recent ImmichFrame Photos"
-                };
-                var result = await immichApi.CreateAlbumAsync(albumDto);
-                immichFrameAlbum = new AlbumResponseDto { Id = result.Id };
-            }
-        }
-
         private async Task<Dictionary<Guid, AssetResponseDto>?> GetFilteredAssetIds()
         {
             bool assetsAdded = false;
@@ -463,7 +426,7 @@ namespace ImmichFrame.Core.Logic
                         WithExif = true,
                         WithPeople = true,
                     };
-                    
+
                     if (!_settings.ShowArchived)
                     {
                         searchBody.IsArchived = false;
@@ -515,126 +478,6 @@ namespace ImmichFrame.Core.Logic
             }
         }
 
-        private (DateTime fetchDate, IWeather? weather)? lastWeather;
-
-        public async Task<IWeather?> GetWeather()
-        {
-            // Check if cached weather data is still valid
-            if (lastWeather != null && lastWeather.Value.fetchDate.AddMinutes(5) > DateTime.Now)
-            {
-                return lastWeather.Value.weather;
-            }
-
-            OpenWeatherMapOptions options = new OpenWeatherMapOptions
-            {
-                ApiKey = _settings.WeatherApiKey,
-                UnitSystem = _settings.UnitSystem,
-                Language = _settings.Language,
-            };
-
-            var weatherLatLong = _settings.WeatherLatLong;
-
-            var weatherLat = !string.IsNullOrWhiteSpace(weatherLatLong) ? float.Parse(weatherLatLong!.Split(',')[0]) : 0f;
-            var weatherLong = !string.IsNullOrWhiteSpace(weatherLatLong) ? float.Parse(weatherLatLong!.Split(',')[1]) : 0f;
-
-            var weather = await GetWeather(weatherLat, weatherLong, options);
-
-            lastWeather = (DateTime.Now, weather);
-
-            return weather;
-        }
-
-        public async Task<IWeather?> GetWeather(double latitude, double longitude, OpenWeatherMapOptions Options)
-        {
-            try
-            {
-                IOpenWeatherMapService openWeatherMapService = new OpenWeatherMapService(Options);
-                var weatherInfo = await openWeatherMapService.GetCurrentWeatherAsync(latitude, longitude);
-
-                return weatherInfo.ToWeather();
-            }
-            catch
-            {
-                //do nothing and return null
-            }
-
-            return null;
-        }
-
-        private (DateTime fetchDate, List<string> calendars)? lastCalendars;
-        public async Task<List<string>> GetCalendars()
-        {
-            if (lastCalendars != null && lastCalendars.Value.fetchDate.AddMinutes(15) > DateTime.Now)
-            {
-                return lastCalendars.Value.calendars;
-            }
-
-            var icals = new List<string>();
-
-            foreach (var webcal in _settings.Webcalendars)
-            {
-                string httpUrl = webcal.Replace("webcal://", "https://");
-
-                using (HttpClient client = new HttpClient())
-                {
-                    HttpResponseMessage response = await client.GetAsync(httpUrl);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        icals.Add(await response.Content.ReadAsStringAsync());
-                    }
-                    else
-                    {
-                        throw new Exception("Failed to load calendar data");
-                    }
-                }
-            }
-
-            lastCalendars = (DateTime.Now, icals);
-
-            return icals;
-        }
-
-        public async Task<List<IAppointment>> GetAppointments()
-        {
-            var appointments = new List<IAppointment>();
-
-            var icals = await GetCalendars();
-
-            foreach (var ical in icals)
-            {
-                var calendar = Calendar.Load(ical);
-
-                appointments.AddRange(calendar.GetOccurrences(DateTime.UtcNow, DateTime.Today.AddDays(1)).Select(x => x.ToAppointment()));
-            }
-
-            return appointments;
-        }
-
-        public async Task SendWebhookNotification(IWebhookNotification notification)
-        {
-            if (string.IsNullOrWhiteSpace(_settings.Webhook)) return;
-
-            var httpClient = new HttpClient();
-
-            var options = new JsonSerializerOptions
-            {
-                Converters = { new PolymorphicJsonConverter<IWebhookNotification>() },
-                WriteIndented = true
-            };
-
-            string json = JsonSerializer.Serialize(notification, options);
-            var data = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-
-            var response = await httpClient.PostAsync(_settings.Webhook, data);
-
-            if (response.IsSuccessStatusCode)
-            {
-                Console.WriteLine("Webhook successfully sent.");
-            }
-            else
-            {
-                Console.WriteLine($"Failed to send notification to webhook: {Convert.ToInt32(response.StatusCode)} {response.StatusCode}");
-            }
-        }
+        public Task SendWebhookNotification(IWebhookNotification notification) => WebhookHelper.SendWebhookNotification(notification, _settings.Webhook);
     }
 }

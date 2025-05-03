@@ -1,5 +1,4 @@
 using ImmichFrame.Core.Interfaces;
-using ImmichFrame.Core.Logic;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,18 +10,20 @@ namespace ImmichFrame.WebApi.Controllers
     public class CalendarController : ControllerBase
     {
         private readonly ILogger<AssetController> _logger;
-        private readonly IImmichFrameLogic _logic;
+        private readonly ICalendarService _calendarService;
 
-        public CalendarController(ILogger<AssetController> logger, ImmichFrameLogic logic)
+        public CalendarController(ILogger<AssetController> logger, ICalendarService calendarService)
         {
             _logger = logger;
-            _logic = logic;
+            _calendarService = calendarService;
         }
 
         [HttpGet(Name = "GetAppointments")]
         public async Task<List<IAppointment>> GetAppointments(string clientIdentifier = "")
         {
-            return await _logic.GetAppointments();
+            var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
+            _logger.LogTrace("Calendar requested by '{ClientIdentifier}'", sanitizedClientIdentifier);
+            return await _calendarService.GetAppointments();
         }
     }
 }
