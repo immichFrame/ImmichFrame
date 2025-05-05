@@ -14,7 +14,7 @@
   <h3 align="center">ImmichFrame</h3>
 
   <p align="center">
-    An awesome way to display your photos as an digital photo frame
+    An awesome way to display your photos as a digital photo frame
     <br />
     <a href="https://immich.app/"><strong>Explore immich »</strong></a>
     <br />
