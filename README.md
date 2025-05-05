@@ -36,7 +36,7 @@ You can find the documentation [here](https://immichframe.online).
 
 You can find a working demo [here](https://demo.immichframe.online).
 
-<img src="/design/demo/web_demo.png" alt="Web Demo" height="300">
+<img src="/design/demo/web_demo.png" alt="Web Demo">
 
 ## ⚠️ Disclaimer
 
