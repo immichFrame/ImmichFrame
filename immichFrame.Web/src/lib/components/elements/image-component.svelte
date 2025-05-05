@@ -16,6 +16,7 @@
 
 	interface Props {
 		images: [string, AssetResponseDto][];
+		interval?: number;
 		error?: boolean;
 		loaded?: boolean;
 		split?: boolean;
@@ -25,10 +26,12 @@
 		showImageDesc?: boolean;
 		showPeopleDesc?: boolean;
 		imageFill?: boolean;
+		imageZoom?: boolean;
 	}
 
 	let {
 		images,
+		interval = 20,
 		error = false,
 		loaded = false,
 		split = false,
@@ -37,10 +40,13 @@
 		showPhotoDate = true,
 		showImageDesc = true,
 		showPeopleDesc = true,
-		imageFill = false
+		imageFill = false,
+		imageZoom = false
 	}: Props = $props();
 	let instantTransition = slideshowStore.instantTransition;
-	let transitionDuration = $derived($instantTransition ? 0 : ($configStore.transitionDuration ?? 1) * 1000);
+	let transitionDuration = $derived(
+		$instantTransition ? 0 : ($configStore.transitionDuration ?? 1) * 1000
+	);
 </script>
 
 {#if hasBday}
@@ -70,22 +76,26 @@
 						<Image
 							multi={true}
 							image={images[0]}
+							{interval}
 							{showLocation}
 							{showPhotoDate}
 							{showImageDesc}
 							{showPeopleDesc}
 							{imageFill}
+							{imageZoom}
 						/>
 					</div>
 					<div id="image_portrait_2" class="relative grid border-l-2 border-primary h-dvh">
 						<Image
 							multi={true}
 							image={images[1]}
+							{interval}
 							{showLocation}
 							{showPhotoDate}
 							{showImageDesc}
 							{showPeopleDesc}
 							{imageFill}
+							{imageZoom}
 						/>
 					</div>
 				</div>
@@ -93,11 +103,13 @@
 				<div id="image_default" class="relative grid h-dvh w-screen">
 					<Image
 						image={images[0]}
+						{interval}
 						{showLocation}
 						{showPhotoDate}
 						{showImageDesc}
 						{showPeopleDesc}
 						{imageFill}
+						{imageZoom}
 					/>
 				</div>
 			{/if}

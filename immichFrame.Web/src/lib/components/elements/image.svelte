@@ -2,7 +2,6 @@
 	import { type AssetResponseDto, type PersonWithFacesResponseDto } from '$lib/immichFrameApi';
 	import { decodeBase64 } from '$lib/utils';
 	import { thumbHashToDataURL } from 'thumbhash';
-	import { configStore } from '$lib/stores/config.store';
 	import AssetInfo from './asset-info.svelte';
 
 	interface Props {
@@ -12,6 +11,8 @@
 		showImageDesc: boolean;
 		showPeopleDesc: boolean;
 		imageFill: boolean;
+		imageZoom: boolean;
+		interval: number;
 		multi?: boolean;
 	}
 
@@ -22,12 +23,12 @@
 		showImageDesc,
 		showPeopleDesc,
 		imageFill,
+		imageZoom,
+		interval,
 		multi = false
 	}: Props = $props();
 
 	let debug = false;
-
-	let interval = $configStore.interval ?? 1;
 
 	let hasPerson = $derived(image[1].people?.filter((x) => x.name).length ?? 0 > 0);
 
@@ -60,7 +61,7 @@
 	}
 
 	function getCenterX(i: number) {
-		if (hasPerson && $configStore.imageZoom) {
+		if (hasPerson && imageZoom) {
 			let face = GetFace(i);
 			if (!face) return;
 
@@ -75,7 +76,7 @@
 	}
 
 	function getCenterY(i: number) {
-		if (hasPerson && $configStore.imageZoom) {
+		if (hasPerson && imageZoom) {
 			let face = GetFace(i);
 			if (!face) return;
 
@@ -145,11 +146,11 @@
 	{/if}
 
 	<img
-	style="--interval: {interval + 2}s; --posX: {getCenterX(0)}%; --posY: {getCenterY(0)}%;"
-	class="{multi || imageFill
-		? 'w-screen h-dvh object-cover'
-		: 'max-h-screen h-dvh max-w-full object-contain'} 
-		{ $configStore.imageZoom
+		style="--interval: {interval + 2}s; --posX: {getCenterX(0)}%; --posY: {getCenterY(0)}%;"
+		class="{multi || imageFill
+			? 'w-screen h-dvh object-cover'
+			: 'max-h-screen h-dvh max-w-full object-contain'} 
+		{imageZoom
 			? zoomEffect()
 				? hasPerson
 					? 'zoom-in-person'
@@ -158,9 +159,9 @@
 					? 'zoom-out-person'
 					: 'zoom-out'
 			: ''}"
-	src={image[0]}
-	alt="data"
-/>
+		src={image[0]}
+		alt="data"
+	/>
 </div>
 <AssetInfo asset={image[1]} {showLocation} {showPhotoDate} {showImageDesc} {showPeopleDesc} />
 <img

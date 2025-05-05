@@ -38,7 +38,7 @@
 
 	let progressBarStatus: ProgressBarStatus = $state(ProgressBarStatus.Playing);
 	let progressBar: ProgressBar = $state() as ProgressBar;
-	
+
 	let error: boolean = $state(false);
 	let authError: boolean = $state(false);
 	let errorMessage: string = $state() as string;
@@ -317,11 +317,13 @@
 		<div class="absolute h-screen w-screen">
 			<ImageComponent
 				showLocation={$configStore.showImageLocation}
+				interval={$configStore.interval}
 				showPhotoDate={$configStore.showPhotoDate}
 				showImageDesc={$configStore.showImageDesc}
 				showPeopleDesc={$configStore.showPeopleDesc}
 				{...imagesState}
 				imageFill={$configStore.imageFill}
+				imageZoom={$configStore.imageZoom}
 			/>
 		</div>
 
