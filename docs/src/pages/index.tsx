@@ -26,7 +26,7 @@ function HomepageHeader() {
           </Link>
           <Link
             className={clsx('button button--secondary button--lg', styles.headingButton)}
-            to="/docs/getting-started/installation/requirements">
+            to="/docs/overview">
             Get Started
           </Link>
         </div>
