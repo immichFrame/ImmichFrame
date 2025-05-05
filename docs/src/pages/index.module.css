@@ -21,3 +21,13 @@
   align-items: center;
   justify-content: center;
 }
+
+.headingButton {
+  margin: 1rem;
+}
+
+.logoImage {
+  max-width: 200px;
+  height: auto;
+  margin: 1rem 0;
+}
