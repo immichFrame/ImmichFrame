@@ -40,7 +40,7 @@ export default function Home(): ReactNode {
   return (
     <Layout
       title={`${siteConfig.title}`}
-      description="An awesome way to display your photos as an digital photo frame">
+      description="An awesome way to display your photos as a digital photo frame">
       <HomepageHeader />
       <main>
         <HomepageFeatures />
