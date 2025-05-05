@@ -1,20 +1,34 @@
 ---
+title: 🔭 Overview
 sidebar_position: 1
 ---
 
-# 🔭 Overview
+# What is ImmichFrame?
 
-:::tip 
-Try out the ImmichFrame demo [here](https://demo.immichframe.online)!
-:::
+**ImmichFrame** is a companion project to [immich][immich-github-url], built to turn your photo collection into a beautiful digital photo frame experience.
 
-:::warning 
-This project is not affiliated with [immich][immich-github-url]!
-::: 
+[immich][immich-github-url] is an excellent self-hosted media management solution – like your private Google Photos. But what if you want to display your favorite photos in a living room, hallway, or even on an e-ink display?
 
-## 🛈 About The Project
+That's where **ImmichFrame** comes in.
 
-This project is a digital photo frame application that interfaces with your [immich][immich-github-url] server. It is a cross-platform C# .NET 8 project that currently supports Android, Linux, macOS, and Windows.
+### Setup
+
+You need to run a separate **ImmichFrame** docker container.
+
+### Use Cases
+
+- A wall-mounted tablet as a dynamic photo frame
+- Raspberry Pi-powered digital frames
+- E-Ink photo displays
+- Office displays or dashboards with rotating team/event photos
+
+
+### Wrapped up
+
+If you're looking for a simple, clean way to display your Immich photos, **ImmichFrame** is the solution.
+
+\*immich = Your photo library <br/>
+\*ImmichFrame = A digital frame showing off your library
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
