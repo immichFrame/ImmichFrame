@@ -53,7 +53,7 @@
 	let availablePeople = $derived(asset.people?.filter((x) => x.name));
 </script>
 
-{#if showPhotoDate || showPhotoDate || showImageDesc || showPeopleDesc}
+{#if showPhotoDate || showLocation || showImageDesc || showPeopleDesc}
 	<div
 		id="imageinfo"
 		class="immichframe_image_metadata absolute bottom-0 right-0 z-100 text-primary p-1 text-right
