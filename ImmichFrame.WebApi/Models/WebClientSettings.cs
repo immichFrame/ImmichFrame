@@ -5,8 +5,7 @@ using ImmichFrame.WebApi.Helpers;
 namespace ImmichFrame.WebApi.Models
 {
     public class WebClientSettings : IWebClientSettings
-    {
-        public string ImageStretch { get; set; } = "Uniform";
+    {        
         public string Margin { get; set; } = "0,0,0,0";
         public int Interval { get; set; } = 45;
         public double TransitionDuration { get; set; } = 1;
@@ -27,6 +26,7 @@ namespace ImmichFrame.WebApi.Models
         public bool ShowWeatherDescription { get; set; } = true;
         public bool UnattendedMode { get; set; } = false;
         public bool ImageZoom { get; set; } = true;
+        public bool ImageFill { get; set; } = false;
         public string Layout { get; set; } = "splitview";
         public string Language { get; set; } = "en";
 

@@ -150,8 +150,7 @@ export type IAppointment = {
     description?: string | null;
     location?: string | null;
 };
-export type WebClientSettings = {
-    imageStretch?: string | null;
+export type WebClientSettings = {    
     margin?: string | null;
     interval?: number;
     transitionDuration?: number;
@@ -172,6 +171,7 @@ export type WebClientSettings = {
     showWeatherDescription?: boolean;
     unattendedMode?: boolean;
     imageZoom?: boolean;
+    imageFill?: boolean;
     layout?: string | null;
     language?: string | null;
 };

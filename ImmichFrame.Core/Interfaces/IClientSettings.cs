@@ -6,8 +6,7 @@
     }
 
     public interface IClientSettings
-    {
-        public string ImageStretch { get; set; }
+    {        
         public string Margin { get; set; }
         public int Interval { get; set; }
         public double TransitionDuration { get; set; }
@@ -28,6 +27,7 @@
         public bool ShowWeatherDescription { get; set; }
         public bool UnattendedMode { get; set; }
         public bool ImageZoom { get; set; }
+        public bool ImageFill { get; set; }
         public string Layout { get; set; }
         public string Language { get; set; }
     }

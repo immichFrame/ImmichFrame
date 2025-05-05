@@ -24,6 +24,7 @@
 		showPhotoDate?: boolean;
 		showImageDesc?: boolean;
 		showPeopleDesc?: boolean;
+		imageFill?: boolean;
 	}
 
 	let {
@@ -35,7 +36,8 @@
 		showLocation = true,
 		showPhotoDate = true,
 		showImageDesc = true,
-		showPeopleDesc = true
+		showPeopleDesc = true,
+		imageFill = false
 	}: Props = $props();
 	let instantTransition = slideshowStore.instantTransition;
 	let transitionDuration = $derived($instantTransition ? 0 : ($configStore.transitionDuration ?? 1) * 1000);
@@ -72,6 +74,7 @@
 							{showPhotoDate}
 							{showImageDesc}
 							{showPeopleDesc}
+							{imageFill}
 						/>
 					</div>
 					<div id="image_portrait_2" class="relative grid border-l-2 border-primary h-dvh">
@@ -82,6 +85,7 @@
 							{showPhotoDate}
 							{showImageDesc}
 							{showPeopleDesc}
+							{imageFill}
 						/>
 					</div>
 				</div>
@@ -93,6 +97,7 @@
 						{showPhotoDate}
 						{showImageDesc}
 						{showPeopleDesc}
+						{imageFill}
 					/>
 				</div>
 			{/if}

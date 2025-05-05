@@ -321,6 +321,7 @@
 				showImageDesc={$configStore.showImageDesc}
 				showPeopleDesc={$configStore.showPeopleDesc}
 				{...imagesState}
+				imageFill={$configStore.imageFill}
 			/>
 		</div>
 

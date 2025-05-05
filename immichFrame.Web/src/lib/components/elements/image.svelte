@@ -11,6 +11,7 @@
 		showPhotoDate: boolean;
 		showImageDesc: boolean;
 		showPeopleDesc: boolean;
+		imageFill: boolean;
 		multi?: boolean;
 	}
 
@@ -20,6 +21,7 @@
 		showPhotoDate,
 		showImageDesc,
 		showPeopleDesc,
+		imageFill,
 		multi = false
 	}: Props = $props();
 
@@ -143,10 +145,11 @@
 	{/if}
 
 	<img
-		style="--interval: {interval + 2}s; --posX: {getCenterX(0)}%; --posY: {getCenterY(0)}%;"
-		class="{multi
-			? 'w-screen'
-			: 'max-h-screen h-dvh max-w-full'} object-contain {$configStore.imageZoom
+	style="--interval: {interval + 2}s; --posX: {getCenterX(0)}%; --posY: {getCenterY(0)}%;"
+	class="{multi || imageFill
+		? 'w-screen h-dvh object-cover'
+		: 'max-h-screen h-dvh max-w-full object-contain'} 
+		{ $configStore.imageZoom
 			? zoomEffect()
 				? hasPerson
 					? 'zoom-in-person'
@@ -155,9 +158,9 @@
 					? 'zoom-out-person'
 					: 'zoom-out'
 			: ''}"
-		src={image[0]}
-		alt="data"
-	/>
+	src={image[0]}
+	alt="data"
+/>
 </div>
 <AssetInfo asset={image[1]} {showLocation} {showPhotoDate} {showImageDesc} {showPeopleDesc} />
 <img
