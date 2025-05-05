@@ -56,7 +56,7 @@ You can find a working demo [here](https://demo.immichframe.online).
 
 ## 🌟 Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=3rob3/ImmichFrame&type=Date)](https://star-history.com/#3rob3/ImmichFrame&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=immichframe/immichframe&type=Date)](https://www.star-history.com/#immichframe/immichframe&Date)
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
