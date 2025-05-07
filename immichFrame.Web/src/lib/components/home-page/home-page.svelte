@@ -257,7 +257,14 @@
 		if (req.status != 200) {
 			return ['', a] as [string, api.AssetResponseDto];
 		}
-		return [getImageUrl(req.data), a] as [string, api.AssetResponseDto];
+
+		// if the people array is already populated, there is no need to call the API again
+		if ((a.people ?? []).length > 0) {
+			return [getImageUrl(req.data), a] as [string, api.AssetResponseDto];
+		}
+		let assetInfoRequest = await api.getAssetInfo(a.id);
+
+		return [getImageUrl(req.data), assetInfoRequest.data] as [string, api.AssetResponseDto];
 	}
 
 	function getImageUrl(image: Blob) {
