@@ -18,7 +18,7 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
         _httpClient = new HttpClient();
         _httpClient.UseApiKey(_settings.ApiKey);
         _immichApi = new ImmichApi(_settings.ImmichServerUrl, _httpClient);
-        _apiCache = new ApiCache<IEnumerable<AssetResponseDto>>(TimeSpan.FromMinutes(_settings.RefreshAlbumPeopleInterval));
+        _apiCache = new ApiCache<IEnumerable<AssetResponseDto>>(TimeSpan.FromHours(_settings.RefreshAlbumPeopleInterval));
     }
 
     public void Dispose()
