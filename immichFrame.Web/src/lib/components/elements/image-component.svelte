@@ -116,5 +116,7 @@
 		</div>
 	{/key}
 {:else}
-	<LoadingElement />
+	<div class="grid absolute h-dvh w-screen">
+		<LoadingElement />
+	</div>
 {/if}
