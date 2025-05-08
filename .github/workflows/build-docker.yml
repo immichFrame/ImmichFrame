@@ -2,12 +2,15 @@ name: Build and Publish image to Docker Hub
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: "Version number"
+        default: "1.0.0.0"
   push:
     tags:
       - "v*"  # Only triggers on versioned tags, e.g., v1.0, v20.15.10
 
 env:
-  # Use ghcr.io
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
@@ -26,7 +29,7 @@ jobs:
         with:
           install: true
 
-      # Login to GHCR (or other registry) except on PR
+      # Login to GHCR (or other registry) except on PRs
       - name: Log into registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
@@ -42,6 +45,15 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
+      - name: Extract version (from tag or manual input)
+        id: version
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+          else
+            echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          fi
+
       # Build and push Docker image for multiple platforms
       - name: Build and push Docker image (${{ env.IMAGE_NAME }})
         uses: docker/build-push-action@v6
@@ -52,3 +64,5 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VERSION=${{ steps.version.outputs.VERSION }}

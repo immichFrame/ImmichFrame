@@ -6,6 +6,9 @@ WORKDIR /source/ImmichFrame.WebApi
 
 # Set default architecture argument for multi-arch builds
 ARG TARGETARCH
+ARG VERSION
+
+ENV APP_VERSION=$VERSION
 
 # Restore dependencies with cache
 RUN dotnet restore
@@ -14,9 +17,11 @@ RUN dotnet restore
 FROM base-api AS publish-api
 
 ARG TARGETARCH
+ARG VERSION
+ENV APP_VERSION=$VERSION
 
 # Publish the app for the target architecture
-RUN dotnet publish --runtime linux-${TARGETARCH} --self-contained false -o /app
+RUN dotnet publish --runtime linux-${TARGETARCH} --self-contained false -p:AssemblyVersion=$VERSION -o /app
 
 # Stage 3: Build frontend with Node.js
 FROM node:18-alpine AS build-node
@@ -34,6 +39,10 @@ RUN npm run build && npm prune --omit=dev
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy AS final
 
 WORKDIR /app
+
+# Optional: für Diagnostik bei Laufzeit
+ARG VERSION
+ENV APP_VERSION=$VERSION
 
 # Copy .NET API and frontend assets
 COPY --from=publish-api /app ./

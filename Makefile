@@ -10,19 +10,10 @@ docs:
 api:
 	npm --prefix immichFrame.Web run api
 
-docker-dev:
-	docker build . --target dev -t ghcr.io/immichframe/immichframe:dev
-
-dev-down:
-	docker compose -f ./docker/docker-compose.dev.yml down --remove-orphans
-
-dev-update:
-	docker compose -f ./docker/docker-compose.dev.yml up --build -V --remove-orphans
-
-docker-prod:
-	docker buildx build --platform linux/amd64 --no-cache . --target final -t ghcr.io/immichframe/immichframe:main
+docker-build-prod:
+	docker buildx build --platform linux/amd64 --no-cache . --target final -t ghcr.io/immichframe/immichframe:latest --build-arg VERSION=1.0.0.0
 	
-prod:
+docker-prod:
 	docker compose -f ./docker/docker-compose.yml up --build -V --remove-orphans
 
 docker-prune:
