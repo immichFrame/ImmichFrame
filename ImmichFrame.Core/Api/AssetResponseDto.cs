@@ -7,25 +7,6 @@ namespace ImmichFrame.Core.Api
     public partial class AssetResponseDto
     {
         [JsonIgnore]
-        private string? _imageDesc;
-
-        [JsonIgnore]
-        public string ImageDesc
-        {
-            get
-            {
-                if (string.IsNullOrWhiteSpace(_imageDesc))
-                    return this.ExifInfo?.Description ?? string.Empty;
-
-                return _imageDesc;
-            }
-            set
-            {
-                _imageDesc = value;
-            }
-        }
-
-        [JsonIgnore]
         public Stream? ThumbhashImage => GetThumbHashStream();
 
         private Stream? GetThumbHashStream()

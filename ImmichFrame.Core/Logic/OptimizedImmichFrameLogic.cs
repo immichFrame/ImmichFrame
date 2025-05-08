@@ -192,7 +192,7 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
             foreach (var lane in memoryLane)
             {
                 var assets = lane.Assets.ToList();
-                assets.ForEach(asset => asset.ImageDesc = $"{lane.YearsAgo} {(lane.YearsAgo == 1 ? "year" : "years")} ago");
+                assets.ForEach(asset => asset.ExifInfo.Description = $"{lane.YearsAgo} {(lane.YearsAgo == 1 ? "year" : "years")} ago");
 
                 memoryAssets.AddRange(assets);
             }
