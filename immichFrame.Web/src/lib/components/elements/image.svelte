@@ -28,7 +28,7 @@
 		multi = false
 	}: Props = $props();
 
-	let debug = true;
+	let debug = false;
 
 	let hasPerson = $derived(image[1].people?.filter((x) => x.name).length ?? 0 > 0);
 	let zoomIn = $derived(imageZoom && zoomEffect());
