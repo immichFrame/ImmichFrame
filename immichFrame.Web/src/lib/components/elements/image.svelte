@@ -85,37 +85,41 @@
 </script>
 
 <div class="immichframe_image relative place-self-center overflow-hidden">
-	{#if debug}
-		{#each image[1].people?.map((x) => x.name) ?? [] as _, i}
-			<div
-				class="face z-[900] bg-red-600 absolute"
-				style="top: {getFaceMetric(i, 'y1')}%;
-					left: {getFaceMetric(i, 'x1')}%;
-					width: {getFaceMetric(i, 'width')}%;
-					height: {getFaceMetric(i, 'height')}%;"
-			></div>
-			<div
-				class="centerface z-[999] w-1 h-1 bg-blue-600 absolute"
-				style="top: {getFaceMetric(i, 'centerY')}%;
-					left: {getFaceMetric(i, 'centerX')}%;"
-			></div>
-		{/each}
-	{/if}
-
-	<img
+	<!-- Container with zoom-effect -->
+	<div
+		class="relative w-full h-full {imageZoom ? 'zoom' : ''}"
 		style="
-		--interval: {interval + 2}s;
-		--originX: {hasPerson ? getFaceMetric(0, 'centerX') + '%' : 'center'};
-		--originY: {hasPerson ? getFaceMetric(0, 'centerY') + '%' : 'center'};
-		--start-scale: {zoomIn ? 1 : 1.3};
-		--end-scale: {zoomIn ? 1.3 : 1};"
-		class="{multi || imageFill
-			? 'w-screen h-dvh object-cover'
-			: 'max-h-screen h-dvh max-w-full object-contain'} 
-		{imageZoom ? 'zoom' : ''}"
-		src={image[0]}
-		alt="data"
-	/>
+			--interval: {interval + 2}s;
+			--originX: {hasPerson ? getFaceMetric(0, 'centerX') + '%' : 'center'};
+			--originY: {hasPerson ? getFaceMetric(0, 'centerY') + '%' : 'center'};
+			--start-scale: {zoomIn ? 1 : 1.3};
+			--end-scale: {zoomIn ? 1.3 : 1};"
+	>
+		{#if debug}
+			{#each image[1].people?.map((x) => x.name) ?? [] as _, i}
+				<div
+					class="face z-[900] bg-red-600 absolute"
+					style="top: {getFaceMetric(i, 'y1')}%;
+						   left: {getFaceMetric(i, 'x1')}%;
+						   width: {getFaceMetric(i, 'width')}%;
+						   height: {getFaceMetric(i, 'height')}%;"
+				></div>
+				<div
+					class="centerface z-[999] w-1 h-1 bg-blue-600 absolute"
+					style="top: {getFaceMetric(i, 'centerY')}%;
+						   left: {getFaceMetric(i, 'centerX')}%;"
+				></div>
+			{/each}
+		{/if}
+
+		<img
+			class="{multi || imageFill
+				? 'w-screen h-dvh object-cover'
+				: 'max-h-screen h-dvh max-w-full object-contain'} w-full h-full"
+			src={image[0]}
+			alt="data"
+		/>
+	</div>
 </div>
 <AssetInfo asset={image[1]} {showLocation} {showPhotoDate} {showImageDesc} {showPeopleDesc} />
 <img
