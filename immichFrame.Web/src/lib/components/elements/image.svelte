@@ -84,7 +84,7 @@
 	}
 </script>
 
-<div class="immichframe_image place-self-center overflow-hidden">
+<div class="immichframe_image relative place-self-center overflow-hidden">
 	{#if debug}
 		{#each image[1].people?.map((x) => x.name) ?? [] as _, i}
 			<div
