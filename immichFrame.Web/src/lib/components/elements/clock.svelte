@@ -1,40 +1,50 @@
 <script lang="ts">
 	import * as api from '$lib/index';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { format } from 'date-fns';
 	import * as locale from 'date-fns/locale';
 	import { configStore } from '$lib/stores/config.store';
 	import { clientIdentifierStore } from '$lib/stores/persist.store';
+	import { writable, derived, get } from 'svelte/store';
 
 	api.init();
 
-	let time = $state(new Date());
+	const time = writable(new Date());
+
 	let weather: api.IWeather = $state() as api.IWeather;
 
 	const selectedLocale = $configStore.language;
-
 	const localeToUse =
 		(selectedLocale && locale[selectedLocale as keyof typeof locale]) || locale.enUS;
 
-	let formattedDate = $derived(
-		format(time, $configStore.photoDateFormat ?? 'dd.MM.yyyy', {
-			locale: localeToUse
-		})
+	const formattedDate = derived(
+		[time, configStore],
+		([$time, $configStore]) =>
+			format($time, $configStore.photoDateFormat ?? 'dd.MM.yyyy', {
+				locale: localeToUse
+			})
 	);
-	let timePortion = $derived(format(time, $configStore.clockFormat ?? 'HH:mm:ss'));
+
+	const timePortion = derived(
+		[time, configStore],
+		([$time, $configStore]) => format($time, $configStore.clockFormat ?? 'HH:mm')
+	);
+
+	let clockInterval: number;
+	let weatherInterval: number;
 
 	onMount(() => {
-		const interval = setInterval(() => {
-			time = new Date();
+		clockInterval = setInterval(() => {
+			time.set(new Date());
 		}, 1000);
 
 		GetWeather();
-		const weatherInterval = setInterval(() => GetWeather(), 10 * 60 * 1000);
+		weatherInterval = setInterval(() => GetWeather(), 10 * 60 * 1000);
+	});
 
-		return () => {
-			clearInterval(interval);
-			clearInterval(weatherInterval);
-		};
+	onDestroy(() => {
+		clearInterval(clockInterval);
+		clearInterval(weatherInterval);
 	});
 
 	async function GetWeather() {
@@ -54,11 +64,11 @@
 	drop-shadow-2xl p-3"
 >
 	<p id="clockdate" class="mt-2 text-sm sm:text-sm md:text-md lg:text-xl font-thin text-shadow-sm">
-		{formattedDate}
+		{$formattedDate}
 	</p>
 	<p
 		id="clocktime" class="mt-2 text-4xl sm:text-4xl md:text-6xl lg:text-8xl font-bold text-shadow-lg">
-		{timePortion}
+		{$timePortion}
 	</p>
 	{#if weather}
 		<div id="clockweather">
