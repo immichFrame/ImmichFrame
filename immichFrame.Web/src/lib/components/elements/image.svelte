@@ -31,7 +31,7 @@
 	let debug = false;
 
 	let hasPerson = $derived(image[1].people?.filter((x) => x.name).length ?? 0 > 0);
-	let zoomIn = $derived(imageZoom && zoomEffect());
+	let zoomIn = $derived(zoomEffect());
 
 	function GetFace(i: number) {
 		const people = image[1].people as PersonWithFacesResponseDto[];
