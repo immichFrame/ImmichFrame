@@ -105,8 +105,6 @@
 	<img
 		style="
 		--interval: {interval + 2}s;
-		--posX: {getFaceMetric(0, 'centerX')}%;
-		--posY: {getFaceMetric(0, 'centerY')}%;
 		--originX: {hasPerson ? getFaceMetric(0, 'centerX') + '%' : 'center'};
 		--originY: {hasPerson ? getFaceMetric(0, 'centerY') + '%' : 'center'};
 		--start-scale: {zoomIn ? 1 : 1.3};
