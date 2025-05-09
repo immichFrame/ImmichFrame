@@ -28,9 +28,10 @@
 		multi = false
 	}: Props = $props();
 
-	let debug = false;
+	let debug = true;
 
 	let hasPerson = $derived(image[1].people?.filter((x) => x.name).length ?? 0 > 0);
+	let zoomIn = $derived(imageZoom && zoomEffect());
 
 	function GetFace(i: number) {
 		let person = image[1].people as PersonWithFacesResponseDto[];
@@ -146,19 +147,18 @@
 	{/if}
 
 	<img
-		style="--interval: {interval + 2}s; --posX: {getCenterX(0)}%; --posY: {getCenterY(0)}%;"
+		style="
+		--interval: {interval + 2}s;
+		--posX: {getCenterX(0)}%;
+		--posY: {getCenterY(0)}%;
+		--originX: {hasPerson ? getCenterX(0) + '%' : 'center'};
+		--originY: {hasPerson ? getCenterY(0) + '%' : 'center'};
+		--start-scale: {zoomIn ? 1 : 1.3};
+		--end-scale: {zoomIn ? 1.3 : 1};"
 		class="{multi || imageFill
 			? 'w-screen h-dvh object-cover'
 			: 'max-h-screen h-dvh max-w-full object-contain'} 
-		{imageZoom
-			? zoomEffect()
-				? hasPerson
-					? 'zoom-in-person'
-					: 'zoom-in'
-				: hasPerson
-					? 'zoom-out-person'
-					: 'zoom-out'
-			: ''}"
+		{imageZoom ? 'zoom' : ''}"
 		src={image[0]}
 		alt="data"
 	/>
@@ -171,56 +171,17 @@
 />
 
 <style>
-	.zoom-in {
-		animation: zoom-in var(--interval) ease-out normal forwards;
-	}
-	.zoom-in-person {
-		animation: zoom-in-person var(--interval) ease-out normal forwards;
-	}
-	.zoom-out {
-		animation: zoom-out var(--interval) ease-out normal forwards;
-	}
-	.zoom-out-person {
-		animation: zoom-out-person var(--interval) ease-out normal forwards;
+	.zoom {
+		animation: zoom var(--interval) ease-out forwards;
+		transform-origin: var(--originX, center) var(--originY, center);
 	}
 
-	@keyframes zoom-in {
+	@keyframes zoom {
 		from {
-			transform: scale(1);
+			transform: scale(var(--start-scale, 1));
 		}
 		to {
-			transform: scale(1.3);
-		}
-	}
-
-	@keyframes zoom-in-person {
-		from {
-			transform: scale(1);
-			transform-origin: center;
-		}
-		to {
-			transform: scale(1.5);
-			transform-origin: var(--posX) var(--posY);
-		}
-	}
-
-	@keyframes zoom-out {
-		from {
-			transform: scale(1.3);
-		}
-		to {
-			transform: scale(1);
-		}
-	}
-
-	@keyframes zoom-out-person {
-		from {
-			transform: scale(1.5);
-			transform-origin: var(--posX) var(--posY);
-		}
-		to {
-			transform: scale(1);
-			transform-origin: center;
+			transform: scale(var(--end-scale, 1.3));
 		}
 	}
 </style>
