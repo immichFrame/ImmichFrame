@@ -31,90 +31,47 @@
 	let debug = false;
 
 	let hasPerson = $derived(image[1].people?.filter((x) => x.name).length ?? 0 > 0);
+	let zoomIn = $derived(zoomEffect());
 
 	function GetFace(i: number) {
-		let person = image[1].people as PersonWithFacesResponseDto[];
-
-		person = person.filter((x) => x.name);
-
-		return person[i].faces[0];
+		const people = image[1].people as PersonWithFacesResponseDto[];
+		const namedPeople = people.filter((x) => x.name);
+		return namedPeople[i]?.faces[0] ?? null;
 	}
 
-	function GetPosX(i: number) {
-		if (hasPerson) {
-			let face = GetFace(i);
-			if (!face) return;
-			return calcPercent(face.boundingBoxX1 ?? 0, face.imageWidth ?? 1);
-		} else {
-			return 0;
-		}
-	}
+	function getFaceMetric(
+		i: number,
+		prop: 'x1' | 'x2' | 'y1' | 'y2' | 'centerX' | 'centerY' | 'width' | 'height'
+	): number {
+		const face = GetFace(i);
+		if (!face) return 0;
 
-	function GetPosY(i: number) {
-		if (hasPerson) {
-			let face = GetFace(i);
-			if (!face) return;
-			return calcPercent(face.boundingBoxY1 ?? 0, face.imageHeight ?? 1);
-		} else {
-			return 0;
-		}
-	}
+		const {
+			boundingBoxX1 = 0,
+			boundingBoxX2 = 0,
+			boundingBoxY1 = 0,
+			boundingBoxY2 = 0,
+			imageWidth = 1,
+			imageHeight = 1
+		} = face;
 
-	function getCenterX(i: number) {
-		if (hasPerson && imageZoom) {
-			let face = GetFace(i);
-			if (!face) return;
-
-			let midX = ((face.boundingBoxX2 ?? 0) - (face.boundingBoxX1 ?? 0)) / 2;
-
-			let part = (face.boundingBoxX1 ?? 0) + midX;
-
-			return calcPercent(part, face.imageWidth ?? 1);
-		} else {
-			return 0;
-		}
-	}
-
-	function getCenterY(i: number) {
-		if (hasPerson && imageZoom) {
-			let face = GetFace(i);
-			if (!face) return;
-
-			let midY = ((face.boundingBoxY2 ?? 0) - (face.boundingBoxY1 ?? 0)) / 2;
-
-			let part = (face.boundingBoxY1 ?? 0) + midY;
-
-			return calcPercent(part, face.imageHeight ?? 1);
-		} else {
-			return 0;
-		}
-	}
-
-	function getWidth(i: number) {
-		if (hasPerson) {
-			let face = GetFace(i);
-			if (!face) return;
-
-			return calcPercent(
-				(face.boundingBoxX2 ?? 0) - (face.boundingBoxX1 ?? 0),
-				face.imageWidth ?? 1
-			);
-		} else {
-			return 0;
-		}
-	}
-
-	function getHeight(i: number) {
-		if (hasPerson) {
-			let face = GetFace(i);
-			if (!face) return;
-
-			return calcPercent(
-				(face.boundingBoxY2 ?? 0) - (face.boundingBoxY1 ?? 0),
-				face.imageHeight ?? 1
-			);
-		} else {
-			return 0;
+		switch (prop) {
+			case 'x1':
+				return calcPercent(boundingBoxX1, imageWidth);
+			case 'x2':
+				return calcPercent(boundingBoxX2, imageWidth);
+			case 'y1':
+				return calcPercent(boundingBoxY1, imageHeight);
+			case 'y2':
+				return calcPercent(boundingBoxY2, imageHeight);
+			case 'width':
+				return calcPercent(boundingBoxX2 - boundingBoxX1, imageWidth);
+			case 'height':
+				return calcPercent(boundingBoxY2 - boundingBoxY1, imageHeight);
+			case 'centerX':
+				return calcPercent(boundingBoxX1 + (boundingBoxX2 - boundingBoxX1) / 2, imageWidth);
+			case 'centerY':
+				return calcPercent(boundingBoxY1 + (boundingBoxY2 - boundingBoxY1) / 2, imageHeight);
 		}
 	}
 
@@ -127,41 +84,42 @@
 	}
 </script>
 
-<div class="immichframe_image place-self-center overflow-hidden">
-	{#if debug}
-		{#each image[1].people?.map((x) => x.name) ?? [] as _, i}
-			<div
-				class="face z-[900] bg-red-600 absolute"
-				style="top: {GetPosY(i)}%;
-					left: {GetPosX(i)}%;
-					width: {getWidth(i)}%;
-					height: {getHeight(i)}%;"
-			></div>
-			<div
-				class="centerface z-[999] w-1 h-1 bg-blue-600 absolute"
-				style="top: {getCenterY(i)}%;
-					left: {getCenterX(i)}%;"
-			></div>
-		{/each}
-	{/if}
+<div class="immichframe_image relative place-self-center overflow-hidden">
+	<!-- Container with zoom-effect -->
+	<div
+		class="relative w-full h-full {imageZoom ? 'zoom' : ''}"
+		style="
+			--interval: {interval + 2}s;
+			--originX: {hasPerson ? getFaceMetric(0, 'centerX') + '%' : 'center'};
+			--originY: {hasPerson ? getFaceMetric(0, 'centerY') + '%' : 'center'};
+			--start-scale: {zoomIn ? 1 : 1.3};
+			--end-scale: {zoomIn ? 1.3 : 1};"
+	>
+		{#if debug}
+			{#each image[1].people?.map((x) => x.name) ?? [] as _, i}
+				<div
+					class="face z-[900] bg-red-600 absolute"
+					style="top: {getFaceMetric(i, 'y1')}%;
+						   left: {getFaceMetric(i, 'x1')}%;
+						   width: {getFaceMetric(i, 'width')}%;
+						   height: {getFaceMetric(i, 'height')}%;"
+				></div>
+				<div
+					class="centerface z-[999] w-1 h-1 bg-blue-600 absolute"
+					style="top: {getFaceMetric(i, 'centerY')}%;
+						   left: {getFaceMetric(i, 'centerX')}%;"
+				></div>
+			{/each}
+		{/if}
 
-	<img
-		style="--interval: {interval + 2}s; --posX: {getCenterX(0)}%; --posY: {getCenterY(0)}%;"
-		class="{multi || imageFill
-			? 'w-screen h-dvh object-cover'
-			: 'max-h-screen h-dvh max-w-full object-contain'} 
-		{imageZoom
-			? zoomEffect()
-				? hasPerson
-					? 'zoom-in-person'
-					: 'zoom-in'
-				: hasPerson
-					? 'zoom-out-person'
-					: 'zoom-out'
-			: ''}"
-		src={image[0]}
-		alt="data"
-	/>
+		<img
+			class="{multi || imageFill
+				? 'w-screen h-dvh object-cover'
+				: 'max-h-screen h-dvh max-w-full object-contain'} w-full h-full"
+			src={image[0]}
+			alt="data"
+		/>
+	</div>
 </div>
 <AssetInfo asset={image[1]} {showLocation} {showPhotoDate} {showImageDesc} {showPeopleDesc} />
 <img
@@ -171,56 +129,17 @@
 />
 
 <style>
-	.zoom-in {
-		animation: zoom-in var(--interval) ease-out normal forwards;
-	}
-	.zoom-in-person {
-		animation: zoom-in-person var(--interval) ease-out normal forwards;
-	}
-	.zoom-out {
-		animation: zoom-out var(--interval) ease-out normal forwards;
-	}
-	.zoom-out-person {
-		animation: zoom-out-person var(--interval) ease-out normal forwards;
+	.zoom {
+		animation: zoom var(--interval) ease-out forwards;
+		transform-origin: var(--originX, center) var(--originY, center);
 	}
 
-	@keyframes zoom-in {
+	@keyframes zoom {
 		from {
-			transform: scale(1);
+			transform: scale(var(--start-scale, 1));
 		}
 		to {
-			transform: scale(1.3);
-		}
-	}
-
-	@keyframes zoom-in-person {
-		from {
-			transform: scale(1);
-			transform-origin: center;
-		}
-		to {
-			transform: scale(1.5);
-			transform-origin: var(--posX) var(--posY);
-		}
-	}
-
-	@keyframes zoom-out {
-		from {
-			transform: scale(1.3);
-		}
-		to {
-			transform: scale(1);
-		}
-	}
-
-	@keyframes zoom-out-person {
-		from {
-			transform: scale(1.5);
-			transform-origin: var(--posX) var(--posY);
-		}
-		to {
-			transform: scale(1);
-			transform-origin: center;
+			transform: scale(var(--end-scale, 1.3));
 		}
 	}
 </style>
