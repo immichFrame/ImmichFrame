@@ -249,7 +249,7 @@
 		transform: translate(var(--frameX), var(--frameY)) translate(var(--centerX), var(--centerY));
 	}
 	.zoom-in {
-		animation: zoom-in var(--interval) ease-out normal forwards;
+		animation: zoom-in var(--interval) ease-in normal forwards;
 	}
 	.zoom-out {
 		animation: zoom-out var(--interval) ease-out normal forwards;
