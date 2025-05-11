@@ -8,30 +8,29 @@
 
 	api.init();
 
-	let weather: api.IWeather | null = null;
+	let weather = $state<api.IWeather | null>(null);
 
-	const selectedLocale = $configStore.language;
+	const localeToUse = $derived(
+		() => locale[$configStore.language as keyof typeof locale] ?? locale.enUS
+	);
 
-	const localeToUse =
-		(selectedLocale && locale[selectedLocale as keyof typeof locale]) || locale.enUS;
+	let now = $state(new Date());
 
-	let formattedDate = '';
-	let timePortion = '';
+	const formattedDate = $derived(() =>
+		format(now, $configStore.photoDateFormat ?? 'dd.MM.yyyy', {
+			locale: localeToUse()
+		})
+	);
 
-	function updateTime() {
-		const time = new Date();
-		formattedDate = format(time, $configStore.photoDateFormat ?? 'dd.MM.yyyy', {
-			locale: localeToUse
-		});
-		timePortion = format(time, $configStore.clockFormat ?? 'HH:mm:ss');
-	}
+	const timePortion = $derived(() => format(now, $configStore.clockFormat ?? 'HH:mm:ss'));
 
 	onMount(() => {
-		updateTime();
-		const interval = setInterval(updateTime, 1000);
+		const interval = setInterval(() => {
+			now = new Date();
+		}, 1000);
 
-		GetWeather();
-		const weatherInterval = setInterval(() => GetWeather(), 10 * 60 * 1000);
+		getWeather();
+		const weatherInterval = setInterval(() => getWeather(), 10 * 60 * 1000);
 
 		return () => {
 			clearInterval(interval);
@@ -39,10 +38,16 @@
 		};
 	});
 
-	async function GetWeather() {
-		let weatherRequest = await api.getWeather({ clientIdentifier: $clientIdentifierStore });
-		if (weatherRequest.status == 200) {
-			weather = weatherRequest.data;
+	async function getWeather() {
+		try {
+			const weatherRequest = await api.getWeather({ clientIdentifier: $clientIdentifierStore });
+			if (weatherRequest.status === 200) {
+				weather = weatherRequest.data;
+			} else {
+				console.warn('Unexpected weather status:', weatherRequest.status);
+			}
+		} catch (err) {
+			console.error('Error fetching weather:', err);
 		}
 	}
 </script>
@@ -56,13 +61,13 @@
 	drop-shadow-2xl p-3"
 >
 	<p id="clockdate" class="mt-2 text-sm sm:text-sm md:text-md lg:text-xl font-thin text-shadow-sm">
-		{formattedDate}
+		{formattedDate()}
 	</p>
 	<p
 		id="clocktime"
 		class="mt-2 text-4xl sm:text-4xl md:text-6xl lg:text-8xl font-bold text-shadow-lg"
 	>
-		{timePortion}
+		{timePortion()}
 	</p>
 	{#if weather}
 		<div id="clockweather">
