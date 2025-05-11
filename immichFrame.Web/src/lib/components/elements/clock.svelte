@@ -8,25 +8,27 @@
 
 	api.init();
 
-	let time = $state(new Date());
-	let weather: api.IWeather = $state() as api.IWeather;
+	let weather: api.IWeather | null = null;
 
 	const selectedLocale = $configStore.language;
 
 	const localeToUse =
 		(selectedLocale && locale[selectedLocale as keyof typeof locale]) || locale.enUS;
 
-	let formattedDate = $derived(
-		format(time, $configStore.photoDateFormat ?? 'dd.MM.yyyy', {
+	let formattedDate = '';
+	let timePortion = '';
+
+	function updateTime() {
+		const time = new Date();
+		formattedDate = format(time, $configStore.photoDateFormat ?? 'dd.MM.yyyy', {
 			locale: localeToUse
-		})
-	);
-	let timePortion = $derived(format(time, $configStore.clockFormat ?? 'HH:mm:ss'));
+		});
+		timePortion = format(time, $configStore.clockFormat ?? 'HH:mm:ss');
+	}
 
 	onMount(() => {
-		const interval = setInterval(() => {
-			time = new Date();
-		}, 1000);
+		updateTime();
+		const interval = setInterval(updateTime, 1000);
 
 		GetWeather();
 		const weatherInterval = setInterval(() => GetWeather(), 10 * 60 * 1000);
@@ -57,12 +59,17 @@
 		{formattedDate}
 	</p>
 	<p
-		id="clocktime" class="mt-2 text-4xl sm:text-4xl md:text-6xl lg:text-8xl font-bold text-shadow-lg">
+		id="clocktime"
+		class="mt-2 text-4xl sm:text-4xl md:text-6xl lg:text-8xl font-bold text-shadow-lg"
+	>
 		{timePortion}
 	</p>
 	{#if weather}
 		<div id="clockweather">
-			<div id="clockweatherinfo" class="text-xl sm:text-xl md:text-2xl lg:text-3xl font-semibold text-shadow-sm">
+			<div
+				id="clockweatherinfo"
+				class="text-xl sm:text-xl md:text-2xl lg:text-3xl font-semibold text-shadow-sm"
+			>
 				{weather.location},
 				{weather.temperature?.toFixed(1)}
 				{weather.unit}
