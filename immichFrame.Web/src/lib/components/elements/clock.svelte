@@ -8,28 +8,29 @@
 
 	api.init();
 
-	let time = $state(new Date());
-	let weather: api.IWeather = $state() as api.IWeather;
+	let weather = $state<api.IWeather | null>(null);
 
-	const selectedLocale = $configStore.language;
+	const localeToUse = $derived(
+		() => locale[$configStore.language as keyof typeof locale] ?? locale.enUS
+	);
 
-	const localeToUse =
-		(selectedLocale && locale[selectedLocale as keyof typeof locale]) || locale.enUS;
+	let now = $state(new Date());
 
-	let formattedDate = $derived(
-		format(time, $configStore.photoDateFormat ?? 'dd.MM.yyyy', {
-			locale: localeToUse
+	const formattedDate = $derived(() =>
+		format(now, $configStore.photoDateFormat ?? 'dd.MM.yyyy', {
+			locale: localeToUse()
 		})
 	);
-	let timePortion = $derived(format(time, $configStore.clockFormat ?? 'HH:mm:ss'));
+
+	const timePortion = $derived(() => format(now, $configStore.clockFormat ?? 'HH:mm:ss'));
 
 	onMount(() => {
 		const interval = setInterval(() => {
-			time = new Date();
+			now = new Date();
 		}, 1000);
 
-		GetWeather();
-		const weatherInterval = setInterval(() => GetWeather(), 10 * 60 * 1000);
+		getWeather();
+		const weatherInterval = setInterval(() => getWeather(), 10 * 60 * 1000);
 
 		return () => {
 			clearInterval(interval);
@@ -37,10 +38,16 @@
 		};
 	});
 
-	async function GetWeather() {
-		let weatherRequest = await api.getWeather({ clientIdentifier: $clientIdentifierStore });
-		if (weatherRequest.status == 200) {
-			weather = weatherRequest.data;
+	async function getWeather() {
+		try {
+			const weatherRequest = await api.getWeather({ clientIdentifier: $clientIdentifierStore });
+			if (weatherRequest.status === 200) {
+				weather = weatherRequest.data;
+			} else {
+				console.warn('Unexpected weather status:', weatherRequest.status);
+			}
+		} catch (err) {
+			console.error('Error fetching weather:', err);
 		}
 	}
 </script>
@@ -54,15 +61,20 @@
 	drop-shadow-2xl p-3"
 >
 	<p id="clockdate" class="mt-2 text-sm sm:text-sm md:text-md lg:text-xl font-thin text-shadow-sm">
-		{formattedDate}
+		{formattedDate()}
 	</p>
 	<p
-		id="clocktime" class="mt-2 text-4xl sm:text-4xl md:text-6xl lg:text-8xl font-bold text-shadow-lg">
-		{timePortion}
+		id="clocktime"
+		class="mt-2 text-4xl sm:text-4xl md:text-6xl lg:text-8xl font-bold text-shadow-lg"
+	>
+		{timePortion()}
 	</p>
 	{#if weather}
 		<div id="clockweather">
-			<div id="clockweatherinfo" class="text-xl sm:text-xl md:text-2xl lg:text-3xl font-semibold text-shadow-sm">
+			<div
+				id="clockweatherinfo"
+				class="text-xl sm:text-xl md:text-2xl lg:text-3xl font-semibold text-shadow-sm"
+			>
 				{weather.location},
 				{weather.temperature?.toFixed(1)}
 				{weather.unit}
