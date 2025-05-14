@@ -6,10 +6,9 @@
 	import ErrorElement from './error-element.svelte';
 	import Image from './image.svelte';
 	import LoadingElement from './LoadingElement.svelte';
-	import { fade } from 'svelte/transition';
+	import { blur, fly } from 'svelte/transition';
 	import { configStore } from '$lib/stores/config.store';
 	import { Confetti } from 'svelte-confetti';
-	import { clientIdentifierStore } from '$lib/stores/persist.store';
 	import { slideshowStore } from '$lib/stores/slideshow.store';
 
 	api.init();
@@ -69,7 +68,7 @@
 	<ErrorElement />
 {:else if loaded}
 	{#key images}
-		<div class="grid absolute h-dvh w-screen" transition:fade={{ duration: transitionDuration }}>
+		<div class="grid absolute h-dvh w-screen" transition:blur={{ duration: transitionDuration }}>
 			{#if split}
 				<div class="grid grid-cols-2">
 					<div id="image_portrait_1" class="relative grid border-r-2 border-primary h-dvh">

@@ -3,6 +3,8 @@
 	import { format } from 'date-fns';
 	import * as locale from 'date-fns/locale';
 	import { configStore } from '$lib/stores/config.store';
+	import Icon from './icon.svelte';
+	import { mdiCalendar, mdiMapMarker, mdiAccount, mdiText } from '@mdi/js';
 
 	interface Props {
 		asset: AssetResponseDto;
@@ -31,6 +33,7 @@
 		return Array.from(locationParts).join(', ');
 	}
 	let assetDate = $derived(asset.exifInfo?.dateTimeOriginal);
+	console.log(asset.exifInfo);
 	let desc = $derived(asset.exifInfo?.description ?? '');
 	let time = $derived(assetDate ? new Date(assetDate) : null);
 	const selectedLocale = $configStore.language;
@@ -62,18 +65,37 @@
 		{$configStore.style == 'blur' ? 'backdrop-blur-lg rounded-tl-2xl' : ''}	"
 	>
 		{#if showPhotoDate && formattedDate}
-			<p id="photodate" class="text-sm font-thin text-shadow-sm">{formattedDate}</p>
+			<p id="photodate" class="info-item">
+				<Icon path={mdiCalendar} class="info-icon" />
+				{formattedDate}
+			</p>
 		{/if}
 		{#if showImageDesc && desc}
-			<p id="imagedescription" class="text-base font-light text-shadow-sm">{desc}</p>
+			<p id="imagedescription" class="info-item">
+				<Icon path={mdiText} class="info-icon" />
+				{desc}
+			</p>
 		{/if}
-		{#if showPeopleDesc && availablePeople}
-			<p id="peopledescription" class="text-sm font-light text-shadow-sm">
+		{#if showPeopleDesc && availablePeople && availablePeople.length > 0}
+			<p id="peopledescription" class="info-item">
+				<Icon path={mdiAccount} />
 				{availablePeople.map((x) => x.name).join(', ')}
 			</p>
 		{/if}
 		{#if showLocation && location}
-			<p id="imagelocation" class="text-base font-light text-shadow-sm">{location}</p>
+			<p id="imagelocation" class="info-item">
+				<Icon path={mdiMapMarker} />
+				{location}
+			</p>
 		{/if}
 	</div>
 {/if}
+
+<style>
+	.info-item {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin: 0.2rem 0.5rem;
+	}
+</style>

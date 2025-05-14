@@ -86,6 +86,9 @@
 			}
 		}
 		for (let i = 0; i < PRELOAD_IMAGES; i++) {
+			if (i >= assetBacklog.length) {
+				break;
+			}
 			if (!(assetBacklog[i].id in imagePromisesDict)) {
 				imagePromisesDict[assetBacklog[i].id] = loadImage(assetBacklog[i]);
 			}
@@ -264,7 +267,9 @@
 		}
 		let assetInfoRequest = await api.getAssetInfo(a.id);
 
-		return [getImageUrl(req.data), assetInfoRequest.data] as [string, api.AssetResponseDto];
+		a.people = assetInfoRequest.data.people;
+
+		return [getImageUrl(req.data), a] as [string, api.AssetResponseDto];
 	}
 
 	function getImageUrl(image: Blob) {
