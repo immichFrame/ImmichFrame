@@ -17,7 +17,7 @@
 	import { page } from '$app/stores';
 
 	interface ImagesState {
-		images: [string, api.AssetResponseDto][];
+		images: [string, api.AssetResponseDto, api.AlbumResponseDto[]][];
 		error: boolean;
 		loaded: boolean;
 		split: boolean;
@@ -49,7 +49,10 @@
 		split: false,
 		hasBday: false
 	});
-	let imagePromisesDict: Record<string, Promise<[string, api.AssetResponseDto]>> = {};
+	let imagePromisesDict: Record<
+		string,
+		Promise<[string, api.AssetResponseDto, api.AlbumResponseDto[]]>
+	> = {};
 
 	let unsubscribeRestart: () => void;
 	let unsubscribeStop: () => void;
@@ -256,20 +259,29 @@
 
 	async function loadImage(a: api.AssetResponseDto) {
 		let req = await api.getImage(a.id, { clientIdentifier: $clientIdentifierStore });
+		let albumReq = await api.getAlbumInfo(a.id);
 
-		if (req.status != 200) {
-			return ['', a] as [string, api.AssetResponseDto];
+		if (req.status != 200 || albumReq.status != 200) {
+			return ['', a, []] as [string, api.AssetResponseDto, api.AlbumResponseDto[]];
 		}
 
 		// if the people array is already populated, there is no need to call the API again
 		if ((a.people ?? []).length > 0) {
-			return [getImageUrl(req.data), a] as [string, api.AssetResponseDto];
+			return [getImageUrl(req.data), a, albumReq.data] as [
+				string,
+				api.AssetResponseDto,
+				api.AlbumResponseDto[]
+			];
 		}
 		let assetInfoRequest = await api.getAssetInfo(a.id);
 
 		a.people = assetInfoRequest.data.people;
 
-		return [getImageUrl(req.data), a] as [string, api.AssetResponseDto];
+		return [getImageUrl(req.data), a, albumReq.data] as [
+			string,
+			api.AssetResponseDto,
+			api.AlbumResponseDto[]
+		];
 	}
 
 	function getImageUrl(image: Blob) {
@@ -333,6 +345,7 @@
 				showPhotoDate={$configStore.showPhotoDate}
 				showImageDesc={$configStore.showImageDesc}
 				showPeopleDesc={$configStore.showPeopleDesc}
+				showAlbumName={$configStore.showAlbumName}
 				{...imagesState}
 				imageFill={$configStore.imageFill}
 				imageZoom={$configStore.imageZoom}

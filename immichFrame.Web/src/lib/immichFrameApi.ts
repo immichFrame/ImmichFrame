@@ -136,6 +136,38 @@ export type AssetResponseDto = {
         [key: string]: any | null;
     } | null;
 };
+export type AlbumUserRole = 0 | 1;
+export type AlbumUserResponseDto = {
+    role: AlbumUserRole;
+    user: UserResponseDto;
+    additionalProperties?: {
+        [key: string]: any | null;
+    } | null;
+};
+export type AssetOrder = 0 | 1;
+export type AlbumResponseDto = {
+    albumName: string;
+    albumThumbnailAssetId?: string | null;
+    albumUsers: AlbumUserResponseDto[];
+    assetCount?: number;
+    assets: AssetResponseDto[];
+    createdAt: string;
+    description: string;
+    endDate?: string | null;
+    hasSharedLink?: boolean;
+    id: string;
+    isActivityEnabled?: boolean;
+    lastModifiedAssetTimestamp?: string | null;
+    order?: AssetOrder;
+    owner: UserResponseDto;
+    ownerId: string;
+    shared?: boolean;
+    startDate?: string | null;
+    updatedAt: string;
+    additionalProperties?: {
+        [key: string]: any | null;
+    } | null;
+};
 export type ImageResponse = {
     randomImageBase64: string | null;
     thumbHashImageBase64: string | null;
@@ -150,7 +182,7 @@ export type IAppointment = {
     description?: string | null;
     location?: string | null;
 };
-export type WebClientSettings = {    
+export type WebClientSettings = {
     margin?: string | null;
     interval?: number;
     transitionDuration?: number;
@@ -162,6 +194,7 @@ export type WebClientSettings = {
     photoDateFormat?: string | null;
     showImageDesc?: boolean;
     showPeopleDesc?: boolean;
+    showAlbumName?: boolean;
     showImageLocation?: boolean;
     imageLocationFormat?: string | null;
     primaryColor?: string | null;
@@ -202,6 +235,18 @@ export function getAssetInfo(id: string, { clientIdentifier }: {
         status: 200;
         data: AssetResponseDto;
     }>(`/api/Asset/${encodeURIComponent(id)}/AssetInfo${QS.query(QS.explode({
+        clientIdentifier
+    }))}`, {
+        ...opts
+    });
+}
+export function getAlbumInfo(id: string, { clientIdentifier }: {
+    clientIdentifier?: string;
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: AlbumResponseDto[];
+    }>(`/api/Asset/${encodeURIComponent(id)}/AlbumInfo${QS.query(QS.explode({
         clientIdentifier
     }))}`, {
         ...opts

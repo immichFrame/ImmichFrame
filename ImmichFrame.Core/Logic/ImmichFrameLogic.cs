@@ -58,6 +58,17 @@ namespace ImmichFrame.Core.Logic
             }
         }
 
+        public async Task<IEnumerable<AlbumResponseDto>> GetAlbumInfoById(Guid assetId)
+        {
+            using (var client = new HttpClient())
+            {
+                client.UseApiKey(_settings.ApiKey);
+                var immichApi = new ImmichApi(_settings.ImmichServerUrl, client);
+
+                return await immichApi.GetAllAlbumsAsync(assetId, null);
+            }
+        }
+
         private int _assetAmount = 250;
         public async Task<IEnumerable<AssetResponseDto>> GetAssets()
         {

@@ -5,7 +5,7 @@ using ImmichFrame.WebApi.Helpers;
 namespace ImmichFrame.WebApi.Models
 {
     public class WebClientSettings : IWebClientSettings
-    {        
+    {
         public string Margin { get; set; } = "0,0,0,0";
         public int Interval { get; set; } = 45;
         public double TransitionDuration { get; set; } = 1;
@@ -17,6 +17,7 @@ namespace ImmichFrame.WebApi.Models
         public string? PhotoDateFormat { get; set; } = "MM/dd/yyyy";
         public bool ShowImageDesc { get; set; } = true;
         public bool ShowPeopleDesc { get; set; } = true;
+        public bool ShowAlbumName { get; set; } = true;
         public bool ShowImageLocation { get; set; } = true;
         public string? ImageLocationFormat { get; set; } = "City,State,Country";
         public string? PrimaryColor { get; set; }

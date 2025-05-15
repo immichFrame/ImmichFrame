@@ -1,15 +1,20 @@
 <script lang="ts">
-	import { type AssetResponseDto, type PersonWithFacesResponseDto } from '$lib/immichFrameApi';
+	import {
+		type AlbumResponseDto,
+		type AssetResponseDto,
+		type PersonWithFacesResponseDto
+	} from '$lib/immichFrameApi';
 	import { decodeBase64 } from '$lib/utils';
 	import { thumbHashToDataURL } from 'thumbhash';
 	import AssetInfo from './asset-info.svelte';
 
 	interface Props {
-		image: [url: string, asset: AssetResponseDto];
+		image: [url: string, asset: AssetResponseDto, albums: AlbumResponseDto[]];
 		showLocation: boolean;
 		showPhotoDate: boolean;
 		showImageDesc: boolean;
 		showPeopleDesc: boolean;
+		showAlbumName: boolean;
 		imageFill: boolean;
 		imageZoom: boolean;
 		interval: number;
@@ -22,6 +27,7 @@
 		showPhotoDate,
 		showImageDesc,
 		showPeopleDesc,
+		showAlbumName,
 		imageFill,
 		imageZoom,
 		interval,
@@ -121,7 +127,15 @@
 		/>
 	</div>
 </div>
-<AssetInfo asset={image[1]} {showLocation} {showPhotoDate} {showImageDesc} {showPeopleDesc} />
+<AssetInfo
+	asset={image[1]}
+	albums={image[2]}
+	{showLocation}
+	{showPhotoDate}
+	{showImageDesc}
+	{showPeopleDesc}
+	{showAlbumName}
+/>
 <img
 	class="absolute flex w-full h-full z-[-1]"
 	src={thumbHashToDataURL(decodeBase64(image[1].thumbhash ?? ''))}

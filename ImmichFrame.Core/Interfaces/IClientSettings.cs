@@ -6,7 +6,7 @@
     }
 
     public interface IClientSettings
-    {        
+    {
         public string Margin { get; set; }
         public int Interval { get; set; }
         public double TransitionDuration { get; set; }
@@ -18,6 +18,7 @@
         public string? PhotoDateFormat { get; set; }
         public bool ShowImageDesc { get; set; }
         public bool ShowPeopleDesc { get; set; }
+        public bool ShowAlbumName { get; set; }
         public bool ShowImageLocation { get; set; }
         public string? ImageLocationFormat { get; set; }
         public string? PrimaryColor { get; set; }

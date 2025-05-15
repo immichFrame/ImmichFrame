@@ -68,6 +68,11 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
         return _immichApi.GetAssetInfoAsync(assetId, null);
     }
 
+    public async Task<IEnumerable<AlbumResponseDto>> GetAlbumInfoById(Guid assetId)
+    {
+        return await _immichApi.GetAllAlbumsAsync(assetId, null);
+    }
+
     private int _assetAmount = 250;
     private Random _random = new Random();
     public async Task<IEnumerable<AssetResponseDto>> GetAssets()
