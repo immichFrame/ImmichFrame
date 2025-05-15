@@ -50,6 +50,15 @@ namespace ImmichFrame.WebApi.Controllers
             return await _logic.GetAssetInfoById(id);
         }
 
+        [HttpGet("{id}/AlbumInfo", Name = "GetAlbumInfo")]
+        public async Task<List<AlbumResponseDto>> GetAlbumInfo(Guid id, string clientIdentifier = "")
+        {
+            var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
+            _logger.LogTrace("AlbumInfo '{id}' requested by '{ClientIdentifier}'", id, sanitizedClientIdentifier);
+
+            return (await _logic.GetAlbumInfoById(id)).ToList() ?? throw new AssetNotFoundException("No asset was found");
+        }
+
         [HttpGet("{id}/Image", Name = "GetImage")]
         [Produces("image/jpeg", "image/webp")]
         [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status200OK)]

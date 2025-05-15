@@ -64,6 +64,7 @@ services:
       # PhotoDateFormat: "yyyy-MM-dd"
       # ShowImageDesc: "true"
       # ShowPeopleDesc: "true"
+      # ShowAlbumName: "true"
       # ShowImageLocation: "true"
       # ImageLocationFormat: "City,State,Country"
       # PrimaryColor: "#F5DEB3"

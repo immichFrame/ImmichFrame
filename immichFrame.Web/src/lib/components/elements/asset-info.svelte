@@ -1,20 +1,30 @@
 <script lang="ts">
-	import { type AssetResponseDto } from '$lib/immichFrameApi';
+	import { type AlbumResponseDto, type AssetResponseDto } from '$lib/immichFrameApi';
 	import { format } from 'date-fns';
 	import * as locale from 'date-fns/locale';
 	import { configStore } from '$lib/stores/config.store';
 	import Icon from './icon.svelte';
-	import { mdiCalendar, mdiMapMarker, mdiAccount, mdiText } from '@mdi/js';
+	import { mdiCalendar, mdiMapMarker, mdiAccount, mdiText, mdiImageAlbum } from '@mdi/js';
 
 	interface Props {
 		asset: AssetResponseDto;
+		albums: AlbumResponseDto[];
 		showLocation: boolean;
 		showPhotoDate: boolean;
 		showImageDesc: boolean;
 		showPeopleDesc: boolean;
+		showAlbumName: boolean;
 	}
 
-	let { asset, showLocation, showPhotoDate, showImageDesc, showPeopleDesc }: Props = $props();
+	let {
+		asset,
+		albums,
+		showLocation,
+		showPhotoDate,
+		showImageDesc,
+		showPeopleDesc,
+		showAlbumName
+	}: Props = $props();
 
 	function formatLocation(format: string, city?: string, state?: string, country?: string) {
 		const locationParts: Array<string> = new Array();
@@ -56,7 +66,7 @@
 	let availablePeople = $derived(asset.people?.filter((x) => x.name));
 </script>
 
-{#if showPhotoDate || showLocation || showImageDesc || showPeopleDesc}
+{#if showPhotoDate || showLocation || showImageDesc || showPeopleDesc || showAlbumName}
 	<div
 		id="imageinfo"
 		class="immichframe_image_metadata absolute bottom-0 right-0 z-100 text-primary p-1 text-right
@@ -74,6 +84,12 @@
 			<p id="imagedescription" class="info-item">
 				<Icon path={mdiText} class="info-icon" />
 				{desc}
+			</p>
+		{/if}
+		{#if showAlbumName && albums && albums.length > 0}
+			<p id="imagealbums" class="info-item">
+				<Icon path={mdiImageAlbum} />
+				{albums.map((x) => x.albumName).join(', ')}
 			</p>
 		{/if}
 		{#if showPeopleDesc && availablePeople && availablePeople.length > 0}

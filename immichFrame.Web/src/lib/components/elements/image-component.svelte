@@ -1,12 +1,10 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
-
 	import type { AssetResponseDto } from '$lib/immichFrameApi';
 	import * as api from '$lib/index';
 	import ErrorElement from './error-element.svelte';
 	import Image from './image.svelte';
 	import LoadingElement from './LoadingElement.svelte';
-	import { blur, fly } from 'svelte/transition';
+	import { blur } from 'svelte/transition';
 	import { configStore } from '$lib/stores/config.store';
 	import { Confetti } from 'svelte-confetti';
 	import { slideshowStore } from '$lib/stores/slideshow.store';
@@ -14,7 +12,7 @@
 	api.init();
 
 	interface Props {
-		images: [string, AssetResponseDto][];
+		images: [string, AssetResponseDto, api.AlbumResponseDto[]][];
 		interval?: number;
 		error?: boolean;
 		loaded?: boolean;
@@ -24,6 +22,7 @@
 		showPhotoDate?: boolean;
 		showImageDesc?: boolean;
 		showPeopleDesc?: boolean;
+		showAlbumName?: boolean;
 		imageFill?: boolean;
 		imageZoom?: boolean;
 	}
@@ -39,6 +38,7 @@
 		showPhotoDate = true,
 		showImageDesc = true,
 		showPeopleDesc = true,
+		showAlbumName = true,
 		imageFill = false,
 		imageZoom = false
 	}: Props = $props();
@@ -80,6 +80,7 @@
 							{showPhotoDate}
 							{showImageDesc}
 							{showPeopleDesc}
+							{showAlbumName}
 							{imageFill}
 							{imageZoom}
 						/>
@@ -93,6 +94,7 @@
 							{showPhotoDate}
 							{showImageDesc}
 							{showPeopleDesc}
+							{showAlbumName}
 							{imageFill}
 							{imageZoom}
 						/>
@@ -107,6 +109,7 @@
 						{showPhotoDate}
 						{showImageDesc}
 						{showPeopleDesc}
+						{showAlbumName}
 						{imageFill}
 						{imageZoom}
 					/>
