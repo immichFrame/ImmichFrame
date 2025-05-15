@@ -259,15 +259,19 @@
 
 	async function loadImage(a: api.AssetResponseDto) {
 		let req = await api.getImage(a.id, { clientIdentifier: $clientIdentifierStore });
-		let albumReq = await api.getAlbumInfo(a.id);
+		let album: api.AlbumResponseDto[] | null = null;
+		if ($configStore.showAlbumName) {
+			let albumReq = await api.getAlbumInfo(a.id);
+			album = albumReq.data;
+		}
 
-		if (req.status != 200 || albumReq.status != 200) {
+		if (req.status != 200 || ($configStore.showAlbumName && album == null)) {
 			return ['', a, []] as [string, api.AssetResponseDto, api.AlbumResponseDto[]];
 		}
 
 		// if the people array is already populated, there is no need to call the API again
-		if ((a.people ?? []).length > 0) {
-			return [getImageUrl(req.data), a, albumReq.data] as [
+		if ($configStore.showPeopleDesc && (a.people ?? []).length > 0) {
+			return [getImageUrl(req.data), a, album] as [
 				string,
 				api.AssetResponseDto,
 				api.AlbumResponseDto[]
@@ -277,7 +281,7 @@
 
 		a.people = assetInfoRequest.data.people;
 
-		return [getImageUrl(req.data), a, albumReq.data] as [
+		return [getImageUrl(req.data), a, album] as [
 			string,
 			api.AssetResponseDto,
 			api.AlbumResponseDto[]
