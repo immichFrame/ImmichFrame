@@ -40,6 +40,7 @@
 	let progressBar: ProgressBar = $state() as ProgressBar;
 
 	let error: boolean = $state(false);
+	let infoVisible: boolean = $state(false);
 	let authError: boolean = $state(false);
 	let errorMessage: string = $state() as string;
 	let imagesState: ImagesState = $state({
@@ -347,6 +348,7 @@
 				{...imagesState}
 				imageFill={$configStore.imageFill}
 				imageZoom={$configStore.imageZoom}
+				bind:showInfo={infoVisible}
 			/>
 		</div>
 
@@ -357,20 +359,33 @@
 		<Appointments />
 
 		<OverlayControls
-			on:next={async () => {
+			next={async () => {
 				await handleDone(false, true);
+				infoVisible = false;
 			}}
-			on:back={async () => {
+			back={async () => {
 				await handleDone(true, true);
+				infoVisible = false;
 			}}
-			on:pause={async () => {
+			pause={async () => {
+				infoVisible = false;
 				if (progressBarStatus == ProgressBarStatus.Paused) {
 					await progressBar.play();
 				} else {
 					await progressBar.pause();
 				}
 			}}
+			showInfo={async () => {
+				if (infoVisible) {
+					infoVisible = false;
+					await progressBar.play();
+				} else {
+					infoVisible = true;
+					await progressBar.pause();
+				}
+			}}
 			bind:status={progressBarStatus}
+			bind:infoVisible
 			overlayVisible={cursorVisible}
 		/>
 

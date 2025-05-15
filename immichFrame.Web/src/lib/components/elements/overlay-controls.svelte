@@ -1,30 +1,34 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
-	import { mdiChevronRight, mdiPlay, mdiPause, mdiChevronLeft } from '@mdi/js';
+	import {
+		mdiChevronRight,
+		mdiPlay,
+		mdiPause,
+		mdiChevronLeft,
+		mdiInformationOutline,
+		mdiInformationOffOutline
+	} from '@mdi/js';
 	import Icon from './icon.svelte';
 	import { ProgressBarStatus } from './progress-bar.svelte';
-
-	const dispatch = createEventDispatcher();
 
 	interface Props {
 		status: ProgressBarStatus;
 		overlayVisible: boolean;
+		infoVisible: boolean;
+		next: () => void;
+		back: () => void;
+		pause: () => void;
+		showInfo: () => void;
 	}
 
-	let { status = $bindable(), overlayVisible }: Props = $props();
-
-	function clickNext() {
-		dispatch('next');
-	}
-	function clickBack() {
-		dispatch('back');
-	}
-	function clickPause() {
-		dispatch('pause');
-	}
-	function clickSettings() {
-		// dispatch('settings');
-	}
+	let {
+		status = $bindable(),
+		overlayVisible,
+		infoVisible = $bindable(),
+		next,
+		back,
+		pause,
+		showInfo
+	}: Props = $props();
 
 	function shortcuts(node: any, shortcutList: any[]) {
 		function handleKeyDown(event: { key: any; preventDefault: () => void }) {
@@ -48,15 +52,19 @@
 	const shortcutList = [
 		{
 			key: 'ArrowRight',
-			action: clickNext
+			action: next
 		},
 		{
 			key: 'ArrowLeft',
-			action: clickBack
+			action: back
 		},
 		{
 			key: ' ',
-			action: clickPause
+			action: pause
+		},
+		{
+			key: 'i',
+			action: showInfo
 		}
 	];
 </script>
@@ -66,7 +74,7 @@
 {#if overlayVisible}
 	<div class="absolute h-full w-full top-0 left-0 z-[100] grid grid-cols-3 gap-2">
 		<div id="overlayback" class="group text-center content-center">
-			<button class="opacity-0 group-hover:opacity-100 text-primary" onclick={clickBack}
+			<button class="opacity-0 group-hover:opacity-100 text-primary" onclick={back}
 				><Icon
 					title="Back"
 					class="max-h-[min(10rem,33vh)] max-w-[min(10rem,33vh)] h-[33vh] w-[33vw]top"
@@ -77,12 +85,19 @@
 		</div>
 
 		<div class="grid grid-rows-3">
-			<div id="overlaysettings" class="group text-center content-center">
-				<!-- <button class="opacity-0 hover:opacity-100 text-primary" onclick={clickSettings}> </button> -->
+			<div id="overlayInfo" class="group text-center content-center">
+				<button class="opacity-0 hover:opacity-100 text-primary" onclick={showInfo}
+					><Icon
+						title="Info"
+						class="max-h-[min(10rem,33vh)] max-w-[min(10rem,33vh)] h-[33vh] w-[33vw]top"
+						path={infoVisible ? mdiInformationOffOutline : mdiInformationOutline}
+						size=""
+					/></button
+				>
 			</div>
 
 			<div id="overlaypause" class="group text-center content-center">
-				<button onclick={clickPause} class="opacity-0 group-hover:opacity-100 text-primary">
+				<button onclick={pause} class="opacity-0 group-hover:opacity-100 text-primary">
 					<Icon
 						class="max-h-[min(10rem,33vh)] max-w-[min(10rem,33vh)] h-[33vh] w-[33vw]"
 						title={status == ProgressBarStatus.Paused ? 'Play' : 'Pause'}
@@ -98,7 +113,7 @@
 		</div>
 
 		<div id="overlaynext" class="group text-center content-center">
-			<button class="opacity-0 group-hover:opacity-100 text-primary" onclick={clickNext}
+			<button class="opacity-0 group-hover:opacity-100 text-primary" onclick={next}
 				><Icon
 					title="Next"
 					class="max-h-[min(10rem,33vh)] max-w-[min(10rem,33vh)] h-[33vh] w-[33vw]top"

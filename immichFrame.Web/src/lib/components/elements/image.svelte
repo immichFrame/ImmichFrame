@@ -6,7 +6,8 @@
 	} from '$lib/immichFrameApi';
 	import { decodeBase64 } from '$lib/utils';
 	import { thumbHashToDataURL } from 'thumbhash';
-	import AssetInfo from './asset-info.svelte';
+	import AssetInfo from '$lib/components/elements/asset-info.svelte';
+	import ImageOverlay from '$lib/components/elements/imageoverlay/image-overlay.svelte';
 
 	interface Props {
 		image: [url: string, asset: AssetResponseDto, albums: AlbumResponseDto[]];
@@ -19,6 +20,7 @@
 		imageZoom: boolean;
 		interval: number;
 		multi?: boolean;
+		showInfo: boolean;
 	}
 
 	let {
@@ -31,7 +33,8 @@
 		imageFill,
 		imageZoom,
 		interval,
-		multi = false
+		multi = false,
+		showInfo = $bindable(false)
 	}: Props = $props();
 
 	let debug = false;
@@ -89,6 +92,10 @@
 		return 0.5 > Math.random();
 	}
 </script>
+
+{#if showInfo}
+	<ImageOverlay asset={image[1]} albums={image[2]} />
+{/if}
 
 <div class="immichframe_image relative place-self-center overflow-hidden">
 	<!-- Container with zoom-effect -->
