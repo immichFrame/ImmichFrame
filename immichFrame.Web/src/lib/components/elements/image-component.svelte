@@ -25,6 +25,7 @@
 		showAlbumName?: boolean;
 		imageFill?: boolean;
 		imageZoom?: boolean;
+		showInfo: boolean;
 	}
 
 	let {
@@ -40,7 +41,8 @@
 		showPeopleDesc = true,
 		showAlbumName = true,
 		imageFill = false,
-		imageZoom = false
+		imageZoom = false,
+		showInfo = $bindable(false)
 	}: Props = $props();
 	let instantTransition = slideshowStore.instantTransition;
 	let transitionDuration = $derived(
@@ -83,6 +85,7 @@
 							{showAlbumName}
 							{imageFill}
 							{imageZoom}
+							bind:showInfo
 						/>
 					</div>
 					<div id="image_portrait_2" class="relative grid border-l-2 border-primary h-dvh">
@@ -97,6 +100,7 @@
 							{showAlbumName}
 							{imageFill}
 							{imageZoom}
+							bind:showInfo
 						/>
 					</div>
 				</div>
@@ -112,6 +116,7 @@
 						{showAlbumName}
 						{imageFill}
 						{imageZoom}
+						bind:showInfo
 					/>
 				</div>
 			{/if}
