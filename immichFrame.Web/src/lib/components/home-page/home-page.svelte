@@ -270,16 +270,10 @@
 		}
 
 		// if the people array is already populated, there is no need to call the API again
-		if ($configStore.showPeopleDesc && (a.people ?? []).length > 0) {
-			return [getImageUrl(req.data), a, album] as [
-				string,
-				api.AssetResponseDto,
-				api.AlbumResponseDto[]
-			];
+		if ($configStore.showPeopleDesc && (a.people ?? []).length == 0) {
+			let assetInfoRequest = await api.getAssetInfo(a.id);
+			a.people = assetInfoRequest.data.people;
 		}
-		let assetInfoRequest = await api.getAssetInfo(a.id);
-
-		a.people = assetInfoRequest.data.people;
 
 		return [getImageUrl(req.data), a, album] as [
 			string,
