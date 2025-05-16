@@ -22,7 +22,7 @@ namespace ImmichFrame.WebApi.Controllers
         public async Task<IWeather?> GetWeather(string clientIdentifier = "")
         {
             var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
-            _logger.LogTrace("Weather requested by '{ClientIdentifier}'", sanitizedClientIdentifier);
+            _logger.LogDebug("Weather requested by '{sanitizedClientIdentifier}'", sanitizedClientIdentifier);
             return await _weatherService.GetWeather();
         }
     }

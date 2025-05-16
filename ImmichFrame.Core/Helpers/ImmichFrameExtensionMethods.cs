@@ -26,13 +26,5 @@ public static class ImmichFrameExtensionMethods
 
         return input;
     }
-
-    public async static Task<AssetResponseDto> LoadAdditionalAssetInfo(this AssetResponseDto asset, ImmichApi api, ILogger logger)
-    {
-        logger.LogTrace($"Loading additional info for asset {asset.Id}");
-        var additional = await api.GetAssetInfoAsync(Guid.Parse(asset.Id), null);
-
-        return additional;
-    }
 }
 

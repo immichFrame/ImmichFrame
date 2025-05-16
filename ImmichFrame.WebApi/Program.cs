@@ -7,7 +7,6 @@ using System.Text.Json;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Logging.AddConsole();
 //log the version number
 var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
 Console.WriteLine($@"
@@ -42,6 +41,29 @@ if (File.Exists(settingsPath))
     serverSettings = JsonSerializer.Deserialize<ServerSettings>(doc);
     clientSettings = JsonSerializer.Deserialize<WebClientSettings>(doc);
 }
+
+builder.Services.AddLogging(builder =>
+{
+    LogLevel level = LogLevel.Information;
+    var logLevel = Environment.GetEnvironmentVariable("LOG_LEVEL");
+    if (!string.IsNullOrWhiteSpace(logLevel))
+    {
+        Enum.TryParse(logLevel, true, out level);
+    }
+    Console.WriteLine($"LogLevel: {level}");
+    builder.SetMinimumLevel(level);
+    builder.AddSimpleConsole(options =>
+            {
+                // Customizing the log output format
+                options.TimestampFormat = "yy-MM-dd HH:mm:ss ";  // Custom timestamp format
+                options.SingleLine = true;
+            });
+
+    // Disable SpaProxy info logs
+    builder.AddFilter("Microsoft.AspNetCore.SpaProxy", LogLevel.Warning);
+    // Disable AspNetCore info logs
+    builder.AddFilter("Microsoft.AspNetCore", LogLevel.Warning);
+});
 
 builder.Services.AddSingleton<IServerSettings>(srv =>
 {

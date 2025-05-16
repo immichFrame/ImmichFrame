@@ -37,7 +37,7 @@ namespace ImmichFrame.WebApi.Controllers
         public async Task<List<AssetResponseDto>> GetAsset(string clientIdentifier = "")
         {
             var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
-            _logger.LogTrace("Assets requested by '{ClientIdentifier}'", sanitizedClientIdentifier);
+            _logger.LogDebug("Assets requested by '{sanitizedClientIdentifier}'", sanitizedClientIdentifier);
             return (await _logic.GetAssets()).ToList() ?? throw new AssetNotFoundException("No asset was found");
         }
 
@@ -45,7 +45,7 @@ namespace ImmichFrame.WebApi.Controllers
         public async Task<AssetResponseDto> GetAssetInfo(Guid id, string clientIdentifier = "")
         {
             var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
-            _logger.LogTrace("AssetInfo '{id}' requested by '{ClientIdentifier}'", id, sanitizedClientIdentifier);
+            _logger.LogDebug("AssetInfo '{id}' requested by '{sanitizedClientIdentifier}'", id, sanitizedClientIdentifier);
 
             return await _logic.GetAssetInfoById(id);
         }
@@ -54,7 +54,7 @@ namespace ImmichFrame.WebApi.Controllers
         public async Task<List<AlbumResponseDto>> GetAlbumInfo(Guid id, string clientIdentifier = "")
         {
             var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
-            _logger.LogTrace("AlbumInfo '{id}' requested by '{ClientIdentifier}'", id, sanitizedClientIdentifier);
+            _logger.LogDebug("AlbumInfo '{id}' requested by '{sanitizedClientIdentifier}'", id, sanitizedClientIdentifier);
 
             return (await _logic.GetAlbumInfoById(id)).ToList() ?? throw new AssetNotFoundException("No asset was found");
         }
@@ -65,7 +65,7 @@ namespace ImmichFrame.WebApi.Controllers
         public async Task<FileResult> GetImage(Guid id, string clientIdentifier = "")
         {
             var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
-            _logger.LogTrace("Image '{id}' requested by '{ClientIdentifier}'", id, sanitizedClientIdentifier);
+            _logger.LogDebug("Image '{id}' requested by '{sanitizedClientIdentifier}'", id, sanitizedClientIdentifier);
             var image = await _logic.GetImage(id);
 
             var notification = new ImageRequestedNotification(id, sanitizedClientIdentifier);
@@ -79,7 +79,7 @@ namespace ImmichFrame.WebApi.Controllers
         public async Task<ImageResponse> GetRandomImageAndInfo(string clientIdentifier = "")
         {
             var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
-            _logger.LogTrace("Random image requested by '{ClientIdentifier}'", sanitizedClientIdentifier);
+            _logger.LogDebug("Random image requested by '{sanitizedClientIdentifier}'", sanitizedClientIdentifier);
 
             var randomImage = await _logic.GetNextAsset() ?? throw new AssetNotFoundException("No asset was found");
 
