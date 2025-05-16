@@ -261,7 +261,7 @@
 		let req = await api.getImage(a.id, { clientIdentifier: $clientIdentifierStore });
 		let album: api.AlbumResponseDto[] | null = null;
 		if ($configStore.showAlbumName) {
-			let albumReq = await api.getAlbumInfo(a.id);
+			let albumReq = await api.getAlbumInfo(a.id, { clientIdentifier: $clientIdentifierStore });
 			album = albumReq.data;
 		}
 
@@ -271,7 +271,9 @@
 
 		// if the people array is already populated, there is no need to call the API again
 		if ($configStore.showPeopleDesc && (a.people ?? []).length == 0) {
-			let assetInfoRequest = await api.getAssetInfo(a.id);
+			let assetInfoRequest = await api.getAssetInfo(a.id, {
+				clientIdentifier: $clientIdentifierStore
+			});
 			a.people = assetInfoRequest.data.people;
 		}
 

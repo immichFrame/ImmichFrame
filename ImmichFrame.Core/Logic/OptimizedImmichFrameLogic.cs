@@ -131,14 +131,6 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
             assetsList = assetsList.Take(_assetAmount).ToList();
         }
 
-        // Do not use for now
-        // var updatedAssetsList = new List<AssetResponseDto>();
-        // foreach (var asset in assetsList)
-        // {
-        //     var updatedAsset = await asset.LoadAdditionalAssetInfo(_immichApi, _logger);
-        //     updatedAssetsList.Add(updatedAsset);
-        // }
-        // return updatedAssetsList;
         return assetsList;
     }
 

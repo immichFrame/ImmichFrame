@@ -22,7 +22,7 @@ namespace ImmichFrame.WebApi.Controllers
         public async Task<List<IAppointment>> GetAppointments(string clientIdentifier = "")
         {
             var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
-            _logger.LogTrace("Calendar requested by '{ClientIdentifier}'", sanitizedClientIdentifier);
+            _logger.LogDebug("Calendar requested by '{sanitizedClientIdentifier}'", sanitizedClientIdentifier);
             return await _calendarService.GetAppointments();
         }
     }
