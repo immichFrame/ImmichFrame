@@ -6,6 +6,7 @@ namespace ImmichFrame.WebApi.Models
 {
     public class WebClientSettings : IWebClientSettings
     {
+        public string ImmichServerUrl { get; set; }
         public string Margin { get; set; } = "0,0,0,0";
         public int Interval { get; set; } = 45;
         public double TransitionDuration { get; set; } = 1;

@@ -42,6 +42,7 @@
 		"date-fns": "^4.1.0",
 		"oazapfts": "^6.1.0",
 		"openapi-fetch": "^0.12.0",
+		"svelte-qrcode": "^1.0.1",
 		"thumbhash": "^0.1.1"
 	}
 }

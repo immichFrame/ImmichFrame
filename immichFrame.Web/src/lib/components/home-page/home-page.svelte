@@ -59,7 +59,7 @@
 	let unsubscribeStop: () => void;
 
 	let cursorVisible = $state(true);
-	let timeoutId: number;
+	let timeoutId: NodeJS.Timeout;
 
 	const clientIdentifier = $page.url.searchParams.get('client');
 	const authsecret = $page.url.searchParams.get('authsecret');

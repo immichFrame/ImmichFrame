@@ -183,6 +183,7 @@ export type IAppointment = {
     location?: string | null;
 };
 export type WebClientSettings = {
+    immichServerUrl?: string | null;
     margin?: string | null;
     interval?: number;
     transitionDuration?: number;
