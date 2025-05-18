@@ -4,8 +4,7 @@
 		mdiPlay,
 		mdiPause,
 		mdiChevronLeft,
-		mdiInformationOutline,
-		mdiInformationOffOutline
+		mdiInformationOutline
 	} from '@mdi/js';
 	import Icon from './icon.svelte';
 	import { ProgressBarStatus } from './progress-bar.svelte';
@@ -94,7 +93,7 @@
 					><Icon
 						title="Info"
 						class="max-h-[min(10rem,33vh)] max-w-[min(10rem,33vh)] h-[33vh] w-[33vw]top"
-						path={infoVisible ? mdiInformationOffOutline : mdiInformationOutline}
+						path={mdiInformationOutline}
 						size=""
 					/></button
 				>
