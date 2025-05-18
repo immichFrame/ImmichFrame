@@ -86,7 +86,7 @@
 				{/if}
 			</div>
 
-			<OverlayQr baseUrl={$configStore.immichServerUrl ?? ''} c id={asset.id} />
+			<OverlayQr baseUrl={$configStore.immichServerUrl ?? ''} id={asset.id} />
 		</div>
 	</div>
 </div>
