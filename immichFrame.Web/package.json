@@ -13,6 +13,7 @@
 		"api": "oazapfts http://localhost:5217/swagger/v1/swagger.json src/lib/immichFrameApi.ts"
 	},
 	"devDependencies": {
+		"@castlenine/svelte-qrcode": "^2.3.0",
 		"@sveltejs/adapter-auto": "^3.0.0",
 		"@sveltejs/adapter-static": "^3.0.5",
 		"@sveltejs/kit": "^2.8.4",
@@ -42,7 +43,6 @@
 		"date-fns": "^4.1.0",
 		"oazapfts": "^6.1.0",
 		"openapi-fetch": "^0.12.0",
-		"svelte-qrcode": "^1.0.1",
 		"thumbhash": "^0.1.1"
 	}
 }

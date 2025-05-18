@@ -1,5 +1,5 @@
 <script lang="ts">
-	import QrCode from 'svelte-qrcode';
+	import QrCode from '@castlenine/svelte-qrcode';
 
 	interface Props {
 		baseUrl: string;
@@ -7,11 +7,13 @@
 	}
 	let { baseUrl, id }: Props = $props();
 
-	let imageUrl = $derived(baseUrl + '/photos/' + id);
+	let imageUrl = `${baseUrl}/photos/${id}`;
 </script>
 
-<div class="border-8 border-white rounded-lg self-center">
-	<QrCode value={imageUrl} />
+<div
+	class="border-4 border-white rounded-lg self-center min-h-[128px] min-w-[128px] grow max-h-[200px] max-w-[200px] aspect-[1/1]"
+>
+	<QrCode data={imageUrl} isResponsive />
 </div>
 <a
 	href={imageUrl}
