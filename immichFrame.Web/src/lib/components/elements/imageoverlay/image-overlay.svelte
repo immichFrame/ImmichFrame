@@ -4,26 +4,46 @@
 		type AssetResponseDto,
 		type ExifResponseDto
 	} from '$lib/immichFrameApi';
-	import { mdiAccount, mdiCamera, mdiFile, mdiImageAlbum, mdiStar, mdiText } from '@mdi/js';
+	import {
+		mdiAccount,
+		mdiCamera,
+		mdiClose,
+		mdiFile,
+		mdiImageAlbum,
+		mdiStar,
+		mdiText
+	} from '@mdi/js';
 	import OverlayItem from './overlay-item.svelte';
 	import OverlayQr from './overlay-qr.svelte';
 	import { configStore } from '$lib/stores/config.store';
+	import Icon from '../icon.svelte';
 
 	interface Props {
 		asset: AssetResponseDto;
 		albums: AlbumResponseDto[];
+		showInfo: boolean;
 	}
+	let { asset, albums, showInfo = $bindable(false) }: Props = $props();
 
-	let { asset, albums }: Props = $props();
 	let availablePeople = $derived(asset.people?.filter((x) => x.name));
-
 	let exif: ExifResponseDto = $derived(asset.exifInfo ?? ({} as ExifResponseDto));
+
+	function close() {
+		showInfo = false;
+	}
 </script>
 
-<div class="p-0 absolute w-full h-full z-[50]">
+<div class="p-0 absolute w-full h-full z-[200]">
 	<div
 		class="bg-black bg-opacity-70 w-full h-full relative items-center justify-center flex pt-32 pb-8 max-h-full overflow-auto"
 	>
+		<button class="absolute top-0 right-0 m-4 text-primary" onclick={close}>
+			<Icon
+				path={mdiClose}
+				size={30}
+				class="hover:scale-110 transition-transform duration-200 text-primary"
+			/>
+		</button>
 		<div class="flex h-full flex-col gap-5">
 			<div class="w-fit flex grow flex-col gap-3">
 				{#if asset.originalFileName}

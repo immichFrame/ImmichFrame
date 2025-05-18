@@ -13,8 +13,9 @@
 <div class="border-8 border-white rounded-lg self-center">
 	<QrCode value={imageUrl} />
 </div>
-<!-- <a
+<a
 	href={imageUrl}
-	class="text-xl border-gray-400 border-2 rounded-md p-2 m-2 text-center text-primary"
+	target="_blank"
+	class="text-xl w-fit self-center rounded-md p-2 m-2 text-center text-secondary bg-primary"
 	>Open in immich</a
-> -->
+>

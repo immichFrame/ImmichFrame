@@ -14,7 +14,7 @@
 	import Clock from '../elements/clock.svelte';
 	import Appointments from '../elements/appointments.svelte';
 	import LoadingElement from '../elements/LoadingElement.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	interface ImagesState {
 		images: [string, api.AssetResponseDto, api.AlbumResponseDto[]][];
@@ -61,8 +61,8 @@
 	let cursorVisible = $state(true);
 	let timeoutId: NodeJS.Timeout;
 
-	const clientIdentifier = $page.url.searchParams.get('client');
-	const authsecret = $page.url.searchParams.get('authsecret');
+	const clientIdentifier = page.url.searchParams.get('client');
+	const authsecret = page.url.searchParams.get('authsecret');
 
 	if (clientIdentifier && clientIdentifier != $clientIdentifierStore) {
 		clientIdentifierStore.set(clientIdentifier);

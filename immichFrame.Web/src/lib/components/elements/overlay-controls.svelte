@@ -72,7 +72,11 @@
 <svelte:window use:shortcuts={shortcutList} />
 
 {#if overlayVisible}
-	<div class="absolute h-full w-full top-0 left-0 z-[100] grid grid-cols-3 gap-2">
+	<div
+		class="absolute h-full w-full top-0 left-0 z-[100] grid grid-cols-3 gap-2 {infoVisible
+			? 'hidden'
+			: ''}"
+	>
 		<div id="overlayback" class="group text-center content-center">
 			<button class="opacity-0 group-hover:opacity-100 text-primary" onclick={back}
 				><Icon
