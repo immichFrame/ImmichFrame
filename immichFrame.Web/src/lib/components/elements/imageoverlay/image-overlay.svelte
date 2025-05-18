@@ -56,17 +56,18 @@
 						]}
 					/>
 				{/if}
-				<!-- TODO check if exists -->
-				<OverlayItem
-					icon={mdiCamera}
-					header="{exif.make} {exif.model}"
-					items={[
-						`ISO: ${exif.iso}`,
-						`Aperture: f/${exif.fNumber}`,
-						`Shutter: 1/${exif.iso}`,
-						`Focal Length: ${exif.focalLength} mm`
-					]}
-				/>
+				{#if exif.make || exif.model || exif.fNumber || exif.exposureTime || exif.focalLength || exif.iso}
+					<OverlayItem
+						icon={mdiCamera}
+						header={`${exif.make ?? ''} ${exif.model ?? ''}`.trim()}
+						items={[
+							exif.fNumber ? `ƒ/${exif.fNumber}` : null,
+							exif.exposureTime ? `${exif.exposureTime} s` : null,
+							exif.focalLength ? `${exif.focalLength} mm` : null,
+							exif.iso ? `ISO ${exif.iso}` : null
+						].filter((item): item is string => item !== null)}
+					/>
+				{/if}
 				{#if exif.description}
 					<OverlayItem icon={mdiText} header={exif.description} />
 				{/if}
