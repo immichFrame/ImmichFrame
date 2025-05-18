@@ -35,13 +35,13 @@
 
 <div class="p-0 absolute w-full h-full z-[200]">
 	<div
-		class="bg-black bg-opacity-70 w-full h-full relative items-center justify-center flex pt-32 pb-8 max-h-full overflow-auto"
+		class="info-overlay-background bg-black bg-opacity-70 w-full h-full relative items-center justify-center flex pt-32 pb-8 max-h-full overflow-auto"
 	>
 		<button class="absolute top-0 right-0 m-4 text-primary" onclick={close}>
 			<Icon
 				path={mdiClose}
 				size={30}
-				class="hover:scale-110 transition-transform duration-200 text-primary"
+				class="info-overlay-close hover:scale-110 transition-transform duration-200 text-primary"
 			/>
 		</button>
 		<div class="flex h-full flex-col gap-5">
@@ -86,7 +86,7 @@
 				{/if}
 			</div>
 
-			<OverlayQr baseUrl={$configStore.immichServerUrl ?? ''} id={asset.id} />
+			<OverlayQr baseUrl={$configStore.immichServerUrl ?? ''} c id={asset.id} />
 		</div>
 	</div>
 </div>
