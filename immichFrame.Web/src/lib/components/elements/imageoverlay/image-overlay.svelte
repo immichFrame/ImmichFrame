@@ -20,9 +20,9 @@
 	let exif: ExifResponseDto = $derived(asset.exifInfo ?? ({} as ExifResponseDto));
 </script>
 
-<div class="p-0 absolute w-full h-full">
+<div class="p-0 absolute w-full h-full z-[50]">
 	<div
-		class="bg-black bg-opacity-70 z-[50] w-full h-full relative items-center justify-center flex pt-32"
+		class="bg-black bg-opacity-70 w-full h-full relative items-center justify-center flex pt-32 pb-8 max-h-full overflow-auto"
 	>
 		<div class="flex h-full flex-col gap-5">
 			<div class="w-fit flex grow flex-col gap-3">
@@ -36,6 +36,7 @@
 						]}
 					/>
 				{/if}
+				<!-- TODO check if exists -->
 				<OverlayItem
 					icon={mdiCamera}
 					header="{exif.make} {exif.model}"
