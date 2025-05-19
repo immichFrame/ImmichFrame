@@ -43,7 +43,6 @@
 		return Array.from(locationParts).join(', ');
 	}
 	let assetDate = $derived(asset.exifInfo?.dateTimeOriginal);
-	console.log(asset.exifInfo);
 	let desc = $derived(asset.exifInfo?.description ?? '');
 	let time = $derived(assetDate ? new Date(assetDate) : null);
 	const selectedLocale = $configStore.language;

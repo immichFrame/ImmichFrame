@@ -6,7 +6,7 @@
 	} from '$lib/components/elements/progress-bar.svelte';
 	import { slideshowStore } from '$lib/stores/slideshow.store';
 	import { clientIdentifierStore, authSecretStore } from '$lib/stores/persist.store';
-	import { onDestroy, onMount } from 'svelte';
+	import { onDestroy, onMount, setContext } from 'svelte';
 	import OverlayControls from '../elements/overlay-controls.svelte';
 	import ImageComponent from '../elements/image-component.svelte';
 	import { configStore } from '$lib/stores/config.store';
@@ -14,7 +14,7 @@
 	import Clock from '../elements/clock.svelte';
 	import Appointments from '../elements/appointments.svelte';
 	import LoadingElement from '../elements/LoadingElement.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	interface ImagesState {
 		images: [string, api.AssetResponseDto, api.AlbumResponseDto[]][];
@@ -40,6 +40,7 @@
 	let progressBar: ProgressBar = $state() as ProgressBar;
 
 	let error: boolean = $state(false);
+	let infoVisible: boolean = $state(false);
 	let authError: boolean = $state(false);
 	let errorMessage: string = $state() as string;
 	let imagesState: ImagesState = $state({
@@ -58,10 +59,10 @@
 	let unsubscribeStop: () => void;
 
 	let cursorVisible = $state(true);
-	let timeoutId: number;
+	let timeoutId: NodeJS.Timeout;
 
-	const clientIdentifier = $page.url.searchParams.get('client');
-	const authsecret = $page.url.searchParams.get('authsecret');
+	const clientIdentifier = page.url.searchParams.get('client');
+	const authsecret = page.url.searchParams.get('authsecret');
 
 	if (clientIdentifier && clientIdentifier != $clientIdentifierStore) {
 		clientIdentifierStore.set(clientIdentifier);
@@ -75,6 +76,13 @@
 	const hideCursor = () => {
 		cursorVisible = false;
 	};
+
+	setContext('close', provideClose);
+
+	async function provideClose() {
+		infoVisible = false;
+		await progressBar.play();
+	}
 
 	const showCursor = () => {
 		cursorVisible = true;
@@ -349,6 +357,7 @@
 				{...imagesState}
 				imageFill={$configStore.imageFill}
 				imageZoom={$configStore.imageZoom}
+				bind:showInfo={infoVisible}
 			/>
 		</div>
 
@@ -359,20 +368,33 @@
 		<Appointments />
 
 		<OverlayControls
-			on:next={async () => {
+			next={async () => {
 				await handleDone(false, true);
+				infoVisible = false;
 			}}
-			on:back={async () => {
+			back={async () => {
 				await handleDone(true, true);
+				infoVisible = false;
 			}}
-			on:pause={async () => {
+			pause={async () => {
+				infoVisible = false;
 				if (progressBarStatus == ProgressBarStatus.Paused) {
 					await progressBar.play();
 				} else {
 					await progressBar.pause();
 				}
 			}}
+			showInfo={async () => {
+				if (infoVisible) {
+					infoVisible = false;
+					await progressBar.play();
+				} else {
+					infoVisible = true;
+					await progressBar.pause();
+				}
+			}}
 			bind:status={progressBarStatus}
+			bind:infoVisible
 			overlayVisible={cursorVisible}
 		/>
 
