@@ -6,7 +6,7 @@
 	} from '$lib/components/elements/progress-bar.svelte';
 	import { slideshowStore } from '$lib/stores/slideshow.store';
 	import { clientIdentifierStore, authSecretStore } from '$lib/stores/persist.store';
-	import { onDestroy, onMount } from 'svelte';
+	import { onDestroy, onMount, setContext } from 'svelte';
 	import OverlayControls from '../elements/overlay-controls.svelte';
 	import ImageComponent from '../elements/image-component.svelte';
 	import { configStore } from '$lib/stores/config.store';
@@ -76,6 +76,13 @@
 	const hideCursor = () => {
 		cursorVisible = false;
 	};
+
+	setContext('close', provideClose);
+
+	async function provideClose() {
+		infoVisible = false;
+		await progressBar.play();
+	}
 
 	const showCursor = () => {
 		cursorVisible = true;

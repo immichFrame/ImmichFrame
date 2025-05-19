@@ -94,7 +94,7 @@
 </script>
 
 {#if showInfo}
-	<ImageOverlay asset={image[1]} albums={image[2]} bind:showInfo />
+	<ImageOverlay asset={image[1]} albums={image[2]} />
 {/if}
 
 <div class="immichframe_image relative place-self-center overflow-hidden">

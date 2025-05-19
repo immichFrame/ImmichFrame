@@ -17,20 +17,18 @@
 	import OverlayQr from './overlay-qr.svelte';
 	import { configStore } from '$lib/stores/config.store';
 	import Icon from '../icon.svelte';
+	import { getContext } from 'svelte';
 
 	interface Props {
 		asset: AssetResponseDto;
 		albums: AlbumResponseDto[];
-		showInfo: boolean;
 	}
-	let { asset, albums, showInfo = $bindable(false) }: Props = $props();
+	let { asset, albums }: Props = $props();
 
 	let availablePeople = $derived(asset.people?.filter((x) => x.name));
 	let exif: ExifResponseDto = $derived(asset.exifInfo ?? ({} as ExifResponseDto));
 
-	function close() {
-		showInfo = false;
-	}
+	let close = getContext<() => void>('close');
 </script>
 
 <div class="p-0 absolute w-full h-full z-[200]">
