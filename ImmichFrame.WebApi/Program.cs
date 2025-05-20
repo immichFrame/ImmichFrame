@@ -83,8 +83,9 @@ builder.Services.AddSingleton<IWeatherService>(srv =>
 builder.Services.AddSingleton<ICalendarService>(srv =>
 {
     var settings = srv.GetRequiredService<IServerSettings>();
+    var logger = srv.GetRequiredService<ILogger<IcalCalendarService>>();
 
-    return new IcalCalendarService(settings);
+    return new IcalCalendarService(settings, logger);
 });
 
 builder.Services.AddSingleton<IImmichFrameLogic>(srv =>
