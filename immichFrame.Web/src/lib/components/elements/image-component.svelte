@@ -70,7 +70,7 @@
 	<ErrorElement />
 {:else if loaded}
 	{#key images}
-		<div class="grid absolute h-dvh w-screen" transition:blur={{ duration: transitionDuration }}>
+		<div class="grid fixed h-dvh w-screen" transition:blur={{ duration: transitionDuration }}>
 			{#if split}
 				<div class="grid grid-cols-2">
 					<div id="image_portrait_1" class="relative grid border-r-2 border-primary h-dvh">
