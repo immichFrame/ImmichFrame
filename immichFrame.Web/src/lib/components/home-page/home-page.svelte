@@ -265,27 +265,30 @@
 		}
 	}
 
-	async function loadImage(a: api.AssetResponseDto) {
-		let req = await api.getImage(a.id, { clientIdentifier: $clientIdentifierStore });
+	async function loadImage(assetResponse: api.AssetResponseDto) {
+		let req = await api.getImage(assetResponse.id, { clientIdentifier: $clientIdentifierStore });
 		let album: api.AlbumResponseDto[] | null = null;
 		if ($configStore.showAlbumName) {
-			let albumReq = await api.getAlbumInfo(a.id, { clientIdentifier: $clientIdentifierStore });
+			let albumReq = await api.getAlbumInfo(assetResponse.id, {
+				clientIdentifier: $clientIdentifierStore
+			});
 			album = albumReq.data;
 		}
 
 		if (req.status != 200 || ($configStore.showAlbumName && album == null)) {
-			return ['', a, []] as [string, api.AssetResponseDto, api.AlbumResponseDto[]];
+			return ['', assetResponse, []] as [string, api.AssetResponseDto, api.AlbumResponseDto[]];
 		}
 
 		// if the people array is already populated, there is no need to call the API again
-		if ($configStore.showPeopleDesc && (a.people ?? []).length == 0) {
-			let assetInfoRequest = await api.getAssetInfo(a.id, {
+		if ($configStore.showPeopleDesc && (assetResponse.people ?? []).length == 0) {
+			let assetInfoRequest = await api.getAssetInfo(assetResponse.id, {
 				clientIdentifier: $clientIdentifierStore
 			});
-			a.people = assetInfoRequest.data.people;
+			assetResponse.people = assetInfoRequest.data.people;
+			assetResponse.exifInfo = assetInfoRequest.data.exifInfo;
 		}
 
-		return [getImageUrl(req.data), a, album] as [
+		return [getImageUrl(req.data), assetResponse, album] as [
 			string,
 			api.AssetResponseDto,
 			api.AlbumResponseDto[]
