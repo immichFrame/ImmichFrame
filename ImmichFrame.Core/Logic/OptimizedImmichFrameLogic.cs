@@ -187,14 +187,14 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
         return await _apiCache.GetOrAddAsync("MemoryAssets", async () =>
         {
             var today = DateTime.Today;
-            var memoryLane = await _immichApi.SearchMemoriesAsync(null, null, null, MemoryType.On_this_day);
+            var memories = await _immichApi.SearchMemoriesAsync(DateTime.Now, null, null, null);
 
             var memoryAssets = new List<AssetResponseDto>();
-            foreach (var lane in memoryLane)
+            foreach (var memory in memories)
             {
-                var assets = lane.Assets.ToList();
-                var yearsAgo = DateTime.Now.Year - lane.Data.Year;
-                assets.ForEach(asset => asset.ExifInfo.Description = $"{yearsAgo} {(yearsAgo == 1 ? "year" : "years")} ago");
+                var assets = memory.Assets.ToList();
+                // var yearsAgo = DateTime.Now.Year - memory.Data.Year;
+                // assets.ForEach(asset => asset.ExifInfo.Description = $"{yearsAgo} {(yearsAgo == 1 ? "year" : "years")} ago");
 
                 memoryAssets.AddRange(assets);
             }

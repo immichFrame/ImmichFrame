@@ -101,6 +101,7 @@ export type TagResponseDto = {
     } | null;
 };
 export type AssetTypeEnum = 0 | 1 | 2 | 3;
+export type AssetVisibility = 0 | 1 | 2 | 3;
 export type AssetResponseDto = {
     checksum: string;
     deviceAssetId: string;
@@ -132,6 +133,7 @@ export type AssetResponseDto = {
     "type": AssetTypeEnum;
     unassignedFaces?: AssetFaceWithoutPersonResponseDto[] | null;
     updatedAt: string;
+    visibility: AssetVisibility;
     additionalProperties?: {
         [key: string]: any | null;
     } | null;

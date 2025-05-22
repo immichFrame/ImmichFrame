@@ -225,21 +225,21 @@ namespace ImmichFrame.Core.Logic
                 var allAssets = new List<AssetResponseDto>();
 
                 var date = DateTime.Today;
-                ICollection<MemoryResponseDto> memoryLane;
+                ICollection<MemoryResponseDto> memories;
                 try
                 {
-                    memoryLane = await immichApi.SearchMemoriesAsync(null, null, null, MemoryType.On_this_day);
+                    memories = await immichApi.SearchMemoriesAsync(DateTime.Now, null, null, null);
                 }
                 catch (ApiException ex)
                 {
                     throw new AlbumNotFoundException($"Memories were not found, check your settings file!{Environment.NewLine}{Environment.NewLine}{ex.Message}", ex);
                 }
 
-                foreach (var lane in memoryLane)
+                foreach (var memory in memories)
                 {
-                    var assets = lane.Assets.ToList();
-                    var yearsAgo = DateTime.Now.Year - lane.Data.Year;
-                    assets.ForEach(asset => asset.ExifInfo.Description = $"{yearsAgo} {(yearsAgo == 1 ? "year" : "years")} ago");
+                    var assets = memory.Assets.ToList();
+                    // var yearsAgo = DateTime.Now.Year - lane.Data.Year;
+                    // assets.ForEach(asset => asset.ExifInfo.Description = $"{yearsAgo} {(yearsAgo == 1 ? "year" : "years")} ago");
 
                     allAssets.AddRange(assets);
                 }
