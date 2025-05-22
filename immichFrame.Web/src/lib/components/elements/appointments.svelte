@@ -58,7 +58,7 @@
 			{#each appointments as appointment}
 				<div class="bg-gray-600 bg-opacity-90 mb-2 text-left rounded-md p-3">
 					<p class="text-xs">
-						{formatDates(appointment.startTime ?? '', appointment.startTime ?? '')}
+						{formatDates(appointment.startTime ?? '', appointment.endTime ?? '')}
 					</p>
 					{appointment.summary}
 					{#if appointment.description}
