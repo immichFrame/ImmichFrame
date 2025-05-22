@@ -225,10 +225,10 @@ namespace ImmichFrame.Core.Logic
                 var allAssets = new List<AssetResponseDto>();
 
                 var date = DateTime.Today;
-                ICollection<MemoryLaneResponseDto> memoryLane;
+                ICollection<MemoryResponseDto> memoryLane;
                 try
                 {
-                    memoryLane = await immichApi.GetMemoryLaneAsync(date.Day, date.Month);
+                    memoryLane = await immichApi.SearchMemoriesAsync(null, null, null, MemoryType.On_this_day);
                 }
                 catch (ApiException ex)
                 {
@@ -238,7 +238,8 @@ namespace ImmichFrame.Core.Logic
                 foreach (var lane in memoryLane)
                 {
                     var assets = lane.Assets.ToList();
-                    assets.ForEach(asset => asset.ExifInfo.Description = $"{lane.YearsAgo} {(lane.YearsAgo == 1 ? "year" : "years")} ago");
+                    var yearsAgo = DateTime.Now.Year - lane.Data.Year;
+                    assets.ForEach(asset => asset.ExifInfo.Description = $"{yearsAgo} {(yearsAgo == 1 ? "year" : "years")} ago");
 
                     allAssets.AddRange(assets);
                 }
@@ -318,10 +319,16 @@ namespace ImmichFrame.Core.Logic
                                 WithExif = true,
                                 WithPeople = true
                             };
-                            if (!_settings.ShowArchived)
+
+                            if (_settings.ShowArchived)
                             {
-                                metadataBody.IsArchived = false;
+                                metadataBody.Visibility = AssetVisibility.Archive;
                             }
+                            else
+                            {
+                                metadataBody.Visibility = AssetVisibility.Timeline;
+                            }
+
                             var takenBefore = _settings.ImagesUntilDate.HasValue ? _settings.ImagesUntilDate : null;
                             if (takenBefore.HasValue)
                             {
@@ -438,9 +445,13 @@ namespace ImmichFrame.Core.Logic
                         WithPeople = true,
                     };
 
-                    if (!_settings.ShowArchived)
+                    if (_settings.ShowArchived)
                     {
-                        searchBody.IsArchived = false;
+                        searchBody.Visibility = AssetVisibility.Archive;
+                    }
+                    else
+                    {
+                        searchBody.Visibility = AssetVisibility.Timeline;
                     }
 
                     if (_settings.ShowFavorites)
