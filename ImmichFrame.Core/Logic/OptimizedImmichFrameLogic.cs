@@ -146,7 +146,11 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
 
         if (_settings.ShowArchived)
         {
-            searchDto.IsArchived = true;
+            searchDto.Visibility = AssetVisibility.Archive;
+        }
+        else
+        {
+            searchDto.Visibility = AssetVisibility.Timeline;
         }
 
         var takenBefore = _settings.ImagesUntilDate.HasValue ? _settings.ImagesUntilDate : null;
@@ -183,13 +187,14 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
         return await _apiCache.GetOrAddAsync("MemoryAssets", async () =>
         {
             var today = DateTime.Today;
-            var memoryLane = await _immichApi.GetMemoryLaneAsync(today.Day, today.Month);
+            var memories = await _immichApi.SearchMemoriesAsync(DateTime.Now, null, null, null);
 
             var memoryAssets = new List<AssetResponseDto>();
-            foreach (var lane in memoryLane)
+            foreach (var memory in memories)
             {
-                var assets = lane.Assets.ToList();
-                assets.ForEach(asset => asset.ExifInfo.Description = $"{lane.YearsAgo} {(lane.YearsAgo == 1 ? "year" : "years")} ago");
+                var assets = memory.Assets.ToList();
+                // var yearsAgo = DateTime.Now.Year - memory.Data.Year;
+                // assets.ForEach(asset => asset.ExifInfo.Description = $"{yearsAgo} {(yearsAgo == 1 ? "year" : "years")} ago");
 
                 memoryAssets.AddRange(assets);
             }

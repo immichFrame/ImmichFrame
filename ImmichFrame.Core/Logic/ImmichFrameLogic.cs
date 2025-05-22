@@ -225,20 +225,21 @@ namespace ImmichFrame.Core.Logic
                 var allAssets = new List<AssetResponseDto>();
 
                 var date = DateTime.Today;
-                ICollection<MemoryLaneResponseDto> memoryLane;
+                ICollection<MemoryResponseDto> memories;
                 try
                 {
-                    memoryLane = await immichApi.GetMemoryLaneAsync(date.Day, date.Month);
+                    memories = await immichApi.SearchMemoriesAsync(DateTime.Now, null, null, null);
                 }
                 catch (ApiException ex)
                 {
                     throw new AlbumNotFoundException($"Memories were not found, check your settings file!{Environment.NewLine}{Environment.NewLine}{ex.Message}", ex);
                 }
 
-                foreach (var lane in memoryLane)
+                foreach (var memory in memories)
                 {
-                    var assets = lane.Assets.ToList();
-                    assets.ForEach(asset => asset.ExifInfo.Description = $"{lane.YearsAgo} {(lane.YearsAgo == 1 ? "year" : "years")} ago");
+                    var assets = memory.Assets.ToList();
+                    // var yearsAgo = DateTime.Now.Year - lane.Data.Year;
+                    // assets.ForEach(asset => asset.ExifInfo.Description = $"{yearsAgo} {(yearsAgo == 1 ? "year" : "years")} ago");
 
                     allAssets.AddRange(assets);
                 }
@@ -318,10 +319,16 @@ namespace ImmichFrame.Core.Logic
                                 WithExif = true,
                                 WithPeople = true
                             };
-                            if (!_settings.ShowArchived)
+
+                            if (_settings.ShowArchived)
                             {
-                                metadataBody.IsArchived = false;
+                                metadataBody.Visibility = AssetVisibility.Archive;
                             }
+                            else
+                            {
+                                metadataBody.Visibility = AssetVisibility.Timeline;
+                            }
+
                             var takenBefore = _settings.ImagesUntilDate.HasValue ? _settings.ImagesUntilDate : null;
                             if (takenBefore.HasValue)
                             {
@@ -438,9 +445,13 @@ namespace ImmichFrame.Core.Logic
                         WithPeople = true,
                     };
 
-                    if (!_settings.ShowArchived)
+                    if (_settings.ShowArchived)
                     {
-                        searchBody.IsArchived = false;
+                        searchBody.Visibility = AssetVisibility.Archive;
+                    }
+                    else
+                    {
+                        searchBody.Visibility = AssetVisibility.Timeline;
                     }
 
                     if (_settings.ShowFavorites)
