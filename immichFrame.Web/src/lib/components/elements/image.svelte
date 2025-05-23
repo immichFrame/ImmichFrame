@@ -127,7 +127,7 @@
 
 		<img
 			class="{multi || imageFill
-				? 'w-screen h-dvh object-cover'
+				? 'w-screen max-h-screen h-dvh object-cover'
 				: 'max-h-screen h-dvh max-w-full object-contain'} w-full h-full"
 			src={image[0]}
 			alt="data"
