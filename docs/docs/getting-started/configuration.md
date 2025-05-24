@@ -9,7 +9,7 @@ sidebar_position: 2
 | **Section**             | **Config-Key**             | **Value**                           | **Default**          | **Description**                                                                                                                       |
 | ----------------------- | -------------------------- | ----------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | **Required**            | **ImmichServerUrl**        | **string**                          |                      | **The URL of your Immich server e.g. `http://photos.yourdomain.com` / `http://192.168.0.100:2283`.**                                  |
-| **Required**            | **ApiKey**                 | **string**                          |                      | **Read more about how to obtain an [immich API key][immich-api-url].**                                                                |
+| **Required**            | **ApiKey**                 | **string**                          |                      | **Read more about how to obtain an [Immich API key][immich-api-url].**                                                                |
 | [Security](#security)   | AuthenticationSecret       | string                              |                      | When set, every client needs to authenticate via Bearer Token and this value.                                                         |
 | [Filtering](#filtering) | Albums                     | string[]                            | []                   | UUID of album(s)                                                                                                                      |
 | [Filtering](#filtering) | ExcludedAlbums             | string[]                            | []                   | UUID of excluded album(s)                                                                                                             |
@@ -28,7 +28,7 @@ sidebar_position: 2
 | Image                   | ImageFill                  | boolean                             | false                | Whether image should fill available space. Aspect ratio maintained but may be cropped.                                                |
 | Image                   | Interval                   | int                                 | 45                   | Image interval in seconds. How long a image is displayed in the frame.                                                                |
 | Image                   | TransitionDuration         | float                               | 2                    | Duration in seconds.                                                                                                                  |
-| [Weather](#weather)     | WeatherApiKey              | string                              |                      | Get api-key: [OpenWeatherMap][openweathermap-url].                                                                                    |
+| [Weather](#weather)     | WeatherApiKey              | string                              |                      | Get an API key from [OpenWeatherMap][openweathermap-url].                                                                                    |
 | [Weather](#weather)     | UnitSystem                 | imperial \| metric                  | imperial             | Imperial or metric system. (Fahrenheit or degrees)                                                                                    |
 | [Weather](#weather)     | Language                   | string                              | en                   | 2 digit ISO code, sets the language of the weather description.                                                                       |
 | [Weather](#weather)     | ShowWeatherDescription     | boolean                             | true                 | Displays the description of the current weather.                                                                                      |
@@ -94,3 +94,6 @@ ImmichFrame can be customized even further using CSS. This will apply to browser
 volumes:  
       - /PATH/TO/YOUR/custom.css:/app/wwwroot/static/custom.css"
 ```
+
+[openweathermap-url]: https://openweathermap.org/appid
+[immich-api-url]: https://immich.app/docs/features/command-line-interface#obtain-the-api-key
