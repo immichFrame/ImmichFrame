@@ -71,48 +71,55 @@
 <svelte:window use:shortcuts={shortcutList} />
 
 {#if overlayVisible}
-<div
-	class={`fixed inset-0 z-[100] grid grid-cols-3 grid-rows-3 ${infoVisible ? 'hidden' : ''}`}
->
-	<div id="overlayInfo" class="group flex justify-center items-center col-start-2 row-start-1">
-		<button class="opacity-0 hover:opacity-100 text-primary" onclick={showInfo}>
-			<Icon
-				title="Info"
-				class="h-32 w-32 max-h-[min(10rem,33vh)] max-w-[min(10rem,33vh)]"
-				path={mdiInformationOutline}
-			/>
-		</button>
-	</div>
+	<div class="inset-0 z-[100] grid grid-cols-3 gap-2 {infoVisible ? 'hidden' : ''}">
+		<div id="overlayback" class="group grid place-items-center">
+			<button class="opacity-0 group-hover:opacity-100 text-primary" onclick={back}
+				><Icon
+					title="Back"
+					class="max-h-[min(10rem,33vh)] max-w-[min(10rem,33vh)] h-[33vh] w-[33vw]top"
+					path={mdiChevronLeft}
+					size=""
+				/></button
+			>
+		</div>
 
-	<div id="overlayback" class="group flex justify-center items-center col-start-1 row-start-2">
-		<button class="opacity-0 group-hover:opacity-100 text-primary" onclick={back}>
-			<Icon
-				title="Back"
-				class="h-32 w-32 max-h-[min(10rem,33vh)] max-w-[min(10rem,33vh)]"
-				path={mdiChevronLeft}
-			/>
-		</button>
-	</div>
+		<div class="grid grid-rows-3 gap-2">
+			<div id="overlayInfo" class="group grid place-items-center">
+				<button class="opacity-0 hover:opacity-100 text-primary" onclick={showInfo}
+					><Icon
+						title="Info"
+						class="max-h-[min(10rem,33vh)] max-w-[min(10rem,33vh)] h-[33vh] w-[33vw]top"
+						path={mdiInformationOutline}
+						size=""
+					/></button
+				>
+			</div>
 
-	<div id="overlaypause" class="group flex justify-center items-center col-start-2 row-start-2">
-		<button class="opacity-0 group-hover:opacity-100 text-primary" onclick={pause}>
-			<Icon
-				title={status == ProgressBarStatus.Paused ? 'Play' : 'Pause'}
-				class="h-32 w-32 max-h-[min(10rem,33vh)] max-w-[min(10rem,33vh)]"
-				path={status == ProgressBarStatus.Paused ? mdiPlay : mdiPause}
-			/>
-		</button>
-	</div>
+			<div id="overlaypause" class="group grid place-items-center">
+				<button onclick={pause} class="opacity-0 group-hover:opacity-100 text-primary">
+					<Icon
+						class="max-h-[min(10rem,33vh)] max-w-[min(10rem,33vh)] h-[33vh] w-[33vw]"
+						title={status == ProgressBarStatus.Paused ? 'Play' : 'Pause'}
+						path={status == ProgressBarStatus.Paused ? mdiPlay : mdiPause}
+						size=""
+					/>
+				</button>
+			</div>
 
-	<div id="overlaynext" class="group flex justify-center items-center col-start-3 row-start-2">
-		<button class="opacity-0 group-hover:opacity-100 text-primary" onclick={next}>
-			<Icon
-				title="Next"
-				class="h-32 w-32 max-h-[min(10rem,33vh)] max-w-[min(10rem,33vh)]"
-				path={mdiChevronRight}
-			/>
-		</button>
-	</div>
-</div>
+			<div class="group grid place-items-center">
+				<!-- <button class="opacity-0 hover:opacity-100 text-primary"> </button> -->
+			</div>
+		</div>
 
+		<div id="overlaynext" class="group grid place-items-center">
+			<button class="opacity-0 group-hover:opacity-100 text-primary" onclick={next}
+				><Icon
+					title="Next"
+					class="max-h-[min(10rem,33vh)] max-w-[min(10rem,33vh)] h-[33vh] w-[33vw]top"
+					path={mdiChevronRight}
+					size=""
+				/>
+			</button>
+		</div>
+	</div>
 {/if}
