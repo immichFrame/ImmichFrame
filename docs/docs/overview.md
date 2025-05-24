@@ -5,9 +5,9 @@ sidebar_position: 1
 
 # What is ImmichFrame?
 
-**ImmichFrame** is a companion project to [immich][immich-github-url], built to turn your photo collection into a beautiful digital photo frame experience.
+**ImmichFrame** is a companion project to [Immich][immich-github-url], built to turn your photo collection into a beautiful digital photo frame experience.
 
-[immich][immich-github-url] is an excellent self-hosted media management solution – like your private Google Photos. But what if you want to display your favorite photos in a living room, hallway, or even on an e-ink display?
+[Immich][immich-github-url] is an excellent self-hosted media management solution – like your private Google Photos. But what if you want to display your favorite photos in a living room, hallway, or even on an e-ink display?
 
 That's where **ImmichFrame** comes in.
 
@@ -45,6 +45,6 @@ If you're looking for a simple, clean way to display your Immich photos, **Immic
 [license-url]: https://github.com/3rob3/ImmichFrame/blob/master/LICENSE.txt
 [releases-url]: https://github.com/3rob3/ImmichFrame/releases/latest
 [support-url]: https://discord.com/channels/979116623879368755/1217843270244372480
-[openweathermap-url]: https://openweathermap.org/
+[openweathermap-url]: https://openweathermap.org/appid
 [immich-github-url]: https://github.com/immich-app/immich
 [immich-api-url]: https://immich.app/docs/features/command-line-interface#obtain-the-api-key
