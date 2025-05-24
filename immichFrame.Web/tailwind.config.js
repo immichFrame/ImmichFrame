@@ -1,4 +1,7 @@
 /** @type {import('tailwindcss').Config} */
+
+import screenSafePlugin from './tailwind.plugins';
+
 export default {
   mode: 'jit',
   content: ['./src/**/*.{html,js,svelte,ts}'],
@@ -26,5 +29,6 @@ export default {
 
       addUtilities(textShadowUtilities);
     },
+    screenSafePlugin
   ],
 };
