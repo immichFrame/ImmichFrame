@@ -71,12 +71,8 @@
 <svelte:window use:shortcuts={shortcutList} />
 
 {#if overlayVisible}
-	<div
-		class="absolute h-full w-full top-0 left-0 z-[100] grid grid-cols-3 gap-2 {infoVisible
-			? 'hidden'
-			: ''}"
-	>
-		<div id="overlayback" class="group text-center content-center">
+	<div class="inset-0 z-[100] grid grid-cols-3 gap-2 {infoVisible ? 'hidden' : ''}">
+		<div id="overlayback" class="group grid place-items-center">
 			<button class="opacity-0 group-hover:opacity-100 text-primary" onclick={back}
 				><Icon
 					title="Back"
@@ -87,8 +83,8 @@
 			>
 		</div>
 
-		<div class="grid grid-rows-3">
-			<div id="overlayInfo" class="group text-center content-center">
+		<div class="grid grid-rows-3 gap-2">
+			<div id="overlayInfo" class="group grid place-items-center">
 				<button class="opacity-0 hover:opacity-100 text-primary" onclick={showInfo}
 					><Icon
 						title="Info"
@@ -99,7 +95,7 @@
 				>
 			</div>
 
-			<div id="overlaypause" class="group text-center content-center">
+			<div id="overlaypause" class="group grid place-items-center">
 				<button onclick={pause} class="opacity-0 group-hover:opacity-100 text-primary">
 					<Icon
 						class="max-h-[min(10rem,33vh)] max-w-[min(10rem,33vh)] h-[33vh] w-[33vw]"
@@ -110,12 +106,12 @@
 				</button>
 			</div>
 
-			<div class="group text-center content-center">
+			<div class="group grid place-items-center">
 				<!-- <button class="opacity-0 hover:opacity-100 text-primary"> </button> -->
 			</div>
 		</div>
 
-		<div id="overlaynext" class="group text-center content-center">
+		<div id="overlaynext" class="group grid place-items-center">
 			<button class="opacity-0 group-hover:opacity-100 text-primary" onclick={next}
 				><Icon
 					title="Next"

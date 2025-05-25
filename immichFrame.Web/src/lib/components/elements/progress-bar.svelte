@@ -102,7 +102,7 @@
 {#if !hidden}
 	<span
 		id="progressbar"
-		class="absolute left-0 h-[3px] bg-primary z-[1000]
+		class="fixed left-0 h-[3px] bg-primary z-[1000]
 		{location == ProgressBarLocation.Top ? 'top-0' : 'bottom-0'}"
 		style:width={`${$progress * 100}%`}
 	></span>

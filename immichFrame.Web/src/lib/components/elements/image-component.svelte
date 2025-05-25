@@ -52,7 +52,7 @@
 
 {#if hasBday}
 	<div
-		class="	z-[1000] top-[-50px] fixed l-0 h-dvh w-screen flex justify-center overflow-hidden pointer-events-none"
+		class="	z-[1000] top-[-50px] fixed l-0 h-dvh-safe w-screen flex justify-center overflow-hidden pointer-events-none"
 	>
 		<Confetti
 			x={[-5, 5]}
@@ -70,10 +70,13 @@
 	<ErrorElement />
 {:else if loaded}
 	{#key images}
-		<div class="grid absolute h-dvh w-screen" transition:blur={{ duration: transitionDuration }}>
+		<div
+			class="grid absolute h-dvh-safe w-screen"
+			transition:blur={{ duration: transitionDuration }}
+		>
 			{#if split}
 				<div class="grid grid-cols-2">
-					<div id="image_portrait_1" class="relative grid border-r-2 border-primary h-dvh">
+					<div id="image_portrait_1" class="relative grid border-r-2 border-primary h-dvh-safe">
 						<Image
 							multi={true}
 							image={images[0]}
@@ -88,7 +91,7 @@
 							bind:showInfo
 						/>
 					</div>
-					<div id="image_portrait_2" class="relative grid border-l-2 border-primary h-dvh">
+					<div id="image_portrait_2" class="relative grid border-l-2 border-primary h-dvh-safe">
 						<Image
 							multi={true}
 							image={images[1]}
@@ -105,7 +108,7 @@
 					</div>
 				</div>
 			{:else}
-				<div id="image_default" class="relative grid h-dvh w-screen">
+				<div id="image_default" class="relative grid h-dvh-safe w-screen">
 					<Image
 						image={images[0]}
 						{interval}
@@ -123,7 +126,7 @@
 		</div>
 	{/key}
 {:else}
-	<div class="grid absolute h-dvh w-screen">
+	<div class="grid absolute h-dvh-safe w-screen">
 		<LoadingElement />
 	</div>
 {/if}
