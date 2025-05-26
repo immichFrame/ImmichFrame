@@ -15,6 +15,13 @@ You can "install" ImmichFrame as a PWA by opening in a browser and going to Shar
 ### Android
 The Android-Version of ImmichFrame is available on the [Google Play Store][play-store-link]. Download it via the store for automatic updates. You can also sideload via APK available in Releases.
 
+
+How to Set Immich Frame as Android TV Screensaver
+
+[![How to Set Immich Frame as Android TV Screensaver](https://img.youtube.com/vi/m3Arh-hrWks/0.jpg)](https://www.youtube.com/watch?v=m3Arh-hrWks)
+
+
+
 See also: [ImmichFrame Android repository][github-android-repo]
 #### Remote Control
 The Android app runs a small local HTTP server on port 53287 that accepts commands `dim`, `undim`, `next`, `previous`, `pause`, `settings`.  
