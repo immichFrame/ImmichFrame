@@ -78,6 +78,11 @@ The Android-Version of ImmichFrame is available on the [Google Play Store][play-
 
 #### Android Screensaver
 
+How to Set Immich Frame as Android TV Screensaver Tutorial
+
+[![How to Set Immich Frame as Android TV Screensaver](https://img.youtube.com/vi/m3Arh-hrWks/0.jpg)](https://www.youtube.com/watch?v=m3Arh-hrWks)
+
+
 - Run the app normally and configure settings.
 - Go to Settings, Display, Advanced, Screen Saver, Current Screen Saver, choose ImmichFrame. Settings, Display, Advanced, Sleep, choose your sleep timeout. The menu options may differ slightly on different Android versions.
   - If you are unable to set ImmichFrame as a screen saver you may need to run this ADB command `adb shell settings put secure screensaver_components com.immichframe.immichframe/.ScreenSaverService`
