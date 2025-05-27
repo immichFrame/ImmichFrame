@@ -285,7 +285,7 @@
 				clientIdentifier: $clientIdentifierStore
 			});
 			assetResponse.people = assetInfoRequest.data.people;
-			assetResponse.exifInfo = assetInfoRequest.data.exifInfo;
+			// assetResponse.exifInfo = assetInfoRequest.data.exifInfo;
 		}
 
 		return [getImageUrl(req.data), assetResponse, album] as [

@@ -193,8 +193,16 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
             foreach (var memory in memories)
             {
                 var assets = memory.Assets.ToList();
-                // var yearsAgo = DateTime.Now.Year - memory.Data.Year;
-                // assets.ForEach(asset => asset.ExifInfo.Description = $"{yearsAgo} {(yearsAgo == 1 ? "year" : "years")} ago");
+                var yearsAgo = DateTime.Now.Year - memory.Data.Year;
+
+                foreach (var asset in assets)
+                {
+                    if (asset.ExifInfo == null)
+                    {
+                        asset.ExifInfo = (await GetAssetInfoById(new Guid(asset.Id))).ExifInfo;
+                    }
+                    asset.ExifInfo.Description = $"{yearsAgo} {(yearsAgo == 1 ? "year" : "years")} ago";
+                }
 
                 memoryAssets.AddRange(assets);
             }
