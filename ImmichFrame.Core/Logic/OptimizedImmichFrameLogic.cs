@@ -199,7 +199,9 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
                 {
                     if (asset.ExifInfo == null)
                     {
-                        asset.ExifInfo = (await GetAssetInfoById(new Guid(asset.Id))).ExifInfo;
+                        var assetInfo = await GetAssetInfoById(new Guid(asset.Id));
+                        asset.ExifInfo = assetInfo.ExifInfo;
+                        asset.People = assetInfo.People;
                     }
                     asset.ExifInfo.Description = $"{yearsAgo} {(yearsAgo == 1 ? "year" : "years")} ago";
                 }
