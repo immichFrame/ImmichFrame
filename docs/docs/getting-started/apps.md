@@ -15,6 +15,25 @@ You can "install" ImmichFrame as a PWA by opening in a browser and going to Shar
 ### Android
 The Android-Version of ImmichFrame is available on the [Google Play Store][play-store-link]. Download it via the store for automatic updates. You can also sideload via APK available in Releases.
 
+
+#### Android Screensaver
+
+How to Set Immich Frame as Android TV Screensaver Tutorial
+
+[![How to Set Immich Frame as Android TV Screensaver](https://img.youtube.com/vi/m3Arh-hrWks/0.jpg)](https://www.youtube.com/watch?v=m3Arh-hrWks)
+
+
+- Run the app normally and configure settings.
+- Go to Settings, Display, Advanced, Screen Saver, Current Screen Saver, choose ImmichFrame. Settings, Display, Advanced, Sleep, choose your sleep timeout. The menu options may differ slightly on different Android versions.
+  - Enable Developer options on your android device.
+  - Enable USB Debugging on Android Device in settings ---> system --> developer options ---> USB Debugging ON
+  - on a terminal/powershell/cmd run `adb connect 192.168.xx.xxx` (the 192.168.xx.xxx will be your Android Device you are trying to add the screensaver too)
+  - You should have a popup on your android device saying allow ADB Connection. Click Allow.   
+  - If you are unable to set ImmichFrame as a screen saver you may need to run this ADB command `adb shell settings put secure screensaver_components com.immichframe.immichframe/.ScreenSaverService`
+  - To view screensaver timeout use this ADB command `adb shell settings get system screen_off_timeout`
+  - To set screensaver timeout use this ADB command `adb shell settings put system screen_off_timeout 60000` (timeout is is ms, so this would be 60 seconds).
+  - To set a second device just run `adb disconnect 192.168.xx.xxx` then follow the steps above again for the next device.
+
 See also: [ImmichFrame Android repository][github-android-repo]
 #### Remote Control
 The Android app runs a small local HTTP server on port 53287 that accepts commands `dim`, `undim`, `next`, `previous`, `pause`, `settings`.  
