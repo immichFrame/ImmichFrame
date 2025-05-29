@@ -6,19 +6,21 @@ using Microsoft.Extensions.Logging;
 
 public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
 {
-    private readonly IServerSettings _settings;
+    private readonly IImmichAccountSettings _settings;
+    private readonly IImmichFrameSettings _frameSettings;
     private readonly HttpClient _httpClient;
     private readonly ImmichApi _immichApi;
     private readonly ApiCache<IEnumerable<AssetResponseDto>> _apiCache;
     private readonly ILogger<OptimizedImmichFrameLogic> _logger;
-    public OptimizedImmichFrameLogic(IServerSettings settings, ILogger<OptimizedImmichFrameLogic> logger)
+    public OptimizedImmichFrameLogic(IImmichAccountSettings settings, IImmichFrameSettings frameSettings, ILogger<OptimizedImmichFrameLogic> logger)
     {
         _settings = settings;
+        _frameSettings = frameSettings;
         _logger = logger;
         _httpClient = new HttpClient();
         _httpClient.UseApiKey(_settings.ApiKey);
         _immichApi = new ImmichApi(_settings.ImmichServerUrl, _httpClient);
-        _apiCache = new ApiCache<IEnumerable<AssetResponseDto>>(TimeSpan.FromHours(_settings.RefreshAlbumPeopleInterval));
+        _apiCache = new ApiCache<IEnumerable<AssetResponseDto>>(TimeSpan.FromHours(_frameSettings.RefreshAlbumPeopleInterval));
     }
 
     public void Dispose()
@@ -312,7 +314,7 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
     public async Task<(string fileName, string ContentType, Stream fileStream)> GetImage(Guid id)
     {
         // Check if the image is already downloaded
-        if (_settings.DownloadImages)
+        if (_frameSettings.DownloadImages)
         {
             if (!Directory.Exists(DownloadLocation))
             {
@@ -323,7 +325,7 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
 
             if (!string.IsNullOrWhiteSpace(file))
             {
-                if (_settings.RenewImagesDuration > (DateTime.UtcNow - File.GetCreationTimeUtc(file)).Days)
+                if (_frameSettings.RenewImagesDuration > (DateTime.UtcNow - File.GetCreationTimeUtc(file)).Days)
                 {
                     var fs = File.OpenRead(file);
 
@@ -349,7 +351,7 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
         var ext = contentType.ToLower() == "image/webp" ? "webp" : "jpeg";
         var fileName = $"{id}.{ext}";
 
-        if (_settings.DownloadImages)
+        if (_frameSettings.DownloadImages)
         {
             var stream = data.Stream;
 
@@ -365,5 +367,5 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
         return (fileName, contentType, data.Stream);
     }
 
-    public Task SendWebhookNotification(IWebhookNotification notification) => WebhookHelper.SendWebhookNotification(notification, _settings.Webhook);
+    public Task SendWebhookNotification(IWebhookNotification notification) => WebhookHelper.SendWebhookNotification(notification, _frameSettings.Webhook);
 }

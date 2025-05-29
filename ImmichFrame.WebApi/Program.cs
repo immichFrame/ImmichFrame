@@ -5,6 +5,7 @@ using ImmichFrame.WebApi.Models;
 using Microsoft.AspNetCore.Authentication;
 using System.Text.Json;
 using System.Reflection;
+using ImmichFrame.Core.Logic;
 
 var builder = WebApplication.CreateBuilder(args);
 //log the version number
@@ -77,22 +78,33 @@ builder.Services.AddSingleton<IWeatherService>(srv =>
 {
     var settings = srv.GetRequiredService<IServerSettings>();
 
-    return new OpenWeatherMapService(settings);
+    return new OpenWeatherMapService(settings.ImmichFrameSettings);
 });
 
 builder.Services.AddSingleton<ICalendarService>(srv =>
 {
     var settings = srv.GetRequiredService<IServerSettings>();
 
-    return new IcalCalendarService(settings);
+    return new IcalCalendarService(settings.ImmichFrameSettings);
+});
+ 
+builder.Services.AddTransient<Func<IImmichAccountSettings, IImmichFrameLogic>>(srv => (account) =>
+{
+    var settings = srv.GetRequiredService<IServerSettings>();
+    
+    return ActivatorUtilities.CreateInstance<OptimizedImmichFrameLogic>(srv, account, settings.ImmichFrameSettings);
 });
 
 builder.Services.AddSingleton<IImmichFrameLogic>(srv =>
 {
     var settings = srv.GetRequiredService<IServerSettings>();
-    var logger = srv.GetRequiredService<ILogger<OptimizedImmichFrameLogic>>();
 
-    return new OptimizedImmichFrameLogic(settings, logger);
+    if (settings.Accounts.Count == 0)
+    {
+        throw new SettingsNotValidException("No immich accounts configured");
+    }
+
+    return ActivatorUtilities.CreateInstance<MultiImmichFrameLogicDelegate>(srv);
 });
 
 builder.Services.AddSingleton<IWebClientSettings>(srv =>
