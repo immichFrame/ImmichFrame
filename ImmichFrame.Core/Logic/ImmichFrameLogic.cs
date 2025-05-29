@@ -8,10 +8,12 @@ namespace ImmichFrame.Core.Logic
 {
     public class ImmichFrameLogic : IImmichFrameLogic
     {
-        private IServerSettings _settings;
-        public ImmichFrameLogic(IServerSettings settings)
+        private IAccountSettings _accountSettings;
+        private IGeneralSettings _frameSettings;
+        public ImmichFrameLogic(IAccountSettings accountSettings, IGeneralSettings frameSettings)
         {
-            _settings = settings;
+            _accountSettings = accountSettings;
+            _frameSettings = frameSettings;
         }
 
         private Task<Dictionary<Guid, AssetResponseDto>?>? _filteredAssetInfos;
@@ -37,7 +39,7 @@ namespace ImmichFrame.Core.Logic
             get
             {
                 TimeSpan timeSinceRefresh = DateTime.Now - lastFilteredAssetRefesh;
-                if (_filteredAssetInfos == null || timeSinceRefresh.TotalHours > _settings.RefreshAlbumPeopleInterval)
+                if (_filteredAssetInfos == null || timeSinceRefresh.TotalHours > _frameSettings.RefreshAlbumPeopleInterval)
                 {
                     lastFilteredAssetRefesh = DateTime.Now;
                     _filteredAssetInfos = GetFilteredAssetIds();
@@ -51,8 +53,8 @@ namespace ImmichFrame.Core.Logic
         {
             using (var client = new HttpClient())
             {
-                client.UseApiKey(_settings.ApiKey);
-                var immichApi = new ImmichApi(_settings.ImmichServerUrl, client);
+                client.UseApiKey(_accountSettings.ApiKey);
+                var immichApi = new ImmichApi((_accountSettings).ImmichServerUrl, client);
 
                 return immichApi.GetAssetInfoAsync(assetId, null);
             }
@@ -62,8 +64,8 @@ namespace ImmichFrame.Core.Logic
         {
             using (var client = new HttpClient())
             {
-                client.UseApiKey(_settings.ApiKey);
-                var immichApi = new ImmichApi(_settings.ImmichServerUrl, client);
+                client.UseApiKey(_accountSettings.ApiKey);
+                var immichApi = new ImmichApi(_accountSettings.ImmichServerUrl, client);
 
                 return await immichApi.GetAllAlbumsAsync(assetId, null);
             }
@@ -93,7 +95,7 @@ namespace ImmichFrame.Core.Logic
         string DownloadLocation = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ImageCache");
         public async Task<(string fileName, string ContentType, Stream fileStream)> GetImage(Guid id)
         {
-            if (_settings.DownloadImages)
+            if (_frameSettings.DownloadImages)
             {
                 if (!Directory.Exists(DownloadLocation))
                 {
@@ -104,7 +106,7 @@ namespace ImmichFrame.Core.Logic
 
                 if (!string.IsNullOrWhiteSpace(file))
                 {
-                    if (_settings.RenewImagesDuration > (DateTime.UtcNow - File.GetCreationTimeUtc(file)).Days)
+                    if (_frameSettings.RenewImagesDuration > (DateTime.UtcNow - File.GetCreationTimeUtc(file)).Days)
                     {
                         var fs = File.OpenRead(file);
 
@@ -119,9 +121,9 @@ namespace ImmichFrame.Core.Logic
 
             using (var client = new HttpClient())
             {
-                client.UseApiKey(_settings.ApiKey);
+                client.UseApiKey(_accountSettings.ApiKey);
 
-                var immichApi = new ImmichApi(_settings.ImmichServerUrl, client);
+                var immichApi = new ImmichApi(_accountSettings.ImmichServerUrl, client);
 
                 var data = await immichApi.ViewAssetAsync(id, string.Empty, AssetMediaSize.Preview);
 
@@ -136,7 +138,7 @@ namespace ImmichFrame.Core.Logic
                 var ext = contentType.ToLower() == "image/webp" ? "webp" : "jpeg";
                 var fileName = $"{id}.{ext}";
 
-                if (_settings.DownloadImages)
+                if (_frameSettings.DownloadImages)
                 {
                     var stream = data.Stream;
 
@@ -156,33 +158,33 @@ namespace ImmichFrame.Core.Logic
         {
             bool assetsAdded = false;
             IEnumerable<AssetResponseDto> list = new List<AssetResponseDto>();
-            if (_settings.ShowMemories)
+            if (_accountSettings.ShowMemories)
             {
                 assetsAdded = true;
                 list = list.Union(await GetMemoryAssets());
             }
 
-            if (_settings.ShowFavorites)
+            if (_accountSettings.ShowFavorites)
             {
                 assetsAdded = true;
                 list = list.Union(await GetRandomAssets());
             }
 
-            if (_settings.Albums?.Any() ?? false)
+            if (_accountSettings.Albums?.Any() ?? false)
             {
                 assetsAdded = true;
                 list = list.Union(await GetAlbumAssets());
             }
 
-            if (_settings.People?.Any() ?? false)
+            if (_accountSettings.People?.Any() ?? false)
             {
                 assetsAdded = true;
                 list = list.Union(await GetPeopleAssets());
             }
 
-            if (_settings.Rating.HasValue && list.Any())
+            if (_accountSettings.Rating.HasValue && list.Any())
             {
-                list = list.Where(x => x.ExifInfo.Rating == _settings.Rating.Value);
+                list = list.Where(x => x.ExifInfo.Rating == _accountSettings.Rating.Value);
             }
 
             if (assetsAdded)
@@ -190,13 +192,13 @@ namespace ImmichFrame.Core.Logic
                 // Exclude videos
                 list = list.Where(x => x.Type != AssetTypeEnum.VIDEO);
 
-                var takenBefore = _settings.ImagesUntilDate.HasValue ? _settings.ImagesUntilDate : null;
+                var takenBefore = _accountSettings.ImagesUntilDate.HasValue ? _accountSettings.ImagesUntilDate : null;
                 if (takenBefore.HasValue)
                 {
                     list = list.Where(x => x.FileCreatedAt < takenBefore.Value);
                 }
 
-                var takenAfter = _settings.ImagesFromDate.HasValue ? _settings.ImagesFromDate : _settings.ImagesFromDays.HasValue ? DateTime.Today.AddDays(-_settings.ImagesFromDays.Value) : null;
+                var takenAfter = _accountSettings.ImagesFromDate.HasValue ? _accountSettings.ImagesFromDate : _accountSettings.ImagesFromDays.HasValue ? DateTime.Today.AddDays(-_accountSettings.ImagesFromDays.Value) : null;
                 if (takenAfter.HasValue)
                 {
                     list = list.Where(x => x.FileCreatedAt > takenAfter.Value);
@@ -218,9 +220,9 @@ namespace ImmichFrame.Core.Logic
         {
             using (var client = new HttpClient())
             {
-                client.UseApiKey(_settings.ApiKey);
+                client.UseApiKey(_accountSettings.ApiKey);
 
-                var immichApi = new ImmichApi(_settings.ImmichServerUrl, client);
+                var immichApi = new ImmichApi(_accountSettings.ImmichServerUrl, client);
 
                 var allAssets = new List<AssetResponseDto>();
 
@@ -253,7 +255,7 @@ namespace ImmichFrame.Core.Logic
             {
                 var albumInfo = await immichApi.GetAlbumInfoAsync(albumId, null, null);
 
-                return _settings.ShowArchived ? albumInfo.Assets : albumInfo.Assets.Where(x => !x.IsArchived);
+                return _accountSettings.ShowArchived ? albumInfo.Assets : albumInfo.Assets.Where(x => !x.IsArchived);
             }
             catch (ApiException ex)
             {
@@ -266,10 +268,10 @@ namespace ImmichFrame.Core.Logic
 
             var allAssets = new List<AssetResponseDto>();
 
-            var immichApi = new ImmichApi(_settings.ImmichServerUrl, client);
+            var immichApi = new ImmichApi(_accountSettings.ImmichServerUrl, client);
 
-            client.UseApiKey(_settings.ApiKey);
-            foreach (var albumId in _settings.Albums!)
+            client.UseApiKey(_accountSettings.ApiKey);
+            foreach (var albumId in _accountSettings.Albums!)
             {
                 allAssets.AddRange(await GetAlbumAssets(albumId, immichApi));
             }
@@ -282,26 +284,40 @@ namespace ImmichFrame.Core.Logic
 
             var allAssets = new List<AssetResponseDto>();
 
-            var immichApi = new ImmichApi(_settings.ImmichServerUrl, client);
+            var immichApi = new ImmichApi(_accountSettings.ImmichServerUrl, client);
 
-            client.UseApiKey(_settings.ApiKey);
-            foreach (var albumId in _settings.ExcludedAlbums!)
+            client.UseApiKey(_accountSettings.ApiKey);
+            foreach (var albumId in _accountSettings.ExcludedAlbums!)
             {
                 allAssets.AddRange(await GetAlbumAssets(albumId, immichApi));
             }
 
             return allAssets.Select(x => Guid.Parse(x.Id));
         }
+
+        public Task<AssetStatsResponseDto> GetAssetStats()
+        {
+            using var client = new HttpClient();
+
+            var allAssets = new List<AssetResponseDto>();
+
+            var immichApi = new ImmichApi(_accountSettings.ImmichServerUrl, client);
+            
+            client.UseApiKey(_accountSettings.ApiKey);
+
+            return immichApi.GetAssetStatisticsAsync(null, false, null);
+        }
+        
         private async Task<IEnumerable<AssetResponseDto>> GetPeopleAssets()
         {
             using (var client = new HttpClient())
             {
                 var allAssets = new List<AssetResponseDto>();
 
-                var immichApi = new ImmichApi(_settings.ImmichServerUrl, client);
+                var immichApi = new ImmichApi(_accountSettings.ImmichServerUrl, client);
 
-                client.UseApiKey(_settings.ApiKey);
-                foreach (var personId in _settings.People!)
+                client.UseApiKey(_accountSettings.ApiKey);
+                foreach (var personId in _accountSettings.People!)
                 {
                     try
                     {
@@ -320,7 +336,7 @@ namespace ImmichFrame.Core.Logic
                                 WithPeople = true
                             };
 
-                            if (_settings.ShowArchived)
+                            if (_accountSettings.ShowArchived)
                             {
                                 metadataBody.Visibility = AssetVisibility.Archive;
                             }
@@ -329,13 +345,13 @@ namespace ImmichFrame.Core.Logic
                                 metadataBody.Visibility = AssetVisibility.Timeline;
                             }
 
-                            var takenBefore = _settings.ImagesUntilDate.HasValue ? _settings.ImagesUntilDate : null;
+                            var takenBefore = _accountSettings.ImagesUntilDate.HasValue ? _accountSettings.ImagesUntilDate : null;
                             if (takenBefore.HasValue)
                             {
                                 metadataBody.TakenBefore = takenBefore.Value;
                             }
 
-                            var takenAfter = _settings.ImagesFromDate.HasValue ? _settings.ImagesFromDate : _settings.ImagesFromDays.HasValue ? DateTime.Today.AddDays(-_settings.ImagesFromDays.Value) : null;
+                            var takenAfter = _accountSettings.ImagesFromDate.HasValue ? _accountSettings.ImagesFromDate : _accountSettings.ImagesFromDays.HasValue ? DateTime.Today.AddDays(-_accountSettings.ImagesFromDays.Value) : null;
                             if (takenAfter.HasValue)
                             {
                                 metadataBody.TakenAfter = takenAfter.Value;
@@ -380,7 +396,7 @@ namespace ImmichFrame.Core.Logic
                 return new List<AssetResponseDto>();
 
             // If only memories, do not return random and order by date
-            if (_settings.ShowMemories && !_settings.Albums.Any() && !_settings.People.Any())
+            if (_accountSettings.ShowMemories && !_accountSettings.Albums.Any() && !_accountSettings.People.Any())
                 return filteredAssetInfos.OrderBy(x => x.Value.ExifInfo.DateTimeOriginal).Select(x => x.Value).ToList();
 
             // Return randomly ordered list
@@ -432,9 +448,9 @@ namespace ImmichFrame.Core.Logic
         {
             using (var client = new HttpClient())
             {
-                client.UseApiKey(_settings.ApiKey);
+                client.UseApiKey(_accountSettings.ApiKey);
 
-                var immichApi = new ImmichApi(_settings.ImmichServerUrl, client);
+                var immichApi = new ImmichApi(_accountSettings.ImmichServerUrl, client);
                 try
                 {
                     var searchBody = new RandomSearchDto
@@ -445,7 +461,7 @@ namespace ImmichFrame.Core.Logic
                         WithPeople = true,
                     };
 
-                    if (_settings.ShowArchived)
+                    if (_accountSettings.ShowArchived)
                     {
                         searchBody.Visibility = AssetVisibility.Archive;
                     }
@@ -454,23 +470,23 @@ namespace ImmichFrame.Core.Logic
                         searchBody.Visibility = AssetVisibility.Timeline;
                     }
 
-                    if (_settings.ShowFavorites)
+                    if (_accountSettings.ShowFavorites)
                     {
                         searchBody.IsFavorite = true;
                     }
 
-                    if (_settings.Rating.HasValue)
+                    if (_accountSettings.Rating.HasValue)
                     {
-                        searchBody.Rating = _settings.Rating.Value;
+                        searchBody.Rating = _accountSettings.Rating.Value;
                     }
 
-                    var takenBefore = _settings.ImagesUntilDate.HasValue ? _settings.ImagesUntilDate : null;
+                    var takenBefore = _accountSettings.ImagesUntilDate.HasValue ? _accountSettings.ImagesUntilDate : null;
                     if (takenBefore.HasValue)
                     {
                         searchBody.TakenBefore = takenBefore.Value;
                     }
 
-                    var takenAfter = _settings.ImagesFromDate.HasValue ? _settings.ImagesFromDate : _settings.ImagesFromDays.HasValue ? DateTime.Today.AddDays(-_settings.ImagesFromDays.Value) : null;
+                    var takenAfter = _accountSettings.ImagesFromDate.HasValue ? _accountSettings.ImagesFromDate : _accountSettings.ImagesFromDays.HasValue ? DateTime.Today.AddDays(-_accountSettings.ImagesFromDays.Value) : null;
                     if (takenAfter.HasValue)
                     {
                         searchBody.TakenAfter = takenAfter.Value;
@@ -500,6 +516,6 @@ namespace ImmichFrame.Core.Logic
             }
         }
 
-        public Task SendWebhookNotification(IWebhookNotification notification) => WebhookHelper.SendWebhookNotification(notification, _settings.Webhook);
+        public Task SendWebhookNotification(IWebhookNotification notification) => WebhookHelper.SendWebhookNotification(notification, _frameSettings.Webhook);
     }
 }

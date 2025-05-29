@@ -23,6 +23,7 @@
     <Content Update="wwwroot\custom.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <InternalsVisibleTo Include="ImmichFrame.WebApi.Tests" />
   </ItemGroup>
 
 

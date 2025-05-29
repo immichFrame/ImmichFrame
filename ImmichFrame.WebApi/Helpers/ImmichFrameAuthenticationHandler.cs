@@ -18,7 +18,7 @@ public class ImmichFrameAuthenticationHandler : AuthenticationHandler<Authentica
         IServerSettings settings)
         : base(options, logger, encoder)
     {
-        this._authenticationSecret = settings.AuthenticationSecret;
+        this._authenticationSecret = settings.GeneralSettings.AuthenticationSecret;
     }
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()

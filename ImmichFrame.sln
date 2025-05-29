@@ -6,6 +6,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImmichFrame.Core", "ImmichF
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImmichFrame.WebApi", "ImmichFrame.WebApi\ImmichFrame.WebApi.csproj", "{4E550CF5-E5D1-4D1F-8438-A55C5C7AC93F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImmichFrame.WebApi.Tests", "ImmichFrame.WebApi.Tests\ImmichFrame.WebApi.Tests.csproj", "{DA9040F2-F048-4A31-909A-086C37056306}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,6 +22,10 @@ Global
 		{4E550CF5-E5D1-4D1F-8438-A55C5C7AC93F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4E550CF5-E5D1-4D1F-8438-A55C5C7AC93F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4E550CF5-E5D1-4D1F-8438-A55C5C7AC93F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA9040F2-F048-4A31-909A-086C37056306}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA9040F2-F048-4A31-909A-086C37056306}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA9040F2-F048-4A31-909A-086C37056306}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA9040F2-F048-4A31-909A-086C37056306}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

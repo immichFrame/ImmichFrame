@@ -7,20 +7,22 @@ using Microsoft.Extensions.Logging;
 
 public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
 {
-    private readonly IServerSettings _settings;
+    private readonly IAccountSettings _accountSettings;
+    private readonly IGeneralSettings _frameSettings;
     private readonly HttpClient _httpClient;
     private readonly ImmichApi _immichApi;
-    private readonly ApiCache<IEnumerable<AssetResponseDto>> _apiCache;
+    private readonly ApiCache _apiCache;
     private readonly ILogger<OptimizedImmichFrameLogic> _logger;
 
-    public OptimizedImmichFrameLogic(IServerSettings settings, ILogger<OptimizedImmichFrameLogic> logger)
+    public OptimizedImmichFrameLogic(IAccountSettings accountSettings, IGeneralSettings frameSettings, ILogger<OptimizedImmichFrameLogic> logger)
     {
-        _settings = settings;
+        _accountSettings = accountSettings;
+        _frameSettings = frameSettings;
         _logger = logger;
         _httpClient = new HttpClient();
-        _httpClient.UseApiKey(_settings.ApiKey);
-        _immichApi = new ImmichApi(_settings.ImmichServerUrl, _httpClient);
-        _apiCache = new ApiCache<IEnumerable<AssetResponseDto>>(TimeSpan.FromHours(_settings.RefreshAlbumPeopleInterval));
+        _httpClient.UseApiKey(_accountSettings.ApiKey);
+        _immichApi = new ImmichApi(_accountSettings.ImmichServerUrl, _httpClient);
+        _apiCache = new ApiCache(TimeSpan.FromHours(_frameSettings.RefreshAlbumPeopleInterval));
     }
 
     public void Dispose()
@@ -92,48 +94,49 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
 
     private int _assetAmount = 250;
     private Random _random = new Random();
+
     public async Task<IEnumerable<AssetResponseDto>> GetAssets()
     {
-        if (!_settings.ShowFavorites && !_settings.ShowMemories && !_settings.Albums.Any() && !_settings.People.Any())
+        if (!_accountSettings.ShowFavorites && !_accountSettings.ShowMemories && !_accountSettings.Albums.Any() && !_accountSettings.People.Any())
         {
             return await GetRandomAssets();
         }
 
         IEnumerable<AssetResponseDto> assets = new List<AssetResponseDto>();
 
-        if (_settings.ShowFavorites)
+        if (_accountSettings.ShowFavorites)
             assets = assets.Concat(await GetFavoriteAssets());
-        if (_settings.ShowMemories)
+        if (_accountSettings.ShowMemories)
             assets = assets.Concat(await GetMemoryAssets());
-        if (_settings.Albums.Any())
+        if (_accountSettings.Albums.Any())
             assets = assets.Concat(await GetAlbumAssets());
-        if (_settings.People.Any())
+        if (_accountSettings.People.Any())
             assets = assets.Concat(await GetPeopleAssets());
 
         // Display only Images
         assets = assets.Where(x => x.Type == AssetTypeEnum.IMAGE);
 
-        if (!_settings.ShowArchived)
+        if (!_accountSettings.ShowArchived)
             assets = assets.Where(x => x.IsArchived == false);
 
-        var takenBefore = _settings.ImagesUntilDate.HasValue ? _settings.ImagesUntilDate : null;
+        var takenBefore = _accountSettings.ImagesUntilDate.HasValue ? _accountSettings.ImagesUntilDate : null;
         if (takenBefore.HasValue)
         {
             assets = assets.Where(x => x.ExifInfo.DateTimeOriginal <= takenBefore);
         }
 
-        var takenAfter = _settings.ImagesFromDate.HasValue ? _settings.ImagesFromDate : _settings.ImagesFromDays.HasValue ? DateTime.Today.AddDays(-_settings.ImagesFromDays.Value) : null;
+        var takenAfter = _accountSettings.ImagesFromDate.HasValue ? _accountSettings.ImagesFromDate : _accountSettings.ImagesFromDays.HasValue ? DateTime.Today.AddDays(-_accountSettings.ImagesFromDays.Value) : null;
         if (takenAfter.HasValue)
         {
             assets = assets.Where(x => x.ExifInfo.DateTimeOriginal >= takenAfter);
         }
 
-        if (_settings.Rating is int rating)
+        if (_accountSettings.Rating is int rating)
         {
             assets = assets.Where(x => x.ExifInfo.Rating == rating);
         }
 
-        if (_settings.ExcludedAlbums.Any())
+        if (_accountSettings.ExcludedAlbums.Any())
         {
             var excludedAssetList = await GetExcludedAlbumAssets();
             var excludedAssetSet = excludedAssetList.Select(x => x.Id).ToHashSet();
@@ -161,7 +164,7 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
             WithPeople = true
         };
 
-        if (_settings.ShowArchived)
+        if (_accountSettings.ShowArchived)
         {
             searchDto.Visibility = AssetVisibility.Archive;
         }
@@ -170,26 +173,26 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
             searchDto.Visibility = AssetVisibility.Timeline;
         }
 
-        var takenBefore = _settings.ImagesUntilDate.HasValue ? _settings.ImagesUntilDate : null;
+        var takenBefore = _accountSettings.ImagesUntilDate.HasValue ? _accountSettings.ImagesUntilDate : null;
         if (takenBefore.HasValue)
         {
             searchDto.TakenBefore = takenBefore;
         }
+        var takenAfter = _accountSettings.ImagesFromDate.HasValue ? _accountSettings.ImagesFromDate : _accountSettings.ImagesFromDays.HasValue ? DateTime.Today.AddDays(-_accountSettings.ImagesFromDays.Value) : null;
 
-        var takenAfter = _settings.ImagesFromDate.HasValue ? _settings.ImagesFromDate : _settings.ImagesFromDays.HasValue ? DateTime.Today.AddDays(-_settings.ImagesFromDays.Value) : null;
         if (takenAfter.HasValue)
         {
             searchDto.TakenAfter = takenAfter;
         }
 
-        if (_settings.Rating is int rating)
+        if (_accountSettings.Rating is int rating)
         {
             searchDto.Rating = rating;
         }
 
         var assets = await _immichApi.SearchRandomAsync(searchDto);
 
-        if (_settings.ExcludedAlbums.Any())
+        if (_accountSettings.ExcludedAlbums.Any())
         {
             var excludedAssetList = await GetExcludedAlbumAssets();
             var excludedAssetSet = excludedAssetList.Select(x => x.Id).ToHashSet();
@@ -230,6 +233,12 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
         });
     }
 
+    public async Task<AssetStatsResponseDto> GetAssetStats()
+    {
+        return await _apiCache.GetOrAddAsync("AssetStats",
+            () => _immichApi.GetAssetStatisticsAsync(null, false, null));
+    }
+
     public async Task<IEnumerable<AssetResponseDto>> GetFavoriteAssets()
     {
         return await _apiCache.GetOrAddAsync("FavoriteAssets", async () =>
@@ -257,8 +266,7 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
 
                 favoriteAssets.AddRange(favoriteInfo.Assets.Items);
                 page++;
-            }
-            while (total == batchSize);
+            } while (total == batchSize);
 
             return favoriteAssets;
         });
@@ -270,7 +278,7 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
         {
             var albumAssets = new List<AssetResponseDto>();
 
-            foreach (var albumId in _settings.Albums)
+            foreach (var albumId in _accountSettings.Albums)
             {
                 var albumInfo = await _immichApi.GetAlbumInfoAsync(albumId, null, null);
 
@@ -287,7 +295,7 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
         {
             var excludedAlbumAssets = new List<AssetResponseDto>();
 
-            foreach (var albumId in _settings.ExcludedAlbums)
+            foreach (var albumId in _accountSettings.ExcludedAlbums)
             {
                 var albumInfo = await _immichApi.GetAlbumInfoAsync(albumId, null, null);
 
@@ -304,7 +312,7 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
         {
             var personAssets = new List<AssetResponseDto>();
 
-            foreach (var personId in _settings.People)
+            foreach (var personId in _accountSettings.People)
             {
                 int page = 1;
                 int batchSize = 1000;
@@ -327,8 +335,7 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
 
                     personAssets.AddRange(personInfo.Assets.Items);
                     page++;
-                }
-                while (total == batchSize);
+                } while (total == batchSize);
             }
 
             return personAssets;
@@ -336,21 +343,23 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
     }
 
     readonly string DownloadLocation = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ImageCache");
+
     public async Task<(string fileName, string ContentType, Stream fileStream)> GetImage(Guid id)
     {
         // Check if the image is already downloaded
-        if (_settings.DownloadImages)
+        if (_frameSettings.DownloadImages)
         {
             if (!Directory.Exists(DownloadLocation))
             {
                 Directory.CreateDirectory(DownloadLocation);
             }
 
-            var file = Directory.GetFiles(DownloadLocation).FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == id.ToString());
+            var file = Directory.GetFiles(DownloadLocation)
+                .FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == id.ToString());
 
             if (!string.IsNullOrWhiteSpace(file))
             {
-                if (_settings.RenewImagesDuration > (DateTime.UtcNow - File.GetCreationTimeUtc(file)).Days)
+                if (_frameSettings.RenewImagesDuration > (DateTime.UtcNow - File.GetCreationTimeUtc(file)).Days)
                 {
                     var fs = File.OpenRead(file);
 
@@ -373,10 +382,11 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
         {
             contentType = data.Headers["Content-Type"].FirstOrDefault()?.ToString() ?? "";
         }
+
         var ext = contentType.ToLower() == "image/webp" ? "webp" : "jpeg";
         var fileName = $"{id}.{ext}";
 
-        if (_settings.DownloadImages)
+        if (_frameSettings.DownloadImages)
         {
             var stream = data.Stream;
 
@@ -392,5 +402,6 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
         return (fileName, contentType, data.Stream);
     }
 
-    public Task SendWebhookNotification(IWebhookNotification notification) => WebhookHelper.SendWebhookNotification(notification, _settings.Webhook);
+    public Task SendWebhookNotification(IWebhookNotification notification) =>
+        WebhookHelper.SendWebhookNotification(notification, _frameSettings.Webhook);
 }

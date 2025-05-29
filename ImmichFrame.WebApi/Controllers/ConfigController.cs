@@ -1,5 +1,4 @@
 using ImmichFrame.Core.Interfaces;
-using ImmichFrame.WebApi.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ImmichFrame.WebApi.Controllers
@@ -9,20 +8,20 @@ namespace ImmichFrame.WebApi.Controllers
     public class ConfigController : ControllerBase
     {
         private readonly ILogger<AssetController> _logger;
-        private readonly IWebClientSettings _settings;
+        private readonly IGeneralSettings _settings;
 
-        public ConfigController(ILogger<AssetController> logger, IWebClientSettings settings)
+        public ConfigController(ILogger<AssetController> logger, IGeneralSettings settings)
         {
             _logger = logger;
             _settings = settings;
         }
 
         [HttpGet(Name = "GetConfig")]
-        public WebClientSettings GetConfig(string clientIdentifier = "")
+        public IGeneralSettings GetConfig(string clientIdentifier = "")
         {
             var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
             _logger.LogDebug("Config requested by '{sanitizedClientIdentifier}'", sanitizedClientIdentifier);
-            return (WebClientSettings)_settings;
+            return _settings;
         }
 
         [HttpGet("Version", Name = "GetVersion")]

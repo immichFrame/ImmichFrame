@@ -1,32 +1,60 @@
 ﻿namespace ImmichFrame.Core.Interfaces
 {
-    public interface IFullSettings : IServerSettings, IClientSettings
-    { }
-
     public interface IServerSettings
     {
-        public string ImmichServerUrl { get; set; }
-        public string ApiKey { get; set; }
-        public bool ShowMemories { get; set; }
-        public bool ShowFavorites { get; set; }
-        public bool ShowArchived { get; set; }
-        public bool DownloadImages { get; set; }
-        public int RenewImagesDuration { get; set; }
-        public int? ImagesFromDays { get; set; }
-        public DateTime? ImagesFromDate { get; set; }
-        public DateTime? ImagesUntilDate { get; set; }
-        public List<Guid> Albums { get; set; }
-        public List<Guid> ExcludedAlbums { get; set; }
-        public List<Guid> People { get; set; }
-        public int? Rating { get; set; }
-        public List<string> Webcalendars { get; set; }
-        public int RefreshAlbumPeopleInterval { get; set; }
-        public string ImmichFrameAlbumName { get; set; }
-        public string? WeatherApiKey { get; set; }
-        public string? WeatherLatLong { get; set; }
-        public string? UnitSystem { get; set; }
-        public string Language { get; set; }
-        public string? Webhook { get; set; }
-        public string? AuthenticationSecret { get; set; }
+        public IEnumerable<IAccountSettings> Accounts { get; }
+        public IGeneralSettings GeneralSettings { get; }
+    }
+    
+    public interface IAccountSettings
+    {
+        public string ImmichServerUrl { get; }
+        public string ApiKey { get; }
+        public bool ShowMemories { get; }
+        public bool ShowFavorites { get; }
+        public bool ShowArchived { get; }
+        public int? ImagesFromDays { get; }
+        public DateTime? ImagesFromDate { get; }
+        public DateTime? ImagesUntilDate { get; }
+        public List<Guid> Albums { get; }
+        public List<Guid> ExcludedAlbums { get; }
+        public List<Guid> People { get; }
+        public int? Rating { get; }
+        public string ImmichFrameAlbumName { get; }
+    }
+    
+    public interface IGeneralSettings
+    {
+        public List<string> Webcalendars { get; }
+        public int RefreshAlbumPeopleInterval { get; }
+        public string? WeatherApiKey { get; }
+        public string? WeatherLatLong { get; }
+        public string? UnitSystem { get; }
+        public string? Webhook { get; }
+        public string? AuthenticationSecret { get; }
+        public string Margin { get; }
+        public int Interval { get; }
+        public double TransitionDuration { get; }
+        public bool DownloadImages { get; }
+        public int RenewImagesDuration { get; }
+        public bool ShowClock { get; }
+        public string? ClockFormat { get; }
+        public bool ShowPhotoDate { get; }
+        public string? PhotoDateFormat { get; }
+        public bool ShowImageDesc { get; }
+        public bool ShowPeopleDesc { get; }
+        public bool ShowAlbumName { get; }
+        public bool ShowImageLocation { get; }
+        public string? ImageLocationFormat { get; }
+        public string? PrimaryColor { get; }
+        public string? SecondaryColor { get; }
+        public string Style { get; }
+        public string? BaseFontSize { get; }
+        public bool ShowWeatherDescription { get; }
+        public bool UnattendedMode { get; }
+        public bool ImageZoom { get; }
+        public bool ImageFill { get; }
+        public string Layout { get; }
+        public string Language { get; }
     }
 }
