@@ -1,11 +1,17 @@
 ﻿using ImmichFrame.WebApi.Models;
 using System.Reflection;
+using ImmichFrame.Core.Interfaces;
 
 namespace ImmichFrame.WebApi.Helpers
 {
     public static class SettingsExtensions
     {
-        public static void SetValue(this ServerSettings s, PropertyInfo prop, string value)
+        
+        public static void SetValue(this IImmichAccountSettings s, PropertyInfo prop, string value)
+        {
+            SetValue((object)s, prop, value.Trim());
+        }
+        public static void SetValue(this IImmichFrameSettings s, PropertyInfo prop, string value)
         {
             SetValue((object)s, prop, value.Trim());
         }

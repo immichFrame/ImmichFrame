@@ -3,9 +3,9 @@ using ImmichFrame.Core.Interfaces;
 
 public class OpenWeatherMapService : IWeatherService
 {
-    private readonly IServerSettings _settings;
-    private readonly ApiCache<IWeather?> _weatherCache = new(TimeSpan.FromMinutes(5));
-    public OpenWeatherMapService(IServerSettings settings)
+    private readonly IImmichFrameSettings _settings;
+    private readonly ApiCache _weatherCache = new(TimeSpan.FromMinutes(5));
+    public OpenWeatherMapService(IImmichFrameSettings settings)
     {
         _settings = settings;
     }
