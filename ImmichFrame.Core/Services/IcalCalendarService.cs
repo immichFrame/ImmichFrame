@@ -5,7 +5,7 @@ using ImmichFrame.WebApi.Helpers;
 public class IcalCalendarService : ICalendarService
 {
     private readonly IImmichFrameSettings _serverSettings;
-    private readonly ApiCache<List<IAppointment>> _appointmentCache = new(TimeSpan.FromMinutes(15));
+    private readonly ApiCache _appointmentCache = new(TimeSpan.FromMinutes(15));
 
     public IcalCalendarService(IImmichFrameSettings serverSettings)
     {

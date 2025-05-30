@@ -42,19 +42,17 @@ builder.Services.AddLogging(builder =>
     builder.AddFilter("Microsoft.AspNetCore", LogLevel.Warning);
 });
 
+
 // Setup Config
 var settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config", "Settings.json");
 ConfigLoader configLoader = new ConfigLoader();
 builder.Services.AddSingleton<IServerSettings>(_ => File.Exists(settingsPath) ? configLoader.LoadConfig<ServerSettings>(settingsPath) : new ServerSettings());
 builder.Services.AddSingleton<IWebClientSettings>(_ => configLoader.LoadConfig<WebClientSettings>(settingsPath));
-
+builder.Services.AddSingleton<IImmichFrameSettings>(srv => srv.GetRequiredService<IServerSettings>().ImmichFrameSettings);
 builder.Services.AddSingleton<IWeatherService, OpenWeatherMapService>();
 builder.Services.AddSingleton<ICalendarService, IcalCalendarService>();
-builder.Services.AddTransient<Func<IImmichAccountSettings, IImmichFrameLogic>>(srv => account =>
-{
-    var settings = srv.GetRequiredService<IServerSettings>();
-    return ActivatorUtilities.CreateInstance<OptimizedImmichFrameLogic>(srv, account, settings.ImmichFrameSettings);
-});
+builder.Services.AddSingleton<IAccountSelectionStrategy, TotalAccountImagesSelectionStrategy>();
+builder.Services.AddTransient<Func<IImmichAccountSettings, IImmichFrameLogic>>(srv => account => ActivatorUtilities.CreateInstance<OptimizedImmichFrameLogic>(srv, account));
 builder.Services.AddSingleton<IImmichFrameLogic, MultiImmichFrameLogicDelegate>();
 
 builder.Services.AddControllers();

@@ -81,6 +81,19 @@ Events will always contain a `Name`, `ClientIdentifier` and a `DateTime` to diff
 | -------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ImageRequestedNotification | Notifies, when a Image requested. | `{"Name":"ImageRequestedNotification", "ClientIdentifier": "Frame_Kitchen", "DateTime":"2024-11-16T21:37:19.4933981+01:00", "RequestedImageId":"UUID"}` |
 
+### Multiple Immich Accounts
+ImmichFrame can be configured to access multiple Immich accounts, on the same or different servers. Additional accounts can be configured with an `Account#.` prefix, where they accept all the 'Required', '[Filtering](#filtering)' and Caching' values:
+
+```
+ImmichServerUrl=http://server:2283/
+ApiKey=key1
+Account2.ImmichServerUrl=http://server2:2283/
+Account2.ApiKey=key2
+Account2.ShowArchived=true
+```
+
+Images will be drawn from each account proportionally based on the total number of images present in each account (not included filtering, this is not yet implemented).
+
 ### Custom CSS
 ImmichFrame can be customized even further using CSS. This will apply to browsers, and apps using WebView (i.e. everything but Frameo and AppleTV):
 - Create a custom.css file somewhere on your host server with your desired content, for example:  
