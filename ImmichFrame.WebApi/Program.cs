@@ -87,7 +87,19 @@ builder.Services.AddSingleton<ICalendarService>(srv =>
 
     return new IcalCalendarService(settings.ImmichFrameSettings);
 });
- 
+
+builder.Services.AddSingleton<IAccountSelectionStrategy>(srv =>
+{
+    var settings = srv.GetRequiredService<IServerSettings>();
+
+    if (settings.Accounts.Count == 0)
+    {
+        throw new SettingsNotValidException("No immich accounts configured");
+    }
+
+    return ActivatorUtilities.CreateInstance<TotalAccountImagesSelectionStrategy>(srv);
+});
+
 builder.Services.AddTransient<Func<IImmichAccountSettings, IImmichFrameLogic>>(srv => (account) =>
 {
     var settings = srv.GetRequiredService<IServerSettings>();

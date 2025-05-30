@@ -294,6 +294,20 @@ namespace ImmichFrame.Core.Logic
 
             return allAssets.Select(x => Guid.Parse(x.Id));
         }
+
+        public Task<AssetStatsResponseDto> GetAssetStats()
+        {
+            using var client = new HttpClient();
+
+            var allAssets = new List<AssetResponseDto>();
+
+            var immichApi = new ImmichApi(_accountSettings.ImmichServerUrl, client);
+            
+            client.UseApiKey(_accountSettings.ApiKey);
+
+            return immichApi.GetAssetStatisticsAsync(null, false, null);
+        }
+        
         private async Task<IEnumerable<AssetResponseDto>> GetPeopleAssets()
         {
             using (var client = new HttpClient())

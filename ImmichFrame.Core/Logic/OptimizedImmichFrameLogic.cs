@@ -10,9 +10,11 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
     private readonly IImmichFrameSettings _frameSettings;
     private readonly HttpClient _httpClient;
     private readonly ImmichApi _immichApi;
-    private readonly ApiCache<IEnumerable<AssetResponseDto>> _apiCache;
+    private readonly ApiCache _apiCache;
     private readonly ILogger<OptimizedImmichFrameLogic> _logger;
-    public OptimizedImmichFrameLogic(IImmichAccountSettings settings, IImmichFrameSettings frameSettings, ILogger<OptimizedImmichFrameLogic> logger)
+
+    public OptimizedImmichFrameLogic(IImmichAccountSettings settings, IImmichFrameSettings frameSettings,
+        ILogger<OptimizedImmichFrameLogic> logger)
     {
         _settings = settings;
         _frameSettings = frameSettings;
@@ -20,7 +22,8 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
         _httpClient = new HttpClient();
         _httpClient.UseApiKey(_settings.ApiKey);
         _immichApi = new ImmichApi(_settings.ImmichServerUrl, _httpClient);
-        _apiCache = new ApiCache<IEnumerable<AssetResponseDto>>(TimeSpan.FromHours(_frameSettings.RefreshAlbumPeopleInterval));
+        _apiCache = new ApiCache(
+            TimeSpan.FromHours(_frameSettings.RefreshAlbumPeopleInterval));
     }
 
     public void Dispose()
@@ -77,6 +80,7 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
 
     private int _assetAmount = 250;
     private Random _random = new Random();
+
     public async Task<IEnumerable<AssetResponseDto>> GetAssets()
     {
         if (!_settings.ShowFavorites && !_settings.ShowMemories && !_settings.Albums.Any() && !_settings.People.Any())
@@ -107,7 +111,8 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
             assets = assets.Where(x => x.ExifInfo.DateTimeOriginal <= takenBefore);
         }
 
-        var takenAfter = _settings.ImagesFromDate.HasValue ? _settings.ImagesFromDate : _settings.ImagesFromDays.HasValue ? DateTime.Today.AddDays(-_settings.ImagesFromDays.Value) : null;
+        var takenAfter = _settings.ImagesFromDate.HasValue ? _settings.ImagesFromDate :
+            _settings.ImagesFromDays.HasValue ? DateTime.Today.AddDays(-_settings.ImagesFromDays.Value) : null;
         if (takenAfter.HasValue)
         {
             assets = assets.Where(x => x.ExifInfo.DateTimeOriginal >= takenAfter);
@@ -161,7 +166,8 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
             searchDto.TakenBefore = takenBefore;
         }
 
-        var takenAfter = _settings.ImagesFromDate.HasValue ? _settings.ImagesFromDate : _settings.ImagesFromDays.HasValue ? DateTime.Today.AddDays(-_settings.ImagesFromDays.Value) : null;
+        var takenAfter = _settings.ImagesFromDate.HasValue ? _settings.ImagesFromDate :
+            _settings.ImagesFromDays.HasValue ? DateTime.Today.AddDays(-_settings.ImagesFromDays.Value) : null;
         if (takenAfter.HasValue)
         {
             searchDto.TakenAfter = takenAfter;
@@ -205,6 +211,12 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
         });
     }
 
+    public async Task<AssetStatsResponseDto> GetAssetStats()
+    {
+        return await _apiCache.GetOrAddAsync("AssetStats",
+            () => _immichApi.GetAssetStatisticsAsync(null, false, null));
+    }
+
     public async Task<IEnumerable<AssetResponseDto>> GetFavoriteAssets()
     {
         return await _apiCache.GetOrAddAsync("FavoriteAssets", async () =>
@@ -232,8 +244,7 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
 
                 favoriteAssets.AddRange(favoriteInfo.Assets.Items);
                 page++;
-            }
-            while (total == batchSize);
+            } while (total == batchSize);
 
             return favoriteAssets;
         });
@@ -302,8 +313,7 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
 
                     personAssets.AddRange(personInfo.Assets.Items);
                     page++;
-                }
-                while (total == batchSize);
+                } while (total == batchSize);
             }
 
             return personAssets;
@@ -311,6 +321,7 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
     }
 
     readonly string DownloadLocation = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ImageCache");
+
     public async Task<(string fileName, string ContentType, Stream fileStream)> GetImage(Guid id)
     {
         // Check if the image is already downloaded
@@ -321,7 +332,8 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
                 Directory.CreateDirectory(DownloadLocation);
             }
 
-            var file = Directory.GetFiles(DownloadLocation).FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == id.ToString());
+            var file = Directory.GetFiles(DownloadLocation)
+                .FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == id.ToString());
 
             if (!string.IsNullOrWhiteSpace(file))
             {
@@ -348,6 +360,7 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
         {
             contentType = data.Headers["Content-Type"].FirstOrDefault()?.ToString() ?? "";
         }
+
         var ext = contentType.ToLower() == "image/webp" ? "webp" : "jpeg";
         var fileName = $"{id}.{ext}";
 
@@ -367,5 +380,6 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
         return (fileName, contentType, data.Stream);
     }
 
-    public Task SendWebhookNotification(IWebhookNotification notification) => WebhookHelper.SendWebhookNotification(notification, _frameSettings.Webhook);
+    public Task SendWebhookNotification(IWebhookNotification notification) =>
+        WebhookHelper.SendWebhookNotification(notification, _frameSettings.Webhook);
 }

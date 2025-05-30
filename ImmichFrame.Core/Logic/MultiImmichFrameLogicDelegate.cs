@@ -10,37 +10,35 @@ public class MultiImmichFrameLogicDelegate : IImmichFrameLogic
 {
     private readonly FrozenDictionary<IImmichAccountSettings, IImmichFrameLogic> _accountToDelegate;
     private readonly IServerSettings _serverSettings;
-    private readonly IMemoryCache _cache;
+    private readonly IMemoryCache _cache = new MemoryCache(new MemoryCacheOptions());
+    private readonly IAccountSelectionStrategy _accountSelectionStrategy;
     private readonly ILogger<MultiImmichFrameLogicDelegate> _logger;
-    
+
     private readonly MemoryCacheEntryOptions _guidCacheOptions = new MemoryCacheEntryOptions()
         .SetSlidingExpiration(TimeSpan.FromSeconds(60)); //cache guids for 60sec
 
     public MultiImmichFrameLogicDelegate(IServerSettings serverSettings,
-        Func<IImmichAccountSettings, IImmichFrameLogic> logicFactory, ILogger<MultiImmichFrameLogicDelegate> logger)
+        Func<IImmichAccountSettings, IImmichFrameLogic> logicFactory, ILogger<MultiImmichFrameLogicDelegate> logger,
+        IAccountSelectionStrategy accountSelectionStrategy)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _accountSelectionStrategy = accountSelectionStrategy;
         _serverSettings = serverSettings;
         _accountToDelegate = serverSettings.Accounts.ToFrozenDictionary(
             keySelector: a => a,
             elementSelector: logicFactory
         );
-
-        var cacheOptions = new MemoryCacheOptions();
-        cacheOptions.ExpirationScanFrequency = TimeSpan.MaxValue;
-        _cache = new MemoryCache(cacheOptions);
     }
-    
+
     public async Task<AssetResponseDto?> GetNextAsset()
     {
-        var selectedIdx = new Random().Next(_accountToDelegate.Count);
-        var account = _serverSettings.Accounts[selectedIdx];
-        var asset = await _accountToDelegate[account].GetNextAsset();
+        var result = await _accountSelectionStrategy.GetNextAsset(_accountToDelegate.Values);
+
+        if (result == null) return null;
+
+        var (account, asset) = result.Value;
         
-        if (asset != null)
-        {
-            _cache.GetOrCreate(asset.Id, entry => entry.Value = account, _guidCacheOptions);
-        }
+        _cache.Set(asset.Id, account, _guidCacheOptions);
 
         return asset;
     }
@@ -48,16 +46,16 @@ public class MultiImmichFrameLogicDelegate : IImmichFrameLogic
     public async Task<IEnumerable<AssetResponseDto>> GetAssets()
     {
         //get assets from all accounts, as tuple of account to asset list
-        var assetLists = await Task.WhenAll(_accountToDelegate.Values.Select(account => account.GetAssets().ContinueWith(async assetList => (account, await assetList)).Unwrap()));
+        var assetLists = await _accountSelectionStrategy.GetAssets(_accountToDelegate.Values);
 
         foreach (var (account, assetList) in assetLists)
         {
             foreach (var asset in assetList)
             {
-                _cache.GetOrCreate(asset.Id, entry => entry.Value = account, _guidCacheOptions);
+                _cache.Set(asset.Id, account, _guidCacheOptions);
             }
         }
-        
+
         var assets = assetLists.SelectMany(innerList => innerList.Item2);
 
         //shuffle them together
@@ -71,9 +69,9 @@ public class MultiImmichFrameLogicDelegate : IImmichFrameLogic
 
     private IImmichFrameLogic GetLogic(Guid id)
     {
-        var found = _cache.TryGetValue(id.ToString(), out IImmichAccountSettings? account);
+        object account = _cache.Get(id.ToString());
 
-        if (found && account != null) return _accountToDelegate[account];
+        if (account != null) return account as IImmichFrameLogic;
 
         _logger.LogWarning("Failed to load asset with GUID {id}; not in cache", id);
         throw new InvalidOperationException("Unknown assetId");
@@ -88,6 +86,20 @@ public class MultiImmichFrameLogicDelegate : IImmichFrameLogic
     {
         return GetLogic(id).GetImage(id);
     }
+
+    public async Task<AssetStatsResponseDto> GetAssetStats()
+    {
+        var allInts = await Task.WhenAll(_accountToDelegate.Values.Select(account => account.GetAssetStats()));
+        
+        return allInts.Aggregate(new AssetStatsResponseDto(), (acc, response) =>
+        {
+            acc.Images += response.Images;
+            acc.Total += response.Total;
+            acc.Videos += response.Videos;
+            return acc;
+        });
+    }
+
 
     public Task SendWebhookNotification(IWebhookNotification notification) =>
         WebhookHelper.SendWebhookNotification(notification, _serverSettings.ImmichFrameSettings.Webhook);
