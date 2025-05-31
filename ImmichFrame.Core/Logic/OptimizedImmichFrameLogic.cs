@@ -1,3 +1,4 @@
+using System.Threading.Channels;
 using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Core.Helpers;
@@ -11,6 +12,7 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
     private readonly ImmichApi _immichApi;
     private readonly ApiCache<IEnumerable<AssetResponseDto>> _apiCache;
     private readonly ILogger<OptimizedImmichFrameLogic> _logger;
+
     public OptimizedImmichFrameLogic(IServerSettings settings, ILogger<OptimizedImmichFrameLogic> logger)
     {
         _settings = settings;
@@ -27,39 +29,54 @@ public class OptimizedImmichFrameLogic : IImmichFrameLogic, IDisposable
         _httpClient.Dispose();
     }
 
-    private Queue<AssetResponseDto> _assetQueue = new();
-    private bool _isReloadingAssets = false;
+    private Channel<AssetResponseDto> _assetQueue = Channel.CreateUnbounded<AssetResponseDto>();
+    private readonly SemaphoreSlim _isReloadingAssets = new(1, 1);
 
-    public Task<AssetResponseDto?> GetNextAsset()
+    public async Task<AssetResponseDto?> GetNextAsset()
     {
-        if (_assetQueue.Count < 10 && !_isReloadingAssets)
+        try
         {
-            // Fire-and-forget, reloading assets in the background
-            _ = ReloadAssetsAsync();
-        }
+            if (_assetQueue.Reader.Count < 10)
+            {
+                // Fire-and-forget, reloading assets in the background
+                ReloadAssetsAsync();
+            }
 
-        if (_assetQueue.Any())
+            return await _assetQueue.Reader.ReadAsync(new CancellationTokenSource(TimeSpan.FromMinutes(1)).Token);
+        }
+        catch (OperationCanceledException)
         {
-            return Task.FromResult<AssetResponseDto?>(_assetQueue.Dequeue());
+            // This exception occurs if the CancellationTokenSource times out
+            _logger.LogWarning("Read asset list timed out");
+            return null;
         }
-
-        return Task.FromResult<AssetResponseDto?>(null);
+        catch (Exception ex)
+        {
+            _logger.LogError($"An unexpected error occurred while reading assets: {ex.Message}");
+            throw;
+        }
     }
 
     private async Task ReloadAssetsAsync()
     {
-        _isReloadingAssets = true;
-        try
+        if (await _isReloadingAssets.WaitAsync(0))
         {
-            var assets = await GetAssets();
-            foreach (var asset in assets)
+            try
             {
-                _assetQueue.Enqueue(asset);
+                _logger.LogDebug("Reloading assets");
+                foreach (var asset in await GetAssets())
+                {
+                    await _assetQueue.Writer.WriteAsync(asset);
+                }
+            }
+            finally
+            {
+                _isReloadingAssets.Release();
             }
         }
-        finally
+        else
         {
-            _isReloadingAssets = false;
+            _logger.LogDebug("Assets already being loaded; not attempting a concurrent reload");
         }
     }
 
