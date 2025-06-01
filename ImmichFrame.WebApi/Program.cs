@@ -65,43 +65,11 @@ builder.Services.AddLogging(builder =>
     builder.AddFilter("Microsoft.AspNetCore", LogLevel.Warning);
 });
 
-builder.Services.AddSingleton<IServerSettings>(srv =>
-{
-    if (serverSettings == null)
-        serverSettings = new ServerSettings();
-
-    return serverSettings;
-});
-
-builder.Services.AddSingleton<IWeatherService>(srv =>
-{
-    var settings = srv.GetRequiredService<IServerSettings>();
-
-    return new OpenWeatherMapService(settings);
-});
-
-builder.Services.AddSingleton<ICalendarService>(srv =>
-{
-    var settings = srv.GetRequiredService<IServerSettings>();
-
-    return new IcalCalendarService(settings);
-});
-
-builder.Services.AddSingleton<IImmichFrameLogic>(srv =>
-{
-    var settings = srv.GetRequiredService<IServerSettings>();
-    var logger = srv.GetRequiredService<ILogger<OptimizedImmichFrameLogic>>();
-
-    return new OptimizedImmichFrameLogic(settings, logger);
-});
-
-builder.Services.AddSingleton<IWebClientSettings>(srv =>
-{
-    if (clientSettings == null)
-        clientSettings = new WebClientSettings();
-
-    return clientSettings;
-});
+builder.Services.AddSingleton<IServerSettings, ServerSettings>();
+builder.Services.AddSingleton<IWeatherService, OpenWeatherMapService>();
+builder.Services.AddSingleton<ICalendarService, IcalCalendarService>();
+builder.Services.AddSingleton<IImmichFrameLogic, OptimizedImmichFrameLogic>();
+builder.Services.AddSingleton<IWebClientSettings, WebClientSettings>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
