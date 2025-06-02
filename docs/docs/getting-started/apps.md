@@ -110,36 +110,36 @@ ADB is often enabled on these devices by default, if it is not go to Frameo Sett
   
 ### Frameo WebView Update  
 Follow instructions below to update WebView to 106. This has been tested and working on Android 6.01 10.1" Frameo devices:  
-#### Download WebView 106 to PC:
-[Lineage OS WebView 106-0-5249-126-12][webview-update]
-#### Push new apk to sdcard
-```shell
-adb push /path/to/your/new/webview.apk /sdcard/
-```
-#### Enter root shell
-```shell
-adb shell su
-```
-#### Backup original WebView APK
-```shell
-mount -o rw,remount /system && cp /system/app/webview/webview.apk /system/app/webview/webview.apk.bak
-```
-#### Delete the oat folder recursively
-```shell
-mount -o rw,remount /system && rm -rf /system/app/webview/oat
-```
-#### Copy new WebView to system    
-```shell
-mount -o rw,remount /system && cp /sdcard/webview.apk /system/app/webview/webview.apk
-```
-#### exit root
-```shell
-exit
-```
-#### Reboot device
-```shell
-adb reboot
-```
+- Download WebView 106 to PC:
+  [Lineage OS WebView 106-0-5249-126-12][webview-update]
+- Push new apk to sdcard
+  ```shell
+  adb push /path/to/your/new/webview.apk /sdcard/
+  ```
+- Enter root shell
+  ```shell
+  adb shell su
+  ```
+- Backup original WebView APK
+  ```shell
+  mount -o rw,remount /system && cp /system/app/webview/webview.apk /system/app/webview/webview.apk.bak
+  ```
+- Delete the oat folder recursively
+  ```shell
+  mount -o rw,remount /system && rm -rf /system/app/webview/oat
+  ```
+- Copy new WebView to system    
+  ```shell
+  mount -o rw,remount /system && cp /sdcard/webview.apk /system/app/webview/webview.apk
+  ```
+- exit root
+  ```shell
+  exit
+  ```
+- Reboot device
+  ```shell
+  adb reboot
+  ```
 ### Desktop (Windows, MacOS, Linux)
 
 Get the latest Desktop-App from the [GitHub Releases][releases-url]-Page.
