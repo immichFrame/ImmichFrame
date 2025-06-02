@@ -21,7 +21,7 @@ See also: [ImmichFrame Android repository][github-android-repo]
 
 [How to Set Immich Frame as Android TV Screensaver Video Tutorial][setting-androidtv-screensaver]
 - Run the app normally and configure settings.
-- Go to Settings, Display, Advanced, Screen Saver, Current Screen Saver, choose ImmichFrame. Settings, Display, Advanced, Sleep, choose your sleep timeout. The menu options may differ slightly on different Android versions.
+- Go to `Settings > Display > Advanced > Screen Saver > Current Screen Saver` and choose ImmichFrame. `Settings > Display > Advanced > Sleep`, choose your sleep timeout. The menu options may differ slightly on different Android versions.
   - Enable Developer Mode on your Android TV Settings
     - Enable usb debugging
   - Add adb to your system variables so we can execute it in powershell/terminal/cmd 
