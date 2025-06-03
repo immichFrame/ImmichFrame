@@ -3,7 +3,6 @@
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 [![MIT License][license-shield]][license-url]
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/immichFrame/ImmichFrame)
 
 <!-- PROJECT LOGO -->
 <br />
