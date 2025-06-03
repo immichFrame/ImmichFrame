@@ -4,7 +4,7 @@ using ImmichFrame.WebApi.Helpers;
 
 namespace ImmichFrame.WebApi.Models
 {
-    public class ServerSettings : IServerSettings
+    public class ServerSettings : IServerSettings, IConfigSettable
     {
         public string ImmichServerUrl { get; set; } = string.Empty;
         public string ApiKey { get; set; } = string.Empty;
@@ -29,30 +29,5 @@ namespace ImmichFrame.WebApi.Models
         public string Language { get; set; } = "en";
         public string? Webhook { get; set; }
         public string? AuthenticationSecret { get; set; }
-
-        public ServerSettings()
-        {
-            var env = Environment.GetEnvironmentVariables();
-            try
-            {
-                foreach (var key in env.Keys)
-                {
-                    if (key == null) continue;
-
-                    var propertyInfo = typeof(ServerSettings).GetProperty(key.ToString() ?? string.Empty);
-
-                    if (propertyInfo != null)
-                    {
-                        this.SetValue(propertyInfo, env[key]?.ToString() ?? string.Empty);
-                    }
-
-                }
-            }
-            catch (Exception ex)
-            {
-                var msg = $"Problem with parsing the settings: {ex.Message}";
-                throw new SettingsNotValidException(msg, ex);
-            }
-        }
     }
 }

@@ -5,6 +5,7 @@ using ImmichFrame.WebApi.Models;
 using Microsoft.AspNetCore.Authentication;
 using System.Text.Json;
 using System.Reflection;
+using ImmichFrame.WebApi.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 //log the version number
@@ -19,29 +20,6 @@ Console.WriteLine($@"
 Console.WriteLine();
 
 // Add services to the container.
-
-var settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config", "Settings.json");
-
-ServerSettings? serverSettings = null;
-WebClientSettings? clientSettings = null;
-
-if (File.Exists(settingsPath))
-{
-    var json = File.ReadAllText(settingsPath);
-    JsonDocument doc;
-    try
-    {
-        doc = JsonDocument.Parse(json);
-    }
-    catch (Exception ex)
-    {
-        throw new SettingsNotValidException($"Problem with parsing the settings: {ex.Message}", ex);
-    }
-
-    serverSettings = JsonSerializer.Deserialize<ServerSettings>(doc);
-    clientSettings = JsonSerializer.Deserialize<WebClientSettings>(doc);
-}
-
 builder.Services.AddLogging(builder =>
 {
     LogLevel level = LogLevel.Information;
@@ -65,11 +43,16 @@ builder.Services.AddLogging(builder =>
     builder.AddFilter("Microsoft.AspNetCore", LogLevel.Warning);
 });
 
-builder.Services.AddSingleton<IServerSettings, ServerSettings>();
+// Setup Config
+var settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config", "Settings.json");
+ConfigLoader configLoader = new ConfigLoader();
+builder.Services.AddSingleton<IServerSettings>(_ => configLoader.LoadConfig<ServerSettings>(settingsPath));
+builder.Services.AddSingleton<IWebClientSettings>(_ => configLoader.LoadConfig<WebClientSettings>(settingsPath));
+
+// Setup Logic
 builder.Services.AddSingleton<IWeatherService, OpenWeatherMapService>();
 builder.Services.AddSingleton<ICalendarService, IcalCalendarService>();
 builder.Services.AddSingleton<IImmichFrameLogic, OptimizedImmichFrameLogic>();
-builder.Services.AddSingleton<IWebClientSettings, WebClientSettings>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
