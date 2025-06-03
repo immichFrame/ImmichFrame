@@ -3,18 +3,14 @@ using System.Reflection;
 
 namespace ImmichFrame.WebApi.Helpers
 {
+    public interface IConfigSettable
+    {
+        // marker interface denoting settable config class
+    }
+
     public static class SettingsExtensions
     {
-        public static void SetValue(this ServerSettings s, PropertyInfo prop, string value)
-        {
-            SetValue((object)s, prop, value.Trim());
-        }
-        public static void SetValue(this WebClientSettings s, PropertyInfo prop, string value)
-        {
-            SetValue((object)s, prop, value.Trim());
-        }
-
-        private static void SetValue(object settings, PropertyInfo prop, string value)
+        public static void SetValue(this IConfigSettable settings, PropertyInfo prop, string value)
         {
             var type = prop.PropertyType;
             if (type == typeof(List<Guid>))
@@ -25,7 +21,7 @@ namespace ImmichFrame.WebApi.Helpers
                     return;
                 }
 
-                prop.SetValue(settings, value.ToString()?.Split(',').Select(x => new Guid(x.Trim())).ToList());
+                prop.SetValue(settings, value.Split(',').Select(x => new Guid(x.Trim())).ToList());
             }
             else if (type == typeof(List<string>))
             {
@@ -35,7 +31,7 @@ namespace ImmichFrame.WebApi.Helpers
                     return;
                 }
 
-                prop.SetValue(settings, value.ToString()?.Split(',').Select(x => x.Trim()).ToList());
+                prop.SetValue(settings, value.Split(',').Select(x => x.Trim()).ToList());
             }
             else if (type == typeof(string))
             {
@@ -43,7 +39,7 @@ namespace ImmichFrame.WebApi.Helpers
             }
             else if (type == typeof(bool))
             {
-                prop.SetValue(settings, bool.Parse(value.ToString() ?? "false"));
+                prop.SetValue(settings, bool.Parse(value));
             }
             else if (type == typeof(int) || type == typeof(int?))
             {

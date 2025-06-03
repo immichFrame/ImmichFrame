@@ -4,7 +4,7 @@ using ImmichFrame.WebApi.Helpers;
 
 namespace ImmichFrame.WebApi.Models
 {
-    public class WebClientSettings : IWebClientSettings
+    public class WebClientSettings : IWebClientSettings, IConfigSettable
     {
         public string ImmichServerUrl { get; set; } = string.Empty;
         public string Margin { get; set; } = "0,0,0,0";
@@ -31,29 +31,5 @@ namespace ImmichFrame.WebApi.Models
         public bool ImageFill { get; set; } = false;
         public string Layout { get; set; } = "splitview";
         public string Language { get; set; } = "en";
-
-        public WebClientSettings()
-        {
-            var env = Environment.GetEnvironmentVariables();
-            try
-            {
-                foreach (var key in env.Keys)
-                {
-                    if (key == null) continue;
-
-                    var propertyInfo = typeof(WebClientSettings).GetProperty(key.ToString() ?? string.Empty);
-
-                    if (propertyInfo != null)
-                    {
-                        this.SetValue(propertyInfo, env[key]?.ToString() ?? string.Empty);
-                    }
-
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new SettingsNotValidException($"Problem with parsing the settings: {ex.Message}", ex);
-            }
-        }
     }
 }
