@@ -129,7 +129,7 @@
 		<img
 			class="
 			{imageFill ? 'object-cover' : ''}
-			{layout == ImageLayout.SplitPortrait ? 'w-screen max-h-screen h-dvh-safe object-contain' : ''}
+			{layout == ImageLayout.SplitPortrait ? 'w-screen max-h-screen h-dvh-safe object-cover' : ''}
 			{layout == ImageLayout.SplitLandscape ? 'h-full w-auto max-h-full mx-auto object-contain' : ''}
 			{layout == ImageLayout.Single ? 'max-h-screen h-dvh-safe max-w-full object-contain' : ''}
 			w-full h-full"
