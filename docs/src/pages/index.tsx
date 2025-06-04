@@ -34,21 +34,21 @@ function HomepageHeader() {
         </div>
         <div className="flex flex-col sm:flex-row place-items-center place-content-center mt-9 gap-4 ">
           <Link
-            className="flex place-items-center place-content-center py-3 px-8 border rounded-xl no-underline hover:no-underline hover:text-gray-50 dark:text-dark-bg font-bold"
+            className="flex place-items-center place-content-center py-3 px-8 border rounded-xl no-underline hover:no-underline font-bold"
             to="/docs/overview"
           >
             Get Started
           </Link>
 
           <Link
-            className="flex place-items-center place-content-center py-3 px-8 border bg--primary  rounded-xl hover:no-underline text-primary dark:text-dark-bg font-bold"
+            className="flex place-items-center place-content-center py-3 px-8 border bg--primary  rounded-xl hover:no-underline text-primary font-bold"
             to="https://demo.immichframe.online/"
           >
             Open Demo
           </Link>
         </div>
 
-        <div className="my-8 flex gap-1 font-medium place-items-center place-content-center text-primary dark:text-dark-primary">
+        <div className="my-8 flex gap-1 font-medium place-items-center place-content-center">
           <Icon
             path={discordPath}
             viewBox={discordViewBox} /* viewBox may show an error in your IDE but it is normal. */
@@ -56,11 +56,6 @@ function HomepageHeader() {
           />
           <Link to="https://discord.immich.app/">Join the immich Discord</Link>
         </div>
-        {/* <ThemedImage
-          sources={{ dark: '/img/screenshot-dark.webp', light: '/img/screenshot-light.webp' }}
-          alt="screenshots"
-          className="w-[95%] lg:w-[85%] xl:w-[70%] 2xl:w-[60%] "
-        /> */}
       </section>
     </header>
   );
