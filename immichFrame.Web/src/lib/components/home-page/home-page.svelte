@@ -8,7 +8,7 @@
 	import { clientIdentifierStore, authSecretStore } from '$lib/stores/persist.store';
 	import { onDestroy, onMount, setContext } from 'svelte';
 	import OverlayControls from '../elements/overlay-controls.svelte';
-	import ImageComponent from '../elements/image-component.svelte';
+	import ImageComponent, { ImageLayout } from '../elements/image-component.svelte';
 	import { configStore } from '$lib/stores/config.store';
 	import ErrorElement from '../elements/error-element.svelte';
 	import Clock from '../elements/clock.svelte';
@@ -20,7 +20,7 @@
 		images: [string, api.AssetResponseDto, api.AlbumResponseDto[]][];
 		error: boolean;
 		loaded: boolean;
-		split: boolean;
+		layout: ImageLayout;
 		hasBday: boolean;
 	}
 
@@ -47,7 +47,7 @@
 		images: [],
 		error: false,
 		loaded: false,
-		split: false,
+		layout: ImageLayout.Single,
 		hasBday: false
 	});
 	let imagePromisesDict: Record<
@@ -157,11 +157,11 @@
 		}
 
 		let next: api.AssetResponseDto[];
+		let assetHorizontal = isHorizontal(assetBacklog[0]);
 		if (
 			$configStore.layout?.trim().toLowerCase() == 'splitview' &&
 			assetBacklog.length > 1 &&
-			isHorizontal(assetBacklog[0]) &&
-			isHorizontal(assetBacklog[1])
+			assetHorizontal == isHorizontal(assetBacklog[1])
 		) {
 			next = assetBacklog.splice(0, 2);
 		} else {
@@ -181,7 +181,7 @@
 
 		displayingAssets = next;
 		updateImagePromises();
-		imagesState = await loadImages(next);
+		imagesState = await loadImages(next, assetHorizontal);
 	}
 
 	async function getPreviousAssets() {
@@ -190,11 +190,11 @@
 		}
 
 		let next: api.AssetResponseDto[];
+		let assetHorizontal = isHorizontal(assetHistory[assetHistory.length - 1]);
 		if (
 			$configStore.layout?.trim().toLowerCase() == 'splitview' &&
 			assetHistory.length > 1 &&
-			isHorizontal(assetHistory[assetHistory.length - 1]) &&
-			isHorizontal(assetHistory[assetHistory.length - 2])
+			assetHorizontal == isHorizontal(assetHistory[assetHistory.length - 2])
 		) {
 			next = assetHistory.splice(assetHistory.length - 2, 2);
 		} else {
@@ -209,7 +209,7 @@
 		}
 		displayingAssets = next;
 		updateImagePromises();
-		imagesState = await loadImages(next);
+		imagesState = await loadImages(next, assetHorizontal);
 	}
 
 	function isHorizontal(asset: api.AssetResponseDto) {
@@ -240,7 +240,7 @@
 		return hasBday;
 	}
 
-	async function loadImages(assets: api.AssetResponseDto[]) {
+	async function loadImages(assets: api.AssetResponseDto[], isHorizontal: boolean) {
 		let newImages = [];
 		try {
 			for (let asset of assets) {
@@ -251,7 +251,12 @@
 				images: newImages,
 				error: false,
 				loaded: true,
-				split: assets.length == 2,
+				layout:
+					assets.length == 2
+						? isHorizontal
+							? ImageLayout.SplitPortrait
+							: ImageLayout.SplitLandscape
+						: ImageLayout.Single,
 				hasBday: hasBirthday(assets)
 			};
 		} catch {
@@ -259,7 +264,7 @@
 				images: [],
 				error: true,
 				loaded: false,
-				split: false,
+				layout: ImageLayout.Single,
 				hasBday: false
 			};
 		}

@@ -8,6 +8,7 @@
 	import { thumbHashToDataURL } from 'thumbhash';
 	import AssetInfo from '$lib/components/elements/asset-info.svelte';
 	import ImageOverlay from '$lib/components/elements/imageoverlay/image-overlay.svelte';
+	import { ImageLayout } from './image-component.svelte';
 
 	interface Props {
 		image: [url: string, asset: AssetResponseDto, albums: AlbumResponseDto[]];
@@ -19,7 +20,7 @@
 		imageFill: boolean;
 		imageZoom: boolean;
 		interval: number;
-		multi?: boolean;
+		layout: ImageLayout;
 		showInfo: boolean;
 	}
 
@@ -33,7 +34,7 @@
 		imageFill,
 		imageZoom,
 		interval,
-		multi = false,
+		layout,
 		showInfo = $bindable(false)
 	}: Props = $props();
 
@@ -97,7 +98,7 @@
 	<ImageOverlay asset={image[1]} albums={image[2]} />
 {/if}
 
-<div class="immichframe_image relative place-self-center overflow-hidden">
+<div class="immichframe_image absolute h-full w-full place-self-center overflow-hidden">
 	<!-- Container with zoom-effect -->
 	<div
 		class="relative w-full h-full {imageZoom ? 'zoom' : ''}"
@@ -126,9 +127,12 @@
 		{/if}
 
 		<img
-			class="{multi || imageFill
-				? 'w-screen max-h-screen h-dvh-safe object-cover'
-				: 'max-h-screen h-dvh-safe max-w-full object-contain'} w-full h-full"
+			class="
+			{imageFill ? 'object-cover' : ''}
+			{layout == ImageLayout.SplitPortrait ? 'w-screen max-h-screen h-dvh-safe object-contain' : ''}
+			{layout == ImageLayout.SplitLandscape ? 'h-full w-auto max-h-full mx-auto object-contain' : ''}
+			{layout == ImageLayout.Single ? 'max-h-screen h-dvh-safe max-w-full object-contain' : ''}
+			w-full h-full"
 			src={image[0]}
 			alt="data"
 		/>
@@ -143,11 +147,15 @@
 	{showPeopleDesc}
 	{showAlbumName}
 />
-<img
-	class="absolute flex w-full h-full z-[-1]"
-	src={thumbHashToDataURL(decodeBase64(image[1].thumbhash ?? ''))}
-	alt="data"
-/>
+
+<!-- Only show the thumbnail if the image is not filled -->
+{#if !imageFill}
+	<img
+		class="absolute flex w-full h-full z-[-1]"
+		src={thumbHashToDataURL(decodeBase64(image[1].thumbhash ?? ''))}
+		alt="data"
+	/>
+{/if}
 
 <style>
 	.zoom {

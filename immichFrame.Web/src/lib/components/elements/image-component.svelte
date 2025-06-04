@@ -1,3 +1,11 @@
+<script module lang="ts">
+	export enum ImageLayout {
+		Single = 'single',
+		SplitPortrait = 'splitPortrait',
+		SplitLandscape = 'splitLandscape'
+	}
+</script>
+
 <script lang="ts">
 	import type { AssetResponseDto } from '$lib/immichFrameApi';
 	import * as api from '$lib/index';
@@ -16,7 +24,7 @@
 		interval?: number;
 		error?: boolean;
 		loaded?: boolean;
-		split?: boolean;
+		layout: ImageLayout;
 		hasBday?: boolean;
 		showLocation?: boolean;
 		showPhotoDate?: boolean;
@@ -33,7 +41,7 @@
 		interval = 20,
 		error = false,
 		loaded = false,
-		split = false,
+		layout = ImageLayout.Single,
 		hasBday = false,
 		showLocation = true,
 		showPhotoDate = true,
@@ -74,11 +82,11 @@
 			class="grid absolute h-dvh-safe w-screen"
 			transition:blur={{ duration: transitionDuration }}
 		>
-			{#if split}
+			{#if layout === ImageLayout.SplitPortrait}
 				<div class="grid grid-cols-2">
 					<div id="image_portrait_1" class="relative grid border-r-2 border-primary h-dvh-safe">
 						<Image
-							multi={true}
+							layout={ImageLayout.SplitPortrait}
 							image={images[0]}
 							{interval}
 							{showLocation}
@@ -93,7 +101,40 @@
 					</div>
 					<div id="image_portrait_2" class="relative grid border-l-2 border-primary h-dvh-safe">
 						<Image
-							multi={true}
+							layout={ImageLayout.SplitPortrait}
+							image={images[1]}
+							{interval}
+							{showLocation}
+							{showPhotoDate}
+							{showImageDesc}
+							{showPeopleDesc}
+							{showAlbumName}
+							{imageFill}
+							{imageZoom}
+							bind:showInfo
+						/>
+					</div>
+				</div>
+			{:else if layout == ImageLayout.SplitLandscape}
+				<div class="grid grid-rows-2">
+					<div id="image_landscape_1" class="relative grid border-b-2 border-primary">
+						<Image
+							layout={ImageLayout.SplitLandscape}
+							image={images[0]}
+							{interval}
+							{showLocation}
+							{showPhotoDate}
+							{showImageDesc}
+							{showPeopleDesc}
+							{showAlbumName}
+							{imageFill}
+							{imageZoom}
+							bind:showInfo
+						/>
+					</div>
+					<div id="image_landscape_2" class="relative grid border-t-2 border-primary">
+						<Image
+							layout={ImageLayout.SplitLandscape}
 							image={images[1]}
 							{interval}
 							{showLocation}
@@ -110,6 +151,7 @@
 			{:else}
 				<div id="image_default" class="relative grid h-dvh-safe w-screen">
 					<Image
+						layout={ImageLayout.Single}
 						image={images[0]}
 						{interval}
 						{showLocation}
