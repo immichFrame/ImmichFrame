@@ -11,7 +11,6 @@ const config: Config = {
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.png',
 
-
   url: 'https://immichframe.online',
   baseUrl: '/',
   trailingSlash: false,
@@ -22,6 +21,7 @@ const config: Config = {
   projectName: 'ImmichFrame', // Usually your repo name.
   deploymentBranch: 'main',
 
+  plugins: ["./src/plugins/tailwind-config.js"],
 
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you
