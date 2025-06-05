@@ -18,6 +18,7 @@
 		showAlbumName: boolean;
 		imageFill: boolean;
 		imageZoom: boolean;
+		imagePan: boolean;
 		interval: number;
 		multi?: boolean;
 		showInfo: boolean;
@@ -32,6 +33,7 @@
 		showAlbumName,
 		imageFill,
 		imageZoom,
+		imagePan,
 		interval,
 		multi = false,
 		showInfo = $bindable(false)
@@ -41,6 +43,7 @@
 
 	let hasPerson = $derived(image[1].people?.filter((x) => x.name).length ?? 0 > 0);
 	let zoomIn = $derived(zoomEffect());
+	let panDirection = $derived(panEffect());
 
 	function GetFace(i: number) {
 		const people = image[1].people as PersonWithFacesResponseDto[];
@@ -91,6 +94,11 @@
 	function zoomEffect() {
 		return 0.5 > Math.random();
 	}
+
+	function panEffect() {
+		const directions = ['left', 'right', 'up', 'down'];
+		return directions[Math.floor(Math.random() * directions.length)];
+	}
 </script>
 
 {#if showInfo}
@@ -100,13 +108,17 @@
 <div class="immichframe_image relative place-self-center overflow-hidden">
 	<!-- Container with zoom-effect -->
 	<div
-		class="relative w-full h-full {imageZoom ? 'zoom' : ''}"
+		class="relative w-full h-full {imageZoom ? 'zoom' : ''} {imagePan ? 'pan' : ''}"
 		style="
 			--interval: {interval + 2}s;
 			--originX: {hasPerson ? getFaceMetric(0, 'centerX') + '%' : 'center'};
 			--originY: {hasPerson ? getFaceMetric(0, 'centerY') + '%' : 'center'};
 			--start-scale: {zoomIn ? 1 : 1.3};
-			--end-scale: {zoomIn ? 1.3 : 1};"
+			--end-scale: {zoomIn ? 1.3 : 1};
+			--pan-start-x: {panDirection === 'left' ? '5%' : panDirection === 'right' ? '-5%' : '0'};
+			--pan-end-x: {panDirection === 'left' ? '-5%' : panDirection === 'right' ? '5%' : '0'};
+			--pan-start-y: {panDirection === 'up' ? '5%' : panDirection === 'down' ? '-5%' : '0'};
+			--pan-end-y: {panDirection === 'up' ? '-5%' : panDirection === 'down' ? '5%' : '0'};"
 	>
 		{#if debug}
 			{#each image[1].people?.map((x) => x.name) ?? [] as _, i}
@@ -155,12 +167,39 @@
 		transform-origin: var(--originX, center) var(--originY, center);
 	}
 
+	.pan {
+		animation: pan var(--interval) ease-in-out forwards;
+	}
+
+	.zoom.pan {
+		animation: zoom-pan var(--interval) ease-in-out forwards;
+		transform-origin: var(--originX, center) var(--originY, center);
+	}
+
 	@keyframes zoom {
 		from {
 			transform: scale(var(--start-scale, 1));
 		}
 		to {
 			transform: scale(var(--end-scale, 1.3));
+		}
+	}
+
+	@keyframes pan {
+		from {
+			transform: translateX(var(--pan-start-x, 0)) translateY(var(--pan-start-y, 0)) scale(1.1);
+		}
+		to {
+			transform: translateX(var(--pan-end-x, 0)) translateY(var(--pan-end-y, 0)) scale(1.1);
+		}
+	}
+
+	@keyframes zoom-pan {
+		from {
+			transform: translateX(var(--pan-start-x, 0)) translateY(var(--pan-start-y, 0)) scale(var(--start-scale, 1));
+		}
+		to {
+			transform: translateX(var(--pan-end-x, 0)) translateY(var(--pan-end-y, 0)) scale(var(--end-scale, 1.3));
 		}
 	}
 </style>

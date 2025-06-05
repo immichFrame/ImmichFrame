@@ -25,6 +25,7 @@
 		showAlbumName?: boolean;
 		imageFill?: boolean;
 		imageZoom?: boolean;
+		imagePan?: boolean;
 		showInfo: boolean;
 	}
 
@@ -42,6 +43,7 @@
 		showAlbumName = true,
 		imageFill = false,
 		imageZoom = false,
+		imagePan = false,
 		showInfo = $bindable(false)
 	}: Props = $props();
 	let instantTransition = slideshowStore.instantTransition;
@@ -75,37 +77,38 @@
 			transition:blur={{ duration: transitionDuration }}
 		>
 			{#if split}
-				<div class="grid grid-cols-2">
-					<div id="image_portrait_1" class="relative grid border-r-2 border-primary h-dvh-safe">
-						<Image
-							multi={true}
-							image={images[0]}
-							{interval}
-							{showLocation}
-							{showPhotoDate}
-							{showImageDesc}
-							{showPeopleDesc}
-							{showAlbumName}
-							{imageFill}
-							{imageZoom}
-							bind:showInfo
-						/>
-					</div>
-					<div id="image_portrait_2" class="relative grid border-l-2 border-primary h-dvh-safe">
-						<Image
-							multi={true}
-							image={images[1]}
-							{interval}
-							{showLocation}
-							{showPhotoDate}
-							{showImageDesc}
-							{showPeopleDesc}
-							{showAlbumName}
-							{imageFill}
-							{imageZoom}
-							bind:showInfo
-						/>
-					</div>
+				<div class="grid grid-cols-2">				<div id="image_portrait_1" class="relative grid border-r-2 border-primary h-dvh-safe">
+					<Image
+						multi={true}
+						image={images[0]}
+						{interval}
+						{showLocation}
+						{showPhotoDate}
+						{showImageDesc}
+						{showPeopleDesc}
+						{showAlbumName}
+						{imageFill}
+						{imageZoom}
+						{imagePan}
+						bind:showInfo
+					/>
+				</div>
+				<div id="image_portrait_2" class="relative grid border-l-2 border-primary h-dvh-safe">
+					<Image
+						multi={true}
+						image={images[1]}
+						{interval}
+						{showLocation}
+						{showPhotoDate}
+						{showImageDesc}
+						{showPeopleDesc}
+						{showAlbumName}
+						{imageFill}
+						{imageZoom}
+						{imagePan}
+						bind:showInfo
+					/>
+				</div>
 				</div>
 			{:else}
 				<div id="image_default" class="relative grid h-dvh-safe w-screen">
@@ -119,6 +122,7 @@
 						{showAlbumName}
 						{imageFill}
 						{imageZoom}
+						{imagePan}
 						bind:showInfo
 					/>
 				</div>
