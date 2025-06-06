@@ -1,10 +1,9 @@
-using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.WebApi.Models;
 using Microsoft.AspNetCore.Authentication;
-using System.Text.Json;
 using System.Reflection;
+using ImmichFrame.Core.Logic;
 using ImmichFrame.WebApi.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -43,16 +42,18 @@ builder.Services.AddLogging(builder =>
     builder.AddFilter("Microsoft.AspNetCore", LogLevel.Warning);
 });
 
+
 // Setup Config
 var settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config", "Settings.json");
 ConfigLoader configLoader = new ConfigLoader();
-builder.Services.AddSingleton<IServerSettings>(_ => configLoader.LoadConfig<ServerSettings>(settingsPath));
+builder.Services.AddSingleton<IServerSettings>(_ => File.Exists(settingsPath) ? configLoader.LoadConfig<ServerSettings>(settingsPath) : new ServerSettings());
 builder.Services.AddSingleton<IWebClientSettings>(_ => configLoader.LoadConfig<WebClientSettings>(settingsPath));
-
-// Setup Logic
+builder.Services.AddSingleton<IImmichFrameSettings>(srv => srv.GetRequiredService<IServerSettings>().ImmichFrameSettings);
 builder.Services.AddSingleton<IWeatherService, OpenWeatherMapService>();
 builder.Services.AddSingleton<ICalendarService, IcalCalendarService>();
-builder.Services.AddSingleton<IImmichFrameLogic, OptimizedImmichFrameLogic>();
+builder.Services.AddSingleton<IAccountSelectionStrategy, TotalAccountImagesSelectionStrategy>();
+builder.Services.AddTransient<Func<IImmichAccountSettings, IImmichFrameLogic>>(srv => account => ActivatorUtilities.CreateInstance<OptimizedImmichFrameLogic>(srv, account));
+builder.Services.AddSingleton<IImmichFrameLogic, MultiImmichFrameLogicDelegate>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

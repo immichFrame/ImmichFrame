@@ -9,6 +9,13 @@ namespace ImmichFrame.Core.Interfaces
         public Task<AssetResponseDto> GetAssetInfoById(Guid assetId);
         public Task<IEnumerable<AlbumResponseDto>> GetAlbumInfoById(Guid assetId);
         public Task<(string fileName, string ContentType, Stream fileStream)> GetImage(Guid id);
+        public Task<AssetStatsResponseDto> GetAssetStats();
         public Task SendWebhookNotification(IWebhookNotification notification);
+    }
+    
+    public interface IAccountSelectionStrategy
+    {
+        Task<(IImmichFrameLogic, AssetResponseDto)?> GetNextAsset(IList<IImmichFrameLogic> accounts);
+        Task<(IImmichFrameLogic account, IEnumerable<AssetResponseDto>)[]> GetAssets(IList<IImmichFrameLogic> accounts);
     }
 }
