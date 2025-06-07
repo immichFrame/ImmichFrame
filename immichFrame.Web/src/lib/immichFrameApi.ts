@@ -207,6 +207,7 @@ export type WebClientSettings = {
     showWeatherDescription?: boolean;
     unattendedMode?: boolean;
     imageZoom?: boolean;
+    imagePan?: boolean;
     imageFill?: boolean;
     layout?: string | null;
     language?: string | null;

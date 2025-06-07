@@ -29,6 +29,7 @@
         public bool ShowWeatherDescription { get; set; }
         public bool UnattendedMode { get; set; }
         public bool ImageZoom { get; set; }
+        public bool ImagePan { get; set; }
         public bool ImageFill { get; set; }
         public string Layout { get; set; }
         public string Language { get; set; }

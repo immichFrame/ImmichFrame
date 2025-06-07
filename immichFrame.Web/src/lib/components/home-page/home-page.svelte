@@ -365,6 +365,7 @@
 				{...imagesState}
 				imageFill={$configStore.imageFill}
 				imageZoom={$configStore.imageZoom}
+				imagePan={$configStore.imagePan}
 				bind:showInfo={infoVisible}
 			/>
 		</div>

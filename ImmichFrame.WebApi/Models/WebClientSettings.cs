@@ -28,6 +28,7 @@ namespace ImmichFrame.WebApi.Models
         public bool ShowWeatherDescription { get; set; } = true;
         public bool UnattendedMode { get; set; } = false;
         public bool ImageZoom { get; set; } = true;
+        public bool ImagePan { get; set; } = false;
         public bool ImageFill { get; set; } = false;
         public string Layout { get; set; } = "splitview";
         public string Language { get; set; } = "en";
