@@ -21,6 +21,7 @@ services:
       # Interval: "10"
       # TransitionDuration: "2"   
       # ImageZoom: "true"
+      # ImagePan: "false"
       # ImageFill: "false"
       # Layout: "splitview"         
       # DownloadImages: "false"

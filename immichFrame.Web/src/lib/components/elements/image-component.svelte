@@ -25,6 +25,7 @@
 		showAlbumName?: boolean;
 		imageFill?: boolean;
 		imageZoom?: boolean;
+		imagePan?: boolean;
 		showInfo: boolean;
 	}
 
@@ -42,6 +43,7 @@
 		showAlbumName = true,
 		imageFill = false,
 		imageZoom = false,
+		imagePan = false,
 		showInfo = $bindable(false)
 	}: Props = $props();
 	let instantTransition = slideshowStore.instantTransition;
@@ -88,6 +90,7 @@
 							{showAlbumName}
 							{imageFill}
 							{imageZoom}
+							{imagePan}
 							bind:showInfo
 						/>
 					</div>
@@ -103,6 +106,7 @@
 							{showAlbumName}
 							{imageFill}
 							{imageZoom}
+							{imagePan}
 							bind:showInfo
 						/>
 					</div>
@@ -119,6 +123,7 @@
 						{showAlbumName}
 						{imageFill}
 						{imageZoom}
+						{imagePan}
 						bind:showInfo
 					/>
 				</div>
