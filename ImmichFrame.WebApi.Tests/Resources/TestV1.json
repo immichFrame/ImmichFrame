@@ -5,7 +5,7 @@
     "Interval": 7,
     "TransitionDuration": 7.7,
     "ImageZoom": true,
-    "ImagePan": false,
+    "ImagePan": true,
     "ImageFill": true,
     "Layout": "Layout_TEST",
     "DownloadImages": true,

@@ -31,7 +31,7 @@
     "ShowWeatherDescription": true,
     "UnattendedMode": true,
     "ImageZoom": true,
-    "ImagePan": false,
+    "ImagePan": true,
     "ImageFill": true,
     "Layout": "Layout_TEST"
   },
