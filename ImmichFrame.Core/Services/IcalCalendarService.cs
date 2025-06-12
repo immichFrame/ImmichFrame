@@ -4,10 +4,10 @@ using ImmichFrame.WebApi.Helpers;
 
 public class IcalCalendarService : ICalendarService
 {
-    private readonly IServerSettings _serverSettings;
-    private readonly ApiCache<List<IAppointment>> _appointmentCache = new(TimeSpan.FromMinutes(15));
+    private readonly IGeneralSettings _serverSettings;
+    private readonly ApiCache _appointmentCache = new(TimeSpan.FromMinutes(15));
 
-    public IcalCalendarService(IServerSettings serverSettings)
+    public IcalCalendarService(IGeneralSettings serverSettings)
     {
         _serverSettings = serverSettings;
     }

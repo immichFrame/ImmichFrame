@@ -1,0 +1,82 @@
+{
+  "General": {
+    "AuthenticationSecret": "AuthenticationSecret_TEST",
+    "DownloadImages": true,
+    "RenewImagesDuration": 7,
+    "Webcalendars": [
+      "Webcalendars_TEST"
+    ],
+    "RefreshAlbumPeopleInterval": 7,
+    "PhotoDateFormat": "PhotoDateFormat_TEST",
+    "ImageLocationFormat": "ImageLocationFormat_TEST",
+    "WeatherApiKey": "WeatherApiKey_TEST",
+    "UnitSystem": "UnitSystem_TEST",
+    "WeatherLatLong": "WeatherLatLong_TEST",
+    "Language": "Language_TEST",
+    "Webhook": "Webhook_TEST",
+    "Margin": "Margin_TEST",
+    "Interval": 7,
+    "TransitionDuration": 7.7,
+    "ShowClock": true,
+    "ClockFormat": "ClockFormat_TEST",
+    "ShowPhotoDate": true,
+    "ShowImageDesc": true,
+    "ShowPeopleDesc": true,
+    "ShowAlbumName": true,
+    "ShowImageLocation": true,
+    "PrimaryColor": "PrimaryColor_TEST",
+    "SecondaryColor": "SecondaryColor_TEST",
+    "Style": "Style_TEST",
+    "BaseFontSize": "BaseFontSize_TEST",
+    "ShowWeatherDescription": true,
+    "UnattendedMode": true,
+    "ImageZoom": true,
+    "ImagePan": false,
+    "ImageFill": true,
+    "Layout": "Layout_TEST"
+  },
+  "Accounts": [
+    {
+      "ImmichServerUrl": "Account1.ImmichServerUrl_TEST",
+      "ApiKey": "Account1.ApiKey_TEST",
+      "ImagesFromDate": "2020-01-02",
+      "ShowMemories": true,
+      "ShowFavorites": true,
+      "ShowArchived": true,
+      "ImagesFromDays": 7,
+      "ImagesUntilDate": "2020-01-02",
+      "Rating": 7,
+      "Albums": [
+        "00000000-0000-0000-0000-000000000001"
+      ],
+      "ExcludedAlbums": [
+        "00000000-0000-0000-0000-000000000001"
+      ],
+      "People": [
+        "00000000-0000-0000-0000-000000000001"
+      ],
+      "ImmichFrameAlbumName": "Account1.ImmichFrameAlbumName_TEST"
+    },
+    {
+      "ImmichServerUrl": "Account2.ImmichServerUrl_TEST",
+      "ApiKey": "Account2.ApiKey_TEST",
+      "ImagesFromDate": "2020-01-02",
+      "ShowMemories": true,
+      "ShowFavorites": true,
+      "ShowArchived": true,
+      "ImagesFromDays": 7,
+      "ImagesUntilDate": "2020-01-02",
+      "Rating": 7,
+      "Albums": [
+        "00000000-0000-0000-0000-000000000001"
+      ],
+      "ExcludedAlbums": [
+        "00000000-0000-0000-0000-000000000001"
+      ],
+      "People": [
+        "00000000-0000-0000-0000-000000000001"
+      ],
+      "ImmichFrameAlbumName": "Account2.ImmichFrameAlbumName_TEST"
+    }
+  ]
+}

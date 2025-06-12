@@ -1,11 +1,11 @@
-using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.WebApi.Models;
 using Microsoft.AspNetCore.Authentication;
-using System.Text.Json;
 using System.Reflection;
+using ImmichFrame.Core.Logic;
 using ImmichFrame.WebApi.Helpers;
+using ImmichFrame.WebApi.Helpers.Config;
 
 var builder = WebApplication.CreateBuilder(args);
 //log the version number
@@ -28,14 +28,15 @@ builder.Services.AddLogging(builder =>
     {
         Enum.TryParse(logLevel, true, out level);
     }
+
     Console.WriteLine($"LogLevel: {level}");
     builder.SetMinimumLevel(level);
     builder.AddSimpleConsole(options =>
-            {
-                // Customizing the log output format
-                options.TimestampFormat = "yy-MM-dd HH:mm:ss ";  // Custom timestamp format
-                options.SingleLine = true;
-            });
+    {
+        // Customizing the log output format
+        options.TimestampFormat = "yy-MM-dd HH:mm:ss "; // Custom timestamp format
+        options.SingleLine = true;
+    });
 
     // Disable SpaProxy info logs
     builder.AddFilter("Microsoft.AspNetCore.SpaProxy", LogLevel.Warning);
@@ -43,29 +44,31 @@ builder.Services.AddLogging(builder =>
     builder.AddFilter("Microsoft.AspNetCore", LogLevel.Warning);
 });
 
+
 // Setup Config
 var settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config", "Settings.json");
-ConfigLoader configLoader = new ConfigLoader();
-builder.Services.AddSingleton<IServerSettings>(_ => configLoader.LoadConfig<ServerSettings>(settingsPath));
-builder.Services.AddSingleton<IWebClientSettings>(_ => configLoader.LoadConfig<WebClientSettings>(settingsPath));
+builder.Services.AddTransient<ConfigLoader>();
+builder.Services.AddSingleton<IServerSettings>(srv => srv.GetRequiredService<ConfigLoader>().LoadConfig(settingsPath));
 
-// Setup Logic
+// Register sub-settings
+builder.Services.AddSingleton<IGeneralSettings>(srv => srv.GetRequiredService<IServerSettings>().GeneralSettings);
+
+// Register services
 builder.Services.AddSingleton<IWeatherService, OpenWeatherMapService>();
 builder.Services.AddSingleton<ICalendarService, IcalCalendarService>();
-builder.Services.AddSingleton<IImmichFrameLogic, OptimizedImmichFrameLogic>();
+builder.Services.AddSingleton<IAccountSelectionStrategy, TotalAccountImagesSelectionStrategy>();
+builder.Services.AddTransient<Func<IAccountSettings, IImmichFrameLogic>>(srv => account => ActivatorUtilities.CreateInstance<OptimizedImmichFrameLogic>(srv, account));
+builder.Services.AddSingleton<IImmichFrameLogic, MultiImmichFrameLogicDelegate>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddAuthorization(options =>
-    {
-        options.AddPolicy("AllowAnonymous", policy => policy.RequireAssertion(context => true));
-    });
+builder.Services.AddAuthorization(options => { options.AddPolicy("AllowAnonymous", policy => policy.RequireAssertion(context => true)); });
 
 builder.Services.AddAuthentication("ImmichFrameScheme")
-     .AddScheme<AuthenticationSchemeOptions, ImmichFrameAuthenticationHandler>("ImmichFrameScheme", options => { });
+    .AddScheme<AuthenticationSchemeOptions, ImmichFrameAuthenticationHandler>("ImmichFrameScheme", options => { });
 
 var app = builder.Build();
 
@@ -102,5 +105,3 @@ app.MapControllers();
 app.MapFallbackToFile("/index.html");
 
 app.Run();
-
-

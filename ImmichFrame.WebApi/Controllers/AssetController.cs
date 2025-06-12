@@ -24,9 +24,9 @@ namespace ImmichFrame.WebApi.Controllers
     {
         private readonly ILogger<AssetController> _logger;
         private readonly IImmichFrameLogic _logic;
-        private readonly IWebClientSettings _settings;
+        private readonly IGeneralSettings _settings;
 
-        public AssetController(ILogger<AssetController> logger, IImmichFrameLogic logic, IWebClientSettings settings)
+        public AssetController(ILogger<AssetController> logger, IImmichFrameLogic logic, IGeneralSettings settings)
         {
             _logger = logger;
             _logic = logic;

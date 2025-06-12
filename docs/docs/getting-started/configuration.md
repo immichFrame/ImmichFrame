@@ -4,59 +4,118 @@ sidebar_position: 2
 
 # 🔧 Configuration
 
-### Settings
+### Full configuration reference:
 
-| **Section**             | **Config-Key**             | **Value**                           | **Default**          | **Description**                                                                                                                       |
-| ----------------------- | -------------------------- | ----------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| **Required**            | **ImmichServerUrl**        | **string**                          |                      | **The URL of your Immich server e.g. `http://photos.yourdomain.com` / `http://192.168.0.100:2283`.**                                  |
-| **Required**            | **ApiKey**                 | **string**                          |                      | **Read more about how to obtain an [Immich API key][immich-api-url].**                                                                |
-| [Security](#security)   | AuthenticationSecret       | string                              |                      | When set, every client needs to authenticate via Bearer Token and this value.                                                         |
-| [Filtering](#filtering) | Albums                     | string[]                            | []                   | UUID of album(s)                                                                                                                      |
-| [Filtering](#filtering) | ExcludedAlbums             | string[]                            | []                   | UUID of excluded album(s)                                                                                                             |
-| [Filtering](#filtering) | People                     | string[]                            | []                   | UUID of person(s)                                                                                                                     |
-| [Filtering](#filtering) | Rating                     | int                                 |                      | Rating of an image in stars, allowed values from -1 to 5. This will only show images with the exact rating you are filtering for.     |
-| [Filtering](#filtering) | ShowMemories               | boolean                             | false                | If this is set, memories are displayed.                                                                                               |
-| [Filtering](#filtering) | ShowFavorites              | boolean                             | false                | If this is set, favorites are displayed.                                                                                              |
-| [Filtering](#filtering) | ShowArchived               | boolean                             | false                | If this is set, assets marked archived are displayed.                                                                                 |
-| [Filtering](#filtering) | ImagesFromDays             | int                                 |                      | Show images from the last X days. e.g 365 -> show images from the last year                                                           |
-| [Filtering](#filtering) | ImagesFromDate             | Date                                |                      | Show images after date. Overwrites the `ImagesFromDays`-Setting                                                                       |
-| [Filtering](#filtering) | ImagesUntilDate            | Date                                |                      | Show images before date.                                                                                                              |
-| Caching                 | RenewImagesDuration        | int                                 | 30                   | Interval in days.                                                                                                                     |
-| Caching                 | DownloadImages             | boolean                             | false                |                                                                                                                                       |
-| Caching                 | RefreshAlbumPeopleInterval | int                                 | 12                   | Interval in hours. Determines how often images are pulled from a person in immich.                                                    |
-| Image                   | ImageZoom                  | boolean                             | true                 | Zooms into or out of an image and gives it a touch of life.                                                                           |
-| Image                   | ImagePan                   | boolean                             | false                | Pans an image in a random direction and gives it a touch of life.                                                                     |
-| Image                   | ImageFill                  | boolean                             | false                | Whether image should fill available space. Aspect ratio maintained but may be cropped.                                                |
-| Image                   | Interval                   | int                                 | 45                   | Image interval in seconds. How long a image is displayed in the frame.                                                                |
-| Image                   | TransitionDuration         | float                               | 2                    | Duration in seconds.                                                                                                                  |
-| [Weather](#weather)     | WeatherApiKey              | string                              |                      | Get an API key from [OpenWeatherMap][openweathermap-url].                                                                             |
-| [Weather](#weather)     | UnitSystem                 | imperial \| metric                  | imperial             | Imperial or metric system. (Fahrenheit or degrees)                                                                                    |
-| [Weather](#weather)     | Language                   | string                              | en                   | 2 digit ISO code, sets the language of the weather description.                                                                       |
-| [Weather](#weather)     | ShowWeatherDescription     | boolean                             | true                 | Displays the description of the current weather.                                                                                      |
-| [Weather](#weather)     | WeatherLatLong             | boolean                             | 40.730610,-73.935242 | Set the weather location with lat/lon.                                                                                                |
-| Clock                   | ShowClock                  | boolean                             | true                 | Displays the current time.                                                                                                            |
-| Clock                   | ClockFormat                | string                              | hh:mm                | Time format.                                                                                                                          |
-| [Calendar](#calendar)   | Webcalendars               | string[]                            | []                   | A list of webcalendar URIs in the .ics format. e.g. https://calendar.google.com/calendar/ical/XXXXXX/public/basic.ics                 |
-| [Metadata](#metadata)   | ShowImageDesc              | boolean                             | true                 | Displays the description of the current image.                                                                                        |
-| [Metadata](#metadata)   | ShowPeopleDesc             | boolean                             | true                 | Displays a comma separated list of names of all the people that are assigned in immich.                                               |
-| [Metadata](#metadata)   | ShowAlbumName              | boolean                             | true                 | Displays a comma separated list of names of all the albums for an image.                                                              |
-| [Metadata](#metadata)   | ShowImageLocation          | boolean                             | true                 | Displays the location of the current image.                                                                                           |
-| [Metadata](#metadata)   | ImageLocationFormat        | string                              | City,State,Country   |                                                                                                                                       |
-| [Metadata](#metadata)   | ShowPhotoDate              | boolean                             | true                 | Displays the date of the current image.                                                                                               |
-| [Metadata](#metadata)   | PhotoDateFormat            | string                              | yyyy-MM-dd           | Date format. See [here](https://date-fns.org/v4.1.0/docs/format) for more information.                                                |
-| UI                      | PrimaryColor               | string                              | #f5deb3              | Lets you choose a primary color for your UI. Use hex with alpha value to edit opacity.                                                |
-| UI                      | SecondaryColor             | string                              | #000000              | Lets you choose a secondary color for your UI. (Only used with `style=solid or transition`) Use hex with alpha value to edit opacity. |
-| UI                      | Style                      | none \| solid \| transition \| blur | none                 | Background-style of the clock and metadata.                                                                                           |
-| UI                      | Layout                     | single \| splitview                 | splitview            | Allow two portrait images to be displayed next to each other                                                                          |
-| UI                      | BaseFontSize               | string                              | 17px                 | Sets the base font size, uses [standard CSS formats](https://developer.mozilla.org/en-US/docs/Web/CSS/font-size).                     |
-| [Misc](#misc)           | Webhook                    | string                              |                      | Webhook URL to be notified e.g. http://example.com/notify                                                                             |
+:::warning
+It is not recommended to copy this full configuration file. Only specify values that are different from the defaults. Configuration options and default values may change in future versions.
+:::
+
+Defaults are below, only one account with `ImmichServerUrl` and `ApiKey` are required.
+
+```json
+{
+  // settings applicable to the web client - when viewing with a browser or webview
+  "General": {
+    //When set, every client needs to authenticate via Bearer Token and this value.
+    "AuthenticationSecret": null, // string, no default
+    // whether to download images to the server
+    "DownloadImages": false, // boolean
+    // if images are downloaded, re-download if age (in days) is more than this
+    "RenewImagesDuration": 30, // int
+    // A list of webcalendar URIs in the .ics format. e.g. https://calendar.google.com/calendar/ical/XXXXXX/public/basic.ics
+    "Webcalendars": [], // string[]
+    // Interval in hours. Determines how often images are pulled from a person in immich.
+    "RefreshAlbumPeopleInterval": 12, //int
+    // Date format. See https://date-fns.org/v4.1.0/docs/format for more information.
+    "PhotoDateFormat": "MM/dd/yyyy", // string
+    "ImageLocationFormat": "City,State,Country",
+    // Get an API key from OpenWeatherMap: https://openweathermap.org/appid
+    "WeatherApiKey": "", // string
+    // Imperial or metric system. (Fahrenheit or degrees)
+    "UnitSystem": "imperial", // "imperial" | "metric"
+    // Set the weather location with lat/lon.
+    "WeatherLatLong": "40.730610,-73.935242", // string
+    // 2 digit ISO code, sets the language of the weather description.
+    "Language": "en", // string
+    //Webhook URL to be notified e.g. http://example.com/notify
+    "Webhook": null, // string
+    // whether to download images to the server
+    "Margin": "0,0,0,0",
+    // Image interval in seconds. How long a image is displayed in the frame.
+    "Interval": 45,
+    // Duration in seconds.
+    "TransitionDuration": 2, // float
+    // Displays the current time.
+    "ShowClock": true, // boolean
+    // Time format
+    "ClockFormat": "hh:mm", // string
+    // Displays the date of the current image. 
+    "ShowPhotoDate": true, // boolean
+    // Displays the description of the current image.
+    "ShowImageDesc": true, // boolean
+    // Displays a comma separated list of names of all the people that are assigned in immich.
+    "ShowPeopleDesc": true, // boolean
+    // Displays a comma separated list of names of all the albums for an image.
+    "ShowAlbumName": true, // boolean
+    // Displays the location of the current image.
+    "ShowImageLocation": true, // boolean
+    // Lets you choose a primary color for your UI. Use hex with alpha value to edit opacity.   
+    "PrimaryColor": "#f5deb3", // string
+    // Lets you choose a secondary color for your UI. (Only used with `style=solid or transition`) Use hex with alpha value to edit opacity.
+    "SecondaryColor": "#000000", // string
+    // Background-style of the clock and metadata.
+    "Style": "none", // none | solid | transition | blur
+    // Sets the base font size, uses standard CSS formats (https://developer.mozilla.org/en-US/docs/Web/CSS/font-size)
+    "BaseFontSize": "17px", //string
+    // Displays the description of the current weather.
+    "ShowWeatherDescription": true, // boolean
+    "UnattendedMode": true, // boolean
+    // Zooms into or out of an image and gives it a touch of life.
+    "ImageZoom": true, // boolean
+    // Pans an image in a random direction and gives it a touch of life.
+    "ImagePan": false, // boolean
+    // Whether image should fill available space. Aspect ratio maintained but may be cropped.
+    "ImageFill": false, // boolean
+    // Allow two portrait images to be displayed next to each other
+    "Layout": "splitview" // single | splitview
+  },
+  "Accounts": [ // multiple accounts permitted
+    {
+      // The URL of your Immich server e.g. `http://photos.yourdomain.com` / `http://192.168.0.100:2283`.
+      "ImmichServerUrl": "REQUIRED", // string, required, no default
+      // Read more about how to obtain an Immich API key: https://immich.app/docs/features/command-line-interface#obtain-the-api-key
+      "ApiKey": "REQUIRED", // string, required, no default
+      // Show images after date. Overwrites the `ImagesFromDays`-Setting
+      "ImagesFromDate": null, // Date
+      // If this is set, memories are displayed.
+      "ShowMemories": false, // boolean
+      // If this is set, favorites are displayed.
+      "ShowFavorites": false, // boolean
+      // If this is set, assets marked archived are displayed.
+      "ShowArchived": false, // boolean
+      // Show images from the last X days. e.g 365 -> show images from the last year
+      "ImagesFromDays": null, // boolean
+      // Show images before date.  
+      "ImagesUntilDate": "2020-01-02", // Date
+      // Rating of an image in stars, allowed values from -1 to 5. This will only show images with the exact rating you are filtering for.
+      "Rating": null, // int
+      // UUID of album(s) - e.g. ["00000000-0000-0000-0000-000000000001"]
+      "Albums": [], // string[]
+      // UUID of excluded album(s)
+      "ExcludedAlbums": [], // string[]
+      // UUID of People
+      "People": [], // string[]
+    }
+  ]
+}
+  ```
 
 ### Security
-Basic authentication can be added via this setting. It is **NOT** recommended to expose immichFrame to the public web, if you still choose to do so, you can set this to a secure secret. Every client needs to authenticate itself with this secret. This can be done in the Webclient via input field or via URL-Parameter. The URL-Parameter will look like this: `?authsecret=[MYSECRET]`
+Basic authentication can be added via `AuthenticationSecret`. It is **NOT** recommended to expose immichFrame to the public web, if you still choose to do so, you can set this to a secure secret. Every client needs to authenticate itself with this secret. This can be done in the Webclient via input field or via URL-Parameter. The URL-Parameter will look like this: `?authsecret=[MYSECRET]`
 
 If this is enabled, the web api required the `Authorization`-Header with `Bearer [MYSECRET]`.
 
-### Filtering
+### Filtering on Albums or People
 You can get the UUIDs from the URL of the album/person. For this URL: `https://demo.immich.app/albums/85c85b29-c95d-4a8b-90f7-c87da1d518ba` this is the UUID: `85c85b29-c95d-4a8b-90f7-c87da1d518ba`
 
 ### Weather
@@ -81,6 +140,11 @@ Events will always contain a `Name`, `ClientIdentifier` and a `DateTime` to diff
 | -------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ImageRequestedNotification | Notifies, when a Image requested. | `{"Name":"ImageRequestedNotification", "ClientIdentifier": "Frame_Kitchen", "DateTime":"2024-11-16T21:37:19.4933981+01:00", "RequestedImageId":"UUID"}` |
 
+### Multiple Immich Accounts
+ImmichFrame can be configured to access multiple Immich accounts, on the same or different servers.
+
+Images will be drawn from each account proportionally based on the total number of images present in each account (not included filtering, this is not yet implemented).
+
 ### Custom CSS
 ImmichFrame can be customized even further using CSS. This will apply to browsers, and apps using WebView (i.e. everything but Frameo and AppleTV):
 - Create a custom.css file somewhere on your host server with your desired content, for example:  
@@ -94,6 +158,3 @@ ImmichFrame can be customized even further using CSS. This will apply to browser
 volumes:  
       - /PATH/TO/YOUR/custom.css:/app/wwwroot/static/custom.css"
 ```
-
-[openweathermap-url]: https://openweathermap.org/appid
-[immich-api-url]: https://immich.app/docs/features/command-line-interface#obtain-the-api-key
