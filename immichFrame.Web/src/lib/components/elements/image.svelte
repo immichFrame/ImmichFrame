@@ -8,7 +8,6 @@
 	import { thumbHashToDataURL } from 'thumbhash';
 	import AssetInfo from '$lib/components/elements/asset-info.svelte';
 	import ImageOverlay from '$lib/components/elements/imageoverlay/image-overlay.svelte';
-	import { ImageLayout } from './image-component.svelte';
 
 	interface Props {
 		image: [url: string, asset: AssetResponseDto, albums: AlbumResponseDto[]];
@@ -19,8 +18,9 @@
 		showAlbumName: boolean;
 		imageFill: boolean;
 		imageZoom: boolean;
+		imagePan: boolean;
 		interval: number;
-		layout: ImageLayout;
+		multi?: boolean;
 		showInfo: boolean;
 	}
 
@@ -33,8 +33,9 @@
 		showAlbumName,
 		imageFill,
 		imageZoom,
+		imagePan,
 		interval,
-		layout,
+		multi = false,
 		showInfo = $bindable(false)
 	}: Props = $props();
 
@@ -42,6 +43,7 @@
 
 	let hasPerson = $derived(image[1].people?.filter((x) => x.name).length ?? 0 > 0);
 	let zoomIn = $derived(zoomEffect());
+	let panDirection = $derived(panEffect());
 
 	function GetFace(i: number) {
 		const people = image[1].people as PersonWithFacesResponseDto[];
@@ -92,22 +94,58 @@
 	function zoomEffect() {
 		return 0.5 > Math.random();
 	}
+
+	function panEffect() {
+		const directions = ['left', 'right', 'up', 'down'];
+		return directions[Math.floor(Math.random() * directions.length)];
+	}
+
+	function getScaleValues() {
+		if (imageZoom && imagePan) {
+			// When both zoom and pan are enabled make sure we have minimum zoom to cover pan offset
+			const minScale = 1.15;
+			const maxScale = 1.35;
+			return {
+				startScale: zoomIn ? minScale : maxScale,
+				endScale: zoomIn ? maxScale : minScale
+			};
+		} else if (imageZoom) {
+			// Original zoom behavior when only zoom is enabled
+			return {
+				startScale: zoomIn ? 1 : 1.3,
+				endScale: zoomIn ? 1.3 : 1
+			};
+		} else {
+			// No zoom but pan give pan slight scale to avoid edges
+			const panScale = imagePan ? 1.1 : 1;
+			return {
+				startScale: panScale,
+				endScale: panScale
+			};
+		}
+	}
+
+	let scaleValues = $derived(getScaleValues());
 </script>
 
 {#if showInfo}
 	<ImageOverlay asset={image[1]} albums={image[2]} />
 {/if}
 
-<div class="immichframe_image absolute h-full w-full place-self-center overflow-hidden">
+<div class="immichframe_image relative place-self-center overflow-hidden">
 	<!-- Container with zoom-effect -->
 	<div
-		class="relative w-full h-full {imageZoom ? 'zoom' : ''}"
+		class="relative w-full h-full {imageZoom ? 'zoom' : ''} {imagePan ? 'pan' : ''}"
 		style="
 			--interval: {interval + 2}s;
 			--originX: {hasPerson ? getFaceMetric(0, 'centerX') + '%' : 'center'};
 			--originY: {hasPerson ? getFaceMetric(0, 'centerY') + '%' : 'center'};
-			--start-scale: {zoomIn ? 1 : 1.3};
-			--end-scale: {zoomIn ? 1.3 : 1};"
+			--start-scale: {scaleValues.startScale};
+			--end-scale: {scaleValues.endScale};
+			--pan-start-x: {panDirection === 'left' ? '5%' : panDirection === 'right' ? '-5%' : '0'};
+			--pan-end-x: {panDirection === 'left' ? '-5%' : panDirection === 'right' ? '5%' : '0'};
+			--pan-start-y: {panDirection === 'up' ? '5%' : panDirection === 'down' ? '-5%' : '0'};
+			--pan-end-y: {panDirection === 'up' ? '-5%' : panDirection === 'down' ? '5%' : '0'};"
 	>
 		{#if debug}
 			{#each image[1].people?.map((x) => x.name) ?? [] as _, i}
@@ -127,12 +165,9 @@
 		{/if}
 
 		<img
-			class="
-			{imageFill ? 'object-cover' : ''}
-			{layout == ImageLayout.SplitPortrait ? 'w-screen max-h-screen h-dvh-safe object-cover' : ''}
-			{layout == ImageLayout.SplitLandscape ? 'h-full w-auto max-h-full mx-auto object-contain' : ''}
-			{layout == ImageLayout.Single ? 'max-h-screen h-dvh-safe max-w-full object-contain' : ''}
-			w-full h-full"
+			class="{multi || imageFill
+				? 'w-screen max-h-screen h-dvh-safe object-cover'
+				: 'max-h-screen h-dvh-safe max-w-full object-contain'} w-full h-full"
 			src={image[0]}
 			alt="data"
 		/>
@@ -147,19 +182,24 @@
 	{showPeopleDesc}
 	{showAlbumName}
 />
-
-<!-- Only show the thumbnail if the image is not filled -->
-{#if !imageFill}
-	<img
-		class="absolute flex w-full h-full z-[-1]"
-		src={thumbHashToDataURL(decodeBase64(image[1].thumbhash ?? ''))}
-		alt="data"
-	/>
-{/if}
+<img
+	class="absolute flex w-full h-full z-[-1]"
+	src={thumbHashToDataURL(decodeBase64(image[1].thumbhash ?? ''))}
+	alt="data"
+/>
 
 <style>
 	.zoom {
 		animation: zoom var(--interval) ease-out forwards;
+		transform-origin: var(--originX, center) var(--originY, center);
+	}
+
+	.pan {
+		animation: pan var(--interval) ease-in-out forwards;
+	}
+
+	.zoom.pan {
+		animation: zoom-pan var(--interval) ease-in-out forwards;
 		transform-origin: var(--originX, center) var(--originY, center);
 	}
 
@@ -169,6 +209,24 @@
 		}
 		to {
 			transform: scale(var(--end-scale, 1.3));
+		}
+	}
+
+	@keyframes pan {
+		from {
+			transform: translateX(var(--pan-start-x, 0)) translateY(var(--pan-start-y, 0)) scale(var(--start-scale, 1));
+		}
+		to {
+			transform: translateX(var(--pan-end-x, 0)) translateY(var(--pan-end-y, 0)) scale(var(--end-scale, 1));
+		}
+	}
+
+	@keyframes zoom-pan {
+		from {
+			transform: translateX(var(--pan-start-x, 0)) translateY(var(--pan-start-y, 0)) scale(var(--start-scale, 1));
+		}
+		to {
+			transform: translateX(var(--pan-end-x, 0)) translateY(var(--pan-end-y, 0)) scale(var(--end-scale, 1.3));
 		}
 	}
 </style>

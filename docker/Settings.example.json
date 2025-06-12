@@ -29,6 +29,7 @@
     "ShowWeatherDescription": true,
     "UnattendedMode": true,
     "ImageZoom": true,
+    "ImagePan": false,
     "ImageFill": false,
     "Layout": "splitview"
   },

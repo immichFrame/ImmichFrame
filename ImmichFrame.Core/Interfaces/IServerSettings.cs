@@ -5,7 +5,7 @@
         public IEnumerable<IAccountSettings> Accounts { get; }
         public IGeneralSettings GeneralSettings { get; }
     }
-    
+
     public interface IAccountSettings
     {
         public string ImmichServerUrl { get; }
@@ -22,7 +22,7 @@
         public int? Rating { get; }
         public string ImmichFrameAlbumName { get; }
     }
-    
+
     public interface IGeneralSettings
     {
         public List<string> Webcalendars { get; }
@@ -53,6 +53,7 @@
         public bool ShowWeatherDescription { get; }
         public bool UnattendedMode { get; }
         public bool ImageZoom { get; }
+        public bool ImagePan { get; }
         public bool ImageFill { get; }
         public string Layout { get; }
         public string Language { get; }

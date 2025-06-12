@@ -49,6 +49,7 @@ public class ServerSettingsV1 : IConfigSettable
     public bool ShowWeatherDescription { get; set; } = true;
     public bool UnattendedMode { get; set; } = false;
     public bool ImageZoom { get; set; } = true;
+    public bool ImagePan { get; set; } = false;
     public bool ImageFill { get; set; } = false;
     public string Layout { get; set; } = "splitview";
 }
@@ -110,6 +111,7 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
         public bool ShowWeatherDescription => _delegate.ShowWeatherDescription;
         public bool UnattendedMode => _delegate.UnattendedMode;
         public bool ImageZoom => _delegate.ImageZoom;
+        public bool ImagePan => _delegate.ImagePan;
         public bool ImageFill => _delegate.ImageFill;
         public string Layout => _delegate.Layout;
         public string Language => _delegate.Language;
