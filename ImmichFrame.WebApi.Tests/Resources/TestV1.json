@@ -5,6 +5,7 @@
     "Interval": 7,
     "TransitionDuration": 7.7,
     "ImageZoom": true,
+    "ImagePan": false,
     "ImageFill": true,
     "Layout": "Layout_TEST",
     "DownloadImages": true,
@@ -16,10 +17,18 @@
     "ImagesUntilDate": "2020-01-02",
     "RenewImagesDuration": 7,
     "Rating": 7,
-    "Albums": ["00000000-0000-0000-0000-000000000001"],
-    "ExcludedAlbums": ["00000000-0000-0000-0000-000000000001"],
-    "People": ["00000000-0000-0000-0000-000000000001"],
-    "Webcalendars": ["Webcalendars_TEST"],
+    "Albums": [
+        "00000000-0000-0000-0000-000000000001"
+    ],
+    "ExcludedAlbums": [
+        "00000000-0000-0000-0000-000000000001"
+    ],
+    "People": [
+        "00000000-0000-0000-0000-000000000001"
+    ],
+    "Webcalendars": [
+        "Webcalendars_TEST"
+    ],
     "RefreshAlbumPeopleInterval": 7,
     "ShowClock": true,
     "ClockFormat": "ClockFormat_TEST",

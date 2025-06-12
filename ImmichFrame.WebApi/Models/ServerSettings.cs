@@ -38,6 +38,7 @@ public class GeneralSettings : IGeneralSettings, IConfigSettable
     public bool ShowWeatherDescription { get; set; } = true;
     public bool UnattendedMode { get; set; } = false;
     public bool ImageZoom { get; set; } = true;
+    public bool ImagePan { get; set; } = false;
     public bool ImageFill { get; set; } = false;
     public string Layout { get; set; } = "splitview";
     public int RenewImagesDuration { get; set; } = 30;
