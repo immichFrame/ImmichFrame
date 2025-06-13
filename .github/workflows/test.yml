@@ -1,0 +1,20 @@
+name: Run Tests
+
+on:
+  push:
+    branches: [ '*' ]
+  pull_request:
+    branches: [ '*' ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'
+    - name: Run tests
+      run: dotnet test ImmichFrame.WebApi.Tests/ImmichFrame.WebApi.Tests.csproj
