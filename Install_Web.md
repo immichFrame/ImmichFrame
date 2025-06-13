@@ -61,6 +61,7 @@ services:
       # RefreshAlbumPeopleInterval: "12"
       # ShowClock: "true"
       # ClockFormat: "hh:mm"
+      # ShowProgressBar: "true"
       # ShowPhotoDate: "true"
       # PhotoDateFormat: "yyyy-MM-dd"
       # ShowImageDesc: "true"
