@@ -49,6 +49,8 @@ Defaults are below, only one account with `ImmichServerUrl` and `ApiKey` are req
     "ShowClock": true, // boolean
     // Time format
     "ClockFormat": "hh:mm", // string
+    // Displays the progress bar.
+    "ShowProgressBar": true, // boolean
     // Displays the date of the current image. 
     "ShowPhotoDate": true, // boolean
     // Displays the description of the current image.

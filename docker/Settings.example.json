@@ -17,6 +17,7 @@
     "TransitionDuration": 2,
     "ShowClock": true,
     "ClockFormat": "hh:mm",
+    "ShowProgressBar": true,
     "ShowPhotoDate": true,
     "ShowImageDesc": true,
     "ShowPeopleDesc": true,

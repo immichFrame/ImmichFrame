@@ -405,7 +405,7 @@
 		<ProgressBar
 			autoplay
 			duration={$configStore.interval}
-			hidden={false}
+			hidden={!$configStore.showProgressBar}
 			location={ProgressBarLocation.Bottom}
 			bind:this={progressBar}
 			bind:status={progressBarStatus}

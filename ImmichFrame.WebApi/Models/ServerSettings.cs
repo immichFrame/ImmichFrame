@@ -26,6 +26,7 @@ public class GeneralSettings : IGeneralSettings, IConfigSettable
     public double TransitionDuration { get; set; } = 1;
     public bool ShowClock { get; set; } = true;
     public string? ClockFormat { get; set; } = "hh:mm";
+    public bool ShowProgressBar { get; set; } = true;
     public bool ShowPhotoDate { get; set; } = true;
     public bool ShowImageDesc { get; set; } = true;
     public bool ShowPeopleDesc { get; set; } = true;

@@ -193,6 +193,7 @@ export type WebClientSettings = {
     renewImagesDuration?: number;
     showClock?: boolean;
     clockFormat?: string | null;
+    showProgressBar?: boolean;
     showPhotoDate?: boolean;
     photoDateFormat?: string | null;
     showImageDesc?: boolean;
