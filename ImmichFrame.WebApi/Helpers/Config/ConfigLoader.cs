@@ -4,7 +4,6 @@ using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.WebApi.Models;
 using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 
 namespace ImmichFrame.WebApi.Helpers.Config;
 
@@ -54,7 +53,7 @@ public class ConfigLoader(ILogger<ConfigLoader> _logger)
             }
             catch (Exception e)
             {
-                _logger.LogWarning("Failed to load config as old JSON, falling back to env vars (${errorMessage})", e.Message);
+                _logger.LogWarning("Failed to load config as old YAML, falling back to env vars (${errorMessage})", e.Message);
             }
         }
 
