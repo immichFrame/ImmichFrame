@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="BloomFilter.NetCore" Version="2.5.2" />
     <PackageReference Include="Ical.Net" Version="4.3.1" />
     <PackageReference Include="Microsoft.Extensions.ApiDescription.Client" Version="8.0.8">
       <PrivateAssets>all</PrivateAssets>
