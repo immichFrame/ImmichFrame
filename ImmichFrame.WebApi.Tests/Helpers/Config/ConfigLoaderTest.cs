@@ -34,11 +34,19 @@ public class ConfigLoaderTest
     }
 
     [Test]
+    public void TestLoadConfigV1Yaml()
+    {
+        var config = _configLoader.LoadConfigYaml<ServerSettingsV1>(Path.Combine(
+            TestContext.CurrentContext.TestDirectory, "Resources/TestV1.yml"));
+        VerifyConfig(new ServerSettingsV1Adapter(config), false);
+    }
+
+    [Test]
     public void TestLoadConfigEnv()
     {
         var jsonConfig = _configLoader.LoadConfigJson<ServerSettingsV1>(Path.Combine(
             TestContext.CurrentContext.TestDirectory, "Resources/TestV1.json"));
-        
+
         var config = _configLoader.LoadConfigFromDictionary<ServerSettingsV1>(ToDictionary(jsonConfig));
         VerifyConfig(new ServerSettingsV1Adapter(config), false);
     }
@@ -48,6 +56,14 @@ public class ConfigLoaderTest
     {
         var config = _configLoader.LoadConfigJson<ServerSettings>(Path.Combine(
             TestContext.CurrentContext.TestDirectory, "Resources/TestV2.json"));
+        VerifyConfig(config, true);
+    }
+
+    [Test]
+    public void TestLoadConfigV2Yaml()
+    {
+        var config = _configLoader.LoadConfigYaml<ServerSettings>(Path.Combine(
+            TestContext.CurrentContext.TestDirectory, "Resources/TestV2.yml"));
         VerifyConfig(config, true);
     }
 
@@ -108,7 +124,7 @@ public class ConfigLoaderTest
             }
         }
     }
-    
+
     public static IDictionary ToDictionary(object obj, bool ignoreNullValues = false)
     {
         if (obj == null)
@@ -142,12 +158,12 @@ public class ConfigLoaderTest
                 {
                     value = value.ToString();
                 }
-                
+
                 dictionary.Add(prop.Name, value);
             }
         }
 
         return dictionary;
     }
-    
+
 }

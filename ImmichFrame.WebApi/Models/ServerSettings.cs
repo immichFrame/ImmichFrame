@@ -1,18 +1,28 @@
 ﻿using System.Text.Json.Serialization;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.WebApi.Helpers;
+using YamlDotNet.Serialization;
 
 namespace ImmichFrame.WebApi.Models;
 
 public class ServerSettings : IServerSettings, IConfigSettable
 {
-    [JsonPropertyName("General")] public GeneralSettings GeneralSettingsImpl { get; set; }
+    [YamlMember(Alias = "General")]
+    [JsonPropertyName("General")]
+    public GeneralSettings GeneralSettingsImpl { get; set; }
 
-    [JsonPropertyName("Accounts")] public IEnumerable<ServerAccountSettings> AccountsImpl { get; set; }
+    [YamlMember(Alias = "Accounts")]
+    [JsonPropertyName("Accounts")]
+    public IEnumerable<ServerAccountSettings> AccountsImpl { get; set; }
 
     //Covariance not allowed on interface impls
-    [JsonIgnore] public IGeneralSettings GeneralSettings => GeneralSettingsImpl;
-    [JsonIgnore] public IEnumerable<IAccountSettings> Accounts => AccountsImpl;
+    [JsonIgnore]
+    [YamlIgnore]
+    public IGeneralSettings GeneralSettings => GeneralSettingsImpl;
+
+    [JsonIgnore]
+    [YamlIgnore]
+    public IEnumerable<IAccountSettings> Accounts => AccountsImpl;
 }
 
 public class GeneralSettings : IGeneralSettings, IConfigSettable
