@@ -88,17 +88,10 @@ public class MultiImmichFrameLogicDelegate : IImmichFrameLogic
         return GetLogic(id).GetImage(id);
     }
 
-    public async Task<AssetStatsResponseDto> GetAssetStats()
+    public async Task<long> GetTotalAssets()
     {
-        var allInts = await Task.WhenAll(_accountToDelegate.Values.Select(account => account.GetAssetStats()));
-        
-        return allInts.Aggregate(new AssetStatsResponseDto(), (acc, response) =>
-        {
-            acc.Images += response.Images;
-            acc.Total += response.Total;
-            acc.Videos += response.Videos;
-            return acc;
-        });
+        var allInts = await Task.WhenAll(_accountToDelegate.Values.Select(account => account.GetTotalAssets()));
+        return allInts.Sum();
     }
 
 

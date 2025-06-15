@@ -1,7 +1,5 @@
 using System.Collections;
 using System.Reflection;
-using System.Runtime.InteropServices.JavaScript;
-using System.Text.Json;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.WebApi.Helpers;
 using ImmichFrame.WebApi.Helpers.Config;

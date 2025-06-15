@@ -4,46 +4,26 @@ using ImmichFrame.Core.Interfaces;
 
 namespace ImmichFrame.Core.Logic;
 
-using Microsoft.Extensions.Caching.Memory;
-
 public class TotalAccountImagesSelectionStrategy : IAccountSelectionStrategy
 {
     private readonly Random _random = new();
-    private readonly IMemoryCache _accountToTotal = new MemoryCache(new MemoryCacheOptions());
-
-    private readonly MemoryCacheEntryOptions _memoryCacheEntryOptions =
-        new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromDays(1));
 
     public async Task<(IImmichFrameLogic, AssetResponseDto)?> GetNextAsset(IList<IImmichFrameLogic> accounts)
     {
-        var (weights, sum) = await GetWeights(accounts);
-        var randomNumber = _random.Next(sum);
-        var selectedIndex = accounts.Count - 1;
+        var chosen = await accounts.ChooseOne(logic => logic.GetTotalAssets());
 
-        for (var i = 0; i < accounts.Count; i++)
-        {
-            randomNumber -= weights[i];
-            if (randomNumber <= 0)
-            {
-                selectedIndex = i;
-                break;
-            }
-        }
-
-        var asset = await accounts[selectedIndex].GetNextAsset();
+        var asset = await chosen.GetNextAsset();
         if (asset != null)
         {
-            return (accounts[selectedIndex], asset);
+            return (chosen, asset);
         }
-        else
-        {
-            return null;
-        }
+
+        return null;
     }
 
-    private async Task<(IList<int>, int)> GetWeights(IList<IImmichFrameLogic> accounts)
+    private async Task<(IList<long>, long)> GetWeights(IList<IImmichFrameLogic> accounts)
     {
-        var weights = await Task.WhenAll(accounts.Select(a => GetTotalForAccount(a)));
+        var weights = await Task.WhenAll(accounts.Select(GetTotalForAccount));
         return (weights, weights.Sum());
     }
 
@@ -53,10 +33,9 @@ public class TotalAccountImagesSelectionStrategy : IAccountSelectionStrategy
         return totals.Select(t => (double)t / sum).ToList();
     }
 
-    private Task<int> GetTotalForAccount(IImmichFrameLogic account)
+    private Task<long> GetTotalForAccount(IImmichFrameLogic account)
     {
-        return _accountToTotal.GetOrCreateAsync(account, async entry => (await account.GetAssetStats()).Images,
-            _memoryCacheEntryOptions);
+        return account.GetTotalAssets();
     }
 
     public async Task<(IImmichFrameLogic account, IEnumerable<AssetResponseDto>)[]> GetAssets(
