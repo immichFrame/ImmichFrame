@@ -2,9 +2,9 @@ using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
 
-namespace ImmichFrame.Core.Logic.Pool;
+namespace ImmichFrame.Core.Logic.Pool.Preload;
 
-public class AlbumAssetsPool(ApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings) : CachingApiAssetsPool(apiCache, immichApi, accountSettings)
+public class AlbumAssetsPreloadPool(ApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings) : PreloadedAssetsPool(apiCache, immichApi, accountSettings)
 {
     protected override async Task<IEnumerable<AssetResponseDto>> LoadAssets(CancellationToken ct = default)
     {

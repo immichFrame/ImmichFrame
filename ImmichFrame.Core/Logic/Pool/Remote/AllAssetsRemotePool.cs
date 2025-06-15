@@ -1,14 +1,14 @@
 using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Interfaces;
 
-namespace ImmichFrame.Core.Logic.Pool;
+namespace ImmichFrame.Core.Logic.Pool.Preload;
 
-public class AllAssetsPool(ApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings) : IAssetPool
+public class AllAssetsRemotePool(ApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings) : IAssetPool
 {
     public async Task<long> GetAssetCount(CancellationToken ct = default)
     {
         //Retrieve total images count (unfiltered); will update to query filtered stats from Immich
-        return (await apiCache.GetOrAddAsync(nameof(AllAssetsPool),
+        return (await apiCache.GetOrAddAsync(nameof(AllAssetsRemotePool),
             () => immichApi.GetAssetStatisticsAsync(null, false, null, ct))).Images;
     }
     

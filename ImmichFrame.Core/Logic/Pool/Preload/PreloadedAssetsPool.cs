@@ -1,17 +1,17 @@
 using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Interfaces;
 
-namespace ImmichFrame.Core.Logic.Pool;
+namespace ImmichFrame.Core.Logic.Pool.Preload;
 
-public abstract class CachingApiAssetsPool(ApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings) : IAssetPool
+public abstract class PreloadedAssetsPool(ApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings) : IAssetPool
 {
     private readonly Random _random = new();
-    
+
     public async Task<long> GetAssetCount(CancellationToken ct = default)
     {
         return (await AllAssets(ct)).Count();
     }
-    
+
     public async Task<IEnumerable<AssetResponseDto>> GetAssets(int requested, CancellationToken ct = default)
     {
         return (await AllAssets(ct)).OrderBy(_ => _random.Next()).Take(requested);
@@ -47,9 +47,33 @@ public abstract class CachingApiAssetsPool(ApiCache apiCache, ImmichApi immichAp
         {
             assets = assets.Where(x => x.ExifInfo.Rating == rating);
         }
-        
+
         return assets;
     }
-        
+
+    protected async Task<IEnumerable<AssetResponseDto>> LoadAssetsFromMetadataSearch(MetadataSearchDto query, CancellationToken ct = default)
+    {
+        var assets = new List<AssetResponseDto>();
+
+        query.Type = AssetTypeEnum.IMAGE;
+
+        int page = 1;
+        int batchSize = 1000;
+        int total;
+        do
+        {
+            query.Page = page;
+            query.Size = batchSize;
+
+            var results = await immichApi.SearchAssetsAsync(query, ct);
+
+            total = results.Assets.Total;
+            assets.AddRange(results.Assets.Items);
+            page++;
+        } while (total == batchSize);
+
+        return assets;
+    }
+
     protected abstract Task<IEnumerable<AssetResponseDto>> LoadAssets(CancellationToken ct = default);
 }

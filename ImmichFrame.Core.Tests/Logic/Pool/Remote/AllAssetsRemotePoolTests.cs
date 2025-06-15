@@ -8,16 +8,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
+using ImmichFrame.Core.Logic.Pool.Preload;
 
-namespace ImmichFrame.Core.Tests.Logic.Pool;
+namespace ImmichFrame.Core.Tests.Logic.Pool.Preload;
 
 [TestFixture]
-public class AllAssetsPoolTests
+public class AllAssetsRemotePoolTests
 {
     private Mock<ApiCache> _mockApiCache;
     private Mock<ImmichApi> _mockImmichApi;
     private Mock<IAccountSettings> _mockAccountSettings;
-    private AllAssetsPool _allAssetsPool;
+    private AllAssetsRemotePool _allAssetsPool;
 
     [SetUp]
     public void Setup()
@@ -25,7 +26,7 @@ public class AllAssetsPoolTests
         _mockApiCache = new Mock<ApiCache>(null);
         _mockImmichApi = new Mock<ImmichApi>(null, null);
         _mockAccountSettings = new Mock<IAccountSettings>();
-        _allAssetsPool = new AllAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
+        _allAssetsPool = new AllAssetsRemotePool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
 
         // Default account settings
         _mockAccountSettings.SetupGet(s => s.ShowArchived).Returns(false);
@@ -63,7 +64,7 @@ public class AllAssetsPoolTests
         // Assert
         Assert.That(count, Is.EqualTo(100));
         _mockImmichApi.Verify(api => api.GetAssetStatisticsAsync(null, false, null, It.IsAny<CancellationToken>()), Times.Once);
-        _mockApiCache.Verify(cache => cache.GetOrAddAsync(nameof(AllAssetsPool), It.IsAny<Func<Task<AssetStatsResponseDto>>>()), Times.Once);
+        _mockApiCache.Verify(cache => cache.GetOrAddAsync(nameof(AllAssetsRemotePool), It.IsAny<Func<Task<AssetStatsResponseDto>>>()), Times.Once);
     }
 
     [Test]

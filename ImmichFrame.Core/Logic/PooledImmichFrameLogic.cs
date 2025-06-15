@@ -3,6 +3,7 @@ using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.Core.Logic.Pool;
+using ImmichFrame.Core.Logic.Pool.Preload;
 
 namespace ImmichFrame.Core.Logic;
 
@@ -14,7 +15,7 @@ public class PooledImmichFrameLogic : IImmichFrameLogic
     private readonly ImmichApi _immichApi;
     private readonly string _downloadLocation = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ImageCache");
 
-    public PooledImmichFrameLogic(IAccountSettings accountSettings, IGeneralSettings generalSettings)
+    public PooledImmichFrameLogic(IAccountSettings accountSettings, IGeneralSettings generalSettings, IAssetPoolFactory assetPoolFactory)
     {
         _generalSettings = generalSettings;
 
@@ -22,31 +23,7 @@ public class PooledImmichFrameLogic : IImmichFrameLogic
         httpClient.UseApiKey(accountSettings.ApiKey);
         _immichApi = new ImmichApi(accountSettings.ImmichServerUrl, httpClient);
         _apiCache = new ApiCache(TimeSpan.FromHours(generalSettings.RefreshAlbumPeopleInterval));
-        _pool = BuildPool(accountSettings);
-    }
-
-    private IAssetPool BuildPool(IAccountSettings accountSettings)
-    {
-        if (!accountSettings.ShowFavorites && !accountSettings.ShowMemories && !accountSettings.Albums.Any() && !accountSettings.People.Any())
-        {
-            return new AllAssetsPool(_apiCache, _immichApi, accountSettings);
-        }
-
-        var pools = new List<IAssetPool>();
-
-        if (accountSettings.ShowFavorites)
-            pools.Add(new FavoriteAssetsPool(_apiCache, _immichApi, accountSettings));
-
-        if (accountSettings.ShowMemories)
-            pools.Add(new MemoryAssetsPool(_apiCache, _immichApi, accountSettings));
-
-        if (accountSettings.Albums.Any())
-            pools.Add(new AlbumAssetsPool(_apiCache, _immichApi, accountSettings));
-
-        if (accountSettings.People.Any())
-            pools.Add(new PersonAssetsPool(_apiCache, _immichApi, accountSettings));
-
-        return new MultiAssetPool(pools);
+        _pool = assetPoolFactory.BuildPool(accountSettings, _apiCache, _immichApi);
     }
 
     public async Task<AssetResponseDto?> GetNextAsset()

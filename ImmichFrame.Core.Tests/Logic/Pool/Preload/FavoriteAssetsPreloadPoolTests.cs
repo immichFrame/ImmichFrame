@@ -8,18 +8,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
+using ImmichFrame.Core.Logic.Pool.Preload;
 
-namespace ImmichFrame.Core.Tests.Logic.Pool;
+namespace ImmichFrame.Core.Tests.Logic.Pool.Preload;
 
 [TestFixture]
-public class FavoriteAssetsPoolTests
+public class FavoriteAssetsPreloadPoolTests
 {
     private Mock<ApiCache> _mockApiCache;
     private Mock<ImmichApi> _mockImmichApi;
     private Mock<IAccountSettings> _mockAccountSettings; // Though not directly used by LoadAssets here
     private TestableFavoriteAssetsPool _favoriteAssetsPool;
 
-    private class TestableFavoriteAssetsPool : FavoriteAssetsPool
+    private class TestableFavoriteAssetsPool : FavoriteAssetsPreloadPool
     {
         public TestableFavoriteAssetsPool(ApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings)
             : base(apiCache, immichApi, accountSettings) { }

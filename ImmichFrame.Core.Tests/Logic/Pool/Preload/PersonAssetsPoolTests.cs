@@ -8,18 +8,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
+using ImmichFrame.Core.Logic.Pool.Preload;
 
 namespace ImmichFrame.Core.Tests.Logic.Pool;
 
 [TestFixture]
-public class PersonAssetsPoolTests // Renamed from PeopleAssetsPoolTests to match class name
+public class PersonAssetsPreloadPoolTests // Renamed from PeopleAssetsPoolTests to match class name
 {
     private Mock<ApiCache> _mockApiCache;
     private Mock<ImmichApi> _mockImmichApi;
     private Mock<IAccountSettings> _mockAccountSettings;
     private TestablePersonAssetsPool _personAssetsPool;
 
-    private class TestablePersonAssetsPool : PersonAssetsPool
+    private class TestablePersonAssetsPool : PersonAssetsPreloadPool
     {
         public TestablePersonAssetsPool(ApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings)
             : base(apiCache, immichApi, accountSettings) { }

@@ -8,11 +8,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
+using ImmichFrame.Core.Logic.Pool.Preload;
 
-namespace ImmichFrame.Core.Tests.Logic.Pool;
+namespace ImmichFrame.Core.Tests.Logic.Pool.Preload;
 
 [TestFixture]
-public class AlbumAssetsPoolTests
+public class AlbumAssetsPreloadPoolTests
 {
     private Mock<ApiCache> _mockApiCache;
     private Mock<ImmichApi> _mockImmichApi;
@@ -20,7 +21,7 @@ public class AlbumAssetsPoolTests
     private TestableAlbumAssetsPool _albumAssetsPool;
 
     private class TestableAlbumAssetsPool(ApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings)
-        : AlbumAssetsPool(apiCache, immichApi, accountSettings)
+        : AlbumAssetsPreloadPool(apiCache, immichApi, accountSettings)
     {
         // Expose LoadAssets for testing
         public Task<IEnumerable<AssetResponseDto>> TestLoadAssets(CancellationToken ct = default) => base.LoadAssets(ct);

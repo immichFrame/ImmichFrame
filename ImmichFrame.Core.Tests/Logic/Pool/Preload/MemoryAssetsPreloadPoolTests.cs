@@ -8,16 +8,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
+using ImmichFrame.Core.Logic.Pool.Preload;
 
-namespace ImmichFrame.Core.Tests.Logic.Pool;
+namespace ImmichFrame.Core.Tests.Logic.Pool.Preload;
 
 [TestFixture]
-public class MemoryAssetsPoolTests
+public class MemoryAssetsPreloadPoolTests
 {
     private Mock<ApiCache> _mockApiCache;
     private Mock<ImmichApi> _mockImmichApi;
     private Mock<IAccountSettings> _mockAccountSettings;
-    private MemoryAssetsPool _memoryAssetsPool;
+    private MemoryAssetsPreloadPool _memoryAssetsPool;
 
     [SetUp]
     public void Setup()
@@ -26,7 +27,7 @@ public class MemoryAssetsPoolTests
         _mockImmichApi = new Mock<ImmichApi>(null, null); // Base constructor requires ILogger, IHttpClientFactory, IOptions, pass null
         _mockAccountSettings = new Mock<IAccountSettings>();
 
-        _memoryAssetsPool = new MemoryAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
+        _memoryAssetsPool = new MemoryAssetsPreloadPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
     }
 
     private List<AssetResponseDto> CreateSampleAssets(int count, bool withExif, int yearCreated)
@@ -158,7 +159,7 @@ public class MemoryAssetsPoolTests
             _mockApiCache = new Mock<ApiCache>(null);
             _mockApiCache.Setup(c => c.GetOrAddAsync<IEnumerable<AssetResponseDto>>(It.IsAny<string>(), It.IsAny<Func<Task<IEnumerable<AssetResponseDto>>>>()))
                          .Returns<string, Func<Task<IEnumerable<AssetResponseDto>>>>(async (key, factory) => await factory());
-            _memoryAssetsPool = new MemoryAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
+            _memoryAssetsPool = new MemoryAssetsPreloadPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
 
 
             // Act
