@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
-using System.Threading.Tasks;
 
 public class ImmichFrameAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
@@ -18,7 +17,7 @@ public class ImmichFrameAuthenticationHandler : AuthenticationHandler<Authentica
         IServerSettings settings)
         : base(options, logger, encoder)
     {
-        this._authenticationSecret = settings.GeneralSettings.AuthenticationSecret;
+        _authenticationSecret = settings.GeneralSettings.AuthenticationSecret;
     }
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
