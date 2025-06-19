@@ -31,7 +31,6 @@ public class GeneralSettings : IGeneralSettings, IConfigSettable
     public string Language { get; set; } = "en";
     public string? ImageLocationFormat { get; set; } = "City,State,Country";
     public string? PhotoDateFormat { get; set; } = "MM/dd/yyyy";
-    public string Margin { get; set; } = "0,0,0,0";
     public int Interval { get; set; } = 45;
     public double TransitionDuration { get; set; } = 1;
     public bool ShowClock { get; set; } = true;
@@ -77,6 +76,4 @@ public class ServerAccountSettings : IAccountSettings, IConfigSettable
     public List<Guid> ExcludedAlbums { get; set; } = new();
     public List<Guid> People { get; set; } = new();
     public int? Rating { get; set; }
-
-    public string ImmichFrameAlbumName { get; set; } = string.Empty;
 }

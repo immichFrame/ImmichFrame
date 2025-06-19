@@ -185,7 +185,6 @@ export type IAppointment = {
     location?: string | null;
 };
 export type ClientSettingsDto = {
-    margin?: string | null;
     interval?: number;
     transitionDuration?: number;
     downloadImages?: boolean;

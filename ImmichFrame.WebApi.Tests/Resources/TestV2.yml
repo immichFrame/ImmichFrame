@@ -13,7 +13,6 @@ General:
   WeatherLatLong: WeatherLatLong_TEST
   Language: Language_TEST
   Webhook: Webhook_TEST
-  Margin: Margin_TEST
   Interval: 7
   TransitionDuration: 7.7
   ShowClock: true
@@ -50,7 +49,6 @@ Accounts:
   - 00000000-0000-0000-0000-000000000001
   People:
   - 00000000-0000-0000-0000-000000000001
-  ImmichFrameAlbumName: Account1.ImmichFrameAlbumName_TEST
 - ImmichServerUrl: Account2.ImmichServerUrl_TEST
   ApiKey: Account2.ApiKey_TEST
   ImagesFromDate: '2020-01-02'
@@ -66,4 +64,3 @@ Accounts:
   - 00000000-0000-0000-0000-000000000001
   People:
   - 00000000-0000-0000-0000-000000000001
-  ImmichFrameAlbumName: Account2.ImmichFrameAlbumName_TEST
