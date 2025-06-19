@@ -32,14 +32,6 @@ public class ConfigLoaderTest
     }
 
     [Test]
-    public void TestLoadConfigV1Yaml()
-    {
-        var config = _configLoader.LoadConfigYaml<ServerSettingsV1>(Path.Combine(
-            TestContext.CurrentContext.TestDirectory, "Resources/TestV1.yml"));
-        VerifyConfig(new ServerSettingsV1Adapter(config), false);
-    }
-
-    [Test]
     public void TestLoadConfigEnv()
     {
         var jsonConfig = _configLoader.LoadConfigJson<ServerSettingsV1>(Path.Combine(

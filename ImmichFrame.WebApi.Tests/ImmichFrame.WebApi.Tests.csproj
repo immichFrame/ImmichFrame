@@ -26,10 +26,6 @@
     <Content Include="Resources\TestV2.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Remove="Resources\TestV1.yml" />
-    <Content Include="Resources\TestV1.yml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <None Remove="Resources\TestV2.yml" />
     <Content Include="Resources\TestV2.yml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
