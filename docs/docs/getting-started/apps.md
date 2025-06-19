@@ -108,10 +108,73 @@ ADB is often enabled on these devices by default, if it is not go to Frameo Sett
       adb uninstall com.immichframe.immichframe
       ```
   
-### Frameo WebView Update  
-Follow instructions below to update WebView to 106. This has been tested and working on Android 6.01 10.1" Frameo devices:  
+### Frameo WebView Update
+
+The basic procedure of updating the WebView installation consists of a few steps. Read through and understand them first, before you attempt any changes.
+
+To make it easier to follow, there are tested and working examples for Android 6.01 10.1" Frameo devices provided at the end. If you have one of those, you might as well skip directly to them.
+
+- Download WebView to PC from [APKMirror (WebView by Lineage)][webview-lineage]
+  - You most likely must use an APK with com.android.webview as the package name, that's why LineageOS version is recommended instead of the Google version (which is com.google.android.webview)
+  - You must use a version that is compatible with your Android version
+  - You must use a version that is compatible with your device's architecture
+- Find the current WebView APK on your device
+  ```shell
+  adb shell pm path com.android.webview
+  ```
+  might return something like `/system/app/webview/webview.apk` or `/product/app/webview/webview.apk`
+- Rename downloaded APK to match the original one (compare with output of the command above)
+  ```
+  mv downloaded-webview.apk webview.apk
+  ```
+- Push new apk to sdcard
+  ```shell
+  adb push /path/to/your/new/webview.apk /sdcard/
+  ```
+- Enter root shell
+  ```shell
+  adb shell su
+  ```
+- Mount the correct partition as read-write. Replace `/partition` with the first path of the original WebView APK on your device
+  ```shell
+  adb shell mount -o rw,remount /partition
+  ```
+- Backup original WebView APK
+  ```shell
+  mount -o rw,remount /partition && cp /path/to/original/webview.apk /path/to/original/webview.apk.bak
+  ```
+- Override original WebView APK with the downloaded one
+  ```shell
+  mount -o rw,remount /system && cp /sdcard/webview.apk /system/app/webview/webview.apk
+  ``` 
+- Delete the oat folder recursively 
+  - needed for Android 6.1 and most likely for all devices, where WebView is installed as a system app below `/system`
+  - might not be needed/possible if original WebView is installed for example below `/product`
+  ```shell
+  mount -o rw,remount /system && rm -rf /system/app/webview/oat
+  ```
+- Copy new WebView to system
+  ```shell
+  mount -o rw,remount /partition && cp /sdcard/webview.apk /path/to/original/webview.apk
+  ```
+- exit root
+  ```shell
+  exit
+  ```
+- Reboot device
+  ```shell
+  adb reboot
+  ```
+  This should reset the mounted /partition to read-only automatically
+- You may or may not need to also follow up with an adb install of the APK
+- Verify WebView version (optional)
+  
+  In Android developer settings, you can view the "WebView implementation". Check that this reflects the new version you pushed.
+
+#### Complete step-by-step instructions for Android 6.01
+Follow instructions below to update WebView to 106. This has been tested and working on Android 6.01 10.1" Frameo devices:
 - Download WebView 106 to PC:
-  [Lineage OS WebView 106-0-5249-126-12][webview-update]
+  [Lineage OS WebView 106-0-5249-126-12][webview-lineage-106]
 - Push new apk to sdcard
   ```shell
   adb push /path/to/your/new/webview.apk /sdcard/
@@ -128,7 +191,7 @@ Follow instructions below to update WebView to 106. This has been tested and wor
   ```shell
   mount -o rw,remount /system && rm -rf /system/app/webview/oat
   ```
-- Copy new WebView to system    
+- Copy new WebView to system
   ```shell
   mount -o rw,remount /system && cp /sdcard/webview.apk /system/app/webview/webview.apk
   ```
@@ -140,6 +203,8 @@ Follow instructions below to update WebView to 106. This has been tested and wor
   ```shell
   adb reboot
   ```
+
+
 ### Desktop (Windows, MacOS, Linux)
 
 Get the latest Desktop-App from the [GitHub Releases][releases-url]-Page.
@@ -174,5 +239,6 @@ The screen is configured in a 3x3 gird. You can touch or click:
 [app-store-link]: https://apps.apple.com/us/app/immichframe/id6742748077
 [releases-url]: https://github.com/3rob3/ImmichFrame/releases/latest
 [ADB-link]: https://www.xda-developers.com/install-adb-windows-macos-linux/
-[webview-update]: https://www.apkmirror.com/apk/lineageos/android-system-webview-2/android-system-webview-2-106-0-5249-126-release/android-system-webview-106-0-5249-126-12-android-apk-download/
+[webview-lineage]: https://www.apkmirror.com/apk/lineageos/android-system-webview-2/
+[webview-lineage-106]: https://www.apkmirror.com/apk/lineageos/android-system-webview-2/android-system-webview-2-106-0-5249-126-release/android-system-webview-106-0-5249-126-12-android-apk-download/
 [setting-androidtv-screensaver]: https://youtu.be/m3Arh-hrWks
