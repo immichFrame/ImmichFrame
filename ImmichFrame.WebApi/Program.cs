@@ -3,6 +3,7 @@ using ImmichFrame.Core.Interfaces;
 using ImmichFrame.WebApi.Models;
 using Microsoft.AspNetCore.Authentication;
 using System.Reflection;
+using System.Text.Json.Serialization.Metadata;
 using ImmichFrame.Core.Logic;
 using ImmichFrame.Core.Logic.AccountSelection;
 using ImmichFrame.WebApi.Helpers;
@@ -62,7 +63,7 @@ builder.Services.AddSingleton<IAccountSelectionStrategy, TotalAccountImagesSelec
 builder.Services.AddTransient<Func<IAccountSettings, IImmichFrameLogic>>(srv => account => ActivatorUtilities.CreateInstance<PooledImmichFrameLogic>(srv, account));
 builder.Services.AddSingleton<IImmichFrameLogic, MultiImmichFrameLogicDelegate>();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options => { options.JsonSerializerOptions.TypeInfoResolver = IGeneralSettings.TypeInfoResolver; });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

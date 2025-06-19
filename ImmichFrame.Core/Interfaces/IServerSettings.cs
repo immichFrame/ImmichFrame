@@ -1,4 +1,9 @@
-﻿namespace ImmichFrame.Core.Interfaces
+﻿using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
+
+namespace ImmichFrame.Core.Interfaces
 {
     public interface IServerSettings
     {
@@ -58,5 +63,37 @@
         public bool ImageFill { get; }
         public string Layout { get; }
         public string Language { get; }
+
+        /// <summary>
+        /// This TypeResolver is here to prevent serialization of AuthenticationSecret.
+        ///
+        /// It must be registered with the serializer.
+        /// </summary>
+        [JsonIgnore]
+        public static IJsonTypeInfoResolver TypeInfoResolver
+        {
+            get
+            {
+                var defaultResolver = new DefaultJsonTypeInfoResolver();
+
+                defaultResolver.Modifiers.Add(typeInfo =>
+                {
+                    if (!typeof(IGeneralSettings).IsAssignableFrom(typeInfo.Type)) return;
+
+                    typeInfo.Properties.ToList().ForEach(prop =>
+                    {
+                        if (prop.AttributeProvider is PropertyInfo property)
+                        {
+                            if (property.Name == nameof(AuthenticationSecret))
+                            {
+                                prop.ShouldSerialize = (_, _) => false;
+                            }
+                        }
+                    });
+                });
+
+                return defaultResolver;
+            }
+        }
     }
 }
