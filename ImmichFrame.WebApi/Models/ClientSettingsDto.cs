@@ -4,7 +4,6 @@ namespace ImmichFrame.WebApi.Models;
 
 public class ClientSettingsDto
 {
-    public string Margin { get; set; }
     public int Interval { get; set; }
     public double TransitionDuration { get; set; }
     public bool DownloadImages { get; set; }
@@ -34,7 +33,6 @@ public class ClientSettingsDto
     public static ClientSettingsDto FromGeneralSettings(IGeneralSettings generalSettings)
     {
         ClientSettingsDto dto = new ClientSettingsDto();
-        dto.Margin = generalSettings.Margin;
         dto.Interval = generalSettings.Interval;
         dto.TransitionDuration = generalSettings.TransitionDuration;
         dto.DownloadImages = generalSettings.DownloadImages;

@@ -1,14 +1,30 @@
 ---
 sidebar_position: 2
 ---
+
 # 🐋 Docker Setup [Docker Compose]
 
-### Docker Compose
+This guide shows how to start **ImmichFrame** using Docker Compose.
 
-An example of the Settings.json can be found [here][example-json].
+---
 
-:::warning
-Change `PATH/TO/CONFIG` to the correct path!
+## Configuration Files
+
+:::tip Recommended
+For most users, the `Settings.yml` setup is easier to read and modify.
+:::
+
+Example configuration files:
+
+- [`Settings.yml` example][example-yaml]
+- [`Settings.json` example][example-json]
+
+---
+
+## Docker Compose Example
+
+:::warning Important
+Replace `PATH/TO/CONFIG` with the actual path to your config folder!
 :::
 
 ```yaml
@@ -28,4 +44,5 @@ services:
 
 [github-root]: https://github.com/immichframe/ImmichFrame/blob/main
 [example-json]: https://github.com/immichframe/ImmichFrame/blob/main/docker/Settings.example.json
+[example-yaml]: https://github.com/immichframe/ImmichFrame/blob/main/docker/Settings.example.yml
 [example-env]: https://github.com/immichframe/ImmichFrame/blob/main/docker/example.env
