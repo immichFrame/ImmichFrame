@@ -2,7 +2,7 @@
 sidebar_position: 2
 ---
 
-# 🐋 Docker Setup (Docker Compose)
+# 🐋 Docker Setup [Docker Compose]
 
 This guide shows how to start **ImmichFrame** using Docker Compose.
 
