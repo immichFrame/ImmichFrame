@@ -4,6 +4,9 @@
 dev:
 	dotnet run --project ./ImmichFrame.WebApi
 
+test:
+	dotnet test ./ImmichFrame.WebApi.Tests/ImmichFrame.WebApi.Tests.csproj
+
 docs:
 	npm --prefix docs run start
 

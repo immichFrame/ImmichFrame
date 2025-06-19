@@ -47,9 +47,9 @@ builder.Services.AddLogging(builder =>
 
 
 // Setup Config
-var settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config", "Settings.json");
+var configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config");
 builder.Services.AddTransient<ConfigLoader>();
-builder.Services.AddSingleton<IServerSettings>(srv => srv.GetRequiredService<ConfigLoader>().LoadConfig(settingsPath));
+builder.Services.AddSingleton<IServerSettings>(srv => srv.GetRequiredService<ConfigLoader>().LoadConfig(configPath));
 
 // Register sub-settings
 builder.Services.AddSingleton<IGeneralSettings>(srv => srv.GetRequiredService<IServerSettings>().GeneralSettings);
