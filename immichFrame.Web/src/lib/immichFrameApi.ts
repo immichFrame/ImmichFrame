@@ -184,8 +184,7 @@ export type IAppointment = {
     description?: string | null;
     location?: string | null;
 };
-export type WebClientSettings = {
-    immichServerUrl?: string | null;
+export type ClientSettingsDto = {
     margin?: string | null;
     interval?: number;
     transitionDuration?: number;
@@ -193,8 +192,8 @@ export type WebClientSettings = {
     renewImagesDuration?: number;
     showClock?: boolean;
     clockFormat?: string | null;
-    showProgressBar?: boolean;
     showPhotoDate?: boolean;
+    showProgressBar?: boolean;
     photoDateFormat?: string | null;
     showImageDesc?: boolean;
     showPeopleDesc?: boolean;
@@ -298,7 +297,7 @@ export function getConfig({ clientIdentifier }: {
 } = {}, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
         status: 200;
-        data: WebClientSettings;
+        data: ClientSettingsDto;
     }>(`/api/Config${QS.query(QS.explode({
         clientIdentifier
     }))}`, {

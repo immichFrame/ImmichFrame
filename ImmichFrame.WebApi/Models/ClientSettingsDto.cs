@@ -12,6 +12,7 @@ public class ClientSettingsDto
     public bool ShowClock { get; set; }
     public string? ClockFormat { get; set; }
     public bool ShowPhotoDate { get; set; }
+    public bool ShowProgressBar { get; set; }
     public string? PhotoDateFormat { get; set; }
     public bool ShowImageDesc { get; set; }
     public bool ShowPeopleDesc { get; set; }
@@ -25,6 +26,7 @@ public class ClientSettingsDto
     public bool ShowWeatherDescription { get; set; }
     public bool UnattendedMode { get; set; }
     public bool ImageZoom { get; set; }
+    public bool ImagePan { get; set; }
     public bool ImageFill { get; set; }
     public string Layout { get; set; }
     public string Language { get; set; }
@@ -40,6 +42,7 @@ public class ClientSettingsDto
         dto.ShowClock = generalSettings.ShowClock;
         dto.ClockFormat = generalSettings.ClockFormat;
         dto.ShowPhotoDate = generalSettings.ShowPhotoDate;
+        dto.ShowProgressBar = generalSettings.ShowProgressBar;
         dto.PhotoDateFormat = generalSettings.PhotoDateFormat;
         dto.ShowImageDesc = generalSettings.ShowImageDesc;
         dto.ShowPeopleDesc = generalSettings.ShowPeopleDesc;
@@ -53,6 +56,7 @@ public class ClientSettingsDto
         dto.ShowWeatherDescription = generalSettings.ShowWeatherDescription;
         dto.UnattendedMode = generalSettings.UnattendedMode;
         dto.ImageZoom = generalSettings.ImageZoom;
+        dto.ImagePan = generalSettings.ImagePan;
         dto.ImageFill = generalSettings.ImageFill;
         dto.Layout = generalSettings.Layout;
         dto.Language = generalSettings.Language;

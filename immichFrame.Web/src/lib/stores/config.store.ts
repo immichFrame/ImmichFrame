@@ -1,10 +1,10 @@
-import type { WebClientSettings } from '$lib/immichFrameApi';
+import type { ClientSettingsDto } from '$lib/immichFrameApi';
 import { writable } from 'svelte/store';
 
-function createConfigStore(settings: WebClientSettings) {
+function createConfigStore(settings: ClientSettingsDto) {
   const { subscribe, set } = writable(settings);
 
-  function ps(settings: WebClientSettings) {
+  function ps(settings: ClientSettingsDto) {
     set(settings);
   }
 

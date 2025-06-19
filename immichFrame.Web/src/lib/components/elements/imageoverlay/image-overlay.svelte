@@ -15,7 +15,6 @@
 	} from '@mdi/js';
 	import OverlayItem from './overlay-item.svelte';
 	import OverlayQr from './overlay-qr.svelte';
-	import { configStore } from '$lib/stores/config.store';
 	import Icon from '../icon.svelte';
 	import { getContext } from 'svelte';
 
@@ -84,7 +83,8 @@
 				{/if}
 			</div>
 
-			<OverlayQr baseUrl={$configStore.immichServerUrl ?? ''} id={asset.id} />
+			<!-- TODO: Fix -->
+			<OverlayQr baseUrl={''} id={asset.id} />
 		</div>
 	</div>
 </div>
