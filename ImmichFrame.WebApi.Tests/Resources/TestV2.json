@@ -14,7 +14,6 @@
     "WeatherLatLong": "WeatherLatLong_TEST",
     "Language": "Language_TEST",
     "Webhook": "Webhook_TEST",
-    "Margin": "Margin_TEST",
     "Interval": 7,
     "TransitionDuration": 7.7,
     "ShowClock": true,
@@ -55,8 +54,7 @@
       ],
       "People": [
         "00000000-0000-0000-0000-000000000001"
-      ],
-      "ImmichFrameAlbumName": "Account1.ImmichFrameAlbumName_TEST"
+      ]
     },
     {
       "ImmichServerUrl": "Account2.ImmichServerUrl_TEST",
@@ -76,8 +74,7 @@
       ],
       "People": [
         "00000000-0000-0000-0000-000000000001"
-      ],
-      "ImmichFrameAlbumName": "Account2.ImmichFrameAlbumName_TEST"
+      ]
     }
   ]
 }

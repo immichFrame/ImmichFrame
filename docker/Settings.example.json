@@ -3,7 +3,9 @@
     "AuthenticationSecret": null,
     "DownloadImages": false,
     "RenewImagesDuration": 30,
-    "Webcalendars": [],
+    "Webcalendars": [
+      "calendarurl"
+    ],
     "RefreshAlbumPeopleInterval": 12,
     "PhotoDateFormat": "MM/dd/yyyy",
     "ImageLocationFormat": "City,State,Country",
@@ -12,7 +14,6 @@
     "WeatherLatLong": "40.730610,-73.935242",
     "Webhook": null,
     "Language": "en",
-    "Margin": "0,0,0,0",
     "Interval": 45,
     "TransitionDuration": 2,
     "ShowClock": true,
@@ -45,9 +46,15 @@
       "ImagesFromDays": null,
       "ImagesUntilDate": "2020-01-02",
       "Rating": null,
-      "Albums": [],
-      "ExcludedAlbums": [],
-      "People": []
+      "Albums": [
+        "UUID"
+      ],
+      "ExcludedAlbums": [
+        "UUID"
+      ],
+      "People": [
+        "UUID"
+      ]
     }
   ]
 }

@@ -23,14 +23,12 @@ public class ServerSettingsV1 : IConfigSettable
     public int? Rating { get; set; }
     public List<string> Webcalendars { get; set; } = new List<string>();
     public int RefreshAlbumPeopleInterval { get; set; } = 12;
-    public string ImmichFrameAlbumName { get; set; } = string.Empty;
     public string? WeatherApiKey { get; set; } = string.Empty;
     public string? UnitSystem { get; set; } = "imperial";
     public string? WeatherLatLong { get; set; } = "40.7128,74.0060";
     public string Language { get; set; } = "en";
     public string? Webhook { get; set; }
     public string? AuthenticationSecret { get; set; }
-    public string Margin { get; set; } = "0,0,0,0";
     public int Interval { get; set; } = 45;
     public double TransitionDuration { get; set; } = 1;
     public bool ShowClock { get; set; } = true;
@@ -79,7 +77,6 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
         public List<Guid> ExcludedAlbums => _delegate.ExcludedAlbums;
         public List<Guid> People => _delegate.People;
         public int? Rating => _delegate.Rating;
-        public string ImmichFrameAlbumName => _delegate.ImmichFrameAlbumName;
     }
 
     class GeneralSettingsV1Adapter(ServerSettingsV1 _delegate) : IGeneralSettings
@@ -91,7 +88,6 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
         public string? UnitSystem => _delegate.UnitSystem;
         public string? Webhook => _delegate.Webhook;
         public string? AuthenticationSecret => _delegate.AuthenticationSecret;
-        public string Margin => _delegate.Margin;
         public int Interval => _delegate.Interval;
         public double TransitionDuration => _delegate.TransitionDuration;
         public bool DownloadImages => _delegate.DownloadImages;
