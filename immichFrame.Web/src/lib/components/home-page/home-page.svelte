@@ -122,19 +122,26 @@
 		try {
 			let assetRequest = await api.getAsset();
 
-			if (assetRequest.status != 200) {
-				if (assetRequest.status == 401) {
+			if (assetRequest.status !== 200) {
+				if (assetRequest.status === 401) {
 					authError = true;
+					error = true;
+					return; // stop retrying on auth error
 				}
 				error = true;
+			} else {
+				error = false;
+				assetBacklog = assetRequest.data;
 				return;
 			}
-
-			error = false;
-			assetBacklog = assetRequest.data;
 		} catch {
 			error = true;
 		}
+
+		// Retry after 3 seconds
+		setTimeout(() => {
+			loadAssets();
+		}, 3000);
 	}
 
 	const handleDone = async (previous: boolean = false, instant: boolean = false) => {
