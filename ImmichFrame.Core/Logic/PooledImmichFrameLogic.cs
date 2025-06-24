@@ -123,7 +123,8 @@ public class PooledImmichFrameLogic : IImmichFrameLogic
         return (fileName, contentType, data.Stream);
     }
 
-
     public Task SendWebhookNotification(IWebhookNotification notification) =>
         WebhookHelper.SendWebhookNotification(notification, _generalSettings.Webhook);
+
+    public override string ToString() => $"Account Pool [{_immichApi.BaseUrl}]";
 }
