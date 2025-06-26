@@ -32,6 +32,8 @@ public class FavoriteAssetsPool(ApiCache apiCache, ImmichApi immichApi, IAccount
             page++;
         } while (total == batchSize);
 
+        favoriteAssets.ForEach(t => t.ImmichSourceUrl = accountSettings.ImmichServerUrl);
+
         return favoriteAssets;
     }
 }

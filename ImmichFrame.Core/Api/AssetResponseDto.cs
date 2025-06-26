@@ -9,6 +9,8 @@ namespace ImmichFrame.Core.Api
         [JsonIgnore]
         public Stream? ThumbhashImage => GetThumbHashStream();
 
+        public string ImmichSourceUrl { get; set; } = string.Empty;
+
         private Stream? GetThumbHashStream()
         {
             if (this.Thumbhash == null)

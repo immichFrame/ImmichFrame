@@ -24,6 +24,8 @@ public class AlbumAssetsPool(ApiCache apiCache, ImmichApi immichApi, IAccountSet
             albumAssets.AddRange(albumInfo.Assets);
         }
 
+        albumAssets.ForEach(t => t.ImmichSourceUrl = accountSettings.ImmichServerUrl);
+
         return albumAssets.WhereExcludes(excludedAlbumAssets, t => t.Id);
     }
 }

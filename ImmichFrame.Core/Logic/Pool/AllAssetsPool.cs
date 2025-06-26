@@ -11,7 +11,7 @@ public class AllAssetsPool(ApiCache apiCache, ImmichApi immichApi, IAccountSetti
         return (await apiCache.GetOrAddAsync(nameof(AllAssetsPool),
             () => immichApi.GetAssetStatisticsAsync(null, false, null, ct))).Images;
     }
-    
+
     public async Task<IEnumerable<AssetResponseDto>> GetAssets(int requested, CancellationToken ct = default)
     {
         var searchDto = new RandomSearchDto
@@ -57,6 +57,8 @@ public class AllAssetsPool(ApiCache apiCache, ImmichApi immichApi, IAccountSetti
             assets = assets.Where(x => !excludedAssetSet.Contains(x.Id)).ToList();
         }
 
+        assets.ToList().ForEach(t => t.ImmichSourceUrl = accountSettings.ImmichServerUrl);
+
         return assets;
     }
 
@@ -71,8 +73,8 @@ public class AllAssetsPool(ApiCache apiCache, ImmichApi immichApi, IAccountSetti
 
             excludedAlbumAssets.AddRange(albumInfo.Assets);
         }
-        
+
         return excludedAlbumAssets;
     }
-    
+
 }
