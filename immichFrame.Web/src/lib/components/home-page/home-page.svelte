@@ -118,30 +118,39 @@
 		}
 	}
 
-	async function loadAssets() {
-		try {
-			let assetRequest = await api.getAsset();
+	async function loadAssets(retryCount = 0) {
+		if (retryCount >= 44) {
+			// max retries reached after ~2 hours
+			return;
+		}
 
-			if (assetRequest.status !== 200) {
-				if (assetRequest.status === 401) {
-					authError = true;
-					error = true;
-					return; // stop retrying on auth error
-				}
-				error = true;
-			} else {
+		try {
+			const assetRequest = await api.getAsset();
+
+			if (assetRequest.status === 200) {
 				error = false;
 				assetBacklog = assetRequest.data;
 				return;
 			}
+
+			if (assetRequest.status === 401) {
+				authError = true;
+				error = true;
+				return;
+			}
+
+			error = true;
 		} catch {
 			error = true;
 		}
 
-		// Retry after 3 seconds
+		const baseDelay = 3000;
+		const maxDelay = 180000;
+		const delay = Math.min(baseDelay * 2 ** retryCount, maxDelay);
+
 		setTimeout(() => {
-			loadAssets();
-		}, 3000);
+			loadAssets(retryCount + 1);
+		}, delay);
 	}
 
 	const handleDone = async (previous: boolean = false, instant: boolean = false) => {
