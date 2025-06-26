@@ -35,6 +35,8 @@ public class PersonAssetsPool(ApiCache apiCache, ImmichApi immichApi, IAccountSe
             } while (total == batchSize);
         }
 
+        personAssets.ForEach(t => t.ImmichSourceUrl = accountSettings.ImmichServerUrl);
+
         return personAssets;
     }
 }

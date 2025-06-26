@@ -29,6 +29,8 @@ public class MemoryAssetsPool(ApiCache apiCache, ImmichApi immichApi, IAccountSe
             memoryAssets.AddRange(assets);
         }
 
+        memoryAssets.ForEach(t => t.ImmichSourceUrl = accountSettings.ImmichServerUrl);
+
         return memoryAssets;
     }
 }
