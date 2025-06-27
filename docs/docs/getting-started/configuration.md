@@ -41,8 +41,6 @@ Defaults are below, only one account with `ImmichServerUrl` and `ApiKey` are req
     "Language": "en", // string
     //Webhook URL to be notified e.g. http://example.com/notify
     "Webhook": null, // string
-    // whether to download images to the server
-    "Margin": "0,0,0,0",
     // Image interval in seconds. How long a image is displayed in the frame.
     "Interval": 45,
     // Duration in seconds.
@@ -73,7 +71,6 @@ Defaults are below, only one account with `ImmichServerUrl` and `ApiKey` are req
     "BaseFontSize": "17px", //string
     // Displays the description of the current weather.
     "ShowWeatherDescription": true, // boolean
-    "UnattendedMode": true, // boolean
     // Zooms into or out of an image and gives it a touch of life.
     "ImageZoom": true, // boolean
     // Pans an image in a random direction and gives it a touch of life.
