@@ -7,7 +7,8 @@ sidebar_position: 2
 ### Full configuration reference:
 
 :::warning
-It is not recommended to copy this full configuration file. Only specify values that are different from the defaults. Configuration options and default values may change in future versions.
+It is not recommended to copy this full configuration file. Only specify values that are different from the defaults. Configuration options and default values may change in future versions.  
+Make sure to remove any comments, inlcuding comments after the data, as JSON does not natively support them. Failure to do so will result in errors.
 :::
 
 Defaults are below, only one account with `ImmichServerUrl` and `ApiKey` are required.
