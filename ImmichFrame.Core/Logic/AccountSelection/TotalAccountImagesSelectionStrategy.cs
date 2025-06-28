@@ -7,39 +7,37 @@ namespace ImmichFrame.Core.Logic.AccountSelection;
 
 public class TotalAccountImagesSelectionStrategy(ILogger<TotalAccountImagesSelectionStrategy> _logger, IAssetAccountTracker _tracker) : IAccountSelectionStrategy
 {
-    private IList<IImmichFrameLogic> _accounts;
+    private IList<IAccountImmichFrameLogic> _accounts;
 
-    public void Initialize(IList<IImmichFrameLogic> accounts)
+    public void Initialize(IList<IAccountImmichFrameLogic> accounts)
     {
         _accounts = accounts;
     }
 
-    public async Task<AssetResponseDto?> GetNextAsset()
+    public async Task<(IAccountImmichFrameLogic, AssetResponseDto)?> GetNextAsset()
     {
         var chosen = await _accounts.ChooseOne(logic => logic.GetTotalAssets());
         
         var asset = await chosen.GetNextAsset();
         if (asset != null)
         {
-            _logger.LogDebug("Returning next asset {id}", asset.Id);
             await _tracker.RecordAssetLocation(chosen, asset.Id);
-            return asset;
+            return (chosen, asset);
         }
         
         _logger.LogDebug("No next asset found");
         return null;
     }
 
-    private async Task<(IList<long>, long)> GetWeights(IList<IImmichFrameLogic> accounts)
+    private async Task<(IList<long>, long)> GetWeights(IList<IAccountImmichFrameLogic> accounts)
     {
         var weights = await Task.WhenAll(accounts.Select(GetTotalForAccount));
         return (weights, weights.Sum());
     }
 
-    private async Task<IList<double>> GetProportions(IList<IImmichFrameLogic> accounts)
+    private async Task<IList<double>> GetProportions(IList<IAccountImmichFrameLogic> accounts)
     {
         var (totals, sum) = await GetWeights(accounts);
-        _logger.LogDebug("Account [{}] will be split by proportion of {}", accounts, sum);
         return totals.Select(t => (double)t / sum).ToList();
     }
 
@@ -48,7 +46,7 @@ public class TotalAccountImagesSelectionStrategy(ILogger<TotalAccountImagesSelec
         return account.GetTotalAssets();
     }
 
-    public async Task<IEnumerable<AssetResponseDto>> GetAssets()
+    public async Task<IEnumerable<(IAccountImmichFrameLogic, AssetResponseDto)>> GetAssets()
     {
         var proportions = await GetProportions(_accounts);
         var maxAccount = proportions.Max();
@@ -77,13 +75,13 @@ public class TotalAccountImagesSelectionStrategy(ILogger<TotalAccountImagesSelec
             }
         }
 
-        var assets = accountAssetTupleList.SelectMany(tuple => tuple.Item2).ToList();
+        var assets = accountAssetTupleList.SelectMany(tuple => tuple.Item2.Select(asset => (tuple.account, asset))).ToList();
 
         _logger.LogDebug("Returning {count} asset(s)", assets.Count);
 
         return assets;
     }
 
-    public T ForAsset<T>(Guid assetId, Func<IImmichFrameLogic, T> f)
+    public T ForAsset<T>(Guid assetId, Func<IAccountImmichFrameLogic, T> f)
         => _tracker.ForAsset(assetId.ToString(), f);
 }

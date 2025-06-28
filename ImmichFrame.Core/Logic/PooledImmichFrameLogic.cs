@@ -6,7 +6,7 @@ using ImmichFrame.Core.Logic.Pool;
 
 namespace ImmichFrame.Core.Logic;
 
-public class PooledImmichFrameLogic : IImmichFrameLogic
+public class PooledImmichFrameLogic : IAccountImmichFrameLogic
 {
     private readonly IGeneralSettings _generalSettings;
     private readonly ApiCache _apiCache;
@@ -19,11 +19,15 @@ public class PooledImmichFrameLogic : IImmichFrameLogic
         _generalSettings = generalSettings;
 
         var httpClient = new HttpClient();
+
+        AccountSettings = accountSettings;
         httpClient.UseApiKey(accountSettings.ApiKey);
         _immichApi = new ImmichApi(accountSettings.ImmichServerUrl, httpClient);
         _apiCache = new ApiCache(TimeSpan.FromHours(generalSettings.RefreshAlbumPeopleInterval));
         _pool = BuildPool(accountSettings);
     }
+
+    public IAccountSettings AccountSettings { get; }
 
     private IAssetPool BuildPool(IAccountSettings accountSettings)
     {

@@ -3,19 +3,18 @@ using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace ImmichFrame.Core.Logic;
 
 public class MultiImmichFrameLogicDelegate : IImmichFrameLogic
 {
-    private readonly FrozenDictionary<IAccountSettings, IImmichFrameLogic> _accountToDelegate;
+    private readonly FrozenDictionary<IAccountSettings, IAccountImmichFrameLogic> _accountToDelegate;
     private readonly IServerSettings _serverSettings;
     private readonly IAccountSelectionStrategy _accountSelectionStrategy;
     private readonly ILogger<MultiImmichFrameLogicDelegate> _logger;
 
     public MultiImmichFrameLogicDelegate(IServerSettings serverSettings,
-        Func<IAccountSettings, IImmichFrameLogic> logicFactory, ILogger<MultiImmichFrameLogicDelegate> logger,
+        Func<IAccountSettings, IAccountImmichFrameLogic> logicFactory, ILogger<MultiImmichFrameLogicDelegate> logger,
         IAccountSelectionStrategy accountSelectionStrategy)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -28,15 +27,15 @@ public class MultiImmichFrameLogicDelegate : IImmichFrameLogic
         _accountSelectionStrategy.Initialize(_accountToDelegate.Values);
     }
 
-    public Task<AssetResponseDto?> GetNextAsset() => _accountSelectionStrategy.GetNextAsset();
+    public async Task<AssetResponseDto?> GetNextAsset() => (await _accountSelectionStrategy.GetNextAsset())?.ToAsset();
 
 
     public async Task<IEnumerable<AssetResponseDto>> GetAssets()
-        => (await _accountSelectionStrategy.GetAssets()).Shuffle().ToList();
+        => (await _accountSelectionStrategy.GetAssets()).Shuffle().Select(it => it.ToAsset());
 
 
     public Task<AssetResponseDto> GetAssetInfoById(Guid assetId)
-        => _accountSelectionStrategy.ForAsset(assetId, logic => logic.GetAssetInfoById(assetId));
+        => _accountSelectionStrategy.ForAsset(assetId, async logic => (await logic.GetAssetInfoById(assetId)).WithAccount(logic));
 
 
     public Task<IEnumerable<AlbumResponseDto>> GetAlbumInfoById(Guid assetId)
@@ -54,4 +53,19 @@ public class MultiImmichFrameLogicDelegate : IImmichFrameLogic
 
     public Task SendWebhookNotification(IWebhookNotification notification) =>
         WebhookHelper.SendWebhookNotification(notification, _serverSettings.GeneralSettings.Webhook);
+}
+
+public static class AccountAndAssetExtensions
+{
+    public static AssetResponseDto ToAsset(this (IAccountImmichFrameLogic, AssetResponseDto) accountAndAsset)
+    {
+        var (account, asset) = accountAndAsset;
+        return asset.WithAccount(account);
+    }
+
+    public static AssetResponseDto WithAccount(this AssetResponseDto asset, IAccountImmichFrameLogic account)
+    {
+        asset.ImmichServerUrl = account.AccountSettings.ImmichServerUrl;
+        return asset;
+    }
 }

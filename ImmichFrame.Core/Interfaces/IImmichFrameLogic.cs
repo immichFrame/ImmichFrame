@@ -1,5 +1,6 @@
 ﻿using ImmichFrame.Core.Api;
 
+
 namespace ImmichFrame.Core.Interfaces
 {
     public interface IImmichFrameLogic
@@ -12,12 +13,18 @@ namespace ImmichFrame.Core.Interfaces
         public Task<long> GetTotalAssets();
         public Task SendWebhookNotification(IWebhookNotification notification);
     }
+
+    public interface IAccountImmichFrameLogic : IImmichFrameLogic
+    {
+        public IAccountSettings AccountSettings { get; }
+
+    }
     
     public interface IAccountSelectionStrategy
     {
-        void Initialize(IList<IImmichFrameLogic> accounts);
-        Task<AssetResponseDto?> GetNextAsset();
-        Task<IEnumerable<AssetResponseDto>> GetAssets();
-        T ForAsset<T>(Guid assetId, Func<IImmichFrameLogic, T> f);
+        void Initialize(IList<IAccountImmichFrameLogic> accounts);
+        Task<(IAccountImmichFrameLogic, AssetResponseDto)?> GetNextAsset();
+        Task<IEnumerable<(IAccountImmichFrameLogic, AssetResponseDto)>> GetAssets();
+        T ForAsset<T>(Guid assetId, Func<IAccountImmichFrameLogic, T> f);
     }
 }
