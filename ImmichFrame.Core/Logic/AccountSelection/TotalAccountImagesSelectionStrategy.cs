@@ -7,9 +7,9 @@ namespace ImmichFrame.Core.Logic.AccountSelection;
 
 public class TotalAccountImagesSelectionStrategy(ILogger<TotalAccountImagesSelectionStrategy> _logger, IAssetAccountTracker _tracker) : IAccountSelectionStrategy
 {
-    private IList<IImmichFrameLogic> _accounts;
+    private IList<IAccountImmichFrameLogic> _accounts;
 
-    public void Initialize(IList<IImmichFrameLogic> accounts)
+    public void Initialize(IList<IAccountImmichFrameLogic> accounts)
     {
         _accounts = accounts;
     }
@@ -21,7 +21,7 @@ public class TotalAccountImagesSelectionStrategy(ILogger<TotalAccountImagesSelec
         var asset = await chosen.GetNextAsset();
         if (asset != null)
         {
-            _logger.LogDebug("Returning next asset {id}", asset.Id);
+            asset.ImmichServerUrl = chosen.AccountSettings.ImmichServerUrl;
             await _tracker.RecordAssetLocation(chosen, asset.Id);
             return asset;
         }
@@ -30,16 +30,15 @@ public class TotalAccountImagesSelectionStrategy(ILogger<TotalAccountImagesSelec
         return null;
     }
 
-    private async Task<(IList<long>, long)> GetWeights(IList<IImmichFrameLogic> accounts)
+    private async Task<(IList<long>, long)> GetWeights(IList<IAccountImmichFrameLogic> accounts)
     {
         var weights = await Task.WhenAll(accounts.Select(GetTotalForAccount));
         return (weights, weights.Sum());
     }
 
-    private async Task<IList<double>> GetProportions(IList<IImmichFrameLogic> accounts)
+    private async Task<IList<double>> GetProportions(IList<IAccountImmichFrameLogic> accounts)
     {
         var (totals, sum) = await GetWeights(accounts);
-        _logger.LogDebug("Account [{}] will be split by proportion of {}", accounts, sum);
         return totals.Select(t => (double)t / sum).ToList();
     }
 
@@ -71,8 +70,10 @@ public class TotalAccountImagesSelectionStrategy(ILogger<TotalAccountImagesSelec
 
         foreach (var accountAssetTuple in accountAssetTupleList)
         {
+            var account = accountAssetTuple.account;
             foreach (var asset in accountAssetTuple.Item2)
             {
+                asset.ImmichServerUrl = account.AccountSettings.ImmichServerUrl;
                 await _tracker.RecordAssetLocation(accountAssetTuple.account, asset.Id);
             }
         }
@@ -84,6 +85,6 @@ public class TotalAccountImagesSelectionStrategy(ILogger<TotalAccountImagesSelec
         return assets;
     }
 
-    public T ForAsset<T>(Guid assetId, Func<IImmichFrameLogic, T> f)
+    public T ForAsset<T>(Guid assetId, Func<IAccountImmichFrameLogic, T> f)
         => _tracker.ForAsset(assetId.ToString(), f);
 }

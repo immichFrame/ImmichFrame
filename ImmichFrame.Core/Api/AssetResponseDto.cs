@@ -8,6 +8,8 @@ namespace ImmichFrame.Core.Api
     {
         [JsonIgnore]
         public Stream? ThumbhashImage => GetThumbHashStream();
+        
+        public string ImmichServerUrl { get; set; }
 
         private Stream? GetThumbHashStream()
         {
