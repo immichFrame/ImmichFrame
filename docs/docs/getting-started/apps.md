@@ -112,7 +112,7 @@ ADB is often enabled on these devices by default, if it is not go to Frameo Sett
 
 The basic procedure of updating the WebView installation consists of a few steps. Read through and understand them first, before you attempt any changes.
 
-To make it easier to follow, there are tested and working examples for Android 6.01 10.1" Frameo devices provided at the end. If you have one of those, you might as well skip directly to them.
+There are tested and working examples for Android 6.01 10.1" Frameo devices provided at the end. If you have one of those, you might as well skip directly to them.
 
 - Download WebView to PC from [APKMirror (WebView by Lineage)][webview-lineage]
   - You most likely must use an APK with com.android.webview as the package name, that's why LineageOS version is recommended instead of the Google version (which is com.google.android.webview)
@@ -143,19 +143,15 @@ To make it easier to follow, there are tested and working examples for Android 6
   ```shell
   mount -o rw,remount /partition && cp /path/to/original/webview.apk /path/to/original/webview.apk.bak
   ```
-- Override original WebView APK with the downloaded one
-  ```shell
-  mount -o rw,remount /system && cp /sdcard/webview.apk /system/app/webview/webview.apk
-  ``` 
+- Overwrite original WebView APK with the downloaded one
+```shell
+  mount -o rw,remount /partition && cp /sdcard/webview.apk /path/to/original/webview.apk
+  ```
 - Delete the oat folder recursively 
   - needed for Android 6.1 and most likely for all devices, where WebView is installed as a system app below `/system`
-  - might not be needed/possible if original WebView is installed for example below `/product`
+  - might not be needed/possible if original WebView is installed somewhere else, for example below `/product`
   ```shell
   mount -o rw,remount /system && rm -rf /system/app/webview/oat
-  ```
-- Copy new WebView to system
-  ```shell
-  mount -o rw,remount /partition && cp /sdcard/webview.apk /path/to/original/webview.apk
   ```
 - exit root
   ```shell
@@ -203,8 +199,6 @@ Follow instructions below to update WebView to 106. This has been tested and wor
   ```shell
   adb reboot
   ```
-
-
 ### Desktop (Windows, MacOS, Linux)
 
 Get the latest Desktop-App from the [GitHub Releases][releases-url]-Page.
