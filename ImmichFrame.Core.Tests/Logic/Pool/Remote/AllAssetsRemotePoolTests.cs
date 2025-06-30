@@ -2,20 +2,14 @@ using NUnit.Framework;
 using Moq;
 using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Interfaces;
-using ImmichFrame.Core.Logic.Pool;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Threading;
-using ImmichFrame.Core.Logic.Pool.Preload;
+using ImmichFrame.Core.Logic.Pool.Remote;
 
-namespace ImmichFrame.Core.Tests.Logic.Pool.Preload;
+namespace ImmichFrame.Core.Tests.Logic.Pool.Remote;
 
 [TestFixture]
 public class AllAssetsRemotePoolTests
 {
-    private Mock<ApiCache> _mockApiCache;
+    private FixtureHelpers.ForgetfulCountingCache _fakeCache;
     private Mock<ImmichApi> _mockImmichApi;
     private Mock<IAccountSettings> _mockAccountSettings;
     private AllAssetsRemotePool _allAssetsPool;
@@ -23,10 +17,10 @@ public class AllAssetsRemotePoolTests
     [SetUp]
     public void Setup()
     {
-        _mockApiCache = new Mock<ApiCache>(null);
+        _fakeCache = new FixtureHelpers.ForgetfulCountingCache();
         _mockImmichApi = new Mock<ImmichApi>(null, null);
         _mockAccountSettings = new Mock<IAccountSettings>();
-        _allAssetsPool = new AllAssetsRemotePool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
+        _allAssetsPool = new AllAssetsRemotePool(_fakeCache, _mockImmichApi.Object, _mockAccountSettings.Object, FixtureHelpers.TestLogger<AllAssetsRemotePool>());
 
         // Default account settings
         _mockAccountSettings.SetupGet(s => s.ShowArchived).Returns(false);
@@ -35,13 +29,6 @@ public class AllAssetsRemotePoolTests
         _mockAccountSettings.SetupGet(s => s.ImagesFromDays).Returns((int?)null);
         _mockAccountSettings.SetupGet(s => s.Rating).Returns((int?)null);
         _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns(new List<Guid>());
-
-        // Default ApiCache setup
-        _mockApiCache.Setup(c => c.GetOrAddAsync(
-                It.IsAny<string>(),
-                It.IsAny<Func<Task<AssetStatsResponseDto>>>() // For GetAssetCount
-            ))
-            .Returns<string, Func<Task<AssetStatsResponseDto>>>(async (key, factory) => await factory());
     }
 
     private List<AssetResponseDto> CreateSampleAssets(int count, string idPrefix = "asset")
@@ -50,21 +37,38 @@ public class AllAssetsRemotePoolTests
             .Select(i => new AssetResponseDto { Id = $"{idPrefix}{i}", Type = AssetTypeEnum.IMAGE })
             .ToList();
     }
-
+    
     [Test]
     public async Task GetAssetCount_CallsApiAndCache()
     {
         // Arrange
+        var stats = new SearchStatisticsResponseDto { Total = 100 };
+        _mockImmichApi.Setup(api => api.SearchAssetStatisticsAsync(It.IsAny<StatisticsSearchDto>(), It.IsAny<CancellationToken>())).ReturnsAsync(stats);
+        
+        // Act
+        var count = await _allAssetsPool.GetAssetCount();
+
+        // Assert
+        Assert.That(count, Is.EqualTo(100));
+        _mockImmichApi.Verify(api => api.SearchAssetStatisticsAsync(new StatisticsSearchDto { Type = AssetTypeEnum.IMAGE }, It.IsAny<CancellationToken>()), Times.Once);
+        Assert.That(_fakeCache.Count, Is.EqualTo(1));
+    }
+    
+
+    [Test]
+    public async Task GetAssetCount_CallsApiAndFallsBack()
+    {
+        // Arrange
         var stats = new AssetStatsResponseDto { Images = 100 };
         _mockImmichApi.Setup(api => api.GetAssetStatisticsAsync(null, false, null, It.IsAny<CancellationToken>())).ReturnsAsync(stats);
-
+        
         // Act
         var count = await _allAssetsPool.GetAssetCount();
 
         // Assert
         Assert.That(count, Is.EqualTo(100));
         _mockImmichApi.Verify(api => api.GetAssetStatisticsAsync(null, false, null, It.IsAny<CancellationToken>()), Times.Once);
-        _mockApiCache.Verify(cache => cache.GetOrAddAsync(nameof(AllAssetsRemotePool), It.IsAny<Func<Task<AssetStatsResponseDto>>>()), Times.Once);
+        Assert.That(_fakeCache.Count, Is.EqualTo(1));
     }
 
     [Test]

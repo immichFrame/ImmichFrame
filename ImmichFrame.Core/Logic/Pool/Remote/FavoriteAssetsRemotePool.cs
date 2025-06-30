@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 
 namespace ImmichFrame.Core.Logic.Pool.Remote;
 
-public class FavoriteAssetsRemotePool(ILogger<FavoriteAssetsRemotePool> _logger, ImmichApi _immichApi, IAssetPool fallbackPool) : IAssetPool
+public class FavoriteAssetsRemotePool(ILogger<FavoriteAssetsRemotePool> _logger, ImmichApi _immichApi) : IAssetPool
 {
     public async Task<long> GetAssetCount(CancellationToken ct = default)
     {
@@ -17,7 +17,7 @@ public class FavoriteAssetsRemotePool(ILogger<FavoriteAssetsRemotePool> _logger,
         catch (Exception e)
         {
             _logger.LogError(e, $"Failed to get asset count, falling back to preload  [{e.Message}]");
-            return await fallbackPool.GetAssetCount(ct);
+            throw;
         }
     }
 
@@ -34,7 +34,7 @@ public class FavoriteAssetsRemotePool(ILogger<FavoriteAssetsRemotePool> _logger,
         catch (Exception e)
         {
             _logger.LogError(e, $"Failed to get assets, falling back to preload [{e.Message}]");
-            return await fallbackPool.GetAssets(requested, ct);
+            throw;
         }
     }
 }

@@ -3,7 +3,7 @@ using ImmichFrame.Core.Interfaces;
 
 namespace ImmichFrame.Core.Logic.Pool.Preload;
 
-public abstract class PreloadedAssetsPool(ApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings) : IAssetPool
+public abstract class PreloadedAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings) : IAssetPool
 {
     private readonly Random _random = new();
 

@@ -4,7 +4,7 @@ using ImmichFrame.Core.Interfaces;
 public class OpenWeatherMapService : IWeatherService
 {
     private readonly IGeneralSettings _settings;
-    private readonly ApiCache _weatherCache = new(TimeSpan.FromMinutes(5));
+    private readonly IApiCache _weatherCache = new ApiCache(TimeSpan.FromMinutes(5));
     public OpenWeatherMapService(IGeneralSettings settings)
     {
         _settings = settings;

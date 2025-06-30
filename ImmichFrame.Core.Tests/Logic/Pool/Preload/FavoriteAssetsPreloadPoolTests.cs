@@ -15,14 +15,14 @@ namespace ImmichFrame.Core.Tests.Logic.Pool.Preload;
 [TestFixture]
 public class FavoriteAssetsPreloadPoolTests
 {
-    private Mock<ApiCache> _mockApiCache;
+    private Mock<IApiCache> _mockApiCache;
     private Mock<ImmichApi> _mockImmichApi;
     private Mock<IAccountSettings> _mockAccountSettings; // Though not directly used by LoadAssets here
     private TestableFavoriteAssetsPool _favoriteAssetsPool;
 
     private class TestableFavoriteAssetsPool : FavoriteAssetsPreloadPool
     {
-        public TestableFavoriteAssetsPool(ApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings)
+        public TestableFavoriteAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings)
             : base(apiCache, immichApi, accountSettings) { }
 
         public Task<IEnumerable<AssetResponseDto>> TestLoadAssets(CancellationToken ct = default)
@@ -34,7 +34,7 @@ public class FavoriteAssetsPreloadPoolTests
     [SetUp]
     public void Setup()
     {
-        _mockApiCache = new Mock<ApiCache>(null);
+        _mockApiCache = new Mock<IApiCache>(null);
         _mockImmichApi = new Mock<ImmichApi>(null, null);
         _mockAccountSettings = new Mock<IAccountSettings>();
         _favoriteAssetsPool = new TestableFavoriteAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
@@ -52,9 +52,28 @@ public class FavoriteAssetsPreloadPoolTests
         var assetsPage1 = Enumerable.Range(0, batchSize).Select(i => CreateAsset($"fav_p1_{i}")).ToList();
         var assetsPage2 = Enumerable.Range(0, 50).Select(i => CreateAsset($"fav_p2_{i}")).ToList();
 
-        _mockImmichApi.SetupSequence(api => api.SearchAssetsAsync(It.IsAny<MetadataSearchDto>(), It.IsAny<CancellationToken>()))
+        _mockImmichApi.Setup(api => api.SearchAssetsAsync(
+                It.Is<MetadataSearchDto>(dto =>
+                    dto.IsFavorite == true &&
+                    dto.Type == AssetTypeEnum.IMAGE &&
+                    dto.WithExif == true &&
+                    dto.WithPeople == true &&
+                    dto.Page == 1 && 
+                    dto.Size == batchSize), It.IsAny<CancellationToken>()))
             .ReturnsAsync(CreateSearchResult(assetsPage1, batchSize)) // Page 1, total indicates more might be available
-            .ReturnsAsync(CreateSearchResult(assetsPage2, 50));      // Page 2, total indicates this is the last page
+            .Verifiable("Requests first page");
+            
+        _mockImmichApi.Setup(api => api.SearchAssetsAsync(
+                It.Is<MetadataSearchDto>(dto =>
+                    dto.IsFavorite == true &&
+                    dto.Type == AssetTypeEnum.IMAGE &&
+                    dto.WithExif == true &&
+                    dto.WithPeople == true &&
+                    dto.Page == 2 && 
+                    dto.Size == batchSize), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(CreateSearchResult(assetsPage2, 50)) // Page 2, total indicates this is the last page
+            .Verifiable("Requests second page");
+            
 
         // Act
         var result = (await _favoriteAssetsPool.TestLoadAssets()).ToList();
@@ -64,21 +83,7 @@ public class FavoriteAssetsPreloadPoolTests
         Assert.That(result.Any(a => a.Id == "fav_p1_0"));
         Assert.That(result.Any(a => a.Id == "fav_p2_49"));
 
-        _mockImmichApi.Verify(api => api.SearchAssetsAsync(
-            It.Is<MetadataSearchDto>(dto =>
-                dto.IsFavorite == true &&
-                dto.Type == AssetTypeEnum.IMAGE &&
-                dto.WithExif == true &&
-                dto.WithPeople == true &&
-                dto.Page == 1 && dto.Size == batchSize),
-            It.IsAny<CancellationToken>()), Times.Once);
-
-        _mockImmichApi.Verify(api => api.SearchAssetsAsync(
-            It.Is<MetadataSearchDto>(dto =>
-                dto.IsFavorite == true &&
-                dto.Type == AssetTypeEnum.IMAGE &&
-                dto.Page == 2 && dto.Size == batchSize),
-            It.IsAny<CancellationToken>()), Times.Once);
+        _mockImmichApi.VerifyAll();
     }
 
     [Test]

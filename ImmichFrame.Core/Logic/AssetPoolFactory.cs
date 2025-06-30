@@ -9,23 +9,27 @@ namespace ImmichFrame.Core.Logic;
 
 public interface IAssetPoolFactory
 {
-    IAssetPool BuildPool(IAccountSettings accountSettings, ApiCache apiCache, ImmichApi immichApi);
+    IAssetPool BuildPool(IAccountSettings accountSettings, IApiCache apiCache, ImmichApi immichApi);
 }
 
 public class AssetPoolFactory(ILoggerFactory loggerFactory) : IAssetPoolFactory
 {
-    public IAssetPool BuildPool(IAccountSettings accountSettings, ApiCache apiCache, ImmichApi immichApi)
+    public IAssetPool BuildPool(IAccountSettings accountSettings, IApiCache apiCache, ImmichApi immichApi)
     {
         if (!accountSettings.ShowFavorites && !accountSettings.ShowMemories && !accountSettings.Albums.Any() && !accountSettings.People.Any())
         {
-            return new AllAssetsRemotePool(apiCache, immichApi, accountSettings);
+            return new AllAssetsRemotePool(apiCache, immichApi, accountSettings, loggerFactory.CreateLogger<AllAssetsRemotePool>());
         }
 
         var pools = new List<IAssetPool>();
 
         if (accountSettings.ShowFavorites)
-            pools.Add(new FavoriteAssetsRemotePool(loggerFactory.CreateLogger<FavoriteAssetsRemotePool>(), immichApi,
-                new FavoriteAssetsPreloadPool(apiCache, immichApi, accountSettings)));
+            pools.Add(
+                new CircuitBreakerPool(
+                    new FavoriteAssetsRemotePool(loggerFactory.CreateLogger<FavoriteAssetsRemotePool>(), immichApi),
+                    new FavoriteAssetsPreloadPool(apiCache, immichApi, accountSettings),
+                    loggerFactory.CreateLogger<CircuitBreakerPool>()
+                ));
 
         if (accountSettings.ShowMemories)
             pools.Add(new MemoryAssetsPreloadPool(apiCache, immichApi, accountSettings));

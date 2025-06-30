@@ -1,16 +1,23 @@
 using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Interfaces;
+using Microsoft.Extensions.Logging;
 
-namespace ImmichFrame.Core.Logic.Pool.Preload;
+namespace ImmichFrame.Core.Logic.Pool.Remote;
 
-public class AllAssetsRemotePool(ApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings) : IAssetPool
+public class AllAssetsRemotePool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings, ILogger<AllAssetsRemotePool> logger) : BaseCircuitBreaker(logger), IAssetPool
 {
-    public async Task<long> GetAssetCount(CancellationToken ct = default)
-    {
-        //Retrieve total images count (unfiltered); will update to query filtered stats from Immich
-        return (await apiCache.GetOrAddAsync(nameof(AllAssetsRemotePool),
+    public virtual Task<long> GetAssetCount(CancellationToken ct = default)
+        => DoCall(
+            () => GetFilteredAssetCount(ct),
+            () => GetTotalAssetCount(ct));
+    
+    private async Task<long> GetFilteredAssetCount(CancellationToken ct = default)
+        => (await apiCache.GetOrAddAsync($"{nameof(AllAssetsRemotePool)}:filtered",
+            () => immichApi.SearchAssetStatisticsAsync(new StatisticsSearchDto { Type = AssetTypeEnum.IMAGE }, ct))).Total;
+    
+    private async Task<long> GetTotalAssetCount(CancellationToken ct = default)
+        => (await apiCache.GetOrAddAsync($"{nameof(AllAssetsRemotePool)}:total",
             () => immichApi.GetAssetStatisticsAsync(null, false, null, ct))).Images;
-    }
     
     public async Task<IEnumerable<AssetResponseDto>> GetAssets(int requested, CancellationToken ct = default)
     {
@@ -19,23 +26,16 @@ public class AllAssetsRemotePool(ApiCache apiCache, ImmichApi immichApi, IAccoun
             Size = requested,
             Type = AssetTypeEnum.IMAGE,
             WithExif = true,
-            WithPeople = true
+            WithPeople = true,
+            Visibility = accountSettings.ShowArchived ? AssetVisibility.Archive : AssetVisibility.Timeline
         };
-
-        if (accountSettings.ShowArchived)
-        {
-            searchDto.Visibility = AssetVisibility.Archive;
-        }
-        else
-        {
-            searchDto.Visibility = AssetVisibility.Timeline;
-        }
 
         var takenBefore = accountSettings.ImagesUntilDate.HasValue ? accountSettings.ImagesUntilDate : null;
         if (takenBefore.HasValue)
         {
             searchDto.TakenBefore = takenBefore;
         }
+
         var takenAfter = accountSettings.ImagesFromDate.HasValue ? accountSettings.ImagesFromDate : accountSettings.ImagesFromDays.HasValue ? DateTime.Today.AddDays(-accountSettings.ImagesFromDays.Value) : null;
 
         if (takenAfter.HasValue)
@@ -71,8 +71,7 @@ public class AllAssetsRemotePool(ApiCache apiCache, ImmichApi immichApi, IAccoun
 
             excludedAlbumAssets.AddRange(albumInfo.Assets);
         }
-        
+
         return excludedAlbumAssets;
     }
-    
 }

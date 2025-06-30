@@ -1,4 +1,9 @@
-public class ApiCache : IDisposable
+public interface IApiCache
+{
+    Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> factory);
+}
+
+public class ApiCache : IApiCache, IDisposable
 {
     private readonly TimeSpan _cacheDuration;
     private readonly Dictionary<string, (DateTime Timestamp, object Data)> _cache = new();
@@ -8,22 +13,7 @@ public class ApiCache : IDisposable
         _cacheDuration = cacheDuration;
     }
 
-    public async Task<T?> GetAsync<T>(string key)
-    {
-        if (_cache.TryGetValue(key, out var entry))
-        {
-            if (DateTime.UtcNow - entry.Timestamp < _cacheDuration)
-            {
-                return (T)entry.Data;
-            }
-
-            Invalidate(key); // Cache expired
-        }
-
-        return default;
-    }
-
-    public virtual async Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> factory)
+    public async Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> factory)
     {
         if (_cache.TryGetValue(key, out var entry))
         {

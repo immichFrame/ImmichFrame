@@ -12,4 +12,14 @@ public static class FixtureHelpers
         });
         return loggerFactory.CreateLogger<T>();
     }
+
+    public class ForgetfulCountingCache : IApiCache
+    {
+        public int Count = 0;
+        public Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> factory)
+        {
+            Count++;
+            return factory();
+        }
+    }
 }
