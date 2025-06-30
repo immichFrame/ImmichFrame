@@ -3,7 +3,7 @@ using ImmichFrame.Core.Interfaces;
 
 namespace ImmichFrame.Core.Logic.Pool;
 
-public class FavoriteAssetsPool(ApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings) : CachingApiAssetsPool(apiCache, immichApi, accountSettings)
+public class FavoriteAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings) : CachingApiAssetsPool(apiCache, immichApi, accountSettings)
 {
     protected override async Task<IEnumerable<AssetResponseDto>> LoadAssets(CancellationToken ct = default)
     {

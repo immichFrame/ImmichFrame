@@ -14,7 +14,7 @@ namespace ImmichFrame.Core.Tests.Logic.Pool;
 [TestFixture]
 public class MemoryAssetsPoolTests
 {
-    private Mock<ApiCache> _mockApiCache;
+    private Mock<IApiCache> _mockApiCache;
     private Mock<ImmichApi> _mockImmichApi;
     private Mock<IAccountSettings> _mockAccountSettings;
     private MemoryAssetsPool _memoryAssetsPool;
@@ -22,7 +22,7 @@ public class MemoryAssetsPoolTests
     [SetUp]
     public void Setup()
     {
-        _mockApiCache = new Mock<ApiCache>(null); // Base constructor requires ILogger and IOptions, pass null for simplicity in mock
+        _mockApiCache = new Mock<IApiCache>(); // Base constructor requires ILogger and IOptions, pass null for simplicity in mock
         _mockImmichApi = new Mock<ImmichApi>(null, null); // Base constructor requires ILogger, IHttpClientFactory, IOptions, pass null
         _mockAccountSettings = new Mock<IAccountSettings>();
 
@@ -155,7 +155,7 @@ public class MemoryAssetsPoolTests
                 .ReturnsAsync(memories);
 
             // Reset and re-setup cache mock for each iteration to ensure factory is called
-            _mockApiCache = new Mock<ApiCache>(null);
+            _mockApiCache = new Mock<IApiCache>();
             _mockApiCache.Setup(c => c.GetOrAddAsync<IEnumerable<AssetResponseDto>>(It.IsAny<string>(), It.IsAny<Func<Task<IEnumerable<AssetResponseDto>>>>()))
                          .Returns<string, Func<Task<IEnumerable<AssetResponseDto>>>>(async (key, factory) => await factory());
             _memoryAssetsPool = new MemoryAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);

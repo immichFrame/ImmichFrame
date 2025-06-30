@@ -14,7 +14,7 @@ namespace ImmichFrame.Core.Tests.Logic.Pool;
 [TestFixture]
 public class AllAssetsPoolTests
 {
-    private Mock<ApiCache> _mockApiCache;
+    private Mock<IApiCache> _mockApiCache;
     private Mock<ImmichApi> _mockImmichApi;
     private Mock<IAccountSettings> _mockAccountSettings;
     private AllAssetsPool _allAssetsPool;
@@ -22,7 +22,7 @@ public class AllAssetsPoolTests
     [SetUp]
     public void Setup()
     {
-        _mockApiCache = new Mock<ApiCache>(null);
+        _mockApiCache = new Mock<IApiCache>();
         _mockImmichApi = new Mock<ImmichApi>(null, null);
         _mockAccountSettings = new Mock<IAccountSettings>();
         _allAssetsPool = new AllAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);

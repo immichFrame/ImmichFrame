@@ -14,7 +14,7 @@ namespace ImmichFrame.Core.Tests.Logic.Pool;
 [TestFixture]
 public class CachingApiAssetsPoolTests
 {
-    private Mock<ApiCache> _mockApiCache;
+    private Mock<IApiCache> _mockApiCache;
     private Mock<ImmichApi> _mockImmichApi; // Dependency for constructor, may not be used directly in base class tests
     private Mock<IAccountSettings> _mockAccountSettings;
     private TestableCachingApiAssetsPool _testPool;
@@ -24,7 +24,7 @@ public class CachingApiAssetsPoolTests
     {
         public Func<Task<IEnumerable<AssetResponseDto>>> LoadAssetsFunc { get; set; }
 
-        public TestableCachingApiAssetsPool(ApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings)
+        public TestableCachingApiAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings)
             : base(apiCache, immichApi, accountSettings)
         {
         }
@@ -38,7 +38,7 @@ public class CachingApiAssetsPoolTests
     [SetUp]
     public void Setup()
     {
-        _mockApiCache = new Mock<ApiCache>(null); // ILogger, IOptions<AppSettings>
+        _mockApiCache = new Mock<IApiCache>(); // ILogger, IOptions<AppSettings>
         _mockImmichApi = new Mock<ImmichApi>(null, null); // ILogger, IHttpClientFactory, IOptions<AppSettings>
         _mockAccountSettings = new Mock<IAccountSettings>();
 

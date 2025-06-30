@@ -1,60 +1,23 @@
-public class ApiCache : IDisposable
+using Microsoft.Extensions.Caching.Memory;
+
+namespace ImmichFrame.Core.Helpers;
+
+public class ApiCache : IApiCache, IDisposable
 {
-    private readonly TimeSpan _cacheDuration;
-    private readonly Dictionary<string, (DateTime Timestamp, object Data)> _cache = new();
+    private readonly MemoryCacheEntryOptions _cacheOptions;
+    private readonly IMemoryCache _cache = new MemoryCache(new MemoryCacheOptions());
 
     public ApiCache(TimeSpan cacheDuration)
     {
-        _cacheDuration = cacheDuration;
-    }
-
-    public async Task<T?> GetAsync<T>(string key)
-    {
-        if (_cache.TryGetValue(key, out var entry))
+        _cacheOptions = new()
         {
-            if (DateTime.UtcNow - entry.Timestamp < _cacheDuration)
-            {
-                return (T)entry.Data;
-            }
-
-            Invalidate(key); // Cache expired
-        }
-
-        return default;
+            AbsoluteExpirationRelativeToNow = cacheDuration
+        };
     }
 
-    public virtual async Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> factory)
-    {
-        if (_cache.TryGetValue(key, out var entry))
-        {
-            if (DateTime.UtcNow - entry.Timestamp < _cacheDuration)
-            {
-                return (T)entry.Data;
-            }
-            else
-            {
-                Invalidate(key); // Cache expired
-            }
-        }
-
-        // Value is not in cache or expired -> reload
-        var data = await factory();
-        _cache[key] = (DateTime.UtcNow, data);
-        return data;
-    }
-
-    public void Invalidate(string key)
-    {
-        _cache.Remove(key);
-    }
-
-    public void Clear()
-    {
-        _cache.Clear();
-    }
+    public virtual Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> factory)
+        => _cache.GetOrCreateAsync<T>(key, _ => factory(), _cacheOptions);
 
     public void Dispose()
-    {
-        Clear();
-    }
+        => _cache.Dispose();
 }
