@@ -14,12 +14,12 @@ namespace ImmichFrame.Core.Tests.Logic.Pool;
 [TestFixture]
 public class AlbumAssetsPoolTests
 {
-    private Mock<ApiCache> _mockApiCache;
+    private Mock<IApiCache> _mockApiCache;
     private Mock<ImmichApi> _mockImmichApi;
     private Mock<IAccountSettings> _mockAccountSettings;
     private TestableAlbumAssetsPool _albumAssetsPool;
 
-    private class TestableAlbumAssetsPool(ApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings)
+    private class TestableAlbumAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings)
         : AlbumAssetsPool(apiCache, immichApi, accountSettings)
     {
         // Expose LoadAssets for testing
@@ -29,7 +29,7 @@ public class AlbumAssetsPoolTests
     [SetUp]
     public void Setup()
     {
-        _mockApiCache = new Mock<ApiCache>(TimeSpan.MaxValue);
+        _mockApiCache = new Mock<IApiCache>();
         _mockImmichApi = new Mock<ImmichApi>("", null);
         _mockAccountSettings = new Mock<IAccountSettings>();
         _albumAssetsPool = new TestableAlbumAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);

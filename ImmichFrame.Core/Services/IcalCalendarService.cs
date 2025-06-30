@@ -1,11 +1,12 @@
 using Ical.Net;
+using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.WebApi.Helpers;
 
 public class IcalCalendarService : ICalendarService
 {
     private readonly IGeneralSettings _serverSettings;
-    private readonly ApiCache _appointmentCache = new(TimeSpan.FromMinutes(15));
+    private readonly IApiCache _appointmentCache = new ApiCache(TimeSpan.FromMinutes(15));
 
     public IcalCalendarService(IGeneralSettings serverSettings)
     {
