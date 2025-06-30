@@ -6,8 +6,8 @@ namespace ImmichFrame.Core.Logic.Pool.Remote;
 
 public class AllAssetsRemotePool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings, ILogger<AllAssetsRemotePool> logger) : BaseCircuitBreaker(logger), IAssetPool
 {
-    public virtual Task<long> GetAssetCount(CancellationToken ct = default)
-        => DoCall(
+    public virtual async Task<long> GetAssetCount(CancellationToken ct = default)
+        => await DoCall(
             () => GetFilteredAssetCount(ct),
             () => GetTotalAssetCount(ct));
     

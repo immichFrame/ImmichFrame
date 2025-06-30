@@ -10,7 +10,7 @@ namespace ImmichFrame.Core.Tests.Logic.Pool
     {
         private Mock<IAssetPool> _mockPool1;
         private Mock<IAssetPool> _mockPool2;
-        private MultiAssetPool _aggregatingPool;
+        private AggregatingAssetPool _aggregatingPool; // Changed type here
         private List<IAssetPool> _assetPools;
 
         [SetUp]

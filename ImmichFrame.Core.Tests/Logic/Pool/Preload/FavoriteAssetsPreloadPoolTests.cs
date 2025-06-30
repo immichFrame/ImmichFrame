@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Net.Http; // Added for HttpClient
 using ImmichFrame.Core.Logic.Pool.Preload;
 
 namespace ImmichFrame.Core.Tests.Logic.Pool.Preload;
@@ -34,8 +35,8 @@ public class FavoriteAssetsPreloadPoolTests
     [SetUp]
     public void Setup()
     {
-        _mockApiCache = new Mock<IApiCache>(null);
-        _mockImmichApi = new Mock<ImmichApi>(null, null);
+        _mockApiCache = new Mock<IApiCache>();
+        _mockImmichApi = new Mock<ImmichApi>("http://dummy-url.com", new HttpClient());
         _mockAccountSettings = new Mock<IAccountSettings>();
         _favoriteAssetsPool = new TestableFavoriteAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
     }

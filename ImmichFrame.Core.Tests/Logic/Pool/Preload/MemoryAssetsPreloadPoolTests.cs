@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Net.Http; // Added for HttpClient
 using ImmichFrame.Core.Logic.Pool.Preload;
 
 namespace ImmichFrame.Core.Tests.Logic.Pool.Preload;
@@ -23,8 +24,8 @@ public class MemoryAssetsPreloadPoolTests
     [SetUp]
     public void Setup()
     {
-        _mockApiCache = new Mock<IApiCache>(null); // Base constructor requires ILogger and IOptions, pass null for simplicity in mock
-        _mockImmichApi = new Mock<ImmichApi>(null, null); // Base constructor requires ILogger, IHttpClientFactory, IOptions, pass null
+        _mockApiCache = new Mock<IApiCache>(); // Base constructor requires ILogger and IOptions, pass null for simplicity in mock
+        _mockImmichApi = new Mock<ImmichApi>("http://dummy-url.com", new HttpClient()); // Base constructor requires ILogger, IHttpClientFactory, IOptions, pass null
         _mockAccountSettings = new Mock<IAccountSettings>();
 
         _memoryAssetsPool = new MemoryAssetsPreloadPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
@@ -156,7 +157,12 @@ public class MemoryAssetsPreloadPoolTests
                 .ReturnsAsync(memories);
 
             // Reset and re-setup cache mock for each iteration to ensure factory is called
-            _mockApiCache = new Mock<IApiCache>(null);
+            _mockApiCache = new Mock<IApiCache>();
+            // _mockImmichApi is already set up in the main Setup method, no need to re-mock it here unless its behavior needs to change per iteration.
+            // If _mockImmichApi needs fresh instances or different setups per loop, it should be:
+            // _mockImmichApi = new Mock<ImmichApi>("http://dummy-url.com", new HttpClient());
+            // And then specific setups for SearchMemoriesAsync would follow if they differ per tc.
+            // For now, assuming the existing _mockImmichApi.Setup in the loop is sufficient.
             _mockApiCache.Setup(c => c.GetOrAddAsync<IEnumerable<AssetResponseDto>>(It.IsAny<string>(), It.IsAny<Func<Task<IEnumerable<AssetResponseDto>>>>()))
                          .Returns<string, Func<Task<IEnumerable<AssetResponseDto>>>>(async (key, factory) => await factory());
             _memoryAssetsPool = new MemoryAssetsPreloadPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);

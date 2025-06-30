@@ -3,6 +3,7 @@ using Moq;
 using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.Core.Logic.Pool.Remote;
+using System.Net.Http; // Added for HttpClient
 
 namespace ImmichFrame.Core.Tests.Logic.Pool.Remote;
 
@@ -18,7 +19,7 @@ public class AllAssetsRemotePoolTests
     public void Setup()
     {
         _fakeCache = new FixtureHelpers.ForgetfulCountingCache();
-        _mockImmichApi = new Mock<ImmichApi>(null, null);
+        _mockImmichApi = new Mock<ImmichApi>("http://dummy-url.com", new HttpClient());
         _mockAccountSettings = new Mock<IAccountSettings>();
         _allAssetsPool = new AllAssetsRemotePool(_fakeCache, _mockImmichApi.Object, _mockAccountSettings.Object, FixtureHelpers.TestLogger<AllAssetsRemotePool>());
 
@@ -50,7 +51,9 @@ public class AllAssetsRemotePoolTests
 
         // Assert
         Assert.That(count, Is.EqualTo(100));
-        _mockImmichApi.Verify(api => api.SearchAssetStatisticsAsync(new StatisticsSearchDto { Type = AssetTypeEnum.IMAGE }, It.IsAny<CancellationToken>()), Times.Once);
+        _mockImmichApi.Verify(api => api.SearchAssetStatisticsAsync(
+            It.Is<StatisticsSearchDto>(dto => dto.Type == AssetTypeEnum.IMAGE),
+            It.IsAny<CancellationToken>()), Times.Once);
         Assert.That(_fakeCache.Count, Is.EqualTo(1));
     }
     
@@ -59,8 +62,12 @@ public class AllAssetsRemotePoolTests
     public async Task GetAssetCount_CallsApiAndFallsBack()
     {
         // Arrange
-        var stats = new AssetStatsResponseDto { Images = 100 };
-        _mockImmichApi.Setup(api => api.GetAssetStatisticsAsync(null, false, null, It.IsAny<CancellationToken>())).ReturnsAsync(stats);
+        // Setup the primary call to throw an exception, forcing the fallback
+        _mockImmichApi.Setup(api => api.SearchAssetStatisticsAsync(It.IsAny<StatisticsSearchDto>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("Simulated API failure for primary call"));
+
+        var fallbackStats = new AssetStatsResponseDto { Images = 100 };
+        _mockImmichApi.Setup(api => api.GetAssetStatisticsAsync(null, false, null, It.IsAny<CancellationToken>())).ReturnsAsync(fallbackStats);
         
         // Act
         var count = await _allAssetsPool.GetAssetCount();
@@ -68,7 +75,7 @@ public class AllAssetsRemotePoolTests
         // Assert
         Assert.That(count, Is.EqualTo(100));
         _mockImmichApi.Verify(api => api.GetAssetStatisticsAsync(null, false, null, It.IsAny<CancellationToken>()), Times.Once);
-        Assert.That(_fakeCache.Count, Is.EqualTo(1));
+        Assert.That(_fakeCache.Count, Is.EqualTo(2), "Cache count should be 2: one for the failed primary attempt, one for the successful fallback.");
     }
 
     [Test]

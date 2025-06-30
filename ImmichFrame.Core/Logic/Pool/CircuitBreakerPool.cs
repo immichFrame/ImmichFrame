@@ -19,13 +19,13 @@ public abstract class BaseCircuitBreakerPool<T>(
 ) : BaseCircuitBreaker(logger), IAssetPool
     where T : BaseCircuitBreakerPool<T>
 {
-    public Task<long> GetAssetCount(CancellationToken ct = default)
-        => DoCall(
+    public async Task<long> GetAssetCount(CancellationToken ct = default)
+        => await DoCall(
             () => primary.GetAssetCount(ct),
             () => secondary.GetAssetCount(ct));
 
-    public Task<IEnumerable<AssetResponseDto>> GetAssets(int requested, CancellationToken ct = default)
-        => DoCall(
+    public async Task<IEnumerable<AssetResponseDto>> GetAssets(int requested, CancellationToken ct = default)
+        => await DoCall(
             () => primary.GetAssets(requested, ct),
             () => secondary.GetAssets(requested, ct));
 }
@@ -36,6 +36,26 @@ public class BaseCircuitBreaker(ILogger<BaseCircuitBreaker> logger)
 
     private static readonly TimeSpan BreakerTimeout = TimeSpan.FromDays(7);
 
+    // Made DoCall async to correctly handle exceptions from async primaryFn
+    protected async Task<TOut> DoCall<TOut>(Func<Task<TOut>> primaryFnAsync, Func<Task<TOut>> secondaryFnAsync)
+    {
+        if (!IsBroken)
+        {
+            try
+            {
+                return await primaryFnAsync();
+            }
+            catch (Exception e)
+            {
+                logger.LogWarning(e, "Failure when calling primary; breaking circuit and using fallback");
+                Break();
+            }
+        }
+
+        return await secondaryFnAsync();
+    }
+
+    // Overload for synchronous functions, if still needed elsewhere, though current usage seems async
     protected TOut DoCall<TOut>(Func<TOut> primaryFn, Func<TOut> secondaryFn)
     {
         if (!IsBroken)
@@ -50,7 +70,6 @@ public class BaseCircuitBreaker(ILogger<BaseCircuitBreaker> logger)
                 Break();
             }
         }
-
         return secondaryFn();
     }
 

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Net.Http; // Added for HttpClient
 using ImmichFrame.Core.Logic.Pool.Preload;
 
 namespace ImmichFrame.Core.Tests.Logic.Pool;
@@ -34,8 +35,8 @@ public class PersonAssetsPreloadPoolTests // Renamed from PeopleAssetsPoolTests 
     [SetUp]
     public void Setup()
     {
-        _mockApiCache = new Mock<IApiCache>(null);
-        _mockImmichApi = new Mock<ImmichApi>(null, null);
+        _mockApiCache = new Mock<IApiCache>();
+        _mockImmichApi = new Mock<ImmichApi>("http://dummy-url.com", new HttpClient());
         _mockAccountSettings = new Mock<IAccountSettings>();
         _personAssetsPool = new TestablePersonAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
 
@@ -45,6 +46,21 @@ public class PersonAssetsPreloadPoolTests // Renamed from PeopleAssetsPoolTests 
     private AssetResponseDto CreateAsset(string id) => new AssetResponseDto { Id = id, Type = AssetTypeEnum.IMAGE };
     private SearchResponseDto CreateSearchResult(List<AssetResponseDto> assets, int total) =>
         new SearchResponseDto { Assets = new SearchAssetResponseDto { Items = assets, Total = total } };
+
+    private bool VerifyMetadataSearchDto(MetadataSearchDto actualDto, Guid expectedPersonId, double expectedPage, int expectedSize)
+    {
+        if (actualDto == null) return false;
+        bool personIdsMatch = actualDto.PersonIds != null &&
+                              actualDto.PersonIds.Count == 1 &&
+                              actualDto.PersonIds.First() == expectedPersonId;
+        bool pageMatch = actualDto.Page == expectedPage;
+        bool typeMatch = actualDto.Type == AssetTypeEnum.IMAGE; // From PeopleAssetsPreloadPool
+        bool withExifMatch = actualDto.WithExif == true;     // From PeopleAssetsPreloadPool
+        bool withPeopleMatch = actualDto.WithPeople == true; // From PeopleAssetsPreloadPool
+        bool sizeMatch = actualDto.Size == expectedSize;     // From LoadAssetsFromMetadataSearch
+
+        return personIdsMatch && pageMatch && typeMatch && withExifMatch && withPeopleMatch && sizeMatch;
+    }
 
     [Test]
     public async Task LoadAssets_CallsSearchAssetsForEachPerson_AndPaginates()
@@ -60,13 +76,19 @@ public class PersonAssetsPreloadPoolTests // Renamed from PeopleAssetsPoolTests 
         var p2AssetsPage1 = Enumerable.Range(0, 20).Select(i => CreateAsset($"p2_p1_{i}")).ToList();
 
         // Person 1 - Page 1
-        _mockImmichApi.Setup(api => api.SearchAssetsAsync(It.Is<MetadataSearchDto>(d => d.PersonIds.Contains(person1Id) && d.Page == 1), It.IsAny<CancellationToken>()))
+        _mockImmichApi.Setup(api => api.SearchAssetsAsync(
+            It.Is<MetadataSearchDto>(d => VerifyMetadataSearchDto(d, person1Id, 1.0, batchSize)),
+            It.IsAny<CancellationToken>()))
             .ReturnsAsync(CreateSearchResult(p1AssetsPage1, batchSize));
         // Person 1 - Page 2
-        _mockImmichApi.Setup(api => api.SearchAssetsAsync(It.Is<MetadataSearchDto>(d => d.PersonIds.Contains(person1Id) && d.Page == 2), It.IsAny<CancellationToken>()))
+        _mockImmichApi.Setup(api => api.SearchAssetsAsync(
+            It.Is<MetadataSearchDto>(d => VerifyMetadataSearchDto(d, person1Id, 2.0, batchSize)),
+            It.IsAny<CancellationToken>()))
             .ReturnsAsync(CreateSearchResult(p1AssetsPage2, 30));
         // Person 2 - Page 1
-        _mockImmichApi.Setup(api => api.SearchAssetsAsync(It.Is<MetadataSearchDto>(d => d.PersonIds.Contains(person2Id) && d.Page == 1), It.IsAny<CancellationToken>()))
+        _mockImmichApi.Setup(api => api.SearchAssetsAsync(
+            It.Is<MetadataSearchDto>(d => VerifyMetadataSearchDto(d, person2Id, 1.0, batchSize)),
+            It.IsAny<CancellationToken>()))
             .ReturnsAsync(CreateSearchResult(p2AssetsPage1, 20));
 
         // Act
@@ -78,9 +100,15 @@ public class PersonAssetsPreloadPoolTests // Renamed from PeopleAssetsPoolTests 
         Assert.That(result.Any(a => a.Id == "p1_p2_29"));
         Assert.That(result.Any(a => a.Id == "p2_p1_19"));
 
-        _mockImmichApi.Verify(api => api.SearchAssetsAsync(It.Is<MetadataSearchDto>(d => d.PersonIds.Contains(person1Id) && d.Page == 1), It.IsAny<CancellationToken>()), Times.Once);
-        _mockImmichApi.Verify(api => api.SearchAssetsAsync(It.Is<MetadataSearchDto>(d => d.PersonIds.Contains(person1Id) && d.Page == 2), It.IsAny<CancellationToken>()), Times.Once);
-        _mockImmichApi.Verify(api => api.SearchAssetsAsync(It.Is<MetadataSearchDto>(d => d.PersonIds.Contains(person2Id) && d.Page == 1), It.IsAny<CancellationToken>()), Times.Once);
+        _mockImmichApi.Verify(api => api.SearchAssetsAsync(
+            It.Is<MetadataSearchDto>(d => VerifyMetadataSearchDto(d, person1Id, 1.0, batchSize)),
+            It.IsAny<CancellationToken>()), Times.Once);
+        _mockImmichApi.Verify(api => api.SearchAssetsAsync(
+            It.Is<MetadataSearchDto>(d => VerifyMetadataSearchDto(d, person1Id, 2.0, batchSize)),
+            It.IsAny<CancellationToken>()), Times.Once);
+        _mockImmichApi.Verify(api => api.SearchAssetsAsync(
+            It.Is<MetadataSearchDto>(d => VerifyMetadataSearchDto(d, person2Id, 1.0, batchSize)),
+            It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Test]
