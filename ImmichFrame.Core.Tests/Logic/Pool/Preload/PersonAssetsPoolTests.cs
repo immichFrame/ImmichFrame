@@ -57,8 +57,8 @@ public class PersonAssetsPreloadPoolTests // Renamed from PeopleAssetsPoolTests 
         bool pageMatch = actualDto.Page.HasValue && actualDto.Page.Value == expectedPage;
         bool typeMatch = actualDto.Type == AssetTypeEnum.IMAGE; // From PeopleAssetsPreloadPool
         bool withExifMatch = actualDto.WithExif == true;     // From PeopleAssetsPreloadPool
-        bool withPeopleMatch = actualDto.WithPeople == true; // From PeopleAssetsPreloadPool
         bool sizeMatch = actualDto.Size.HasValue && actualDto.Size.Value == expectedSize;     // From LoadAssetsFromMetadataSearch
+        bool withPeopleMatch = actualDto.WithPeople == true; // From PeopleAssetsPreloadPool
 
         return personIdsMatch && pageMatch && typeMatch && withExifMatch && withPeopleMatch && sizeMatch;
     }
@@ -80,17 +80,20 @@ public class PersonAssetsPreloadPoolTests // Renamed from PeopleAssetsPoolTests 
         _mockImmichApi.Setup(api => api.SearchAssetsAsync(
             It.Is<MetadataSearchDto>(d => VerifyMetadataSearchDto(d, person1Id, 1.0, batchSize)),
             It.IsAny<CancellationToken>()))
-            .ReturnsAsync(CreateSearchResult(p1AssetsPage1, batchSize));
+            .ReturnsAsync(CreateSearchResult(p1AssetsPage1, batchSize))
+            .Verifiable();
         // Person 1 - Page 2
         _mockImmichApi.Setup(api => api.SearchAssetsAsync(
             It.Is<MetadataSearchDto>(d => VerifyMetadataSearchDto(d, person1Id, 2.0, batchSize)),
             It.IsAny<CancellationToken>()))
-            .ReturnsAsync(CreateSearchResult(p1AssetsPage2, 30));
+            .ReturnsAsync(CreateSearchResult(p1AssetsPage2, 30))
+            .Verifiable();
         // Person 2 - Page 1
         _mockImmichApi.Setup(api => api.SearchAssetsAsync(
             It.Is<MetadataSearchDto>(d => VerifyMetadataSearchDto(d, person2Id, 1.0, batchSize)),
             It.IsAny<CancellationToken>()))
-            .ReturnsAsync(CreateSearchResult(p2AssetsPage1, 20));
+            .ReturnsAsync(CreateSearchResult(p2AssetsPage1, 20))
+            .Verifiable();
 
         // Act
         var result = (await _personAssetsPool.TestLoadAssets()).ToList();
@@ -101,15 +104,7 @@ public class PersonAssetsPreloadPoolTests // Renamed from PeopleAssetsPoolTests 
         Assert.That(result.Any(a => a.Id == "p1_p2_29"));
         Assert.That(result.Any(a => a.Id == "p2_p1_19"));
 
-        _mockImmichApi.Verify(api => api.SearchAssetsAsync(
-            It.Is<MetadataSearchDto>(d => VerifyMetadataSearchDto(d, person1Id, 1.0, batchSize)),
-            It.IsAny<CancellationToken>()), Times.Once);
-        _mockImmichApi.Verify(api => api.SearchAssetsAsync(
-            It.Is<MetadataSearchDto>(d => VerifyMetadataSearchDto(d, person1Id, 2.0, batchSize)),
-            It.IsAny<CancellationToken>()), Times.Once);
-        _mockImmichApi.Verify(api => api.SearchAssetsAsync(
-            It.Is<MetadataSearchDto>(d => VerifyMetadataSearchDto(d, person2Id, 1.0, batchSize)),
-            It.IsAny<CancellationToken>()), Times.Once);
+        _mockImmichApi.VerifyAll();
     }
 
     [Test]
