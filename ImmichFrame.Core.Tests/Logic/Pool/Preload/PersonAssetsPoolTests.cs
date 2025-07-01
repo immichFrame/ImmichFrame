@@ -53,11 +53,12 @@ public class PersonAssetsPreloadPoolTests // Renamed from PeopleAssetsPoolTests 
         bool personIdsMatch = actualDto.PersonIds != null &&
                               actualDto.PersonIds.Count == 1 &&
                               actualDto.PersonIds.First() == expectedPersonId;
-        bool pageMatch = actualDto.Page == expectedPage;
+        // Explicitly check HasValue for nullable types before comparing Value
+        bool pageMatch = actualDto.Page.HasValue && actualDto.Page.Value == expectedPage;
         bool typeMatch = actualDto.Type == AssetTypeEnum.IMAGE; // From PeopleAssetsPreloadPool
         bool withExifMatch = actualDto.WithExif == true;     // From PeopleAssetsPreloadPool
         bool withPeopleMatch = actualDto.WithPeople == true; // From PeopleAssetsPreloadPool
-        bool sizeMatch = actualDto.Size == expectedSize;     // From LoadAssetsFromMetadataSearch
+        bool sizeMatch = actualDto.Size.HasValue && actualDto.Size.Value == expectedSize;     // From LoadAssetsFromMetadataSearch
 
         return personIdsMatch && pageMatch && typeMatch && withExifMatch && withPeopleMatch && sizeMatch;
     }
