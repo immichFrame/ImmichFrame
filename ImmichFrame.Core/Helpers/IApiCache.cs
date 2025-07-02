@@ -1,19 +1,19 @@
 public interface IApiCache
 {
-    Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> factory);
+    Task<T> GetOrAddAsync<T>(object key, Func<Task<T>> factory);
 }
 
 public class ApiCache : IApiCache, IDisposable
 {
     private readonly TimeSpan _cacheDuration;
-    private readonly Dictionary<string, (DateTime Timestamp, object Data)> _cache = new();
+    private readonly Dictionary<object, (DateTime Timestamp, object Data)> _cache = new();
 
     public ApiCache(TimeSpan cacheDuration)
     {
         _cacheDuration = cacheDuration;
     }
 
-    public async Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> factory)
+    public async Task<T> GetOrAddAsync<T>(object key, Func<Task<T>> factory)
     {
         if (_cache.TryGetValue(key, out var entry))
         {
@@ -33,7 +33,7 @@ public class ApiCache : IApiCache, IDisposable
         return data;
     }
 
-    public void Invalidate(string key)
+    public void Invalidate(object key)
     {
         _cache.Remove(key);
     }

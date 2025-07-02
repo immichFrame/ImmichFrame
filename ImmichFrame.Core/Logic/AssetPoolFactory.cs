@@ -23,6 +23,18 @@ public class AssetPoolFactory(ILoggerFactory loggerFactory) : IAssetPoolFactory
 
         var pools = new List<IAssetPool>();
 
+        if (accountSettings.Albums.Any() || accountSettings.People.Any())
+            pools.Add(
+                new CircuitBreakerPool(
+                    new FilteredAssetsRemotePool(apiCache, immichApi, accountSettings, loggerFactory.CreateLogger<FilteredAssetsRemotePool>()),
+                    new MultiAssetPool(new List<IAssetPool>
+                    {
+                        new AlbumAssetsPreloadPool(apiCache, immichApi, accountSettings),
+                        new PersonAssetsPreloadPool(apiCache, immichApi, accountSettings)
+                    }),
+                    loggerFactory.CreateLogger<CircuitBreakerPool>()
+                ));
+
         if (accountSettings.ShowFavorites)
             pools.Add(
                 new CircuitBreakerPool(
@@ -34,11 +46,6 @@ public class AssetPoolFactory(ILoggerFactory loggerFactory) : IAssetPoolFactory
         if (accountSettings.ShowMemories)
             pools.Add(new MemoryAssetsPreloadPool(apiCache, immichApi, accountSettings));
 
-        if (accountSettings.Albums.Any())
-            pools.Add(new AlbumAssetsPreloadPool(apiCache, immichApi, accountSettings));
-
-        if (accountSettings.People.Any())
-            pools.Add(new PersonAssetsPreloadPool(apiCache, immichApi, accountSettings));
 
         return new MultiAssetPool(pools);
     }

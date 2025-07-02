@@ -16,7 +16,7 @@ public static class FixtureHelpers
     public class ForgetfulCountingCache : IApiCache
     {
         public int Count = 0;
-        public Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> factory)
+        public Task<T> GetOrAddAsync<T>(object key, Func<Task<T>> factory)
         {
             Count++;
             return factory();
