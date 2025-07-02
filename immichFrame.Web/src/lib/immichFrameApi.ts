@@ -204,7 +204,6 @@ export type ClientSettingsDto = {
     style?: string | null;
     baseFontSize?: string | null;
     showWeatherDescription?: boolean;
-    unattendedMode?: boolean;
     imageZoom?: boolean;
     imagePan?: boolean;
     imageFill?: boolean;

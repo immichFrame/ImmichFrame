@@ -71,7 +71,6 @@ General:
   BaseFontSize: '17px'  # string
   # Displays the description of the current weather.
   ShowWeatherDescription: true  # boolean
-  UnattendedMode: true  # boolean
   # Zooms into or out of an image and gives it a touch of life.
   ImageZoom: true  # boolean
   # Pans an image in a random direction and gives it a touch of life.

@@ -50,7 +50,6 @@
         public string Style { get; }
         public string? BaseFontSize { get; }
         public bool ShowWeatherDescription { get; }
-        public bool UnattendedMode { get; }
         public bool ImageZoom { get; }
         public bool ImagePan { get; }
         public bool ImageFill { get; }

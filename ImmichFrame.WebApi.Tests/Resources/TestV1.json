@@ -51,6 +51,5 @@
     "Webhook": "Webhook_TEST",
     "Account2.ImmichServerUrl": "Account2.ImmichServerUrl_TEST",
     "Account2.ApiKey": "Account2.ApiKey_TEST",
-    "Account2.ImagesFromDate": "Account2.ImagesFromDate_TEST",
-    "UnattendedMode": true
+    "Account2.ImagesFromDate": "Account2.ImagesFromDate_TEST"
 }

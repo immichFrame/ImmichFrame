@@ -29,7 +29,6 @@
     "Style": "Style_TEST",
     "BaseFontSize": "BaseFontSize_TEST",
     "ShowWeatherDescription": true,
-    "UnattendedMode": true,
     "ImageZoom": true,
     "ImagePan": true,
     "ImageFill": true,

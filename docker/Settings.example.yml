@@ -27,7 +27,6 @@ General:
   Style: none
   BaseFontSize: 17px
   ShowWeatherDescription: true
-  UnattendedMode: true
   ImageZoom: true
   ImagePan: false
   ImageFill: false
