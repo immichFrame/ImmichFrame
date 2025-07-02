@@ -20,7 +20,7 @@ public class ConfigLoader(ILogger<ConfigLoader> _logger)
             }
             catch (Exception e)
             {
-                _logger.LogWarning("Failed to load config as current version, falling back to old version (${errorMessage})", e.Message);
+                _logger.LogWarning("Failed to load config as current version JSON. ({errorMessage})", e.Message);
             }
 
             try
@@ -30,7 +30,7 @@ public class ConfigLoader(ILogger<ConfigLoader> _logger)
             }
             catch (Exception e)
             {
-                _logger.LogWarning("Failed to load config as old JSON, falling back to env vars (${errorMessage})", e.Message);
+                _logger.LogWarning("Failed to load config as old JSON. ({errorMessage})", e.Message);
             }
         }
 
@@ -43,7 +43,7 @@ public class ConfigLoader(ILogger<ConfigLoader> _logger)
             }
             catch (Exception e)
             {
-                _logger.LogWarning("Failed to load config as current version, falling back to old version (${errorMessage})", e.Message);
+                _logger.LogWarning("Failed to load config as current version YAML. ({errorMessage})", e.Message);
             }
 
             try
@@ -53,7 +53,7 @@ public class ConfigLoader(ILogger<ConfigLoader> _logger)
             }
             catch (Exception e)
             {
-                _logger.LogWarning("Failed to load config as old YAML, falling back to env vars (${errorMessage})", e.Message);
+                _logger.LogWarning("Failed to load config as old YAML. ({errorMessage})", e.Message);
             }
         }
 
@@ -64,7 +64,7 @@ public class ConfigLoader(ILogger<ConfigLoader> _logger)
         }
         catch (Exception e)
         {
-            _logger.LogWarning("Failed to load config as env vars (${errorMessage})", e.Message);
+            _logger.LogWarning("Failed to load config as env vars ({errorMessage})", e.Message);
         }
 
         throw new ImmichFrameException("Failed to load configuration");
