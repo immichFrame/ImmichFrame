@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authentication;
 using System.Reflection;
 using ImmichFrame.Core.Logic;
 using ImmichFrame.Core.Logic.AccountSelection;
-using ImmichFrame.WebApi.Helpers;
 using ImmichFrame.WebApi.Helpers.Config;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -59,7 +58,11 @@ builder.Services.AddSingleton<IWeatherService, OpenWeatherMapService>();
 builder.Services.AddSingleton<ICalendarService, IcalCalendarService>();
 builder.Services.AddSingleton<IAssetAccountTracker, BloomFilterAssetAccountTracker>();
 builder.Services.AddSingleton<IAccountSelectionStrategy, TotalAccountImagesSelectionStrategy>();
-builder.Services.AddTransient<Func<IAccountSettings, IImmichFrameLogic>>(srv => account => ActivatorUtilities.CreateInstance<PooledImmichFrameLogic>(srv, account));
+builder.Services.AddHttpClient(); // Ensures IHttpClientFactory is available
+
+builder.Services.AddTransient<Func<IAccountSettings, IImmichFrameLogic>>(srv =>
+    account => ActivatorUtilities.CreateInstance<PooledImmichFrameLogic>(srv, account));
+
 builder.Services.AddSingleton<IImmichFrameLogic, MultiImmichFrameLogicDelegate>();
 
 builder.Services.AddControllers();
@@ -107,3 +110,6 @@ app.MapControllers();
 app.MapFallbackToFile("/index.html");
 
 app.Run();
+
+// Make Program public for WebApplicationFactory
+public partial class Program { }

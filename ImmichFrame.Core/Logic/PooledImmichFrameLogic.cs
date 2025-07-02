@@ -2,6 +2,7 @@ using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
+using System.Net.Http;
 using ImmichFrame.Core.Logic.Pool;
 
 namespace ImmichFrame.Core.Logic;
@@ -14,13 +15,14 @@ public class PooledImmichFrameLogic : IImmichFrameLogic
     private readonly ImmichApi _immichApi;
     private readonly string _downloadLocation = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ImageCache");
 
-    public PooledImmichFrameLogic(IAccountSettings accountSettings, IGeneralSettings generalSettings)
+    public PooledImmichFrameLogic(IAccountSettings accountSettings, IGeneralSettings generalSettings, IHttpClientFactory httpClientFactory)
     {
         _generalSettings = generalSettings;
 
-        var httpClient = new HttpClient();
+        var httpClient = httpClientFactory.CreateClient("ImmichApiAccountClient");
         httpClient.UseApiKey(accountSettings.ApiKey);
         _immichApi = new ImmichApi(accountSettings.ImmichServerUrl, httpClient);
+
         _apiCache = new ApiCache(TimeSpan.FromHours(generalSettings.RefreshAlbumPeopleInterval));
         _pool = BuildPool(accountSettings);
     }
