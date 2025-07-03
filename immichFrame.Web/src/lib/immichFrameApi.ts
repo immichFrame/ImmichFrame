@@ -185,7 +185,6 @@ export type IAppointment = {
     location?: string | null;
 };
 export type ClientSettingsDto = {
-    margin?: string | null;
     interval?: number;
     transitionDuration?: number;
     downloadImages?: boolean;
@@ -205,7 +204,6 @@ export type ClientSettingsDto = {
     style?: string | null;
     baseFontSize?: string | null;
     showWeatherDescription?: boolean;
-    unattendedMode?: boolean;
     imageZoom?: boolean;
     imagePan?: boolean;
     imageFill?: boolean;

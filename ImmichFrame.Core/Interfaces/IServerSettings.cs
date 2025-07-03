@@ -20,7 +20,6 @@
         public List<Guid> ExcludedAlbums { get; }
         public List<Guid> People { get; }
         public int? Rating { get; }
-        public string ImmichFrameAlbumName { get; }
     }
 
     public interface IGeneralSettings
@@ -32,7 +31,6 @@
         public string? UnitSystem { get; }
         public string? Webhook { get; }
         public string? AuthenticationSecret { get; }
-        public string Margin { get; }
         public int Interval { get; }
         public double TransitionDuration { get; }
         public bool DownloadImages { get; }
@@ -52,7 +50,6 @@
         public string Style { get; }
         public string? BaseFontSize { get; }
         public bool ShowWeatherDescription { get; }
-        public bool UnattendedMode { get; }
         public bool ImageZoom { get; }
         public bool ImagePan { get; }
         public bool ImageFill { get; }

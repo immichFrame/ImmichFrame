@@ -39,7 +39,6 @@
     "ShowPeopleDesc": true,
     "ShowImageLocation": true,
     "ImageLocationFormat": "ImageLocationFormat_TEST",
-    "ImmichFrameAlbumName": "ImmichFrameAlbumName_TEST",
     "PrimaryColor": "PrimaryColor_TEST",
     "SecondaryColor": "SecondaryColor_TEST",
     "Style": "Style_TEST",
@@ -52,7 +51,5 @@
     "Webhook": "Webhook_TEST",
     "Account2.ImmichServerUrl": "Account2.ImmichServerUrl_TEST",
     "Account2.ApiKey": "Account2.ApiKey_TEST",
-    "Account2.ImagesFromDate": "Account2.ImagesFromDate_TEST",
-    "Margin": "Margin_TEST",
-    "UnattendedMode": true
+    "Account2.ImagesFromDate": "Account2.ImagesFromDate_TEST"
 }

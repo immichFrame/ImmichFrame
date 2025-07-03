@@ -1,0 +1,49 @@
+General:
+  AuthenticationSecret: null
+  DownloadImages: false
+  RenewImagesDuration: 30
+  Webcalendars:
+    - calendarurl
+  RefreshAlbumPeopleInterval: 12
+  PhotoDateFormat: MM/dd/yyyy
+  ImageLocationFormat: 'City,State,Country'
+  WeatherApiKey: ''
+  UnitSystem: imperial
+  WeatherLatLong: '40.730610,-73.935242'
+  Webhook: null
+  Language: en
+  Interval: 45
+  TransitionDuration: 2
+  ShowClock: true
+  ClockFormat: 'hh:mm'
+  ShowProgressBar: true
+  ShowPhotoDate: true
+  ShowImageDesc: true
+  ShowPeopleDesc: true
+  ShowAlbumName: true
+  ShowImageLocation: true
+  PrimaryColor: '#f5deb3'
+  SecondaryColor: '#000000'
+  Style: none
+  BaseFontSize: 17px
+  ShowWeatherDescription: true
+  ImageZoom: true
+  ImagePan: false
+  ImageFill: false
+  Layout: splitview
+Accounts:
+  - ImmichServerUrl: REQUIRED
+    ApiKey: REQUIRED
+    ImagesFromDate: null
+    ShowMemories: false
+    ShowFavorites: false
+    ShowArchived: false
+    ImagesFromDays: null
+    ImagesUntilDate: '2020-01-02'
+    Rating: null
+    Albums:
+      - UUID
+    ExcludedAlbums:
+      - UUID
+    People:
+      - UUID

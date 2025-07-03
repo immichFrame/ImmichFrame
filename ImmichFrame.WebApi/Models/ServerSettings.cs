@@ -1,18 +1,28 @@
 ﻿using System.Text.Json.Serialization;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.WebApi.Helpers;
+using YamlDotNet.Serialization;
 
 namespace ImmichFrame.WebApi.Models;
 
 public class ServerSettings : IServerSettings, IConfigSettable
 {
-    [JsonPropertyName("General")] public GeneralSettings GeneralSettingsImpl { get; set; }
+    [YamlMember(Alias = "General")]
+    [JsonPropertyName("General")]
+    public GeneralSettings GeneralSettingsImpl { get; set; }
 
-    [JsonPropertyName("Accounts")] public IEnumerable<ServerAccountSettings> AccountsImpl { get; set; }
+    [YamlMember(Alias = "Accounts")]
+    [JsonPropertyName("Accounts")]
+    public IEnumerable<ServerAccountSettings> AccountsImpl { get; set; }
 
     //Covariance not allowed on interface impls
-    [JsonIgnore] public IGeneralSettings GeneralSettings => GeneralSettingsImpl;
-    [JsonIgnore] public IEnumerable<IAccountSettings> Accounts => AccountsImpl;
+    [JsonIgnore]
+    [YamlIgnore]
+    public IGeneralSettings GeneralSettings => GeneralSettingsImpl;
+
+    [JsonIgnore]
+    [YamlIgnore]
+    public IEnumerable<IAccountSettings> Accounts => AccountsImpl;
 }
 
 public class GeneralSettings : IGeneralSettings, IConfigSettable
@@ -21,7 +31,6 @@ public class GeneralSettings : IGeneralSettings, IConfigSettable
     public string Language { get; set; } = "en";
     public string? ImageLocationFormat { get; set; } = "City,State,Country";
     public string? PhotoDateFormat { get; set; } = "MM/dd/yyyy";
-    public string Margin { get; set; } = "0,0,0,0";
     public int Interval { get; set; } = 45;
     public double TransitionDuration { get; set; } = 1;
     public bool ShowClock { get; set; } = true;
@@ -37,7 +46,6 @@ public class GeneralSettings : IGeneralSettings, IConfigSettable
     public string Style { get; set; } = "none";
     public string? BaseFontSize { get; set; }
     public bool ShowWeatherDescription { get; set; } = true;
-    public bool UnattendedMode { get; set; } = false;
     public bool ImageZoom { get; set; } = true;
     public bool ImagePan { get; set; } = false;
     public bool ImageFill { get; set; } = false;
@@ -67,6 +75,4 @@ public class ServerAccountSettings : IAccountSettings, IConfigSettable
     public List<Guid> ExcludedAlbums { get; set; } = new();
     public List<Guid> People { get; set; } = new();
     public int? Rating { get; set; }
-
-    public string ImmichFrameAlbumName { get; set; } = string.Empty;
 }
