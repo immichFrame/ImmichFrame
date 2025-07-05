@@ -9,13 +9,13 @@ namespace ImmichFrame.Core.Logic;
 
 public class MultiImmichFrameLogicDelegate : IImmichFrameLogic
 {
-    private readonly FrozenDictionary<IAccountSettings, IImmichFrameLogic> _accountToDelegate;
+    private readonly FrozenDictionary<IAccountSettings, IAccountImmichFrameLogic> _accountToDelegate;
     private readonly IServerSettings _serverSettings;
     private readonly IAccountSelectionStrategy _accountSelectionStrategy;
     private readonly ILogger<MultiImmichFrameLogicDelegate> _logger;
 
     public MultiImmichFrameLogicDelegate(IServerSettings serverSettings,
-        Func<IAccountSettings, IImmichFrameLogic> logicFactory, ILogger<MultiImmichFrameLogicDelegate> logger,
+        Func<IAccountSettings, IAccountImmichFrameLogic> logicFactory, ILogger<MultiImmichFrameLogicDelegate> logger,
         IAccountSelectionStrategy accountSelectionStrategy)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
