@@ -50,6 +50,9 @@ public class ServerSettingsV1 : IConfigSettable
     public bool ImagePan { get; set; } = false;
     public bool ImageFill { get; set; } = false;
     public string Layout { get; set; } = "splitview";
+    public string ClockPosition { get; set; } = "bottom-left";
+    public string AssetInfoPosition { get; set; } = "bottom-right";
+    public string AppointmentsPosition { get; set; } = "top-right";
 }
 
 /// <summary>
@@ -111,8 +114,8 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
         public bool ImageFill => _delegate.ImageFill;
         public string Layout => _delegate.Layout;
         public string Language => _delegate.Language;
-        public string ClockPosition => "bottom-left";
-        public string AssetInfoPosition => "bottom-right";
-        public string AppointmentsPosition => "top-right";
+        public string ClockPosition => _delegate.ClockPosition;
+        public string AssetInfoPosition => _delegate.AssetInfoPosition;
+        public string AppointmentsPosition => _delegate.AppointmentsPosition;
     }
 }
