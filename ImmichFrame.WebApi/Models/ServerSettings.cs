@@ -9,7 +9,7 @@ public class ServerSettings : IServerSettings, IConfigSettable
 {
     [YamlMember(Alias = "General")]
     [JsonPropertyName("General")]
-    public GeneralSettings GeneralSettingsImpl { get; set; }
+    public GeneralSettings? GeneralSettingsImpl { get; set; }
 
     [YamlMember(Alias = "Accounts")]
     [JsonPropertyName("Accounts")]
@@ -18,7 +18,7 @@ public class ServerSettings : IServerSettings, IConfigSettable
     //Covariance not allowed on interface impls
     [JsonIgnore]
     [YamlIgnore]
-    public IGeneralSettings GeneralSettings => GeneralSettingsImpl;
+    public IGeneralSettings GeneralSettings => GeneralSettingsImpl ?? new GeneralSettings();
 
     [JsonIgnore]
     [YamlIgnore]

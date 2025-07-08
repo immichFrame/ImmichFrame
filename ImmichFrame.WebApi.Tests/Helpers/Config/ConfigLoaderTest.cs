@@ -6,6 +6,7 @@ using ImmichFrame.WebApi.Helpers.Config;
 using ImmichFrame.WebApi.Models;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
+using AwesomeAssertions;
 
 namespace ImmichFrame.WebApi.Tests.Helpers.Config;
 
@@ -48,6 +49,16 @@ public class ConfigLoaderTest
             TestContext.CurrentContext.TestDirectory, "Resources/TestV2.json"));
         VerifyConfig(config, true);
     }
+    
+    [Test]
+    public void TestLoadConfigV2Json_NoGeneral()
+    {
+        var config = _configLoader.LoadConfigJson<ServerSettings>(Path.Combine(
+            TestContext.CurrentContext.TestDirectory, "Resources/TestV2_NoGeneral.json"));
+        
+        Assert.That(config.GeneralSettings, Is.Not.Null);
+        config.GeneralSettings.Should().BeEquivalentTo(new GeneralSettings());
+    }
 
     [Test]
     public void TestLoadConfigV2Yaml()
@@ -57,12 +68,16 @@ public class ConfigLoaderTest
         VerifyConfig(config, true);
     }
 
-    private void VerifyConfig(IServerSettings serverSettings, Boolean usePrefix)
+    private void VerifyConfig(IServerSettings serverSettings, bool usePrefix)
     {
         VerifyProperties(serverSettings.GeneralSettings);
+        VerifyAccounts(serverSettings.Accounts, usePrefix);
+    }
 
+    private void VerifyAccounts(IEnumerable<IAccountSettings> accounts, bool usePrefix)
+    {
         var idx = 1;
-        foreach (var account in serverSettings.Accounts)
+        foreach (var account in accounts)
         {
             VerifyProperties(account, usePrefix ? "Account" + idx + "." : "");
             idx++;
