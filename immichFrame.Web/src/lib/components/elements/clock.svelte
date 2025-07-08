@@ -5,6 +5,7 @@
 	import * as locale from 'date-fns/locale';
 	import { configStore } from '$lib/stores/config.store';
 	import { clientIdentifierStore } from '$lib/stores/persist.store';
+	import { getPositionClasses, getTextAlignment } from '$lib/utils';
 
 	api.init();
 
@@ -54,7 +55,9 @@
 
 <div
 	id="clock"
-	class="fixed bottom-0 left-0 z-10 text-center text-primary
+	class="fixed z-10 text-primary
+	{getPositionClasses($configStore.clockPosition || 'bottom-left')}
+	{getTextAlignment($configStore.clockPosition || 'bottom-left')}
 	{$configStore.style == 'solid' ? 'bg-secondary rounded-tr-2xl' : ''}
 	{$configStore.style == 'transition' ? 'bg-gradient-to-r from-secondary from-0% pr-10' : ''}
 	{$configStore.style == 'blur' ? 'backdrop-blur-lg rounded-tr-2xl' : ''}	

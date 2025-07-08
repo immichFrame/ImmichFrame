@@ -31,6 +31,9 @@ General:
   ImagePan: false
   ImageFill: false
   Layout: splitview
+  ClockPosition: bottom-left
+  AssetInfoPosition: bottom-right
+  AppointmentsPosition: top-right
 Accounts:
   - ImmichServerUrl: REQUIRED
     ApiKey: REQUIRED

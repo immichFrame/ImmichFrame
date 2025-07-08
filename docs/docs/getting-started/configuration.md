@@ -49,6 +49,8 @@ General:
   ShowClock: true  # boolean
   # Time format
   ClockFormat: 'hh:mm'  # string
+  # Position of the clock overlay (format: vertical-horizontal)
+  ClockPosition: 'bottom-left'  # 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right'
   # Displays the progress bar.
   ShowProgressBar: true  # boolean
   # Displays the date of the current image.
@@ -61,6 +63,10 @@ General:
   ShowAlbumName: true  # boolean
   # Displays the location of the current image.
   ShowImageLocation: true  # boolean
+  # Position of the asset info overlay (photo date, description, people, albums, location)
+  AssetInfoPosition: 'bottom-right'  # 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right'
+  # Position of the appointments overlay
+  AppointmentsPosition: 'top-right'  # 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right'
   # Lets you choose a primary color for your UI. Use hex with alpha value to edit opacity.
   PrimaryColor: '#f5deb3'  # string
   # Lets you choose a secondary color for your UI. (Only used with `style=solid or transition`) Use hex with alpha value to edit opacity.
@@ -124,6 +130,19 @@ Weather is enabled by entering an API key. Get yours free from [OpenWeatherMap][
 
 ### Calendar
 If you are using Google Calendar, more information can be found [here](https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Cget-your-calendar-view-only).
+
+### Overlay Positioning
+You can customize the position of different overlays on the screen:
+
+- **ClockPosition**: Controls where the clock, date, and weather information appears
+- **AssetInfoPosition**: Controls where image metadata (date, description, people, albums, location) appears  
+- **AppointmentsPosition**: Controls where calendar appointments appear
+
+Each position setting uses the format `vertical-horizontal` with these options:
+- **Vertical**: `top` or `bottom`
+- **Horizontal**: `left`, `center`, or `right`
+
+For example: `top-left`, `bottom-center`, `top-right`, etc.
 
 ### Misc
 #### Webhook

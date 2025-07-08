@@ -4,6 +4,7 @@
 	import { format } from 'date-fns';
 	import { configStore } from '$lib/stores/config.store';
 	import { clientIdentifierStore } from '$lib/stores/persist.store';
+	import { getPositionClasses, getTextAlignment } from '$lib/utils';
 
 	api.init();
 
@@ -51,7 +52,9 @@
 {#if appointments}
 	<div
 		id="appointments"
-		class="fixed top-0 right-0 w-auto z-10 text-center text-primary m-5 max-w-[20%] hidden lg:block md:min-w-[10%]"
+		class="fixed w-auto z-10 text-primary m-5 max-w-[20%] hidden lg:block md:min-w-[10%]
+		{getPositionClasses($configStore.appointmentsPosition || 'top-right')}
+		{getTextAlignment($configStore.appointmentsPosition || 'top-right')}"
 	>
 		<!-- <div class="text-4xl mx-8 font-bold">Appointments</div> -->
 		<div class="">

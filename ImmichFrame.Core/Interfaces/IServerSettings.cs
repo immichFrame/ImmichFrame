@@ -55,5 +55,8 @@
         public bool ImageFill { get; }
         public string Layout { get; }
         public string Language { get; }
+        public string ClockPosition { get; }
+        public string AssetInfoPosition { get; }
+        public string AppointmentsPosition { get; }
     }
 }
