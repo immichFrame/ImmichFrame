@@ -9,7 +9,7 @@ namespace ImmichFrame.Core.Logic;
 public class PooledImmichFrameLogic : IImmichFrameLogic
 {
     private readonly IGeneralSettings _generalSettings;
-    private readonly ApiCache _apiCache;
+    private readonly IApiCache _apiCache;
     private readonly IAssetPool _pool;
     private readonly ImmichApi _immichApi;
     private readonly string _downloadLocation = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ImageCache");

@@ -14,14 +14,14 @@ namespace ImmichFrame.Core.Tests.Logic.Pool;
 [TestFixture]
 public class PersonAssetsPoolTests // Renamed from PeopleAssetsPoolTests to match class name
 {
-    private Mock<ApiCache> _mockApiCache;
+    private Mock<IApiCache> _mockApiCache;
     private Mock<ImmichApi> _mockImmichApi;
     private Mock<IAccountSettings> _mockAccountSettings;
     private TestablePersonAssetsPool _personAssetsPool;
 
     private class TestablePersonAssetsPool : PersonAssetsPool
     {
-        public TestablePersonAssetsPool(ApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings)
+        public TestablePersonAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings)
             : base(apiCache, immichApi, accountSettings) { }
 
         public Task<IEnumerable<AssetResponseDto>> TestLoadAssets(CancellationToken ct = default)
@@ -33,7 +33,7 @@ public class PersonAssetsPoolTests // Renamed from PeopleAssetsPoolTests to matc
     [SetUp]
     public void Setup()
     {
-        _mockApiCache = new Mock<ApiCache>(null);
+        _mockApiCache = new Mock<IApiCache>();
         _mockImmichApi = new Mock<ImmichApi>(null, null);
         _mockAccountSettings = new Mock<IAccountSettings>();
         _personAssetsPool = new TestablePersonAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
