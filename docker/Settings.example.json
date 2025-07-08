@@ -32,7 +32,10 @@
     "ImageZoom": true,
     "ImagePan": false,
     "ImageFill": false,
-    "Layout": "splitview"
+    "Layout": "splitview",
+    "ClockPosition": "bottom-left",
+    "AssetInfoPosition": "bottom-right",
+    "AppointmentsPosition": "top-right"
   },
   "Accounts": [
     {

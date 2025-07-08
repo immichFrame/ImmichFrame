@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * ImmichFrame.WebApi
  * 1.0
@@ -209,6 +208,9 @@ export type ClientSettingsDto = {
     imageFill?: boolean;
     layout?: string | null;
     language?: string | null;
+    clockPosition?: string | null;
+    assetInfoPosition?: string | null;
+    appointmentsPosition?: string | null;
 };
 export type IWeather = {
     location?: string | null;

@@ -5,6 +5,7 @@
 	import { configStore } from '$lib/stores/config.store';
 	import Icon from './icon.svelte';
 	import { mdiCalendar, mdiMapMarker, mdiAccount, mdiText, mdiImageAlbum } from '@mdi/js';
+	import { getPositionClasses, getTextAlignment } from '$lib/utils';
 
 	interface Props {
 		asset: AssetResponseDto;
@@ -68,7 +69,9 @@
 {#if showPhotoDate || showLocation || showImageDesc || showPeopleDesc || showAlbumName}
 	<div
 		id="imageinfo"
-		class="immichframe_image_metadata absolute bottom-0 right-0 z-100 text-primary p-1 text-right
+		class="immichframe_image_metadata absolute z-100 text-primary p-1
+		{getPositionClasses($configStore.assetInfoPosition || 'bottom-right')}
+		{getTextAlignment($configStore.assetInfoPosition || 'bottom-right')}
 		{$configStore.style == 'solid' ? 'bg-secondary rounded-tl-2xl' : ''}
 		{$configStore.style == 'transition' ? 'bg-gradient-to-l from-secondary from-0% pl-10' : ''}
 		{$configStore.style == 'blur' ? 'backdrop-blur-lg rounded-tl-2xl' : ''}	"
