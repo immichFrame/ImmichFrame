@@ -172,7 +172,7 @@ The screen is configured in a 3x3 gird. You can touch or click:
 [github-android-repo]: https://github.com/immichFrame/ImmichFrame_Android
 [github-appletv-repo]: https://github.com/immichFrame/ImmichFrame_Apple
 [app-store-link]: https://apps.apple.com/us/app/immichframe/id6742748077
-[releases-url]: https://github.com/3rob3/ImmichFrame/releases/latest
+[releases-url]: https://github.com/immichFrame/ImmichFrame_Desktop/releases/latest
 [ADB-link]: https://www.xda-developers.com/install-adb-windows-macos-linux/
 [webview-update]: https://www.apkmirror.com/apk/lineageos/android-system-webview-2/android-system-webview-2-106-0-5249-126-release/android-system-webview-106-0-5249-126-12-android-apk-download/
 [setting-androidtv-screensaver]: https://youtu.be/m3Arh-hrWks
