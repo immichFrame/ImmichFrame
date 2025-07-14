@@ -1,0 +1,44 @@
+{
+  "Accounts": [
+    {
+      "ImmichServerUrl": "Account1.ImmichServerUrl_TEST",
+      "ApiKey": "Account1.ApiKey_TEST",
+      "ImagesFromDate": "2020-01-02",
+      "ShowMemories": true,
+      "ShowFavorites": true,
+      "ShowArchived": true,
+      "ImagesFromDays": 7,
+      "ImagesUntilDate": "2020-01-02",
+      "Rating": 7,
+      "Albums": [
+        "00000000-0000-0000-0000-000000000001"
+      ],
+      "ExcludedAlbums": [
+        "00000000-0000-0000-0000-000000000001"
+      ],
+      "People": [
+        "00000000-0000-0000-0000-000000000001"
+      ]
+    },
+    {
+      "ImmichServerUrl": "Account2.ImmichServerUrl_TEST",
+      "ApiKey": "Account2.ApiKey_TEST",
+      "ImagesFromDate": "2020-01-02",
+      "ShowMemories": true,
+      "ShowFavorites": true,
+      "ShowArchived": true,
+      "ImagesFromDays": 7,
+      "ImagesUntilDate": "2020-01-02",
+      "Rating": 7,
+      "Albums": [
+        "00000000-0000-0000-0000-000000000001"
+      ],
+      "ExcludedAlbums": [
+        "00000000-0000-0000-0000-000000000001"
+      ],
+      "People": [
+        "00000000-0000-0000-0000-000000000001"
+      ]
+    }
+  ]
+}
