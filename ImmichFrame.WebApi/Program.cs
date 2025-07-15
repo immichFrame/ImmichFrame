@@ -59,7 +59,8 @@ builder.Services.AddSingleton<IWeatherService, OpenWeatherMapService>();
 builder.Services.AddSingleton<ICalendarService, IcalCalendarService>();
 builder.Services.AddSingleton<IAssetAccountTracker, BloomFilterAssetAccountTracker>();
 builder.Services.AddSingleton<IAccountSelectionStrategy, TotalAccountImagesSelectionStrategy>();
-builder.Services.AddTransient<Func<IAccountSettings, IAccountImmichFrameLogic>>(srv => account => ActivatorUtilities.CreateInstance<PooledImmichFrameLogic>(srv, account));
+builder.Services.AddTransient<Func<IAccountSettings, IAccountImmichFrameLogic>>(srv => account => 
+    ActivatorUtilities.CreateInstance<PooledImmichFrameLogic>(srv, ActivatorUtilities.CreateInstance<PoolConfiguration>(srv, account)));
 builder.Services.AddSingleton<IImmichFrameLogic, MultiImmichFrameLogicDelegate>();
 
 builder.Services.AddControllers();

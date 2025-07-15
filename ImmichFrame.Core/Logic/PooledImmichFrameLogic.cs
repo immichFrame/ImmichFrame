@@ -1,74 +1,23 @@
 using ImmichFrame.Core.Api;
-using ImmichFrame.Core.Exceptions;
-using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
-using ImmichFrame.Core.Logic.Pool;
 
 namespace ImmichFrame.Core.Logic;
 
-public class PooledImmichFrameLogic : IAccountImmichFrameLogic
+public class PooledImmichFrameLogic: LogicPoolAdapter, IAccountImmichFrameLogic
 {
     private readonly IGeneralSettings _generalSettings;
-    private readonly IApiCache _apiCache;
-    private readonly IAssetPool _pool;
     private readonly ImmichApi _immichApi;
     private readonly string _downloadLocation = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ImageCache");
 
-    public PooledImmichFrameLogic(IAccountSettings accountSettings, IGeneralSettings generalSettings)
+    public PooledImmichFrameLogic(IGeneralSettings generalSettings, PoolConfiguration poolConfiguration)
+        : base(poolConfiguration.AssetPool, poolConfiguration.ImmichApi, generalSettings.Webhook)
     {
         _generalSettings = generalSettings;
-
-        var httpClient = new HttpClient();
-
-        AccountSettings = accountSettings;
-        httpClient.UseApiKey(accountSettings.ApiKey);
-        _immichApi = new ImmichApi(accountSettings.ImmichServerUrl, httpClient);
-        _apiCache = new ApiCache(TimeSpan.FromHours(generalSettings.RefreshAlbumPeopleInterval));
-        _pool = BuildPool(accountSettings);
+        _immichApi = poolConfiguration.ImmichApi;
     }
-
+    
     public IAccountSettings AccountSettings { get; }
-
-    private IAssetPool BuildPool(IAccountSettings accountSettings)
-    {
-        if (!accountSettings.ShowFavorites && !accountSettings.ShowMemories && !accountSettings.Albums.Any() && !accountSettings.People.Any())
-        {
-            return new AllAssetsPool(_apiCache, _immichApi, accountSettings);
-        }
-
-        var pools = new List<IAssetPool>();
-
-        if (accountSettings.ShowFavorites)
-            pools.Add(new FavoriteAssetsPool(_apiCache, _immichApi, accountSettings));
-
-        if (accountSettings.ShowMemories)
-            pools.Add(new MemoryAssetsPool(_apiCache, _immichApi, accountSettings));
-
-        if (accountSettings.Albums.Any())
-            pools.Add(new AlbumAssetsPool(_apiCache, _immichApi, accountSettings));
-
-        if (accountSettings.People.Any())
-            pools.Add(new PersonAssetsPool(_apiCache, _immichApi, accountSettings));
-
-        return new MultiAssetPool(pools);
-    }
-
-    public async Task<AssetResponseDto?> GetNextAsset()
-    {
-        return (await _pool.GetAssets(1)).FirstOrDefault();
-    }
-
-    public Task<IEnumerable<AssetResponseDto>> GetAssets()
-    {
-        return _pool.GetAssets(25);
-    }
-
-    public Task<AssetResponseDto> GetAssetInfoById(Guid assetId) => _immichApi.GetAssetInfoAsync(assetId, null);
-
-    public async Task<IEnumerable<AlbumResponseDto>> GetAlbumInfoById(Guid assetId) => await _immichApi.GetAllAlbumsAsync(assetId, null);
-
-    public Task<long> GetTotalAssets() => _pool.GetAssetCount();
-
+    
     public async Task<(string fileName, string ContentType, Stream fileStream)> GetImage(Guid id)
     {
 // Check if the image is already downloaded
@@ -97,38 +46,21 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
             }
         }
 
-        var data = await _immichApi.ViewAssetAsync(id, string.Empty, AssetMediaSize.Preview);
-
-        if (data == null)
-            throw new AssetNotFoundException($"Asset {id} was not found!");
-
-        var contentType = "";
-        if (data.Headers.ContainsKey("Content-Type"))
-        {
-            contentType = data.Headers["Content-Type"].FirstOrDefault() ?? "";
-        }
-
-        var ext = contentType.ToLower() == "image/webp" ? "webp" : "jpeg";
-        var fileName = $"{id}.{ext}";
+        var (fileName, contentType, fileStream) = await base.GetImage(id);
 
         if (_generalSettings.DownloadImages)
         {
-            var stream = data.Stream;
-
             var filePath = Path.Combine(_downloadLocation, fileName);
 
             // save to folder
             var fs = File.Create(filePath);
-            await stream.CopyToAsync(fs);
+            await fileStream.CopyToAsync(fs);
             fs.Position = 0;
             return (Path.GetFileName(filePath), contentType, fs);
         }
 
-        return (fileName, contentType, data.Stream);
+        return (fileName, contentType, fileStream);
     }
-
-    public Task SendWebhookNotification(IWebhookNotification notification) =>
-        WebhookHelper.SendWebhookNotification(notification, _generalSettings.Webhook);
 
     public override string ToString() => $"Account Pool [{_immichApi.BaseUrl}]";
 }

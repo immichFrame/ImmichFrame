@@ -22,16 +22,16 @@ public class CachingApiAssetsPoolTests
     // Concrete implementation for testing the abstract class
     private class TestableCachingApiAssetsPool : CachingApiAssetsPool
     {
-        public Func<Task<IEnumerable<AssetResponseDto>>> LoadAssetsFunc { get; set; }
+        public Func<Task<IList<AssetResponseDto>>> LoadAssetsFunc { get; set; }
 
         public TestableCachingApiAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings)
-            : base(apiCache, immichApi, accountSettings)
+            : base(apiCache, accountSettings)
         {
         }
 
-        protected override Task<IEnumerable<AssetResponseDto>> LoadAssets(CancellationToken ct = default)
+        protected override Task<IList<AssetResponseDto>> LoadAssets(CancellationToken ct = default)
         {
-            return LoadAssetsFunc != null ? LoadAssetsFunc() : Task.FromResult(Enumerable.Empty<AssetResponseDto>());
+            return LoadAssetsFunc != null ? LoadAssetsFunc() : Task.FromResult<IList<AssetResponseDto>>(new List<AssetResponseDto>());
         }
     }
 
@@ -47,9 +47,9 @@ public class CachingApiAssetsPoolTests
         // Default setup for ApiCache to execute the factory function
         _mockApiCache.Setup(c => c.GetOrAddAsync(
                 It.IsAny<string>(),
-                It.IsAny<Func<Task<IEnumerable<AssetResponseDto>>>>()
+                It.IsAny<Func<Task<IList<AssetResponseDto>>>>()
             ))
-            .Returns<string, Func<Task<IEnumerable<AssetResponseDto>>>>(async (key, factory) => await factory());
+            .Returns<string, Func<Task<IList<AssetResponseDto>>>>(async (key, factory) => await factory());
 
         // Default account settings
         _mockAccountSettings.SetupGet(s => s.ShowArchived).Returns(true);
@@ -76,7 +76,7 @@ public class CachingApiAssetsPoolTests
     {
         // Arrange
         var assets = CreateSampleAssets();
-        _testPool.LoadAssetsFunc = () => Task.FromResult<IEnumerable<AssetResponseDto>>(assets);
+        _testPool.LoadAssetsFunc = () => Task.FromResult<IList<AssetResponseDto>>(assets);
         _mockAccountSettings.SetupGet(s => s.ShowArchived).Returns(false); // Filter out archived
 
         // Act
@@ -92,7 +92,7 @@ public class CachingApiAssetsPoolTests
     {
         // Arrange
         var assets = CreateSampleAssets(); // Total 5 assets, 4 images if ShowArchived = true
-        _testPool.LoadAssetsFunc = () => Task.FromResult<IEnumerable<AssetResponseDto>>(assets);
+        _testPool.LoadAssetsFunc = () => Task.FromResult<IList<AssetResponseDto>>(assets);
         _mockAccountSettings.SetupGet(s => s.ShowArchived).Returns(true); // Asset "3" included
 
         // Act
@@ -109,7 +109,7 @@ public class CachingApiAssetsPoolTests
     {
         // Arrange
         var assets = CreateSampleAssets().Where(a => a.Type == AssetTypeEnum.IMAGE && !a.IsArchived).ToList(); // 3 assets
-        _testPool.LoadAssetsFunc = () => Task.FromResult<IEnumerable<AssetResponseDto>>(assets);
+        _testPool.LoadAssetsFunc = () => Task.FromResult<IList<AssetResponseDto>>(assets);
         _mockAccountSettings.SetupGet(s => s.ShowArchived).Returns(false);
 
         // Act
@@ -129,16 +129,16 @@ public class CachingApiAssetsPoolTests
         _testPool.LoadAssetsFunc = () =>
         {
             loadAssetsCallCount++;
-            return Task.FromResult<IEnumerable<AssetResponseDto>>(assets);
+            return Task.FromResult<IList<AssetResponseDto>>(assets);
         };
 
         // Setup cache to really cache after the first call
-        IEnumerable<AssetResponseDto> cachedValue = null;
+        IList<AssetResponseDto> cachedValue = null;
         _mockApiCache.Setup(c => c.GetOrAddAsync(
                 It.IsAny<string>(),
-                It.IsAny<Func<Task<IEnumerable<AssetResponseDto>>>>()
+                It.IsAny<Func<Task<IList<AssetResponseDto>>>>()
             ))
-            .Returns<string, Func<Task<IEnumerable<AssetResponseDto>>>>(async (key, factory) =>
+            .Returns<string, Func<Task<IList<AssetResponseDto>>>>(async (key, factory) =>
             {
                 if (cachedValue == null)
                 {
@@ -162,7 +162,7 @@ public class CachingApiAssetsPoolTests
     {
         // Arrange
         var assets = CreateSampleAssets(); // Asset "3" is archived
-        _testPool.LoadAssetsFunc = () => Task.FromResult<IEnumerable<AssetResponseDto>>(assets);
+        _testPool.LoadAssetsFunc = () => Task.FromResult<IList<AssetResponseDto>>(assets);
         _mockAccountSettings.SetupGet(s => s.ShowArchived).Returns(false);
 
         // Act
@@ -178,7 +178,7 @@ public class CachingApiAssetsPoolTests
     {
         // Arrange
         var assets = CreateSampleAssets();
-        _testPool.LoadAssetsFunc = () => Task.FromResult<IEnumerable<AssetResponseDto>>(assets);
+        _testPool.LoadAssetsFunc = () => Task.FromResult<IList<AssetResponseDto>>(assets);
         var untilDate = DateTime.Now.AddDays(-7); // Assets "1" (10 days ago), "5" (1 year ago) should match
         _mockAccountSettings.SetupGet(s => s.ImagesUntilDate).Returns(untilDate);
         _mockAccountSettings.SetupGet(s => s.ShowArchived).Returns(true); // Include asset "3" for date check if not filtered by archive
@@ -201,7 +201,7 @@ public class CachingApiAssetsPoolTests
     {
         // Arrange
         var assets = CreateSampleAssets();
-        _testPool.LoadAssetsFunc = () => Task.FromResult<IEnumerable<AssetResponseDto>>(assets);
+        _testPool.LoadAssetsFunc = () => Task.FromResult<IList<AssetResponseDto>>(assets);
         var fromDate = DateTime.Now.AddDays(-7); // Assets "3" (5 days ago), "4" (2 days ago) should match
         _mockAccountSettings.SetupGet(s => s.ImagesFromDate).Returns(fromDate);
         _mockAccountSettings.SetupGet(s => s.ShowArchived).Returns(true);
@@ -224,7 +224,7 @@ public class CachingApiAssetsPoolTests
     {
         // Arrange
         var assets = CreateSampleAssets();
-        _testPool.LoadAssetsFunc = () => Task.FromResult<IEnumerable<AssetResponseDto>>(assets);
+        _testPool.LoadAssetsFunc = () => Task.FromResult<IList<AssetResponseDto>>(assets);
         _mockAccountSettings.SetupGet(s => s.ImagesFromDays).Returns(7); // Last 7 days
         _mockAccountSettings.SetupGet(s => s.ShowArchived).Returns(true);
         var fromDate = DateTime.Today.AddDays(-7);
@@ -248,7 +248,7 @@ public class CachingApiAssetsPoolTests
     {
         // Arrange
         var assets = CreateSampleAssets(); // Asset "1" (rating 5), "3" (rating 3), "4" (rating 5), "5" (rating 1)
-        _testPool.LoadAssetsFunc = () => Task.FromResult<IEnumerable<AssetResponseDto>>(assets);
+        _testPool.LoadAssetsFunc = () => Task.FromResult<IList<AssetResponseDto>>(assets);
         _mockAccountSettings.SetupGet(s => s.Rating).Returns(5);
         _mockAccountSettings.SetupGet(s => s.ShowArchived).Returns(true);
 
@@ -269,7 +269,7 @@ public class CachingApiAssetsPoolTests
     {
         // Arrange
         var assets = CreateSampleAssets();
-        _testPool.LoadAssetsFunc = () => Task.FromResult<IEnumerable<AssetResponseDto>>(assets);
+        _testPool.LoadAssetsFunc = () => Task.FromResult<IList<AssetResponseDto>>(assets);
 
         _mockAccountSettings.SetupGet(s => s.ShowArchived).Returns(false); // No archived (Asset "3" out)
         _mockAccountSettings.SetupGet(s => s.ImagesFromDays).Returns(15); // Last 15 days (Asset "5" out)
