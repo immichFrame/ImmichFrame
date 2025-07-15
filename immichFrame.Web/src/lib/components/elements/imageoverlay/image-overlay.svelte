@@ -83,7 +83,7 @@
 				{/if}
 			</div>
 
-			<OverlayQr baseUrl={asset.ImmichServerUrl ?? ''} id={asset.id} />
+			<OverlayQr baseUrl={asset.immichServerUrl ?? ''} id={asset.id} />
 		</div>
 	</div>
 </div>
