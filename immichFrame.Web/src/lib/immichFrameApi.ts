@@ -103,6 +103,7 @@ export type TagResponseDto = {
 export type AssetTypeEnum = 0 | 1 | 2 | 3;
 export type AssetVisibility = 0 | 1 | 2 | 3;
 export type AssetResponseDto = {
+    immichServerUrl?: string | null;
     checksum: string;
     deviceAssetId: string;
     deviceId: string;
