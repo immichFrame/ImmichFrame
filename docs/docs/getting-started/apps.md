@@ -125,8 +125,6 @@ This might break your warranty.
 
 The basic procedure of updating the WebView installation consists of a few steps. Read through and understand them first, before you attempt any changes.
 
-There are tested and working examples for Android 6.01 10.1" Frameo devices provided at the end. If you have one of those, you might as well skip directly to them.
-
 - Download WebView to PC from [APKMirror (WebView by Lineage)][webview-lineage]
   - You most likely must use an APK with com.android.webview as the package name, that's why LineageOS version is recommended instead of the Google version (which is com.google.android.webview)
   - You must use a version that is compatible with your Android version
@@ -157,7 +155,7 @@ There are tested and working examples for Android 6.01 10.1" Frameo devices prov
   mount -o rw,remount /partition && cp /path/to/original/webview.apk /path/to/original/webview.apk.bak
   ```
 - Overwrite original WebView APK with the downloaded one
-```shell
+  ```shell
   mount -o rw,remount /partition && cp /sdcard/webview.apk /path/to/original/webview.apk
   ```
 - Delete the oat folder recursively 
@@ -180,7 +178,7 @@ There are tested and working examples for Android 6.01 10.1" Frameo devices prov
   
   In Android developer settings, you can view the "WebView implementation". Check that this reflects the new version you pushed.
 
-#### Complete step-by-step instructions for Android 6.01
+#### Complete step-by-step instructions for Android 6.01 10.1" Frameo devices
 Follow instructions below to update WebView to 106. This has been tested and working on Android 6.01 10.1" Frameo devices:
 - Download WebView 106 to PC:
   [Lineage OS WebView 106-0-5249-126-12][webview-lineage-106]
