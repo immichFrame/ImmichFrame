@@ -120,7 +120,7 @@ If this worked for you, consider opening a 'Show and tell'-Discussion.
 
 ```
 ❗️ Warning:
-This might break your warranty
+This might break your warranty.
 ```
 
 The basic procedure of updating the WebView installation consists of a few steps. Read through and understand them first, before you attempt any changes.
