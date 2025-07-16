@@ -110,6 +110,19 @@ ADB is often enabled on these devices by default, if it is not go to Frameo Sett
   
 ### Frameo WebView Update
 
+```
+⚠️ Disclaimer:
+
+This might not work for you or require extra steps that are not covered here. Since there are a myriad of devices and Android versions, consider this procedure as not tested. Especially when talking about repurposed digital frames, vendor lockdowns vastly differ.
+
+If this worked for you, consider opening a 'Show and tell'-Discussion.
+```
+
+```
+❗️ Warning:
+This might break your warranty
+```
+
 The basic procedure of updating the WebView installation consists of a few steps. Read through and understand them first, before you attempt any changes.
 
 There are tested and working examples for Android 6.01 10.1" Frameo devices provided at the end. If you have one of those, you might as well skip directly to them.
