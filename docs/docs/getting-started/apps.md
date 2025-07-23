@@ -140,7 +140,15 @@ Follow instructions below to update WebView to 106. This has been tested and wor
   ```shell
   adb reboot
   ```
-### Desktop (Windows, MacOS, Linux)
+
+### Keyboard
+**Settings** - Up arrow  
+**Quit** - Down arrow  
+**Prev Image** - Left arrow  
+**Next Image** - Right arrow  
+**Pause** - Enter/Return  
+
+## Desktop (Windows, MacOS, Linux)
 
 Get the latest Desktop-App from the [GitHub Releases][releases-url]-Page.
 
@@ -158,14 +166,6 @@ The screen is configured in a 3x3 gird. You can touch or click:
   ```bash 
   xattr -c /Applications/immichframe.app
   ```
-
-## Keyboard
-**Settings** - Up arrow  
-**Quit** - Down arrow  
-**Prev Image** - Left arrow  
-**Next Image** - Right arrow  
-**Pause** - Enter/Return  
-
 
 <!-- MARKDOWN LINKS & IMAGES -->
 [play-store-link]: https://play.google.com/store/apps/details?id=com.immichframe.immichframe
