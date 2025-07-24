@@ -23,9 +23,12 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
         AccountSettings = accountSettings;
         httpClient.UseApiKey(accountSettings.ApiKey);
         _immichApi = new ImmichApi(accountSettings.ImmichServerUrl, httpClient);
-        _apiCache = new ApiCache(TimeSpan.FromHours(generalSettings.RefreshAlbumPeopleInterval));
+        _apiCache = new ApiCache(RefreshInterval(generalSettings.RefreshAlbumPeopleInterval));
         _pool = BuildPool(accountSettings);
     }
+
+    private static TimeSpan RefreshInterval(int hours)
+        => hours > 0 ? TimeSpan.FromHours(hours) : TimeSpan.FromMilliseconds(1);
 
     public IAccountSettings AccountSettings { get; }
 
