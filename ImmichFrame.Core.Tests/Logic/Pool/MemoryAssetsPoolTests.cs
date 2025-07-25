@@ -22,11 +22,10 @@ public class MemoryAssetsPoolTests
     [SetUp]
     public void Setup()
     {
-        _mockApiCache = new Mock<IApiCache>(); // Base constructor requires ILogger and IOptions, pass null for simplicity in mock
         _mockImmichApi = new Mock<ImmichApi>(null, null); // Base constructor requires ILogger, IHttpClientFactory, IOptions, pass null
         _mockAccountSettings = new Mock<IAccountSettings>();
 
-        _memoryAssetsPool = new MemoryAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
+        _memoryAssetsPool = new MemoryAssetsPool(_mockImmichApi.Object, _mockAccountSettings.Object);
     }
 
     private List<AssetResponseDto> CreateSampleAssets(int count, bool withExif, int yearCreated)
@@ -154,11 +153,7 @@ public class MemoryAssetsPoolTests
             _mockImmichApi.Setup(x => x.SearchMemoriesAsync(It.IsAny<DateTimeOffset>(), null, null, null, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(memories);
 
-            // Reset and re-setup cache mock for each iteration to ensure factory is called
-            _mockApiCache = new Mock<IApiCache>();
-            _mockApiCache.Setup(c => c.GetOrAddAsync<IEnumerable<AssetResponseDto>>(It.IsAny<string>(), It.IsAny<Func<Task<IEnumerable<AssetResponseDto>>>>()))
-                         .Returns<string, Func<Task<IEnumerable<AssetResponseDto>>>>(async (key, factory) => await factory());
-            _memoryAssetsPool = new MemoryAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
+         _memoryAssetsPool = new MemoryAssetsPool(_mockImmichApi.Object, _mockAccountSettings.Object);
 
 
             // Act
