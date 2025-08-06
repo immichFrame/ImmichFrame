@@ -116,9 +116,13 @@ Follow instructions below to update WebView to 106. This has been tested and wor
   ```shell
   adb push /path/to/your/new/webview.apk /sdcard/
   ```
-- Enter root shell
+- Enter shell and switch to the root user
   ```shell
-  adb shell su
+  adb shell
+  ```
+  then inside the shell
+  ```shell
+  su
   ```
 - Backup original WebView APK
   ```shell
@@ -140,6 +144,12 @@ Follow instructions below to update WebView to 106. This has been tested and wor
   ```shell
   adb reboot
   ```
+
+Depending on the device or Android version, the location to the webview apk may be different for you. You can locate it with
+```shell
+adb shell pm path com.android.webview
+```
+
 ### Desktop (Windows, MacOS, Linux)
 
 Get the latest Desktop-App from the [GitHub Releases][releases-url]-Page.
