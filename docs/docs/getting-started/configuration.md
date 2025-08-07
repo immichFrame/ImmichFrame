@@ -143,6 +143,20 @@ ImmichFrame can be configured to access multiple Immich accounts, on the same or
 
 Images will be drawn from each account proportionally based on the total number of images present in each account (not included filtering, this is not yet implemented).
 
+### API Key Permissions
+For full ImmichFrame functionality, the API key being used needs the following permissions:
+
+- `album.read`
+- `album.statistics`
+- `asset.view`
+- `asset.read`
+- `asset.statistics`
+- `face.read`
+- `memory.read`
+- `person.read`
+- `person.statistics`
+
+
 ### Custom CSS
 ImmichFrame can be customized even further using CSS. This will apply to browsers, and apps using WebView (i.e. everything but Frameo and AppleTV):
 - Create a custom.css file somewhere on your host server with your desired content, for example:  
