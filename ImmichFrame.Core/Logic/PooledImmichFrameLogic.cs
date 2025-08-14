@@ -46,7 +46,7 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
             pools.Add(new FavoriteAssetsPool(_apiCache, _immichApi, accountSettings));
 
         if (accountSettings.ShowMemories)
-            pools.Add(new MemoryAssetsPool(_apiCache, _immichApi, accountSettings));
+            pools.Add(new MemoryAssetsPool(_immichApi, accountSettings));
 
         if (accountSettings.Albums.Any())
             pools.Add(new AlbumAssetsPool(_apiCache, _immichApi, accountSettings));
