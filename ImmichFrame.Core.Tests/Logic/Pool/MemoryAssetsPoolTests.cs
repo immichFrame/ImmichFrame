@@ -14,7 +14,6 @@ namespace ImmichFrame.Core.Tests.Logic.Pool;
 [TestFixture]
 public class MemoryAssetsPoolTests
 {
-    private Mock<IApiCache> _mockApiCache;
     private Mock<ImmichApi> _mockImmichApi;
     private Mock<IAccountSettings> _mockAccountSettings;
     private MemoryAssetsPool _memoryAssetsPool;
@@ -22,11 +21,10 @@ public class MemoryAssetsPoolTests
     [SetUp]
     public void Setup()
     {
-        _mockApiCache = new Mock<IApiCache>(); // Base constructor requires ILogger and IOptions, pass null for simplicity in mock
         _mockImmichApi = new Mock<ImmichApi>(null, null); // Base constructor requires ILogger, IHttpClientFactory, IOptions, pass null
         _mockAccountSettings = new Mock<IAccountSettings>();
 
-        _memoryAssetsPool = new MemoryAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
+        _memoryAssetsPool = new MemoryAssetsPool(_mockImmichApi.Object, _mockAccountSettings.Object);
     }
 
     private List<AssetResponseDto> CreateSampleAssets(int count, bool withExif, int yearCreated)
@@ -76,10 +74,6 @@ public class MemoryAssetsPoolTests
         // Let's simulate this by calling a method that would trigger LoadAssets if cache is empty.
         // Since LoadAssets is protected, we'll test its effects via GetAsset.
         // We need to ensure the cache is empty or expired for LoadAssets to be called.
-        _mockApiCache.Setup(c => c.GetOrAddAsync(It.IsAny<string>(), It.IsAny<Func<Task<IEnumerable<AssetResponseDto>>>>()))
-            .Returns<string, Func<Task<IEnumerable<AssetResponseDto>>>>(async (key, factory) => await factory());
-
-
         await _memoryAssetsPool.GetAssets(1, CancellationToken.None); // This should trigger LoadAssets
 
         // Assert
@@ -98,9 +92,6 @@ public class MemoryAssetsPoolTests
             .ReturnsAsync(memories);
         _mockImmichApi.Setup(x => x.GetAssetInfoAsync(new Guid(assetId), null, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new AssetResponseDto { Id = assetId, ExifInfo = new ExifResponseDto { DateTimeOriginal = new DateTime(memoryYear, 1, 1) }, People = new List<PersonWithFacesResponseDto>() });
-
-        _mockApiCache.Setup(c => c.GetOrAddAsync<IEnumerable<AssetResponseDto>>(It.IsAny<string>(), It.IsAny<Func<Task<IEnumerable<AssetResponseDto>>>>()))
-            .Returns<string, Func<Task<IEnumerable<AssetResponseDto>>>>(async (key, factory) => await factory());
 
         // Act
         var resultAsset = (await _memoryAssetsPool.GetAssets(1, CancellationToken.None)).First(); // Triggers LoadAssets
@@ -121,9 +112,6 @@ public class MemoryAssetsPoolTests
 
         _mockImmichApi.Setup(x => x.SearchMemoriesAsync(It.IsAny<DateTimeOffset>(), null, null, null, It.IsAny<CancellationToken>()))
             .ReturnsAsync(memories);
-
-        _mockApiCache.Setup(c => c.GetOrAddAsync<IEnumerable<AssetResponseDto>>(It.IsAny<string>(), It.IsAny<Func<Task<IEnumerable<AssetResponseDto>>>>()))
-            .Returns<string, Func<Task<IEnumerable<AssetResponseDto>>>>(async (key, factory) => await factory());
 
         // Act
         var resultAsset = (await _memoryAssetsPool.GetAssets(1, CancellationToken.None)).First(); // Triggers LoadAssets
@@ -154,11 +142,7 @@ public class MemoryAssetsPoolTests
             _mockImmichApi.Setup(x => x.SearchMemoriesAsync(It.IsAny<DateTimeOffset>(), null, null, null, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(memories);
 
-            // Reset and re-setup cache mock for each iteration to ensure factory is called
-            _mockApiCache = new Mock<IApiCache>();
-            _mockApiCache.Setup(c => c.GetOrAddAsync<IEnumerable<AssetResponseDto>>(It.IsAny<string>(), It.IsAny<Func<Task<IEnumerable<AssetResponseDto>>>>()))
-                         .Returns<string, Func<Task<IEnumerable<AssetResponseDto>>>>(async (key, factory) => await factory());
-            _memoryAssetsPool = new MemoryAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
+         _memoryAssetsPool = new MemoryAssetsPool(_mockImmichApi.Object, _mockAccountSettings.Object);
 
 
             // Act
@@ -180,9 +164,6 @@ public class MemoryAssetsPoolTests
         _mockImmichApi.Setup(x => x.SearchMemoriesAsync(It.IsAny<DateTimeOffset>(), null, null, null, It.IsAny<CancellationToken>()))
             .ReturnsAsync(memories).Verifiable(Times.Once);
 
-        _mockApiCache.Setup(c => c.GetOrAddAsync(It.IsAny<string>(), It.IsAny<Func<Task<IEnumerable<AssetResponseDto>>>>()))
-            .Returns<string, Func<Task<IEnumerable<AssetResponseDto>>>>(async (key, factory) => await factory());
-
         // Act
         // We will rely on the fact that the factory in GetFromCacheAsync is called, and it returns the list.
         // The count can be indirectly verified if we could access the pool's internal list after LoadAssets.
@@ -191,15 +172,7 @@ public class MemoryAssetsPoolTests
         // We need a way to inspect the result of LoadAssets directly.
         // We can make LoadAssets internal and use InternalsVisibleTo, or use reflection.
         // Or, we can rely on the setup of GetFromCacheAsync to capture the factory's result.
-        IEnumerable<AssetResponseDto> loadedAssets = null;
-        _mockApiCache.Setup(c => c.GetOrAddAsync<IEnumerable<AssetResponseDto>>(It.IsAny<string>(), It.IsAny<Func<Task<IEnumerable<AssetResponseDto>>>>()))
-            .Returns<string, Func<Task<IEnumerable<AssetResponseDto>>>>(async (key, factory) =>
-            {
-                loadedAssets = await factory();
-                return loadedAssets;
-            });
-
-        await _memoryAssetsPool.GetAssets(4, CancellationToken.None); // Trigger load
+        var loadedAssets = await _memoryAssetsPool.GetAssets(4, CancellationToken.None); // Trigger load
 
         // Assert
         Assert.That(loadedAssets, Is.Not.Null);
