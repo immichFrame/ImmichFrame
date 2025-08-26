@@ -15,7 +15,7 @@
 	);
 
 	let now = $state(new Date());
-
+	
 	const formattedDate = $derived(() =>
 		format(now, $configStore.clockDateFormat ?? 'eee, MMM d', {
 			locale: localeToUse()

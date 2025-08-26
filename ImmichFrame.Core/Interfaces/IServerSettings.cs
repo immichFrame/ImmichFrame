@@ -37,7 +37,7 @@
         public int RenewImagesDuration { get; }
         public bool ShowClock { get; }
         public string? ClockFormat { get; }
-        public string? ClockDateFormat { get; }
+		public string? ClockDateFormat { get; }
         public bool ShowProgressBar { get; }
         public bool ShowPhotoDate { get; }
         public string? PhotoDateFormat { get; }
