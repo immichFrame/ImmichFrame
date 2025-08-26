@@ -192,6 +192,7 @@ export type ClientSettingsDto = {
     renewImagesDuration?: number;
     showClock?: boolean;
     clockFormat?: string | null;
+	clockDateFormat?: string | null;
     showPhotoDate?: boolean;
     showProgressBar?: boolean;
     photoDateFormat?: string | null;
