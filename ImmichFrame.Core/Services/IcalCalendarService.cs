@@ -20,12 +20,13 @@ public class IcalCalendarService : ICalendarService
             var appointments = new List<IAppointment>();
 
             var icals = await GetCalendars(_serverSettings.Webcalendars);
+			var lookAheadDays = _serverSettings.WebcalendarLookaheadDays;
 
             foreach (var ical in icals)
             {
                 var calendar = Calendar.Load(ical);
 
-                appointments.AddRange(calendar.GetOccurrences(DateTime.UtcNow, DateTime.Today.AddDays(1)).Select(x => x.ToAppointment()));
+                appointments.AddRange(calendar.GetOccurrences(DateTime.UtcNow, DateTime.Today.AddDays(lookAheadDays)).Select(x => x.ToAppointment()));
             }
 
             return appointments;

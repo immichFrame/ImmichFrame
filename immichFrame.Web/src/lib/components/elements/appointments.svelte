@@ -4,6 +4,8 @@
 	import { format } from 'date-fns';
 	import { configStore } from '$lib/stores/config.store';
 	import { clientIdentifierStore } from '$lib/stores/persist.store';
+	import Icon from './icon.svelte';
+	import { mdiMapMarker} from '@mdi/js';
 
 	api.init();
 
@@ -51,19 +53,31 @@
 {#if appointments}
 	<div
 		id="appointments"
-		class="fixed top-0 right-0 w-auto z-10 text-center text-primary m-5 max-w-[20%] hidden lg:block md:min-w-[10%]"
+		class="fixed top-0 right-0 w-auto z-10 text-center text-primary mr-1 mt-5 max-w-[20%] hidden lg:block md:min-w-[10%]"
 	>
 		<!-- <div class="text-4xl mx-8 font-bold">Appointments</div> -->
 		<div class="">
 			{#each appointments as appointment}
 				<div class="bg-gray-600 bg-opacity-90 mb-2 text-left rounded-md p-3">
+					<p class="text-s">
+						<b><u>{format(new Date(appointment.startTime ?? ''), 'EEEE MMMM dd, yyyy')}</u></b>
+					</p>
 					<p class="text-xs">
-						{formatDates(appointment.startTime ?? '', appointment.endTime ?? '')}
+						{format(appointment.startTime ?? '', 'hh:mm b')} - {format(appointment.endTime ?? '', 'hh:mm b')}
 					</p>
 					{appointment.summary}
+					{#if appointment.location}
+						<p class="text-xs font-light">
+							<!-- <Icon path={mdiMapMarker}/> -->
+							<i>{appointment.location}</i>
+						</p>
+					{/if}
+					<!--
 					{#if appointment.description}
+						<br />
 						<p class="text-xs font-light">{appointment.description}</p>
 					{/if}
+					-->
 				</div>
 			{/each}
 		</div>
