@@ -25,6 +25,7 @@
     public interface IGeneralSettings
     {
         public List<string> Webcalendars { get; }
+		public int WebcalendarLookaheadDays {get; }
         public int RefreshAlbumPeopleInterval { get; }
         public string? WeatherApiKey { get; }
         public string? WeatherLatLong { get; }
