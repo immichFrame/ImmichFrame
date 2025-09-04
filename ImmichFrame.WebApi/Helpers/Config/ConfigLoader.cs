@@ -9,9 +9,15 @@ namespace ImmichFrame.WebApi.Helpers.Config;
 
 public class ConfigLoader(ILogger<ConfigLoader> _logger)
 {
+    private string FindConfigFile(string dir, params string[] fileNames)
+    {
+        return Directory.EnumerateFiles(dir, "*", SearchOption.TopDirectoryOnly)
+            .FirstOrDefault(f => fileNames.Any(name => string.Equals(Path.GetFileName(f), name, StringComparison.OrdinalIgnoreCase)))
+            ?? Path.Combine(dir, fileNames.First());
+    }
     public IServerSettings LoadConfig(string configPath)
     {
-        var jsonConfigPath = Path.Combine(configPath, "Settings.json");
+        var jsonConfigPath = FindConfigFile(configPath, "Settings.json");
         if (File.Exists(jsonConfigPath))
         {
             try
@@ -34,7 +40,7 @@ public class ConfigLoader(ILogger<ConfigLoader> _logger)
             }
         }
 
-        var ymlConfigPath = Path.Combine(configPath, "Settings.yml");
+        var ymlConfigPath = FindConfigFile(configPath, "Settings.yml", "Settings.yaml");
         if (File.Exists(ymlConfigPath))
         {
             try
