@@ -18,8 +18,12 @@ The Android-Version of ImmichFrame is available on the [Google Play Store][play-
 See also: [ImmichFrame Android repository][github-android-repo]
 
 #### Android Screensaver
-
+##### Android 12 and Below
 [How to Set Immich Frame as Android TV Screensaver Video Tutorial][setting-androidtv-screensaver]
+
+##### Android 14
+[How to Setup Immich Frame as a Screensaver on Chromecast with Google TV on Android 14][setting-androidtv-14-screensaver]
+
 - Run the app normally and configure settings.
 - Go to `Settings > Display > Advanced > Screen Saver > Current Screen Saver` and choose ImmichFrame. `Settings > Display > Advanced > Sleep`, choose your sleep timeout. The menu options may differ slightly on different Android versions.
   - Enable Developer Mode on your Android TV Settings
@@ -186,3 +190,4 @@ The screen is configured in a 3x3 gird. You can touch or click:
 [ADB-link]: https://www.xda-developers.com/install-adb-windows-macos-linux/
 [webview-update]: https://www.apkmirror.com/apk/lineageos/android-system-webview-2/android-system-webview-2-106-0-5249-126-release/android-system-webview-106-0-5249-126-12-android-apk-download/
 [setting-androidtv-screensaver]: https://youtu.be/m3Arh-hrWks
+[setting-androidtv-14-screensaver]: https://youtu.be/78z0Rs8KhsE?si=VQyuFnFITVTizYOf
