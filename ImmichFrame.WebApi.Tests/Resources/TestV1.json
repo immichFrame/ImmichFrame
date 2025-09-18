@@ -32,6 +32,7 @@
     "RefreshAlbumPeopleInterval": 7,
     "ShowClock": true,
     "ClockFormat": "ClockFormat_TEST",
+    "ClockDateFormat": "ClockDateFormat_TEST",
     "ShowProgressBar": true,
     "ShowPhotoDate": true,
     "PhotoDateFormat": "PhotoDateFormat_TEST",

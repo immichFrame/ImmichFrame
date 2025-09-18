@@ -33,6 +33,7 @@ public class ServerSettingsV1 : IConfigSettable
     public double TransitionDuration { get; set; } = 1;
     public bool ShowClock { get; set; } = true;
     public string? ClockFormat { get; set; } = "hh:mm";
+	public string? ClockDateFormat { get; set; } = "MM/dd/yyyy";
     public bool ShowProgressBar { get; set; } = true;
     public bool ShowPhotoDate { get; set; } = true;
     public string? PhotoDateFormat { get; set; } = "MM/dd/yyyy";
@@ -93,6 +94,7 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
         public int RenewImagesDuration => _delegate.RenewImagesDuration;
         public bool ShowClock => _delegate.ShowClock;
         public string? ClockFormat => _delegate.ClockFormat;
+		public string? ClockDateFormat => _delegate.ClockDateFormat;
         public bool ShowProgressBar => _delegate.ShowProgressBar;
         public bool ShowPhotoDate => _delegate.ShowPhotoDate;
         public string? PhotoDateFormat => _delegate.PhotoDateFormat;
