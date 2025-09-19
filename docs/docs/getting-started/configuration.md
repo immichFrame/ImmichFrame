@@ -49,7 +49,7 @@ General:
   ShowClock: true  # boolean
   # Time format
   ClockFormat: 'hh:mm'  # string
-  # Date formate for the clock
+  # Date format for the clock
   ClockDateFormat: 'eee, MMM d' # string
   # Displays the progress bar.
   ShowProgressBar: true  # boolean
