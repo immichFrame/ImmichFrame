@@ -10,7 +10,8 @@ This guide will help you set up **ImmichFrame** for local development and contri
 
 Before you begin, make sure you have the following installed:
 
-- [Node.js](https://nodejs.org/) (LTS version recommended)
+- [.NET SDK 8.0](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+- [Node.js](https://nodejs.org/) (v24 LTS version recommended)
 - [Docker](https://www.docker.com/) (optional)
 - [Make](https://www.gnu.org/software/make/) (used to run common scripts)
 
@@ -21,6 +22,13 @@ Before you begin, make sure you have the following installed:
 ```bash
 git clone https://github.com/immichFrame/ImmichFrame
 cd ImmichFrame
+
+# Install NPM dependencies for immichFrame.Web
+cd immichFrame.Web
+npm install
+
+# Build and run the project
+cd ..
 make dev
 ```
 
