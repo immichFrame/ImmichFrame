@@ -47,6 +47,7 @@ namespace ImmichFrame.WebApi.Tests.Controllers
                             ShowWeatherDescription = false, // Assuming this corresponds to ShowWeather
                             ShowClock = true,
                             ClockFormat = "HH:mm",
+                            ClockDateFormat = "eee, MMM d",
                             Language = "en",
                             PhotoDateFormat = "MM/dd/yyyy", // Crucial for the NRE
                             ImageLocationFormat = "City,State,Country",

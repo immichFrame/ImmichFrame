@@ -17,7 +17,7 @@
 	let now = $state(new Date());
 
 	const formattedDate = $derived(() =>
-		format(now, $configStore.photoDateFormat ?? 'dd.MM.yyyy', {
+		format(now, $configStore.clockDateFormat ?? 'eee, MMM d', {
 			locale: localeToUse()
 		})
 	);
@@ -75,7 +75,7 @@
 				id="clockweatherinfo"
 				class="text-xl sm:text-xl md:text-2xl lg:text-3xl font-semibold text-shadow-sm"
 			>
-				{weather.location},
+				{weather.location}
 				{weather.temperature?.toFixed(1)}
 				{weather.unit}
 			</div>
