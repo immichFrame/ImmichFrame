@@ -45,6 +45,7 @@
     "BaseFontSize": "BaseFontSize_TEST",
     "WeatherApiKey": "WeatherApiKey_TEST",
     "ShowWeatherDescription": true,
+    "WeatherIconUrl": "WeatherIconUrl_TEST",
     "UnitSystem": "UnitSystem_TEST",
     "WeatherLatLong": "WeatherLatLong_TEST",
     "Language": "Language_TEST",

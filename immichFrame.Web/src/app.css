@@ -61,3 +61,34 @@ html {
 	width: 100%;
 	font-size: 17px;
 }
+
+div.weather-info {
+	display: flex;
+	vertical-align: middle;
+}
+
+div.weather-location 
+{
+	display: inline-block;
+	order: 2;
+	margin-right: 0.25em;
+}
+
+div.weather-temperature 
+{
+	display: inline-block;
+	order: 3;
+}
+
+div.weather-unit
+{
+	display: inline-block;
+	order: 4;
+}
+
+img.icon-weather {
+	display: inline-block;
+	vertical-align: middle;
+	margin-top: -8px;	/* adjust icon top to line up with text */
+	order: 1;
+}
