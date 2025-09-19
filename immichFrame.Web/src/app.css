@@ -67,21 +67,18 @@ div.weather-info {
 	vertical-align: middle;
 }
 
-div.weather-location 
-{
+div.weather-location {
 	display: inline-block;
 	order: 2;
 	margin-right: 0.25em;
 }
 
-div.weather-temperature 
-{
+div.weather-temperature {
 	display: inline-block;
 	order: 3;
 }
 
-div.weather-unit
-{
+div.weather-unit {
 	display: inline-block;
 	order: 4;
 }
