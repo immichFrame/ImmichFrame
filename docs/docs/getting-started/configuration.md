@@ -71,6 +71,8 @@ General:
   BaseFontSize: '17px'  # string
   # Displays the description of the current weather.
   ShowWeatherDescription: true  # boolean
+  # URL for the icon to load for the current weather condition
+  WeatherIconUrl: 'https://openweathermap.org/img/wn/{IconId}.png'
   # Zooms into or out of an image and gives it a touch of life.
   ImageZoom: true  # boolean
   # Pans an image in a random direction and gives it a touch of life.

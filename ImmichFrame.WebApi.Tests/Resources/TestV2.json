@@ -29,6 +29,7 @@
     "Style": "Style_TEST",
     "BaseFontSize": "BaseFontSize_TEST",
     "ShowWeatherDescription": true,
+    "WeatherIconUrl": "WeatherIconUrl_TEST",
     "ImageZoom": true,
     "ImagePan": true,
     "ImageFill": true,

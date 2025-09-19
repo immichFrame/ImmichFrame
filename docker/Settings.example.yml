@@ -27,6 +27,7 @@ General:
   Style: none
   BaseFontSize: 17px
   ShowWeatherDescription: true
+  WeatherIconUrl: 'https://openweathermap.org/img/wn/{IconId}.png'
   ImageZoom: true
   ImagePan: false
   ImageFill: false

@@ -46,6 +46,7 @@ public class ServerSettingsV1 : IConfigSettable
     public string Style { get; set; } = "none";
     public string? BaseFontSize { get; set; }
     public bool ShowWeatherDescription { get; set; } = true;
+    public string? WeatherIconUrl { get; set; } = "https://openweathermap.org/img/wn/{IconId}.png";
     public bool ImageZoom { get; set; } = true;
     public bool ImagePan { get; set; } = false;
     public bool ImageFill { get; set; } = false;
@@ -106,6 +107,7 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
         public string Style => _delegate.Style;
         public string? BaseFontSize => _delegate.BaseFontSize;
         public bool ShowWeatherDescription => _delegate.ShowWeatherDescription;
+        public string? WeatherIconUrl => _delegate.WeatherIconUrl;
         public bool ImageZoom => _delegate.ImageZoom;
         public bool ImagePan => _delegate.ImagePan;
         public bool ImageFill => _delegate.ImageFill;
