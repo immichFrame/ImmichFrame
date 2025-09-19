@@ -13,8 +13,8 @@
 		let sameDay = startDate.getDate() == endDate.getDate();
 
 		let clockFormat = $configStore.clockFormat ?? 'HH:mm';
-		let photoDateFormat = $configStore.photoDateFormat ?? 'dd.MM.yyyy';
-		let fullFormat = photoDateFormat + ' ' + clockFormat;
+		let clockDateFormat = $configStore.clockDateFormat ?? 'eee, MMM d';
+		let fullFormat = clockDateFormat + ' ' + clockFormat;
 
 		if (sameDay) {
 			return format(startDate, clockFormat) + ' - ' + format(endDate, clockFormat);

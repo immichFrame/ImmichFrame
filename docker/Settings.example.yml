@@ -16,6 +16,7 @@ General:
   TransitionDuration: 2
   ShowClock: true
   ClockFormat: 'hh:mm'
+  ClockDateFormat: 'eee, MMM d'
   ShowProgressBar: true
   ShowPhotoDate: true
   ShowImageDesc: true
