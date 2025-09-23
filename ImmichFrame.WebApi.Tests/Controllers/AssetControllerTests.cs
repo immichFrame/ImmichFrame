@@ -45,6 +45,7 @@ namespace ImmichFrame.WebApi.Tests.Controllers
                         var generalSettings = new GeneralSettings
                         {
                             ShowWeatherDescription = false, // Assuming this corresponds to ShowWeather
+                            WeatherIconUrl = "https://openweathermap.org/img/wn/{IconId}.png",
                             ShowClock = true,
                             ClockFormat = "HH:mm",
                             Language = "en",

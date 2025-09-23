@@ -75,6 +75,7 @@ services:
       # BaseFontSize: "17px"
       # WeatherApiKey: ""
       # ShowWeatherDescription: "true"
+      # WeatherIconUrl: "https://openweathermap.org/img/wn/{IconId}.png"
       # UnitSystem: "imperial"
       # WeatherLatLong: ""
       # Language: "en"      

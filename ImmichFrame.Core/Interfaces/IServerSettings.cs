@@ -50,6 +50,7 @@
         public string Style { get; }
         public string? BaseFontSize { get; }
         public bool ShowWeatherDescription { get; }
+        public string? WeatherIconUrl { get; }
         public bool ImageZoom { get; }
         public bool ImagePan { get; }
         public bool ImageFill { get; }
