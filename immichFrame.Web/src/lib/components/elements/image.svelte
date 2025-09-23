@@ -20,7 +20,6 @@
 		imageZoom: boolean;
 		imagePan: boolean;
 		interval: number;
-		multi?: boolean;
 		showInfo: boolean;
 	}
 
@@ -35,7 +34,6 @@
 		imageZoom,
 		imagePan,
 		interval,
-		multi = false,
 		showInfo = $bindable(false)
 	}: Props = $props();
 
