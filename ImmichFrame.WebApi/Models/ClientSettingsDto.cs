@@ -10,6 +10,7 @@ public class ClientSettingsDto
     public int RenewImagesDuration { get; set; }
     public bool ShowClock { get; set; }
     public string? ClockFormat { get; set; }
+    public string? ClockDateFormat { get; set; }
     public bool ShowPhotoDate { get; set; }
     public bool ShowProgressBar { get; set; }
     public string? PhotoDateFormat { get; set; }
@@ -39,6 +40,7 @@ public class ClientSettingsDto
         dto.RenewImagesDuration = generalSettings.RenewImagesDuration;
         dto.ShowClock = generalSettings.ShowClock;
         dto.ClockFormat = generalSettings.ClockFormat;
+        dto.ClockDateFormat = generalSettings.ClockDateFormat;
         dto.ShowPhotoDate = generalSettings.ShowPhotoDate;
         dto.ShowProgressBar = generalSettings.ShowProgressBar;
         dto.PhotoDateFormat = generalSettings.PhotoDateFormat;

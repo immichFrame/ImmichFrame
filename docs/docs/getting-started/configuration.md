@@ -49,6 +49,8 @@ General:
   ShowClock: true  # boolean
   # Time format
   ClockFormat: 'hh:mm'  # string
+  # Date format for the clock
+  ClockDateFormat: 'eee, MMM d' # string
   # Displays the progress bar.
   ShowProgressBar: true  # boolean
   # Displays the date of the current image.

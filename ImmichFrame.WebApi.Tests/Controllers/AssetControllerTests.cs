@@ -48,6 +48,7 @@ namespace ImmichFrame.WebApi.Tests.Controllers
                             WeatherIconUrl = "https://openweathermap.org/img/wn/{IconId}.png",
                             ShowClock = true,
                             ClockFormat = "HH:mm",
+                            ClockDateFormat = "eee, MMM d",
                             Language = "en",
                             PhotoDateFormat = "MM/dd/yyyy", // Crucial for the NRE
                             ImageLocationFormat = "City,State,Country",
