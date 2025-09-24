@@ -80,7 +80,6 @@
 				<div class="grid grid-cols-2">
 					<div id="image_portrait_1" class="relative grid border-r-2 border-primary h-dvh-safe">
 						<Image
-							multi={true}
 							image={images[0]}
 							{interval}
 							{showLocation}
@@ -96,7 +95,6 @@
 					</div>
 					<div id="image_portrait_2" class="relative grid border-l-2 border-primary h-dvh-safe">
 						<Image
-							multi={true}
 							image={images[1]}
 							{interval}
 							{showLocation}
