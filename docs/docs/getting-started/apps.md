@@ -154,7 +154,7 @@ Depending on the device or Android version, the location to the webview apk may 
 adb shell pm path com.android.webview
 ```
 
-### Desktop (Windows, MacOS, Linux)
+## Desktop (Windows, MacOS, Linux)
 
 Get the latest Desktop-App from the [GitHub Releases][releases-url]-Page.
 
