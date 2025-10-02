@@ -18,13 +18,14 @@ Example configuration files:
 
 - [`Settings.yml` example][example-yaml]
 - [`Settings.json` example][example-json]
+- [`.env` example][example-env]
 
 ---
 
 ## Docker Compose Example
 
 :::warning Important
-Replace `PATH/TO/CONFIG` with the actual path to your config folder!
+If using yaml or json settings, replace `PATH/TO/CONFIG` with the actual path to your config folder containing the settings file!
 :::
 
 ```yaml
