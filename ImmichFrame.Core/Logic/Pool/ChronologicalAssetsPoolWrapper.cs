@@ -52,13 +52,12 @@ public class ChronologicalAssetsPoolWrapper(IAssetPool basePool, IGeneralSetting
     /// <returns>An enumerable collection of assets organized chronologically.</returns>
     public async Task<IEnumerable<AssetResponseDto>> GetAssets(int requested, CancellationToken ct = default)
     {
-        if (!generalSettings.ShowChronologicalImages || generalSettings.ChronologicalImagesCount <= 0)
+        var chronologicalCount = generalSettings.ChronologicalImagesCount;
+        if (!generalSettings.ShowChronologicalImages || chronologicalCount <= 0)
         {
             // Fallback to base pool behavior if chronological is disabled
             return await basePool.GetAssets(requested, ct);
         }
-        
-        var chronologicalCount = generalSettings.ChronologicalImagesCount;
         
         // Get a larger set to work with for chronological selection
         // Use configurable multiplier and cap for better performance and flexibility
