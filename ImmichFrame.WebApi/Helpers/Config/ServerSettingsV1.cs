@@ -52,6 +52,8 @@ public class ServerSettingsV1 : IConfigSettable
     public bool ImagePan { get; set; } = false;
     public bool ImageFill { get; set; } = false;
     public string Layout { get; set; } = "splitview";
+    public bool ShowChronologicalImages { get; set; } = false;
+    public int ChronologicalImagesCount { get; set; } = 3;
 }
 
 /// <summary>
@@ -115,5 +117,7 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
         public bool ImageFill => _delegate.ImageFill;
         public string Layout => _delegate.Layout;
         public string Language => _delegate.Language;
+        public bool ShowChronologicalImages => _delegate.ShowChronologicalImages;
+        public int ChronologicalImagesCount => _delegate.ChronologicalImagesCount;
     }
 }
