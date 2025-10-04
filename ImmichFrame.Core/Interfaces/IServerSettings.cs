@@ -57,5 +57,7 @@
         public bool ImageFill { get; }
         public string Layout { get; }
         public string Language { get; }
+        public bool ShowChronologicalImages { get; }
+        public int ChronologicalImagesCount { get; }
     }
 }

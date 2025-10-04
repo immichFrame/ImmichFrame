@@ -34,7 +34,9 @@
     "ImageZoom": true,
     "ImagePan": false,
     "ImageFill": false,
-    "Layout": "splitview"
+    "Layout": "splitview",
+    "ShowChronologicalImages": false,
+    "ChronologicalImagesCount": 3
   },
   "Accounts": [
     {

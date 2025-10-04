@@ -33,6 +33,8 @@ General:
   ImagePan: false
   ImageFill: false
   Layout: splitview
+  ShowChronologicalImages: false
+  ChronologicalImagesCount: 3
 Accounts:
   - ImmichServerUrl: REQUIRED
     ApiKey: REQUIRED
