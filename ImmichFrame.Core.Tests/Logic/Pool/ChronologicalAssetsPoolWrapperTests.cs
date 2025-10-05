@@ -391,4 +391,239 @@ public class ChronologicalAssetsPoolWrapperTests
         result = await _wrapper.GetAssets(5);
         _mockBasePool.Verify(x => x.GetAssets(5, It.IsAny<CancellationToken>()), Times.AtLeastOnce);
     }
+
+    #region TryParseDateTime Tests
+
+    /// <summary>
+    /// Tests the TryParseDateTime functionality with various date scenarios using reflection
+    /// since the method is private.
+    /// </summary>
+    [Test]
+    public void TryParseDateTime_WithValidDeserialized_ReturnsCorrectDate()
+    {
+        // Test with valid deserialized DateTimeOffset
+        var asset = new AssetResponseDto
+        {
+            OriginalFileName = "test.jpg",
+            ExifInfo = new ExifResponseDto
+            {
+                DateTimeOriginal = new DateTimeOffset(2024, 3, 15, 14, 30, 0, TimeSpan.Zero)
+            }
+        };
+
+        var result = InvokeTryParseDateTime(asset);
+        
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.Value.Year, Is.EqualTo(2024));
+        Assert.That(result.Value.Month, Is.EqualTo(3));
+        Assert.That(result.Value.Day, Is.EqualTo(15));
+        Assert.That(result.Value.Hour, Is.EqualTo(14));
+        Assert.That(result.Value.Minute, Is.EqualTo(30));
+    }
+
+    [Test]
+    public void TryParseDateTime_WithInvalidDeserializedDate_UsesFilenameParsing()
+    {
+        // Test with invalid deserialized date (pre-1900) but valid filename pattern
+        var asset = new AssetResponseDto
+        {
+            OriginalFileName = "240315_143022.jpg", // March 15, 2024 at 14:30:22
+            ExifInfo = new ExifResponseDto
+            {
+                DateTimeOriginal = new DateTimeOffset(1908, 6, 11, 20, 58, 0, TimeSpan.Zero) // Invalid
+            }
+        };
+
+        var result = InvokeTryParseDateTime(asset);
+        
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.Value.Year, Is.EqualTo(2024));
+        Assert.That(result.Value.Month, Is.EqualTo(3));
+        Assert.That(result.Value.Day, Is.EqualTo(15));
+        Assert.That(result.Value.Hour, Is.EqualTo(14));
+        Assert.That(result.Value.Minute, Is.EqualTo(30));
+        Assert.That(result.Value.Second, Is.EqualTo(22));
+    }
+
+    [Test]
+    [TestCase("131005_140838.jpg", 2013, 10, 5, 14, 8, 38)]
+    [TestCase("240701_235959.jpg", 2024, 7, 1, 23, 59, 59)]
+    [TestCase("991231_000000.jpg", 2099, 12, 31, 0, 0, 0)]
+    [TestCase("000101_120000.jpg", 2000, 1, 1, 12, 0, 0)]
+    public void TryParseDateTime_WithVariousFilenamePatterns_ParsesCorrectly(
+        string filename, int expectedYear, int expectedMonth, int expectedDay, 
+        int expectedHour, int expectedMinute, int expectedSecond)
+    {
+        var asset = new AssetResponseDto
+        {
+            OriginalFileName = filename,
+            ExifInfo = new ExifResponseDto
+            {
+                DateTimeOriginal = new DateTimeOffset(1908, 6, 11, 20, 58, 0, TimeSpan.Zero) // Invalid
+            }
+        };
+
+        var result = InvokeTryParseDateTime(asset);
+        
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.Value.Year, Is.EqualTo(expectedYear));
+        Assert.That(result.Value.Month, Is.EqualTo(expectedMonth));
+        Assert.That(result.Value.Day, Is.EqualTo(expectedDay));
+        Assert.That(result.Value.Hour, Is.EqualTo(expectedHour));
+        Assert.That(result.Value.Minute, Is.EqualTo(expectedMinute));
+        Assert.That(result.Value.Second, Is.EqualTo(expectedSecond));
+    }
+
+    [Test]
+    [TestCase("IMG_001.jpg")]
+    [TestCase("P1100696.jpg")]
+    [TestCase("DSC01446.jpg")]
+    [TestCase("999999_205436.jpg")] // Invalid date format (year 99 -> 2099 outside range)
+    [TestCase("131305_140838.jpg")] // Invalid month (13)
+    [TestCase("131232_140838.jpg")] // Invalid day (32)
+    [TestCase("131005_250838.jpg")] // Invalid hour (25)
+    [TestCase("131005_146038.jpg")] // Invalid minute (60)
+    [TestCase("131005_140860.jpg")] // Invalid second (60)
+    public void TryParseDateTime_WithInvalidFilenamePatterns_ReturnsNull(string filename)
+    {
+        var asset = new AssetResponseDto
+        {
+            OriginalFileName = filename,
+            ExifInfo = new ExifResponseDto
+            {
+                DateTimeOriginal = new DateTimeOffset(1908, 6, 11, 20, 58, 0, TimeSpan.Zero) // Invalid
+            }
+        };
+
+        var result = InvokeTryParseDateTime(asset);
+        
+        Assert.That(result, Is.Null);
+    }
+
+    [Test]
+    public void TryParseDateTime_WithNullExifInfo_ReturnsNull()
+    {
+        var asset = new AssetResponseDto
+        {
+            OriginalFileName = "131005_140838.jpg",
+            ExifInfo = null
+        };
+
+        var result = InvokeTryParseDateTime(asset);
+        
+        Assert.That(result, Is.Null);
+    }
+
+    [Test]
+    public void TryParseDateTime_WithNullDateTimeOriginal_UsesFilenameParsing()
+    {
+        var asset = new AssetResponseDto
+        {
+            OriginalFileName = "131005_140838.jpg",
+            ExifInfo = new ExifResponseDto
+            {
+                DateTimeOriginal = null
+            }
+        };
+
+        var result = InvokeTryParseDateTime(asset);
+        
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.Value.Year, Is.EqualTo(2013));
+        Assert.That(result.Value.Month, Is.EqualTo(10));
+        Assert.That(result.Value.Day, Is.EqualTo(5));
+    }
+
+    [Test]
+    public void TryParseDateTime_WithNullAsset_ReturnsNull()
+    {
+        AssetResponseDto? nullAsset = null;
+        var result = InvokeTryParseDateTime(nullAsset);
+        
+        Assert.That(result, Is.Null);
+    }
+
+    [Test]
+    public void TryParseDateTime_WithEdgeCaseDates_HandlesCorrectly()
+    {
+        // Test leap year
+        var leapYearAsset = new AssetResponseDto
+        {
+            OriginalFileName = "240229_120000.jpg", // Feb 29, 2024 (leap year)
+            ExifInfo = new ExifResponseDto
+            {
+                DateTimeOriginal = new DateTimeOffset(1908, 6, 11, 20, 58, 0, TimeSpan.Zero)
+            }
+        };
+
+        var result = InvokeTryParseDateTime(leapYearAsset);
+        
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.Value.Year, Is.EqualTo(2024));
+        Assert.That(result.Value.Month, Is.EqualTo(2));
+        Assert.That(result.Value.Day, Is.EqualTo(29));
+
+        // Test non-leap year Feb 29 (should fail)
+        var nonLeapYearAsset = new AssetResponseDto
+        {
+            OriginalFileName = "230229_120000.jpg", // Feb 29, 2023 (not leap year)
+            ExifInfo = new ExifResponseDto
+            {
+                DateTimeOriginal = new DateTimeOffset(1908, 6, 11, 20, 58, 0, TimeSpan.Zero)
+            }
+        };
+
+        result = InvokeTryParseDateTime(nonLeapYearAsset);
+        Assert.That(result, Is.Null); // Should return null due to invalid date
+    }
+
+    [Test]
+    public void TryParseDateTime_WithValidModernDate_AcceptsDateAfter1950()
+    {
+        var asset = new AssetResponseDto
+        {
+            OriginalFileName = "test.jpg",
+            ExifInfo = new ExifResponseDto
+            {
+                DateTimeOriginal = new DateTimeOffset(1951, 1, 1, 0, 0, 0, TimeSpan.Zero) // Just after 1950
+            }
+        };
+
+        var result = InvokeTryParseDateTime(asset);
+        
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.Value.Year, Is.EqualTo(1951));
+    }
+
+    [Test]
+    public void TryParseDateTime_WithBoundaryYear1950_RejectsAsInvalid()
+    {
+        var asset = new AssetResponseDto
+        {
+            OriginalFileName = "131005_140838.jpg", // Fallback pattern
+            ExifInfo = new ExifResponseDto
+            {
+                DateTimeOriginal = new DateTimeOffset(1950, 1, 1, 0, 0, 0, TimeSpan.Zero) // Exactly 1950
+            }
+        };
+
+        var result = InvokeTryParseDateTime(asset);
+        
+        // Should use filename parsing since 1950 is considered invalid (< 1950 check uses >=)
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.Value.Year, Is.EqualTo(2013)); // From filename
+    }
+
+    /// <summary>
+    /// Helper method to invoke the private TryParseDateTime method using reflection.
+    /// </summary>
+    private DateTime? InvokeTryParseDateTime(AssetResponseDto? asset)
+    {
+        var method = typeof(ChronologicalAssetsPoolWrapper)
+            .GetMethod("TryParseDateTime", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        
+        return (DateTime?)method?.Invoke(_wrapper, new object?[] { asset });
+    }
+
+    #endregion
 }

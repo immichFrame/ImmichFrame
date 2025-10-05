@@ -52,12 +52,13 @@ public class ChronologicalAssetsPoolWrapper(IAssetPool basePool, IGeneralSetting
     /// <returns>An enumerable collection of assets organized chronologically.</returns>
     public async Task<IEnumerable<AssetResponseDto>> GetAssets(int requested, CancellationToken ct = default)
     {
-        var chronologicalCount = generalSettings.ChronologicalImagesCount;
-        if (!generalSettings.ShowChronologicalImages || chronologicalCount <= 0)
+        if (!generalSettings.ShowChronologicalImages || generalSettings.ChronologicalImagesCount <= 0)
         {
             // Fallback to base pool behavior if chronological is disabled
             return await basePool.GetAssets(requested, ct);
         }
+        
+        var chronologicalCount = generalSettings.ChronologicalImagesCount;
         
         // Get a larger set to work with for chronological selection
         // Use configurable multiplier and cap for better performance and flexibility
@@ -78,9 +79,7 @@ public class ChronologicalAssetsPoolWrapper(IAssetPool basePool, IGeneralSetting
             .ToList();
         
         return result;
-    }
-    
-    /// <summary>
+    }    /// <summary>
     /// Creates chronological sets from the provided assets.
     /// Assets with DateTimeOriginal are sorted chronologically and placed first,
     /// followed by assets without date information to preserve all assets.
@@ -99,16 +98,18 @@ public class ChronologicalAssetsPoolWrapper(IAssetPool basePool, IGeneralSetting
     {
         var assetsList = allAssets.ToList();
         
-        // Separate assets with and without date information
+        // Separate assets with and without date information using safe parsing
         var datedAssets = assetsList
-            .Where(a => a.ExifInfo?.DateTimeOriginal.HasValue == true)
-            .OrderBy(a => a.ExifInfo.DateTimeOriginal!.Value)
+            .Select(a => new { Asset = a, ParsedDate = TryParseDateTime(a) })
+            .Where(x => x.ParsedDate.HasValue)
+            .OrderBy(x => x.ParsedDate!.Value)
+            .Select(x => x.Asset)
             .ToList();
             
         var undatedAssets = assetsList
-            .Where(a => a.ExifInfo?.DateTimeOriginal.HasValue != true)
+            .Where(a => !TryParseDateTime(a).HasValue)
             .ToList();
-            
+        
         if (!datedAssets.Any())
         {
             // Fallback: create sets from randomly ordered assets if no date info available
@@ -146,5 +147,64 @@ public class ChronologicalAssetsPoolWrapper(IAssetPool basePool, IGeneralSetting
         }
         
         return sets;
+    }
+
+    /// <summary>
+    /// Safely parses DateTime from an asset's EXIF information.
+    /// Handles both the potentially incorrectly deserialized DateTime and direct JSON string parsing.
+    /// </summary>
+    /// <param name="asset">The asset to parse the date from.</param>
+    /// <returns>The parsed DateTime if successful, null otherwise.</returns>
+    private DateTime? TryParseDateTime(AssetResponseDto asset)
+    {
+        if (asset?.ExifInfo == null)
+            return null;
+
+        // Try to use the deserialized DateTimeOffset if it seems reasonable (after 1950 and before 2050)
+        if (asset.ExifInfo.DateTimeOriginal.HasValue)
+        {
+            var deserializedDate = asset.ExifInfo.DateTimeOriginal.Value;
+            if (deserializedDate.Year > 1950 && deserializedDate.Year <= 2050)
+            {
+                return deserializedDate.DateTime; // Convert DateTimeOffset to DateTime
+            }
+        }
+
+        // If deserialized date is unreasonable, try to parse from filename patterns
+        if (!string.IsNullOrEmpty(asset.OriginalFileName))
+        {
+            // Try to extract date from common filename patterns like "131005_140838.jpg" -> 2013-10-05
+            var fileName = asset.OriginalFileName;
+            
+            // Pattern: YYMMDD_HHMMSS.ext (like 131005_140838.jpg)
+            var match = System.Text.RegularExpressions.Regex.Match(fileName, @"(\d{6})_(\d{6})");
+            if (match.Success)
+            {
+                var dateStr = match.Groups[1].Value; // YYMMDD
+                var timeStr = match.Groups[2].Value; // HHMMSS
+                
+                if (dateStr.Length == 6 && timeStr.Length == 6)
+                {
+                    var year = 2000 + int.Parse(dateStr.Substring(0, 2)); // YY -> 20YY
+                    var month = int.Parse(dateStr.Substring(2, 2));
+                    var day = int.Parse(dateStr.Substring(4, 2));
+                    var hour = int.Parse(timeStr.Substring(0, 2));
+                    var minute = int.Parse(timeStr.Substring(2, 2));
+                    var second = int.Parse(timeStr.Substring(4, 2));
+                    
+                    try
+                    {
+                        return new DateTime(year, month, day, hour, minute, second);
+                    }
+                    catch
+                    {
+                        // Invalid date components
+                    }
+                }
+            }
+        }
+
+        // Fallback: return null for unparseable dates
+        return null;
     }
 }
