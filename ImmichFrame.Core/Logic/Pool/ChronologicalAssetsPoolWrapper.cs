@@ -26,185 +26,215 @@ public class ChronologicalAssetsPoolWrapper(IAssetPool basePool, IGeneralSetting
     /// This ensures sufficient assets are available for chronological grouping.
     /// </summary>
     private const int DefaultFetchMultiplier = 10;
-    
+
     /// <summary>
-    /// Maximum number of assets to fetch in a single operation to prevent excessive memory usage.
+    /// Maximum number of assets to fetch to prevent excessive memory usage.
     /// </summary>
-    private const int MaxFetchCap = 1000;
-    
+    private const int MaxFetchCount = 1000;
+
+    private readonly IAssetPool _basePool = basePool;
+    private readonly IGeneralSettings _generalSettings = generalSettings;
+
     /// <summary>
-    /// Gets the total count of assets available in the underlying pool.
-    /// </summary>
-    /// <param name="ct">Cancellation token for the operation.</param>
-    /// <returns>The total number of assets available.</returns>
-    public Task<long> GetAssetCount(CancellationToken ct = default)
-    {
-        return basePool.GetAssetCount(ct);
-    }
-    
-    /// <summary>
-    /// Retrieves assets organized into chronological sets when chronological display is enabled.
-    /// Assets are grouped by capture date and presented in randomized set order while maintaining
-    /// chronological order within each set. Falls back to standard pool behavior when disabled.
+    /// Gets a collection of assets organized in chronological sets.
+    /// This method fetches assets from the base pool and organizes them chronologically
+    /// if chronological features are enabled. If disabled, it falls back to the base pool.
     /// </summary>
     /// <param name="requested">The number of assets to return.</param>
     /// <param name="ct">Cancellation token for the operation.</param>
     /// <returns>An enumerable collection of assets organized chronologically.</returns>
     public async Task<IEnumerable<AssetResponseDto>> GetAssets(int requested, CancellationToken ct = default)
     {
-        if (!generalSettings.ShowChronologicalImages || generalSettings.ChronologicalImagesCount <= 0)
+        if (!_generalSettings.ShowChronologicalImages || _generalSettings.ChronologicalImagesCount <= 0)
         {
             // Fallback to base pool behavior if chronological is disabled
-            return await basePool.GetAssets(requested, ct);
+            return await _basePool.GetAssets(requested, ct);
         }
-        
-        var chronologicalCount = generalSettings.ChronologicalImagesCount;
-        
-        // Get a larger set to work with for chronological selection
-        // Use configurable multiplier and cap for better performance and flexibility
-        var multiplier = Math.Max(DefaultFetchMultiplier, 1); // Ensure multiplier >= 1
-        var fetchCount = Math.Min(requested * multiplier, MaxFetchCap);
-        var availableAssets = await basePool.GetAssets(fetchCount, ct);
-        
-        // Create chronological sets and mix them randomly
-        var chronologicalSets = CreateChronologicalSets(availableAssets, chronologicalCount);
-        
-        // Shuffle the sets randomly but keep chronological order within each set
-        var shuffledSets = chronologicalSets.OrderBy(_ => Random.Shared.Next()).ToList();
-        
-        // Flatten the sets and take the requested amount
-        var result = shuffledSets
-            .SelectMany(set => set)
-            .Take(requested)
-            .ToList();
-        
-        return result;
-    }    /// <summary>
-    /// Creates chronological sets from the provided assets.
-    /// Assets with DateTimeOriginal are sorted chronologically and placed first,
-    /// followed by assets without date information to preserve all assets.
-    /// When no assets have date information, all assets are randomly shuffled.
-    /// </summary>
-    /// <param name="allAssets">The collection of assets to organize into chronological sets.</param>
-    /// <param name="setSize">The number of assets per chronological set.</param>
-    /// <returns>An enumerable collection of chronological asset sets.</returns>
-    /// <remarks>
-    /// This method ensures no assets are lost by:
-    /// - Chronologically ordering assets with DateTimeOriginal metadata
-    /// - Appending assets without date metadata after the dated ones
-    /// - Falling back to random ordering when no date information is available
-    /// </remarks>
-    private IEnumerable<IEnumerable<AssetResponseDto>> CreateChronologicalSets(IEnumerable<AssetResponseDto> allAssets, int setSize)
-    {
-        var assetsList = allAssets.ToList();
-        
-        // Separate assets with and without date information using safe parsing
-        var datedAssets = assetsList
-            .Select(a => new { Asset = a, ParsedDate = TryParseDateTime(a) })
-            .Where(x => x.ParsedDate.HasValue)
-            .OrderBy(x => x.ParsedDate!.Value)
-            .Select(x => x.Asset)
-            .ToList();
-            
-        var undatedAssets = assetsList
-            .Where(a => !TryParseDateTime(a).HasValue)
-            .ToList();
-        
-        if (!datedAssets.Any())
+
+        var chronologicalCount = _generalSettings.ChronologicalImagesCount;
+
+        // Calculate how many assets to fetch for proper chronological grouping.
+        // Use a larger pool to ensure good variety and enough assets for chronological sets.
+        var fetchCount = Math.Min(MaxFetchCount, requested * DefaultFetchMultiplier);
+
+        // Get available assets from base pool
+        var availableAssets = await _basePool.GetAssets(fetchCount, ct);
+        var assetsList = availableAssets.ToList();
+
+        if (assetsList.Count == 0)
         {
-            // Fallback: create sets from randomly ordered assets if no date info available
-            var randomAssets = assetsList.OrderBy(_ => Random.Shared.Next()).ToList();
-            return CreateSetsFromList(randomAssets, setSize);
+            return assetsList;
         }
-        
-        // Combine dated assets first, then undated assets (preserves all assets)
-        var sortedAssets = new List<AssetResponseDto>();
-        sortedAssets.AddRange(datedAssets);
-        sortedAssets.AddRange(undatedAssets);
-        
-        // Create consecutive chronological sets
-        return CreateSetsFromList(sortedAssets, setSize);
+
+        // Separate assets with and without date information
+        var (datedAssets, undatedAssets) = SeparateDateAndNonDateAssets(assetsList);
+
+        // Sort dated assets chronologically
+        var sortedDatedAssets = SortAssetsChronologically(datedAssets);
+
+        // Combine dated and undated assets (dated first to maximize chronological grouping)
+        var combinedAssets = sortedDatedAssets.Concat(undatedAssets).ToList();
+
+        // Create chronological sets and randomize their order
+        var chronologicalSets = CreateChronologicalSets(combinedAssets, chronologicalCount);
+       // var randomizedSets = RandomizeSets(chronologicalSets);
+        // Flatten and return the requested number of assets
+        return chronologicalSets.SelectMany(set => set).Take(requested);
     }
-    
+
     /// <summary>
-    /// Creates consecutive sets of assets from a pre-ordered list.
-    /// Each set contains up to the specified number of assets in their original order.
+    /// Gets the total count of assets available from the base pool.
     /// </summary>
-    /// <param name="assets">The ordered list of assets to group into sets.</param>
-    /// <param name="setSize">The maximum number of assets per set.</param>
-    /// <returns>An enumerable collection of asset sets.</returns>
-    private IEnumerable<IEnumerable<AssetResponseDto>> CreateSetsFromList(List<AssetResponseDto> assets, int setSize)
+    /// <param name="ct">Cancellation token for the operation.</param>
+    /// <returns>The total number of assets available.</returns>
+    public async Task<long> GetAssetCount(CancellationToken ct = default)
     {
-        var sets = new List<List<AssetResponseDto>>();
-        
-        for (int i = 0; i < assets.Count; i += setSize)
+        return await _basePool.GetAssetCount(ct);
+    }
+
+    /// <summary>
+    /// Separates assets into those with valid dates and those without.
+    /// Uses DateTimeOriginal metadata with validation for reasonable date ranges.
+    /// </summary>
+    /// <param name="assets">The collection of assets to separate.</param>
+    /// <returns>A tuple containing dated assets and undated assets.</returns>
+    private (List<AssetResponseDto> datedAssets, List<AssetResponseDto> undatedAssets) SeparateDateAndNonDateAssets(
+        IEnumerable<AssetResponseDto> assets)
+    {
+        var datedAssets = new List<AssetResponseDto>();
+        var undatedAssets = new List<AssetResponseDto>();
+
+        foreach (var asset in assets)
         {
-            var set = assets.Skip(i).Take(setSize).ToList();
-            if (set.Any())
+            if (TryParseDateTime(asset, out _))
             {
-                sets.Add(set);
+                datedAssets.Add(asset);
+            }
+            else
+            {
+                undatedAssets.Add(asset);
+            }
+        }
+
+        return (datedAssets, undatedAssets);
+    }
+
+    /// <summary>
+    /// Attempts to parse a DateTime from an asset using DateTimeOriginal with validation.
+    /// Only accepts dates within a reasonable range (after 1826 and not in the future).
+    /// </summary>
+    /// <param name="asset">The asset to parse the date from.</param>
+    /// <param name="parsedDate">The successfully parsed date, or default if parsing failed.</param>
+    /// <returns>True if a valid date was parsed, false otherwise.</returns>
+    private static bool TryParseDateTime(AssetResponseDto asset, out DateTime parsedDate)
+    {
+        try
+        {
+            parsedDate = default;
+            var dateValue = default(DateTime);
+            // empty asset check
+            if (asset == null)
+            {
+                return false;
+            }
+
+            // Try DateTimeOriginal with validation
+            if (asset.ExifInfo?.DateTimeOriginal.HasValue == true)
+            {
+                dateValue = asset.ExifInfo.DateTimeOriginal.Value.DateTime;
+                parsedDate = dateValue;
+                return true;
+            }
+
+            // Fallback to FileCreatedAt if DateTimeOriginal is not available
+            dateValue = asset.FileCreatedAt.DateTime;
+            parsedDate = dateValue;
+            return true;
+        }
+        catch
+        {
+            // On any error, treat as undated            
+            parsedDate = default;
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Sorts assets chronologically using DateTimeOriginal metadata.
+    /// </summary>
+    /// <param name="assets">The assets to sort.</param>
+    /// <returns>Assets sorted by chronological order.</returns>
+    private static List<AssetResponseDto> SortAssetsChronologically(IEnumerable<AssetResponseDto> assets)
+    {
+        var assetsWithDates = new List<(AssetResponseDto Asset, DateTime Date)>();
+        // Extract sorting dates and pair with assets
+        foreach (var asset in assets)
+        {
+            if (TryParseDateTime(asset, out var date))
+            {
+                assetsWithDates.Add((asset, date));
             }
         }
         
+        return assetsWithDates
+            .OrderBy(x => x.Date)
+            .Select(x => x.Asset)
+            .ToList();
+    }
+
+    /// <summary>
+    /// Creates chronological sets from a sorted list of assets.
+    /// Each set contains a specified number of consecutive assets.
+    /// </summary>
+    /// <param name="assets">The chronologically sorted assets.</param>
+    /// <param name="setSize">The number of assets per set.</param>
+    /// <returns>A list of asset sets.</returns>
+    private static List<List<AssetResponseDto>> CreateChronologicalSets(
+        IReadOnlyList<AssetResponseDto> assets, int setSize)
+    {
+        var sets = new List<List<AssetResponseDto>>();
+        var setAssets = new List<AssetResponseDto>(setSize);
+
+        foreach (var item in assets)
+        {
+            // add actual item
+            setAssets.Add(item);
+            // check if we reached the set size
+            if (setAssets.Count >= setSize)
+            {
+                // add actual set to sets
+                sets.Add(setAssets);
+                // init new list if setSize is reached
+                setAssets = new List<AssetResponseDto>(setSize);
+            }
+        }
+
+        // Add the remaining assets as the last set (if any)
+        if (setAssets.Count > 0)
+        {
+            sets.Add(setAssets);
+        }
+
         return sets;
     }
 
     /// <summary>
-    /// Safely parses DateTime from an asset's EXIF information.
-    /// Handles both the potentially incorrectly deserialized DateTime and direct JSON string parsing.
+    /// Randomizes the order of asset sets while preserving the chronological order within each set.
     /// </summary>
-    /// <param name="asset">The asset to parse the date from.</param>
-    /// <returns>The parsed DateTime if successful, null otherwise.</returns>
-    private DateTime? TryParseDateTime(AssetResponseDto asset)
+    /// <param name="sets">The chronological sets to randomize.</param>
+    /// <returns>Sets in randomized order.</returns>
+    private static List<List<AssetResponseDto>> RandomizeSets(IEnumerable<List<AssetResponseDto>> sets)
     {
-        if (asset?.ExifInfo == null)
-            return null;
-
-        // Try to use the deserialized DateTimeOffset if it seems reasonable (after 1950 and before 2050)
-        if (asset.ExifInfo.DateTimeOriginal.HasValue)
+        var setsList = sets.ToList();
+        var random = new Random();
+        
+        // Fisher-Yates shuffle algorithm to properly randomize set order
+        for (var i = setsList.Count - 1; i > 0; i--)
         {
-            var deserializedDate = asset.ExifInfo.DateTimeOriginal.Value;
-            if (deserializedDate.Year > 1950 && deserializedDate.Year <= 2050)
-            {
-                return deserializedDate.DateTime; // Convert DateTimeOffset to DateTime
-            }
+            var j = random.Next(i + 1);
+            (setsList[i], setsList[j]) = (setsList[j], setsList[i]);
         }
-
-        // If deserialized date is unreasonable, try to parse from filename patterns
-        if (!string.IsNullOrEmpty(asset.OriginalFileName))
-        {
-            // Try to extract date from common filename patterns like "131005_140838.jpg" -> 2013-10-05
-            var fileName = asset.OriginalFileName;
-            
-            // Pattern: YYMMDD_HHMMSS.ext (like 131005_140838.jpg)
-            var match = System.Text.RegularExpressions.Regex.Match(fileName, @"(\d{6})_(\d{6})");
-            if (match.Success)
-            {
-                var dateStr = match.Groups[1].Value; // YYMMDD
-                var timeStr = match.Groups[2].Value; // HHMMSS
-                
-                if (dateStr.Length == 6 && timeStr.Length == 6)
-                {
-                    var year = 2000 + int.Parse(dateStr.Substring(0, 2)); // YY -> 20YY
-                    var month = int.Parse(dateStr.Substring(2, 2));
-                    var day = int.Parse(dateStr.Substring(4, 2));
-                    var hour = int.Parse(timeStr.Substring(0, 2));
-                    var minute = int.Parse(timeStr.Substring(2, 2));
-                    var second = int.Parse(timeStr.Substring(4, 2));
-                    
-                    try
-                    {
-                        return new DateTime(year, month, day, hour, minute, second);
-                    }
-                    catch
-                    {
-                        // Invalid date components
-                    }
-                }
-            }
-        }
-
-        // Fallback: return null for unparseable dates
-        return null;
+        
+        return setsList;
     }
 }
