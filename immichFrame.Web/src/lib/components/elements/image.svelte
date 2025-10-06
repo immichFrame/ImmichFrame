@@ -20,7 +20,6 @@
 		imageZoom: boolean;
 		imagePan: boolean;
 		interval: number;
-		multi?: boolean;
 		showInfo: boolean;
 	}
 
@@ -35,7 +34,6 @@
 		imageZoom,
 		imagePan,
 		interval,
-		multi = false,
 		showInfo = $bindable(false)
 	}: Props = $props();
 
@@ -165,7 +163,7 @@
 		{/if}
 
 		<img
-			class="{multi || imageFill
+			class="{imageFill
 				? 'w-screen max-h-screen h-dvh-safe object-cover'
 				: 'max-h-screen h-dvh-safe max-w-full object-contain'} w-full h-full"
 			src={image[0]}
