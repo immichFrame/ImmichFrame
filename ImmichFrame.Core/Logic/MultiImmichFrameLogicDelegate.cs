@@ -31,7 +31,7 @@ public class MultiImmichFrameLogicDelegate : IImmichFrameLogic
 
 
     public async Task<IEnumerable<AssetResponseDto>> GetAssets()
-    //bösewicht
+       // Preserve asset order from selection strategy (required for chronological grouping, no shuffling here)
         => (await _accountSelectionStrategy.GetAssets()).Select(it => it.ToAsset());
 
 

@@ -22,7 +22,7 @@ public class MemoryAssetsPoolTests
     [SetUp]
     public void Setup()
     {
-        _mockImmichApi = new Mock<ImmichApi>(); // Base constructor requires ILogger, IHttpClientFactory, IOptions, pass null
+        _mockImmichApi = new Mock<ImmichApi>();
         _mockAccountSettings = new Mock<IAccountSettings>();
         _mockGeneralSettings = new Mock<IGeneralSettings>();
 

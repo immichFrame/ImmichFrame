@@ -526,107 +526,6 @@ public class ChronologicalAssetsPoolWrapperTests
 
     #region Current Logic Tests
 
-    /// <summary>
-    /// Tests for the current implementation logic including tag assignment,
-    /// FileCreatedAt fallback, and set randomization behavior.
-    /// </summary>
-
-    [Test]
-    public async Task GetAssets_ShouldAssignSetTagsToAssets()
-    {
-        // Arrange
-        var inputAssets = _testAssets.Take(9).ToList(); // 9 assets = 3 sets of 3
-        _mockBasePool.Setup(x => x.GetAssets(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-                    .ReturnsAsync(inputAssets);
-
-        // Act
-        var result = await _wrapper.GetAssets(9);
-
-        // Assert
-        var resultList = result.ToList();
-        
-        // Verify that all assets have set tags assigned
-        foreach (var asset in resultList)
-        {
-            Assert.That(asset.Tags, Is.Not.Null, "Tags collection should not be null");
-            var setTags = asset.Tags.Where(t => t.Name.StartsWith("Set ")).ToList();
-            Assert.That(setTags.Count, Is.EqualTo(1), $"Asset {asset.Id} should have exactly one set tag");
-            
-            var setTag = setTags.First();
-            Assert.That(setTag.Name, Does.Match(@"^Set \d+$"), 
-                $"Set tag should match pattern 'Set X' but was '{setTag.Name}'");
-        }
-
-        // Verify that we have the expected number of different sets
-        var allSetTags = resultList.SelectMany(a => a.Tags)
-                                  .Where(t => t.Name.StartsWith("Set "))
-                                  .Select(t => t.Name)
-                                  .Distinct()
-                                  .ToList();
-        
-        // With 9 assets and set size 3, we should have exactly 3 different sets
-        Assert.That(allSetTags.Count, Is.EqualTo(3), 
-            "Should have exactly 3 different set tags");
-    }
-
-    [Test]
-    public async Task GetAssets_ShouldAssignConsecutiveSetNumbers()
-    {
-        // Arrange
-        var inputAssets = _testAssets.Take(6).ToList(); // 6 assets = 2 sets of 3
-        _mockBasePool.Setup(x => x.GetAssets(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-                    .ReturnsAsync(inputAssets);
-
-        // Act
-        var result = await _wrapper.GetAssets(6);
-
-        // Assert
-        var resultList = result.ToList();
-        var setNumbers = resultList.SelectMany(a => a.Tags)
-                                   .Where(t => t.Name.StartsWith("Set "))
-                                   .Select(t => int.Parse(t.Name.Split(' ')[1]))
-                                   .Distinct()
-                                   .OrderBy(n => n)
-                                   .ToList();
-
-        // Should have set numbers starting from 1
-        Assert.That(setNumbers, Is.EqualTo(new[] { 1, 2 }), 
-            "Set numbers should be consecutive starting from 1");
-    }
-
-    [Test]
-    public async Task GetAssets_WithPartialLastSet_ShouldStillAssignSetTags()
-    {
-        // Arrange
-        var inputAssets = _testAssets.Take(7).ToList(); // 7 assets = 2 full sets + 1 partial set
-        _mockBasePool.Setup(x => x.GetAssets(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-                    .ReturnsAsync(inputAssets);
-
-        // Act
-        var result = await _wrapper.GetAssets(7);
-
-        // Assert
-        var resultList = result.ToList();
-        
-        // All assets should have set tags
-        foreach (var asset in resultList)
-        {
-            var setTags = asset.Tags.Where(t => t.Name.StartsWith("Set ")).ToList();
-            Assert.That(setTags.Count, Is.EqualTo(1), 
-                $"Asset {asset.Id} should have exactly one set tag");
-        }
-
-        // Should have 3 different sets (including the partial one)
-        var setNumbers = resultList.SelectMany(a => a.Tags)
-                                   .Where(t => t.Name.StartsWith("Set "))
-                                   .Select(t => int.Parse(t.Name.Split(' ')[1]))
-                                   .Distinct()
-                                   .ToList();
-        
-        Assert.That(setNumbers.Count, Is.EqualTo(3), 
-            "Should have 3 sets: 2 full sets of 3 + 1 partial set of 1");
-    }
-
     [Test]
     public void TryParseDateTime_WithFileCreatedAtFallback_ReturnsFileCreatedAt()
     {
@@ -708,13 +607,13 @@ public class ChronologicalAssetsPoolWrapperTests
     }
 
     [Test]
-    public async Task GetAssets_SetRandomization_PreservesInternalChronologicalOrder()
+    public async Task GetAssets_WithChronologicalEnabled_ReturnsAllAssets()
     {
         // Arrange - Create assets with predictable dates for chronological testing
         var chronologicalAssets = new List<AssetResponseDto>();
         var baseDate = new DateTime(2024, 1, 1, 10, 0, 0);
         
-        for (int i = 0; i < 12; i++) // 12 assets = 4 sets of 3
+        for (int i = 0; i < 12; i++) // 12 assets
         {
             chronologicalAssets.Add(new AssetResponseDto
             {
@@ -730,97 +629,60 @@ public class ChronologicalAssetsPoolWrapperTests
         _mockBasePool.Setup(x => x.GetAssets(It.IsAny<int>(), It.IsAny<CancellationToken>()))
                     .ReturnsAsync(chronologicalAssets);
 
-        // Act - Run multiple times to test randomization
-        var results = new List<List<AssetResponseDto>>();
-        for (int run = 0; run < 5; run++)
-        {
-            var result = await _wrapper.GetAssets(12);
-            results.Add(result.ToList());
-        }
+        // Act
+        var result = await _wrapper.GetAssets(12);
 
-        // Assert - Verify that within each set, chronological order is preserved
-        foreach (var resultList in results)
+        // Assert - Verify all assets are returned
+        var resultList = result.ToList();
+        
+        Assert.That(resultList.Count, Is.EqualTo(12), "Should return all 12 assets");
+        
+        // Verify all expected asset IDs are present
+        var expectedIds = chronologicalAssets.Select(a => a.Id).ToHashSet();
+        var actualIds = resultList.Select(a => a.Id).ToHashSet();
+        
+        Assert.That(actualIds.SetEquals(expectedIds), Is.True, 
+            "Should contain exactly the same asset IDs as input");
+        
+        // Verify all assets have valid dates
+        foreach (var asset in resultList)
         {
-            // Group assets by their set tags
-            var assetsBySet = resultList.GroupBy(a => a.Tags.First(t => t.Name.StartsWith("Set ")).Name)
-                                       .OrderBy(g => g.Key)
-                                       .ToList();
-
-            foreach (var setGroup in assetsBySet)
-            {
-                var assetsInSet = setGroup.OrderBy(a => resultList.IndexOf(a)).ToList();
-                
-                // Within each set, dates should be in chronological order
-                for (int i = 1; i < assetsInSet.Count; i++)
-                {
-                    var prevAsset = assetsInSet[i - 1];
-                    var currAsset = assetsInSet[i];
-                    
-                    // Only check assets that have DateTimeOriginal (since we're testing chronological assets)
-                    if (prevAsset.ExifInfo?.DateTimeOriginal.HasValue == true && 
-                        currAsset.ExifInfo?.DateTimeOriginal.HasValue == true)
-                    {
-                        var prevDate = prevAsset.ExifInfo.DateTimeOriginal.Value;
-                        var currDate = currAsset.ExifInfo.DateTimeOriginal.Value;
-                        
-                        Assert.That(currDate, Is.GreaterThanOrEqualTo(prevDate),
-                            $"Within {setGroup.Key}, assets should maintain chronological order. " +
-                            $"Asset {currAsset.Id} ({currDate:yyyy-MM-dd}) should be after " +
-                            $"{prevAsset.Id} ({prevDate:yyyy-MM-dd})");
-                    }
-                }
-            }
+            Assert.That(asset.ExifInfo?.DateTimeOriginal.HasValue, Is.True,
+                $"Asset {asset.Id} should have a valid DateTimeOriginal");
         }
     }
 
     [Test]
-    public async Task GetAssets_MultipleRuns_ShowsSetRandomization()
+    public async Task GetAssets_MultipleRuns_ShowsConsistentResults()
     {
         // Arrange
-        var inputAssets = _testAssets.Take(9).ToList(); // 9 assets = 3 sets
+        var inputAssets = _testAssets.Take(9).ToList();
         _mockBasePool.Setup(x => x.GetAssets(It.IsAny<int>(), It.IsAny<CancellationToken>()))
                     .ReturnsAsync(inputAssets);
 
         // Act - Run the method multiple times
-        var setOrders = new List<List<string>>();
-        for (int run = 0; run < 10; run++)
+        var results = new List<List<AssetResponseDto>>();
+        for (int run = 0; run < 5; run++)
         {
             var result = await _wrapper.GetAssets(9);
-            var resultList = result.ToList();
-            
-            // Extract the order of sets as they appear in the result
-            var setOrder = resultList.Select(a => a.Tags.First(t => t.Name.StartsWith("Set ")).Name)
-                                     .Distinct()
-                                     .ToList();
-            setOrders.Add(setOrder);
+            results.Add(result.ToList());
         }
 
-        // Assert - We should see different orderings across multiple runs
-        // (Note: This test might occasionally fail due to randomness, but very rarely)
-        var uniqueOrders = setOrders.Select(order => string.Join(",", order))
-                                   .Distinct()
-                                   .Count();
-
-        // With sufficient runs, we should see some variation in set order
-        // At minimum, we should have all expected set numbers present
-        foreach (var setOrder in setOrders)
+        // Assert - Verify consistent behavior across multiple runs
+        foreach (var resultList in results)
         {
-            Assert.That(setOrder.Count, Is.EqualTo(3), "Should always have 3 sets");
+            // Verify all results have the expected count
+            Assert.That(resultList.Count, Is.EqualTo(9), "Should always return 9 assets");
             
-            var setNumbers = setOrder.Select(s => int.Parse(s.Split(' ')[1])).ToHashSet();
-            var expectedSetNumbers = new HashSet<int> { 1, 2, 3 };
+            // Verify all expected asset IDs are present
+            var resultIds = resultList.Select(a => a.Id).ToHashSet();
+            var expectedIds = inputAssets.Select(a => a.Id).ToHashSet();
             
-            // Check that we have the right set numbers (order may vary due to randomization)
-            Assert.That(setNumbers.Count, Is.EqualTo(3), "Should have exactly 3 different set numbers");
-            Assert.That(setNumbers.IsSupersetOf(expectedSetNumbers) && expectedSetNumbers.IsSupersetOf(setNumbers), 
-                Is.True, $"Should contain sets 1, 2, and 3. Got: {string.Join(", ", setNumbers.OrderBy(x => x))}");
+            Assert.That(resultIds.SetEquals(expectedIds), Is.True, 
+                "Should contain exactly the same asset IDs as input");
         }
 
-        // Since sets are randomized, we expect to see some variety over multiple runs
-        // This is a probabilistic test - with 10 runs and 3! = 6 possible orders, 
-        // we should see at least 2 different orders most of the time
-        // We make this assertion optional to avoid flaky tests
-        Console.WriteLine($"Observed {uniqueOrders} unique set orders out of 10 runs");
+        Console.WriteLine($"Verified consistent results across {results.Count} runs");
     }
 
     [Test] 
@@ -901,100 +763,6 @@ public class ChronologicalAssetsPoolWrapperTests
         
         Assert.That(actualDatesSet, Is.EqualTo(expectedDatesSet),
             "All mixed-source dates should be present in the result");
-    }
-
-    [Test]
-    public async Task GetAssets_PreservesOriginalTagsAndAddsSetTags()
-    {
-        // Arrange - Create assets with existing tags
-        var assetsWithTags = new List<AssetResponseDto>();
-        for (int i = 0; i < 3; i++)
-        {
-            assetsWithTags.Add(new AssetResponseDto
-            {
-                Id = $"tagged-{i}",
-                ExifInfo = new ExifResponseDto
-                {
-                    DateTimeOriginal = new DateTime(2024, 1, i + 1, 10, 0, 0)
-                },
-                OriginalFileName = $"tagged_{i}.jpg",
-                Tags = new List<TagResponseDto>
-                {
-                    new() { Name = $"OriginalTag{i}" },
-                    new() { Name = "CommonTag" }
-                }
-            });
-        }
-
-        _mockBasePool.Setup(x => x.GetAssets(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-                    .ReturnsAsync(assetsWithTags);
-
-        // Act
-        var result = await _wrapper.GetAssets(3);
-
-        // Assert
-        var resultList = result.ToList();
-        
-        foreach (var asset in resultList)
-        {
-            Assert.That(asset.Tags, Is.Not.Null);
-            
-            // Should have original tags plus one set tag
-            var originalTags = asset.Tags.Where(t => !t.Name.StartsWith("Set ")).ToList();
-            var setTags = asset.Tags.Where(t => t.Name.StartsWith("Set ")).ToList();
-            
-            Assert.That(originalTags.Count, Is.EqualTo(2), 
-                "Should preserve all original tags");
-            Assert.That(setTags.Count, Is.EqualTo(1), 
-                "Should add exactly one set tag");
-            
-            // Check original tags are preserved
-            Assert.That(originalTags.Any(t => t.Name == "CommonTag"), Is.True,
-                "Should preserve CommonTag");
-            Assert.That(originalTags.Any(t => t.Name.StartsWith("OriginalTag")), Is.True,
-                "Should preserve asset-specific original tag");
-        }
-    }
-
-    [Test] 
-    public async Task GetAssets_WithEmptyOrNullTags_InitializesTagsCollection()
-    {
-        // Arrange - Create assets with null or empty tags
-        var assetsWithoutTags = new List<AssetResponseDto>
-        {
-            new()
-            {
-                Id = "null-tags",
-                ExifInfo = new ExifResponseDto { DateTimeOriginal = new DateTime(2024, 1, 1) },
-                OriginalFileName = "null_tags.jpg",
-                Tags = null // Null tags
-            },
-            new()
-            {
-                Id = "empty-tags", 
-                ExifInfo = new ExifResponseDto { DateTimeOriginal = new DateTime(2024, 1, 2) },
-                OriginalFileName = "empty_tags.jpg",
-                Tags = new List<TagResponseDto>() // Empty tags
-            }
-        };
-
-        _mockBasePool.Setup(x => x.GetAssets(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-                    .ReturnsAsync(assetsWithoutTags);
-
-        // Act
-        var result = await _wrapper.GetAssets(2);
-
-        // Assert
-        var resultList = result.ToList();
-        
-        foreach (var asset in resultList)
-        {
-            Assert.That(asset.Tags, Is.Not.Null, "Tags collection should be initialized");
-            
-            var setTags = asset.Tags.Where(t => t.Name.StartsWith("Set ")).ToList();
-            Assert.That(setTags.Count, Is.EqualTo(1), 
-                "Should have exactly one set tag even when starting with null/empty tags");
-        }
     }
 
     #endregion

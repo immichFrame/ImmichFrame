@@ -35,7 +35,7 @@ public class FavoriteAssetsPoolTests
     public void Setup()
     {
         _mockApiCache = new Mock<IApiCache>();
-        _mockImmichApi = new Mock<ImmichApi>();
+        _mockImmichApi = new Mock<ImmichApi>("", null!);
         _mockAccountSettings = new Mock<IAccountSettings>();
         _mockGeneralSettings = new Mock<IGeneralSettings>();
         _favoriteAssetsPool = new TestableFavoriteAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object, _mockGeneralSettings.Object);
