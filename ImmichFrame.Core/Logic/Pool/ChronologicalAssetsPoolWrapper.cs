@@ -45,7 +45,7 @@ public class ChronologicalAssetsPoolWrapper(IAssetPool basePool, IGeneralSetting
     /// <returns>An enumerable collection of assets organized chronologically.</returns>
     public async Task<IEnumerable<AssetResponseDto>> GetAssets(int requested, CancellationToken ct = default)
     {
-        if (!_generalSettings.ShowChronologicalImages || _generalSettings.ChronologicalImagesCount <= 0)
+        if (_generalSettings.ChronologicalImagesCount <= 0)
         {
             // Fallback to base pool behavior if chronological is disabled
             return await _basePool.GetAssets(requested, ct);
@@ -60,7 +60,6 @@ public class ChronologicalAssetsPoolWrapper(IAssetPool basePool, IGeneralSetting
         // Get available assets from base pool
         var availableAssets = await _basePool.GetAssets(fetchCount, ct);
         var assetsList = availableAssets.ToList();
-
         if (assetsList.Count == 0)
         {
             return assetsList;
@@ -77,9 +76,9 @@ public class ChronologicalAssetsPoolWrapper(IAssetPool basePool, IGeneralSetting
 
         // Create chronological sets and randomize their order
         var chronologicalSets = CreateChronologicalSets(combinedAssets, chronologicalCount);
-       // var randomizedSets = RandomizeSets(chronologicalSets);
+        var randomizedSets = RandomizeSets(chronologicalSets);
         // Flatten and return the requested number of assets
-        return chronologicalSets.SelectMany(set => set).Take(requested);
+        return randomizedSets.SelectMany(set => set).Take(requested);
     }
 
     /// <summary>
@@ -175,11 +174,8 @@ public class ChronologicalAssetsPoolWrapper(IAssetPool basePool, IGeneralSetting
                 assetsWithDates.Add((asset, date));
             }
         }
-        
-        return assetsWithDates
-            .OrderBy(x => x.Date)
-            .Select(x => x.Asset)
-            .ToList();
+        var retlist = assetsWithDates.OrderBy(x => x.Date).Select(x => x.Asset).ToList();
+        return retlist;
     }
 
     /// <summary>
@@ -196,7 +192,7 @@ public class ChronologicalAssetsPoolWrapper(IAssetPool basePool, IGeneralSetting
         var setAssets = new List<AssetResponseDto>(setSize);
 
         foreach (var item in assets)
-        {
+        {   
             // add actual item
             setAssets.Add(item);
             // check if we reached the set size

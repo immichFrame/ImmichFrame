@@ -17,10 +17,11 @@ public class AlbumAssetsPoolTests
     private Mock<IApiCache> _mockApiCache;
     private Mock<ImmichApi> _mockImmichApi;
     private Mock<IAccountSettings> _mockAccountSettings;
+    private Mock<IGeneralSettings> _mockGeneralSettings;
     private TestableAlbumAssetsPool _albumAssetsPool;
 
-    private class TestableAlbumAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings)
-        : AlbumAssetsPool(apiCache, immichApi, accountSettings)
+    private class TestableAlbumAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings, IGeneralSettings generalSettings)
+        : AlbumAssetsPool(apiCache, immichApi, accountSettings, generalSettings)
     {
         // Expose LoadAssets for testing
         public Task<IEnumerable<AssetResponseDto>> TestLoadAssets(CancellationToken ct = default) => base.LoadAssets(ct);
@@ -32,7 +33,8 @@ public class AlbumAssetsPoolTests
         _mockApiCache = new Mock<IApiCache>();
         _mockImmichApi = new Mock<ImmichApi>("", null);
         _mockAccountSettings = new Mock<IAccountSettings>();
-        _albumAssetsPool = new TestableAlbumAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
+        _mockGeneralSettings = new Mock<IGeneralSettings>();
+        _albumAssetsPool = new TestableAlbumAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object, _mockGeneralSettings.Object);
 
         _mockAccountSettings.SetupGet(s => s.Albums).Returns(new List<Guid>());
         _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns(new List<Guid>());

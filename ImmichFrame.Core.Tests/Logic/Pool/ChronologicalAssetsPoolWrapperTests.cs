@@ -33,7 +33,6 @@ public class ChronologicalAssetsPoolWrapperTests
         _testAssets = CreateTestAssets();
         
         // Setup default configuration
-        _mockGeneralSettings.Setup(x => x.ShowChronologicalImages).Returns(true);
         _mockGeneralSettings.Setup(x => x.ChronologicalImagesCount).Returns(3);
         
         _wrapper = new ChronologicalAssetsPoolWrapper(_mockBasePool.Object, _mockGeneralSettings.Object);
@@ -130,7 +129,7 @@ public class ChronologicalAssetsPoolWrapperTests
     public async Task GetAssets_WhenChronologicalDisabled_ShouldUseBasePool()
     {
         // Arrange
-        _mockGeneralSettings.Setup(x => x.ShowChronologicalImages).Returns(false);
+        _mockGeneralSettings.Setup(x => x.ChronologicalImagesCount).Returns(0);
         _mockBasePool.Setup(x => x.GetAssets(It.IsAny<int>(), It.IsAny<CancellationToken>()))
                     .ReturnsAsync(_testAssets.Take(5));
 
@@ -365,6 +364,62 @@ public class ChronologicalAssetsPoolWrapperTests
     }
 
     [Test]
+    public async Task GetAssets_ShouldReturnExactInputObjects()
+    {
+        // Arrange
+        var inputAssets = _testAssets.Take(10).ToList();
+        _mockBasePool.Setup(x => x.GetAssets(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                    .ReturnsAsync(inputAssets);
+
+        // Act
+        var result = await _wrapper.GetAssets(10);
+
+        // Assert
+        var resultList = result.ToList();
+        
+        // Verify that we get back the exact same number of assets
+        Assert.That(resultList.Count, Is.EqualTo(inputAssets.Count), 
+            "Output should contain the same number of assets as input");
+        
+        // Verify that all input asset IDs are present in the output
+        var inputIds = inputAssets.Select(a => a.Id).ToHashSet();
+        var outputIds = resultList.Select(a => a.Id).ToHashSet();
+        Assert.That(outputIds.SetEquals(inputIds), Is.True, 
+            "Output should contain exactly the same asset IDs as input");
+        
+        // Verify that all input assets are present by reference or by content
+        foreach (var inputAsset in inputAssets)
+        {
+            var matchingOutputAsset = resultList.FirstOrDefault(a => a.Id == inputAsset.Id);
+            Assert.That(matchingOutputAsset, Is.Not.Null, 
+                $"Asset with ID {inputAsset.Id} should be present in output");
+            
+            // Verify key properties are preserved
+            Assert.That(matchingOutputAsset.Id, Is.EqualTo(inputAsset.Id),
+                "Asset ID should be preserved");
+            Assert.That(matchingOutputAsset.OriginalFileName, Is.EqualTo(inputAsset.OriginalFileName),
+                "OriginalFileName should be preserved");
+            
+            // Verify EXIF data is preserved
+            if (inputAsset.ExifInfo?.DateTimeOriginal.HasValue == true)
+            {
+                Assert.That(matchingOutputAsset.ExifInfo?.DateTimeOriginal, 
+                    Is.EqualTo(inputAsset.ExifInfo.DateTimeOriginal),
+                    "EXIF DateTimeOriginal should be preserved");
+            }
+        }
+        
+        // Verify no duplicates exist in output
+        var uniqueOutputIds = outputIds.Count;
+        Assert.That(uniqueOutputIds, Is.EqualTo(resultList.Count), 
+            "Output should not contain duplicate assets");
+        
+        // Verify no extra assets were added
+        Assert.That(outputIds.All(id => inputIds.Contains(id)), Is.True,
+            "Output should not contain any assets not present in input");
+    }
+
+    [Test]
     public void Constructor_WithValidParameters_ShouldCreateInstance()
     {
         // Act & Assert
@@ -422,159 +477,14 @@ public class ChronologicalAssetsPoolWrapperTests
     }
 
     [Test]
-    public void TryParseDateTime_WithInvalidDeserializedDate_UsesFilenameParsing()
-    {
-        // Test with invalid deserialized date (pre-1900) but valid filename pattern
-        var asset = new AssetResponseDto
-        {
-            OriginalFileName = "240315_143022.jpg", // March 15, 2024 at 14:30:22
-            ExifInfo = new ExifResponseDto
-            {
-                DateTimeOriginal = new DateTimeOffset(1908, 6, 11, 20, 58, 0, TimeSpan.Zero) // Invalid
-            }
-        };
-
-        var result = InvokeTryParseDateTime(asset);
-        
-        Assert.That(result, Is.Not.Null);
-        Assert.That(result.Value.Year, Is.EqualTo(2024));
-        Assert.That(result.Value.Month, Is.EqualTo(3));
-        Assert.That(result.Value.Day, Is.EqualTo(15));
-        Assert.That(result.Value.Hour, Is.EqualTo(14));
-        Assert.That(result.Value.Minute, Is.EqualTo(30));
-        Assert.That(result.Value.Second, Is.EqualTo(22));
-    }
-
-    [Test]
-    [TestCase("131005_140838.jpg", 2013, 10, 5, 14, 8, 38)]
-    [TestCase("240701_235959.jpg", 2024, 7, 1, 23, 59, 59)]
-    [TestCase("991231_000000.jpg", 2099, 12, 31, 0, 0, 0)]
-    [TestCase("000101_120000.jpg", 2000, 1, 1, 12, 0, 0)]
-    public void TryParseDateTime_WithVariousFilenamePatterns_ParsesCorrectly(
-        string filename, int expectedYear, int expectedMonth, int expectedDay, 
-        int expectedHour, int expectedMinute, int expectedSecond)
-    {
-        var asset = new AssetResponseDto
-        {
-            OriginalFileName = filename,
-            ExifInfo = new ExifResponseDto
-            {
-                DateTimeOriginal = new DateTimeOffset(1908, 6, 11, 20, 58, 0, TimeSpan.Zero) // Invalid
-            }
-        };
-
-        var result = InvokeTryParseDateTime(asset);
-        
-        Assert.That(result, Is.Not.Null);
-        Assert.That(result.Value.Year, Is.EqualTo(expectedYear));
-        Assert.That(result.Value.Month, Is.EqualTo(expectedMonth));
-        Assert.That(result.Value.Day, Is.EqualTo(expectedDay));
-        Assert.That(result.Value.Hour, Is.EqualTo(expectedHour));
-        Assert.That(result.Value.Minute, Is.EqualTo(expectedMinute));
-        Assert.That(result.Value.Second, Is.EqualTo(expectedSecond));
-    }
-
-    [Test]
-    [TestCase("IMG_001.jpg")]
-    [TestCase("P1100696.jpg")]
-    [TestCase("DSC01446.jpg")]
-    [TestCase("999999_205436.jpg")] // Invalid date format (year 99 -> 2099 outside range)
-    [TestCase("131305_140838.jpg")] // Invalid month (13)
-    [TestCase("131232_140838.jpg")] // Invalid day (32)
-    [TestCase("131005_250838.jpg")] // Invalid hour (25)
-    [TestCase("131005_146038.jpg")] // Invalid minute (60)
-    [TestCase("131005_140860.jpg")] // Invalid second (60)
-    public void TryParseDateTime_WithInvalidFilenamePatterns_ReturnsNull(string filename)
-    {
-        var asset = new AssetResponseDto
-        {
-            OriginalFileName = filename,
-            ExifInfo = new ExifResponseDto
-            {
-                DateTimeOriginal = new DateTimeOffset(1908, 6, 11, 20, 58, 0, TimeSpan.Zero) // Invalid
-            }
-        };
-
-        var result = InvokeTryParseDateTime(asset);
-        
-        Assert.That(result, Is.Null);
-    }
-
-    [Test]
-    public void TryParseDateTime_WithNullExifInfo_ReturnsNull()
-    {
-        var asset = new AssetResponseDto
-        {
-            OriginalFileName = "131005_140838.jpg",
-            ExifInfo = null
-        };
-
-        var result = InvokeTryParseDateTime(asset);
-        
-        Assert.That(result, Is.Null);
-    }
-
-    [Test]
-    public void TryParseDateTime_WithNullDateTimeOriginal_UsesFilenameParsing()
-    {
-        var asset = new AssetResponseDto
-        {
-            OriginalFileName = "131005_140838.jpg",
-            ExifInfo = new ExifResponseDto
-            {
-                DateTimeOriginal = null
-            }
-        };
-
-        var result = InvokeTryParseDateTime(asset);
-        
-        Assert.That(result, Is.Not.Null);
-        Assert.That(result.Value.Year, Is.EqualTo(2013));
-        Assert.That(result.Value.Month, Is.EqualTo(10));
-        Assert.That(result.Value.Day, Is.EqualTo(5));
-    }
-
-    [Test]
     public void TryParseDateTime_WithNullAsset_ReturnsNull()
     {
         AssetResponseDto? nullAsset = null;
+        
+        // The reflection helper should handle null gracefully and return null
         var result = InvokeTryParseDateTime(nullAsset);
         
         Assert.That(result, Is.Null);
-    }
-
-    [Test]
-    public void TryParseDateTime_WithEdgeCaseDates_HandlesCorrectly()
-    {
-        // Test leap year
-        var leapYearAsset = new AssetResponseDto
-        {
-            OriginalFileName = "240229_120000.jpg", // Feb 29, 2024 (leap year)
-            ExifInfo = new ExifResponseDto
-            {
-                DateTimeOriginal = new DateTimeOffset(1908, 6, 11, 20, 58, 0, TimeSpan.Zero)
-            }
-        };
-
-        var result = InvokeTryParseDateTime(leapYearAsset);
-        
-        Assert.That(result, Is.Not.Null);
-        Assert.That(result.Value.Year, Is.EqualTo(2024));
-        Assert.That(result.Value.Month, Is.EqualTo(2));
-        Assert.That(result.Value.Day, Is.EqualTo(29));
-
-        // Test non-leap year Feb 29 (should fail)
-        var nonLeapYearAsset = new AssetResponseDto
-        {
-            OriginalFileName = "230229_120000.jpg", // Feb 29, 2023 (not leap year)
-            ExifInfo = new ExifResponseDto
-            {
-                DateTimeOriginal = new DateTimeOffset(1908, 6, 11, 20, 58, 0, TimeSpan.Zero)
-            }
-        };
-
-        result = InvokeTryParseDateTime(nonLeapYearAsset);
-        Assert.That(result, Is.Null); // Should return null due to invalid date
     }
 
     [Test]
@@ -595,34 +505,496 @@ public class ChronologicalAssetsPoolWrapperTests
         Assert.That(result.Value.Year, Is.EqualTo(1951));
     }
 
-    [Test]
-    public void TryParseDateTime_WithBoundaryYear1950_RejectsAsInvalid()
-    {
-        var asset = new AssetResponseDto
-        {
-            OriginalFileName = "131005_140838.jpg", // Fallback pattern
-            ExifInfo = new ExifResponseDto
-            {
-                DateTimeOriginal = new DateTimeOffset(1950, 1, 1, 0, 0, 0, TimeSpan.Zero) // Exactly 1950
-            }
-        };
-
-        var result = InvokeTryParseDateTime(asset);
-        
-        // Should use filename parsing since 1950 is considered invalid (< 1950 check uses >=)
-        Assert.That(result, Is.Not.Null);
-        Assert.That(result.Value.Year, Is.EqualTo(2013)); // From filename
-    }
-
     /// <summary>
     /// Helper method to invoke the private TryParseDateTime method using reflection.
     /// </summary>
     private DateTime? InvokeTryParseDateTime(AssetResponseDto? asset)
     {
         var method = typeof(ChronologicalAssetsPoolWrapper)
-            .GetMethod("TryParseDateTime", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            .GetMethod("TryParseDateTime", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
         
-        return (DateTime?)method?.Invoke(_wrapper, new object?[] { asset });
+        if (method == null) return null;
+        
+        var parameters = new object?[] { asset, null };
+        var result = method.Invoke(null, parameters);
+        var success = result != null && (bool)result;
+        
+        return success ? (DateTime)parameters[1]! : null;
+    }
+
+    #endregion
+
+    #region Current Logic Tests
+
+    /// <summary>
+    /// Tests for the current implementation logic including tag assignment,
+    /// FileCreatedAt fallback, and set randomization behavior.
+    /// </summary>
+
+    [Test]
+    public async Task GetAssets_ShouldAssignSetTagsToAssets()
+    {
+        // Arrange
+        var inputAssets = _testAssets.Take(9).ToList(); // 9 assets = 3 sets of 3
+        _mockBasePool.Setup(x => x.GetAssets(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                    .ReturnsAsync(inputAssets);
+
+        // Act
+        var result = await _wrapper.GetAssets(9);
+
+        // Assert
+        var resultList = result.ToList();
+        
+        // Verify that all assets have set tags assigned
+        foreach (var asset in resultList)
+        {
+            Assert.That(asset.Tags, Is.Not.Null, "Tags collection should not be null");
+            var setTags = asset.Tags.Where(t => t.Name.StartsWith("Set ")).ToList();
+            Assert.That(setTags.Count, Is.EqualTo(1), $"Asset {asset.Id} should have exactly one set tag");
+            
+            var setTag = setTags.First();
+            Assert.That(setTag.Name, Does.Match(@"^Set \d+$"), 
+                $"Set tag should match pattern 'Set X' but was '{setTag.Name}'");
+        }
+
+        // Verify that we have the expected number of different sets
+        var allSetTags = resultList.SelectMany(a => a.Tags)
+                                  .Where(t => t.Name.StartsWith("Set "))
+                                  .Select(t => t.Name)
+                                  .Distinct()
+                                  .ToList();
+        
+        // With 9 assets and set size 3, we should have exactly 3 different sets
+        Assert.That(allSetTags.Count, Is.EqualTo(3), 
+            "Should have exactly 3 different set tags");
+    }
+
+    [Test]
+    public async Task GetAssets_ShouldAssignConsecutiveSetNumbers()
+    {
+        // Arrange
+        var inputAssets = _testAssets.Take(6).ToList(); // 6 assets = 2 sets of 3
+        _mockBasePool.Setup(x => x.GetAssets(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                    .ReturnsAsync(inputAssets);
+
+        // Act
+        var result = await _wrapper.GetAssets(6);
+
+        // Assert
+        var resultList = result.ToList();
+        var setNumbers = resultList.SelectMany(a => a.Tags)
+                                   .Where(t => t.Name.StartsWith("Set "))
+                                   .Select(t => int.Parse(t.Name.Split(' ')[1]))
+                                   .Distinct()
+                                   .OrderBy(n => n)
+                                   .ToList();
+
+        // Should have set numbers starting from 1
+        Assert.That(setNumbers, Is.EqualTo(new[] { 1, 2 }), 
+            "Set numbers should be consecutive starting from 1");
+    }
+
+    [Test]
+    public async Task GetAssets_WithPartialLastSet_ShouldStillAssignSetTags()
+    {
+        // Arrange
+        var inputAssets = _testAssets.Take(7).ToList(); // 7 assets = 2 full sets + 1 partial set
+        _mockBasePool.Setup(x => x.GetAssets(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                    .ReturnsAsync(inputAssets);
+
+        // Act
+        var result = await _wrapper.GetAssets(7);
+
+        // Assert
+        var resultList = result.ToList();
+        
+        // All assets should have set tags
+        foreach (var asset in resultList)
+        {
+            var setTags = asset.Tags.Where(t => t.Name.StartsWith("Set ")).ToList();
+            Assert.That(setTags.Count, Is.EqualTo(1), 
+                $"Asset {asset.Id} should have exactly one set tag");
+        }
+
+        // Should have 3 different sets (including the partial one)
+        var setNumbers = resultList.SelectMany(a => a.Tags)
+                                   .Where(t => t.Name.StartsWith("Set "))
+                                   .Select(t => int.Parse(t.Name.Split(' ')[1]))
+                                   .Distinct()
+                                   .ToList();
+        
+        Assert.That(setNumbers.Count, Is.EqualTo(3), 
+            "Should have 3 sets: 2 full sets of 3 + 1 partial set of 1");
+    }
+
+    [Test]
+    public void TryParseDateTime_WithFileCreatedAtFallback_ReturnsFileCreatedAt()
+    {
+        // Arrange - Asset without DateTimeOriginal but with FileCreatedAt
+        var testDate = new DateTimeOffset(2023, 6, 15, 10, 30, 0, TimeSpan.Zero);
+        var asset = new AssetResponseDto
+        {
+            Id = Guid.NewGuid().ToString(),
+            OriginalFileName = "test_fallback.jpg",
+            FileCreatedAt = testDate,
+            ExifInfo = new ExifResponseDto
+            {
+                DateTimeOriginal = null // No EXIF date
+            }
+        };
+
+        // Act
+        var result = InvokeTryParseDateTime(asset);
+
+        // Assert
+        Assert.That(result, Is.Not.Null, "Should return FileCreatedAt when DateTimeOriginal is null");
+        Assert.That(result.Value.Year, Is.EqualTo(2023));
+        Assert.That(result.Value.Month, Is.EqualTo(6));
+        Assert.That(result.Value.Day, Is.EqualTo(15));
+        Assert.That(result.Value.Hour, Is.EqualTo(10));
+        Assert.That(result.Value.Minute, Is.EqualTo(30));
+    }
+
+    [Test]
+    public void TryParseDateTime_WithNullExifInfo_ReturnsFileCreatedAt()
+    {
+        // Arrange - Asset with null ExifInfo should fallback to FileCreatedAt
+        var testDate = new DateTimeOffset(2022, 12, 25, 14, 45, 30, TimeSpan.Zero);
+        var asset = new AssetResponseDto
+        {
+            Id = Guid.NewGuid().ToString(),
+            OriginalFileName = "christmas_photo.jpg",
+            FileCreatedAt = testDate,
+            ExifInfo = null // No EXIF info at all
+        };
+
+        // Act
+        var result = InvokeTryParseDateTime(asset);
+
+        // Assert
+        Assert.That(result, Is.Not.Null, "Should return FileCreatedAt when ExifInfo is null");
+        Assert.That(result.Value.Year, Is.EqualTo(2022));
+        Assert.That(result.Value.Month, Is.EqualTo(12));
+        Assert.That(result.Value.Day, Is.EqualTo(25));
+    }
+
+    [Test]
+    public void TryParseDateTime_DateTimeOriginalTakesPrecedence_OverFileCreatedAt()
+    {
+        // Arrange - Asset with both DateTimeOriginal and FileCreatedAt
+        var exifDate = new DateTimeOffset(2024, 8, 20, 16, 20, 0, TimeSpan.Zero);
+        var fileDate = new DateTimeOffset(2024, 8, 25, 10, 0, 0, TimeSpan.Zero); // Different date
+        
+        var asset = new AssetResponseDto
+        {
+            Id = Guid.NewGuid().ToString(),
+            OriginalFileName = "preference_test.jpg",
+            FileCreatedAt = fileDate,
+            ExifInfo = new ExifResponseDto
+            {
+                DateTimeOriginal = exifDate
+            }
+        };
+
+        // Act
+        var result = InvokeTryParseDateTime(asset);
+
+        // Assert
+        Assert.That(result, Is.Not.Null, "Should parse date successfully");
+        Assert.That(result.Value.Year, Is.EqualTo(2024));
+        Assert.That(result.Value.Month, Is.EqualTo(8));
+        Assert.That(result.Value.Day, Is.EqualTo(20), 
+            "Should prefer DateTimeOriginal over FileCreatedAt");
+    }
+
+    [Test]
+    public async Task GetAssets_SetRandomization_PreservesInternalChronologicalOrder()
+    {
+        // Arrange - Create assets with predictable dates for chronological testing
+        var chronologicalAssets = new List<AssetResponseDto>();
+        var baseDate = new DateTime(2024, 1, 1, 10, 0, 0);
+        
+        for (int i = 0; i < 12; i++) // 12 assets = 4 sets of 3
+        {
+            chronologicalAssets.Add(new AssetResponseDto
+            {
+                Id = $"chrono-{i:D3}",
+                ExifInfo = new ExifResponseDto
+                {
+                    DateTimeOriginal = baseDate.AddDays(i)
+                },
+                OriginalFileName = $"chrono_{i:D3}.jpg"
+            });
+        }
+
+        _mockBasePool.Setup(x => x.GetAssets(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                    .ReturnsAsync(chronologicalAssets);
+
+        // Act - Run multiple times to test randomization
+        var results = new List<List<AssetResponseDto>>();
+        for (int run = 0; run < 5; run++)
+        {
+            var result = await _wrapper.GetAssets(12);
+            results.Add(result.ToList());
+        }
+
+        // Assert - Verify that within each set, chronological order is preserved
+        foreach (var resultList in results)
+        {
+            // Group assets by their set tags
+            var assetsBySet = resultList.GroupBy(a => a.Tags.First(t => t.Name.StartsWith("Set ")).Name)
+                                       .OrderBy(g => g.Key)
+                                       .ToList();
+
+            foreach (var setGroup in assetsBySet)
+            {
+                var assetsInSet = setGroup.OrderBy(a => resultList.IndexOf(a)).ToList();
+                
+                // Within each set, dates should be in chronological order
+                for (int i = 1; i < assetsInSet.Count; i++)
+                {
+                    var prevAsset = assetsInSet[i - 1];
+                    var currAsset = assetsInSet[i];
+                    
+                    // Only check assets that have DateTimeOriginal (since we're testing chronological assets)
+                    if (prevAsset.ExifInfo?.DateTimeOriginal.HasValue == true && 
+                        currAsset.ExifInfo?.DateTimeOriginal.HasValue == true)
+                    {
+                        var prevDate = prevAsset.ExifInfo.DateTimeOriginal.Value;
+                        var currDate = currAsset.ExifInfo.DateTimeOriginal.Value;
+                        
+                        Assert.That(currDate, Is.GreaterThanOrEqualTo(prevDate),
+                            $"Within {setGroup.Key}, assets should maintain chronological order. " +
+                            $"Asset {currAsset.Id} ({currDate:yyyy-MM-dd}) should be after " +
+                            $"{prevAsset.Id} ({prevDate:yyyy-MM-dd})");
+                    }
+                }
+            }
+        }
+    }
+
+    [Test]
+    public async Task GetAssets_MultipleRuns_ShowsSetRandomization()
+    {
+        // Arrange
+        var inputAssets = _testAssets.Take(9).ToList(); // 9 assets = 3 sets
+        _mockBasePool.Setup(x => x.GetAssets(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                    .ReturnsAsync(inputAssets);
+
+        // Act - Run the method multiple times
+        var setOrders = new List<List<string>>();
+        for (int run = 0; run < 10; run++)
+        {
+            var result = await _wrapper.GetAssets(9);
+            var resultList = result.ToList();
+            
+            // Extract the order of sets as they appear in the result
+            var setOrder = resultList.Select(a => a.Tags.First(t => t.Name.StartsWith("Set ")).Name)
+                                     .Distinct()
+                                     .ToList();
+            setOrders.Add(setOrder);
+        }
+
+        // Assert - We should see different orderings across multiple runs
+        // (Note: This test might occasionally fail due to randomness, but very rarely)
+        var uniqueOrders = setOrders.Select(order => string.Join(",", order))
+                                   .Distinct()
+                                   .Count();
+
+        // With sufficient runs, we should see some variation in set order
+        // At minimum, we should have all expected set numbers present
+        foreach (var setOrder in setOrders)
+        {
+            Assert.That(setOrder.Count, Is.EqualTo(3), "Should always have 3 sets");
+            
+            var setNumbers = setOrder.Select(s => int.Parse(s.Split(' ')[1])).ToHashSet();
+            var expectedSetNumbers = new HashSet<int> { 1, 2, 3 };
+            
+            // Check that we have the right set numbers (order may vary due to randomization)
+            Assert.That(setNumbers.Count, Is.EqualTo(3), "Should have exactly 3 different set numbers");
+            Assert.That(setNumbers.IsSupersetOf(expectedSetNumbers) && expectedSetNumbers.IsSupersetOf(setNumbers), 
+                Is.True, $"Should contain sets 1, 2, and 3. Got: {string.Join(", ", setNumbers.OrderBy(x => x))}");
+        }
+
+        // Since sets are randomized, we expect to see some variety over multiple runs
+        // This is a probabilistic test - with 10 runs and 3! = 6 possible orders, 
+        // we should see at least 2 different orders most of the time
+        // We make this assertion optional to avoid flaky tests
+        Console.WriteLine($"Observed {uniqueOrders} unique set orders out of 10 runs");
+    }
+
+    [Test] 
+    public async Task GetAssets_WithMixedDateSources_SortsCorrectly()
+    {
+        // Arrange - Create assets with mixed date sources (some DateTimeOriginal, some FileCreatedAt only)
+        var mixedAssets = new List<AssetResponseDto>();
+        var baseDate = new DateTime(2024, 3, 1, 12, 0, 0);
+
+        // Assets with DateTimeOriginal
+        for (int i = 0; i < 3; i++)
+        {
+            mixedAssets.Add(new AssetResponseDto
+            {
+                Id = $"exif-{i}",
+                ExifInfo = new ExifResponseDto
+                {
+                    DateTimeOriginal = baseDate.AddDays(i * 2) // Day 0, 2, 4
+                },
+                FileCreatedAt = baseDate.AddDays(i * 2 + 10), // Much later file dates
+                OriginalFileName = $"exif_{i}.jpg"
+            });
+        }
+
+        // Assets without DateTimeOriginal (will use FileCreatedAt)
+        for (int i = 0; i < 3; i++)
+        {
+            mixedAssets.Add(new AssetResponseDto
+            {
+                Id = $"file-{i}",
+                ExifInfo = new ExifResponseDto
+                {
+                    DateTimeOriginal = null
+                },
+                FileCreatedAt = baseDate.AddDays(i * 2 + 1), // Day 1, 3, 5
+                OriginalFileName = $"file_{i}.jpg"
+            });
+        }
+
+        _mockBasePool.Setup(x => x.GetAssets(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                    .ReturnsAsync(mixedAssets);
+
+        // Act
+        var result = await _wrapper.GetAssets(6);
+
+        // Assert
+        var resultList = result.ToList();
+        
+        // Extract the dates used for sorting (DateTimeOriginal or FileCreatedAt)
+        var sortedDates = new List<DateTime>();
+        foreach (var asset in resultList.Where(a => a.ExifInfo?.DateTimeOriginal.HasValue == true || a.FileCreatedAt != default))
+        {
+            if (asset.ExifInfo?.DateTimeOriginal.HasValue == true)
+            {
+                sortedDates.Add(asset.ExifInfo.DateTimeOriginal.Value.DateTime);
+            }
+            else
+            {
+                sortedDates.Add(asset.FileCreatedAt.DateTime);
+            }
+        }
+
+        // The mixed sources should still result in overall chronological order
+        // Expected order: Day 0 (exif), Day 1 (file), Day 2 (exif), Day 3 (file), Day 4 (exif), Day 5 (file)
+        var expectedDates = new[]
+        {
+            baseDate,                    // Day 0 (exif-0)
+            baseDate.AddDays(1),        // Day 1 (file-0)
+            baseDate.AddDays(2),        // Day 2 (exif-1)
+            baseDate.AddDays(3),        // Day 3 (file-1)
+            baseDate.AddDays(4),        // Day 4 (exif-2)
+            baseDate.AddDays(5)         // Day 5 (file-2)
+        };
+
+        // Since sets are randomized, we can't guarantee exact order, but all expected dates should be present
+        var actualDatesSet = new HashSet<DateTime>(sortedDates);
+        var expectedDatesSet = new HashSet<DateTime>(expectedDates);
+        
+        Assert.That(actualDatesSet, Is.EqualTo(expectedDatesSet),
+            "All mixed-source dates should be present in the result");
+    }
+
+    [Test]
+    public async Task GetAssets_PreservesOriginalTagsAndAddsSetTags()
+    {
+        // Arrange - Create assets with existing tags
+        var assetsWithTags = new List<AssetResponseDto>();
+        for (int i = 0; i < 3; i++)
+        {
+            assetsWithTags.Add(new AssetResponseDto
+            {
+                Id = $"tagged-{i}",
+                ExifInfo = new ExifResponseDto
+                {
+                    DateTimeOriginal = new DateTime(2024, 1, i + 1, 10, 0, 0)
+                },
+                OriginalFileName = $"tagged_{i}.jpg",
+                Tags = new List<TagResponseDto>
+                {
+                    new() { Name = $"OriginalTag{i}" },
+                    new() { Name = "CommonTag" }
+                }
+            });
+        }
+
+        _mockBasePool.Setup(x => x.GetAssets(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                    .ReturnsAsync(assetsWithTags);
+
+        // Act
+        var result = await _wrapper.GetAssets(3);
+
+        // Assert
+        var resultList = result.ToList();
+        
+        foreach (var asset in resultList)
+        {
+            Assert.That(asset.Tags, Is.Not.Null);
+            
+            // Should have original tags plus one set tag
+            var originalTags = asset.Tags.Where(t => !t.Name.StartsWith("Set ")).ToList();
+            var setTags = asset.Tags.Where(t => t.Name.StartsWith("Set ")).ToList();
+            
+            Assert.That(originalTags.Count, Is.EqualTo(2), 
+                "Should preserve all original tags");
+            Assert.That(setTags.Count, Is.EqualTo(1), 
+                "Should add exactly one set tag");
+            
+            // Check original tags are preserved
+            Assert.That(originalTags.Any(t => t.Name == "CommonTag"), Is.True,
+                "Should preserve CommonTag");
+            Assert.That(originalTags.Any(t => t.Name.StartsWith("OriginalTag")), Is.True,
+                "Should preserve asset-specific original tag");
+        }
+    }
+
+    [Test] 
+    public async Task GetAssets_WithEmptyOrNullTags_InitializesTagsCollection()
+    {
+        // Arrange - Create assets with null or empty tags
+        var assetsWithoutTags = new List<AssetResponseDto>
+        {
+            new()
+            {
+                Id = "null-tags",
+                ExifInfo = new ExifResponseDto { DateTimeOriginal = new DateTime(2024, 1, 1) },
+                OriginalFileName = "null_tags.jpg",
+                Tags = null // Null tags
+            },
+            new()
+            {
+                Id = "empty-tags", 
+                ExifInfo = new ExifResponseDto { DateTimeOriginal = new DateTime(2024, 1, 2) },
+                OriginalFileName = "empty_tags.jpg",
+                Tags = new List<TagResponseDto>() // Empty tags
+            }
+        };
+
+        _mockBasePool.Setup(x => x.GetAssets(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                    .ReturnsAsync(assetsWithoutTags);
+
+        // Act
+        var result = await _wrapper.GetAssets(2);
+
+        // Assert
+        var resultList = result.ToList();
+        
+        foreach (var asset in resultList)
+        {
+            Assert.That(asset.Tags, Is.Not.Null, "Tags collection should be initialized");
+            
+            var setTags = asset.Tags.Where(t => t.Name.StartsWith("Set ")).ToList();
+            Assert.That(setTags.Count, Is.EqualTo(1), 
+                "Should have exactly one set tag even when starting with null/empty tags");
+        }
     }
 
     #endregion

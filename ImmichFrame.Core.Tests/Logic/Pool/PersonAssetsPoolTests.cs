@@ -17,12 +17,13 @@ public class PersonAssetsPoolTests // Renamed from PeopleAssetsPoolTests to matc
     private Mock<IApiCache> _mockApiCache;
     private Mock<ImmichApi> _mockImmichApi;
     private Mock<IAccountSettings> _mockAccountSettings;
+    private Mock<IGeneralSettings> _mockGeneralSettings;
     private TestablePersonAssetsPool _personAssetsPool;
 
     private class TestablePersonAssetsPool : PersonAssetsPool
     {
-        public TestablePersonAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings)
-            : base(apiCache, immichApi, accountSettings) { }
+        public TestablePersonAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings, IGeneralSettings generalSettings)
+            : base(apiCache, immichApi, accountSettings, generalSettings) { }
 
         public Task<IEnumerable<AssetResponseDto>> TestLoadAssets(CancellationToken ct = default)
         {
@@ -34,9 +35,10 @@ public class PersonAssetsPoolTests // Renamed from PeopleAssetsPoolTests to matc
     public void Setup()
     {
         _mockApiCache = new Mock<IApiCache>();
-        _mockImmichApi = new Mock<ImmichApi>(null, null);
+        _mockImmichApi = new Mock<ImmichApi>();
         _mockAccountSettings = new Mock<IAccountSettings>();
-        _personAssetsPool = new TestablePersonAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
+        _mockGeneralSettings = new Mock<IGeneralSettings>();
+        _personAssetsPool = new TestablePersonAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object, _mockGeneralSettings.Object);
 
         _mockAccountSettings.SetupGet(s => s.People).Returns(new List<Guid>());
     }

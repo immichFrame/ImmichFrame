@@ -39,29 +39,29 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
         
         if (!accountSettings.ShowFavorites && !accountSettings.ShowMemories && !accountSettings.Albums.Any() && !accountSettings.People.Any())
         {
-            basePool = new AllAssetsPool(_apiCache, _immichApi, accountSettings);
+            basePool = new AllAssetsPool(_apiCache, _immichApi, accountSettings, _generalSettings);
         }
         else
         {
             var pools = new List<IAssetPool>();
 
             if (accountSettings.ShowFavorites)
-                pools.Add(new FavoriteAssetsPool(_apiCache, _immichApi, accountSettings));
+                pools.Add(new FavoriteAssetsPool(_apiCache, _immichApi, accountSettings, _generalSettings));
 
             if (accountSettings.ShowMemories)
-                pools.Add(new MemoryAssetsPool(_immichApi, accountSettings));
+                pools.Add(new MemoryAssetsPool(_immichApi, accountSettings, _generalSettings));
 
             if (accountSettings.Albums.Any())
-                pools.Add(new AlbumAssetsPool(_apiCache, _immichApi, accountSettings));
+                pools.Add(new AlbumAssetsPool(_apiCache, _immichApi, accountSettings, _generalSettings));
 
             if (accountSettings.People.Any())
-                pools.Add(new PersonAssetsPool(_apiCache, _immichApi, accountSettings));
+                pools.Add(new PersonAssetsPool(_apiCache, _immichApi, accountSettings, _generalSettings));
 
             basePool = new MultiAssetPool(pools);
         }
         
         // Wrap with chronological logic if enabled
-        if (_generalSettings.ShowChronologicalImages)
+        if (_generalSettings.ChronologicalImagesCount > 0)
         {
             return new ChronologicalAssetsPoolWrapper(basePool, _generalSettings);
         }

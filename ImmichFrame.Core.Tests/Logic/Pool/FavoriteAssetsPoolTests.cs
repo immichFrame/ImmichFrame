@@ -17,12 +17,13 @@ public class FavoriteAssetsPoolTests
     private Mock<IApiCache> _mockApiCache;
     private Mock<ImmichApi> _mockImmichApi;
     private Mock<IAccountSettings> _mockAccountSettings; // Though not directly used by LoadAssets here
+    private Mock<IGeneralSettings> _mockGeneralSettings;
     private TestableFavoriteAssetsPool _favoriteAssetsPool;
 
     private class TestableFavoriteAssetsPool : FavoriteAssetsPool
     {
-        public TestableFavoriteAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings)
-            : base(apiCache, immichApi, accountSettings) { }
+        public TestableFavoriteAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings, IGeneralSettings generalSettings)
+            : base(apiCache, immichApi, accountSettings, generalSettings) { }
 
         public Task<IEnumerable<AssetResponseDto>> TestLoadAssets(CancellationToken ct = default)
         {
@@ -34,9 +35,10 @@ public class FavoriteAssetsPoolTests
     public void Setup()
     {
         _mockApiCache = new Mock<IApiCache>();
-        _mockImmichApi = new Mock<ImmichApi>(null, null);
+        _mockImmichApi = new Mock<ImmichApi>();
         _mockAccountSettings = new Mock<IAccountSettings>();
-        _favoriteAssetsPool = new TestableFavoriteAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
+        _mockGeneralSettings = new Mock<IGeneralSettings>();
+        _favoriteAssetsPool = new TestableFavoriteAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object, _mockGeneralSettings.Object);
     }
 
     private AssetResponseDto CreateAsset(string id) => new AssetResponseDto { Id = id, Type = AssetTypeEnum.IMAGE };

@@ -51,7 +51,6 @@
     "WeatherLatLong": "WeatherLatLong_TEST",
     "Language": "Language_TEST",
     "Webhook": "Webhook_TEST",
-    "ShowChronologicalImages": true,
     "ChronologicalImagesCount": 7,
     "Account2.ImmichServerUrl": "Account2.ImmichServerUrl_TEST",
     "Account2.ApiKey": "Account2.ApiKey_TEST",

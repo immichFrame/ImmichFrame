@@ -16,15 +16,17 @@ public class MemoryAssetsPoolTests
 {
     private Mock<ImmichApi> _mockImmichApi;
     private Mock<IAccountSettings> _mockAccountSettings;
+    private Mock<IGeneralSettings> _mockGeneralSettings;
     private MemoryAssetsPool _memoryAssetsPool;
 
     [SetUp]
     public void Setup()
     {
-        _mockImmichApi = new Mock<ImmichApi>(null, null); // Base constructor requires ILogger, IHttpClientFactory, IOptions, pass null
+        _mockImmichApi = new Mock<ImmichApi>(); // Base constructor requires ILogger, IHttpClientFactory, IOptions, pass null
         _mockAccountSettings = new Mock<IAccountSettings>();
+        _mockGeneralSettings = new Mock<IGeneralSettings>();
 
-        _memoryAssetsPool = new MemoryAssetsPool(_mockImmichApi.Object, _mockAccountSettings.Object);
+        _memoryAssetsPool = new MemoryAssetsPool(_mockImmichApi.Object, _mockAccountSettings.Object, _mockGeneralSettings.Object);
     }
 
     private List<AssetResponseDto> CreateSampleAssets(int count, bool withExif, int yearCreated)
@@ -142,7 +144,7 @@ public class MemoryAssetsPoolTests
             _mockImmichApi.Setup(x => x.SearchMemoriesAsync(It.IsAny<DateTimeOffset>(), null, null, null, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(memories);
 
-         _memoryAssetsPool = new MemoryAssetsPool(_mockImmichApi.Object, _mockAccountSettings.Object);
+         _memoryAssetsPool = new MemoryAssetsPool(_mockImmichApi.Object, _mockAccountSettings.Object, _mockGeneralSettings.Object);
 
 
             // Act

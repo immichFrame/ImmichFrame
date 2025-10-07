@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace ImmichFrame.Core.Logic.AccountSelection;
 
-public class TotalAccountImagesSelectionStrategy(ILogger<TotalAccountImagesSelectionStrategy> _logger, IAssetAccountTracker _tracker) : IAccountSelectionStrategy
+public class TotalAccountImagesSelectionStrategy(ILogger<TotalAccountImagesSelectionStrategy> _logger, IAssetAccountTracker _tracker, IGeneralSettings _generalSettings) : IAccountSelectionStrategy
 {
     private IList<IAccountImmichFrameLogic> _accounts;
 
@@ -60,7 +60,12 @@ public class TotalAccountImagesSelectionStrategy(ILogger<TotalAccountImagesSelec
                 var (task, account, proportion) = tuple;
                 var assets = (await task).ToList();
                 _logger.LogDebug("Retrieved {total} asset(s) for account [{account}], will take {proportion}%", assets.Count(), account, proportion * 100);
-                return (account, assets.Shuffle().TakeProportional(proportion));
+                
+                // Skip shuffling if chronological sorting is enabled to preserve order
+                var processedAssets = _generalSettings.ChronologicalImagesCount > 0 
+                    ? assets.TakeProportional(proportion)
+                    : assets.Shuffle().TakeProportional(proportion); // Better would be to shuffle sets, in pool classes;
+                return (account, processedAssets);
             });
 
         var accountAssetTupleList = await Task.WhenAll(taskList);

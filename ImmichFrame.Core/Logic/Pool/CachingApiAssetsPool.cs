@@ -3,7 +3,7 @@ using ImmichFrame.Core.Interfaces;
 
 namespace ImmichFrame.Core.Logic.Pool;
 
-public abstract class CachingApiAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings) : IAssetPool
+public abstract class CachingApiAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings, IGeneralSettings generalSettings) : IAssetPool
 {
     private readonly Random _random = new();
     
@@ -14,6 +14,10 @@ public abstract class CachingApiAssetsPool(IApiCache apiCache, ImmichApi immichA
     
     public virtual async Task<IEnumerable<AssetResponseDto>> GetAssets(int requested, CancellationToken ct = default)
     {
+        // Randomize the order of assets in the cache may destroy logic in other pools if they rely on order
+        // For example, PeopleAssetsPool relies on the order of assets to show the most recent
+        // So we should not randomize here
+        //
         return (await AllAssets(ct)).OrderBy(_ => _random.Next()).Take(requested);
     }
 

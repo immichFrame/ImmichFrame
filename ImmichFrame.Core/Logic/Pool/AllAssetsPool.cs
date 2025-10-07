@@ -3,7 +3,7 @@ using ImmichFrame.Core.Interfaces;
 
 namespace ImmichFrame.Core.Logic.Pool;
 
-public class AllAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings) : IAssetPool
+public class AllAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings, IGeneralSettings generalSettings) : IAssetPool
 {
     public async Task<long> GetAssetCount(CancellationToken ct = default)
     {
@@ -15,49 +15,49 @@ public class AllAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSett
     public async Task<IEnumerable<AssetResponseDto>> GetAssets(int requested, CancellationToken ct = default)
     {
         var searchDto = new RandomSearchDto
-        {
-            Size = requested,
-            Type = AssetTypeEnum.IMAGE,
-            WithExif = true,
-            WithPeople = true
-        };
+            {
+                Size = requested,
+                Type = AssetTypeEnum.IMAGE,
+                WithExif = true,
+                WithPeople = true
+            };
 
-        if (accountSettings.ShowArchived)
-        {
-            searchDto.Visibility = AssetVisibility.Archive;
-        }
-        else
-        {
-            searchDto.Visibility = AssetVisibility.Timeline;
-        }
+            if (accountSettings.ShowArchived)
+            {
+                searchDto.Visibility = AssetVisibility.Archive;
+            }
+            else
+            {
+                searchDto.Visibility = AssetVisibility.Timeline;
+            }
 
-        var takenBefore = accountSettings.ImagesUntilDate.HasValue ? accountSettings.ImagesUntilDate : null;
-        if (takenBefore.HasValue)
-        {
-            searchDto.TakenBefore = takenBefore;
-        }
-        var takenAfter = accountSettings.ImagesFromDate.HasValue ? accountSettings.ImagesFromDate : accountSettings.ImagesFromDays.HasValue ? DateTime.Today.AddDays(-accountSettings.ImagesFromDays.Value) : null;
+            var takenBefore = accountSettings.ImagesUntilDate.HasValue ? accountSettings.ImagesUntilDate : null;
+            if (takenBefore.HasValue)
+            {
+                searchDto.TakenBefore = takenBefore;
+            }
+            var takenAfter = accountSettings.ImagesFromDate.HasValue ? accountSettings.ImagesFromDate : accountSettings.ImagesFromDays.HasValue ? DateTime.Today.AddDays(-accountSettings.ImagesFromDays.Value) : null;
 
-        if (takenAfter.HasValue)
-        {
-            searchDto.TakenAfter = takenAfter;
-        }
+            if (takenAfter.HasValue)
+            {
+                searchDto.TakenAfter = takenAfter;
+            }
 
-        if (accountSettings.Rating is int rating)
-        {
-            searchDto.Rating = rating;
-        }
+            if (accountSettings.Rating is int rating)
+            {
+                searchDto.Rating = rating;
+            }
 
-        var assets = await immichApi.SearchRandomAsync(searchDto, ct);
+            var assets = await immichApi.SearchRandomAsync(searchDto, ct);
 
-        if (accountSettings.ExcludedAlbums.Any())
-        {
-            var excludedAssetList = await GetExcludedAlbumAssets(ct);
-            var excludedAssetSet = excludedAssetList.Select(x => x.Id).ToHashSet();
-            assets = assets.Where(x => !excludedAssetSet.Contains(x.Id)).ToList();
-        }
+            if (accountSettings.ExcludedAlbums.Any())
+            {
+                var excludedAssetList = await GetExcludedAlbumAssets(ct);
+                var excludedAssetSet = excludedAssetList.Select(x => x.Id).ToHashSet();
+                assets = assets.Where(x => !excludedAssetSet.Contains(x.Id)).ToList();
+            }
 
-        return assets;
+            return assets;
     }
 
 
