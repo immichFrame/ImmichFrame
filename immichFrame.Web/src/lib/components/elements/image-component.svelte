@@ -74,8 +74,8 @@
 	{#key images}
 		<div
 			class="grid absolute h-dvh-safe w-screen"
-			out:fade={{ duration: transitionDuration }}
-			in:fade={{ duration: transitionDuration, delay: transitionDuration + 25 }}
+			out:fade={{ duration: transitionDuration / 2 }}
+			in:fade={{ duration: transitionDuration, delay: transitionDuration / 2 + 50 }}
 		>
 			{#if split}
 				<div class="grid grid-cols-2">
