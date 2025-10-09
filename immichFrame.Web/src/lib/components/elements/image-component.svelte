@@ -50,8 +50,6 @@
 	let transitionDuration = $derived(
 		$instantTransition ? 0 : ($configStore.transitionDuration ?? 1) * 1000
 	);
-	// flicker fix
-	let fadeInDelay = $derived(transitionDuration + 50);
 </script>
 
 {#if hasBday}
@@ -77,7 +75,7 @@
 		<div
 			class="grid absolute h-dvh-safe w-screen"
 			out:fade={{ duration: transitionDuration }}
-			in:fade={{ duration: transitionDuration, delay: fadeInDelay }}
+			in:fade={{ duration: transitionDuration, delay: transitionDuration + 25 }}
 		>
 			{#if split}
 				<div class="grid grid-cols-2">
