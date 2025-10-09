@@ -4,7 +4,7 @@
 	import ErrorElement from './error-element.svelte';
 	import Image from './image.svelte';
 	import LoadingElement from './LoadingElement.svelte';
-	import { blur } from 'svelte/transition';
+	import { fade } from 'svelte/transition';
 	import { configStore } from '$lib/stores/config.store';
 	import { Confetti } from 'svelte-confetti';
 	import { slideshowStore } from '$lib/stores/slideshow.store';
@@ -50,11 +50,13 @@
 	let transitionDuration = $derived(
 		$instantTransition ? 0 : ($configStore.transitionDuration ?? 1) * 1000
 	);
+	// flicker fix
+	let fadeInDelay = $derived(transitionDuration + 50);
 </script>
 
 {#if hasBday}
 	<div
-		class="	z-[1000] top-[-50px] fixed l-0 h-dvh-safe w-screen flex justify-center overflow-hidden pointer-events-none"
+		class=" z-[1000] top-[-50px] fixed l-0 h-dvh-safe w-screen flex justify-center overflow-hidden pointer-events-none"
 	>
 		<Confetti
 			x={[-5, 5]}
@@ -74,7 +76,8 @@
 	{#key images}
 		<div
 			class="grid absolute h-dvh-safe w-screen"
-			transition:blur={{ duration: transitionDuration }}
+			out:fade={{ duration: transitionDuration }}
+			in:fade={{ duration: transitionDuration, delay: fadeInDelay }}
 		>
 			{#if split}
 				<div class="grid grid-cols-2">
