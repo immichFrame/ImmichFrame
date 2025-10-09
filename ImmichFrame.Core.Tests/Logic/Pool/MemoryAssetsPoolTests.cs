@@ -22,7 +22,7 @@ public class MemoryAssetsPoolTests
     [SetUp]
     public void Setup()
     {
-        _mockImmichApi = new Mock<ImmichApi>();
+        _mockImmichApi = new Mock<ImmichApi>("", null!);
         _mockAccountSettings = new Mock<IAccountSettings>();
         _mockGeneralSettings = new Mock<IGeneralSettings>();
 

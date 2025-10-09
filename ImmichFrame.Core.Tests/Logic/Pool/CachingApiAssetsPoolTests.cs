@@ -23,7 +23,7 @@ public class CachingApiAssetsPoolTests
     // Concrete implementation for testing the abstract class
     private class TestableCachingApiAssetsPool : CachingApiAssetsPool
     {
-        public Func<Task<IEnumerable<AssetResponseDto>>> LoadAssetsFunc { get; set; }
+        public Func<Task<IEnumerable<AssetResponseDto>>>? LoadAssetsFunc { get; set; }
 
         public TestableCachingApiAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings, IGeneralSettings generalSettings)
             : base(apiCache, immichApi, accountSettings, generalSettings)
@@ -40,7 +40,7 @@ public class CachingApiAssetsPoolTests
     public void Setup()
     {
         _mockApiCache = new Mock<IApiCache>(); // ILogger, IOptions<AppSettings>
-        _mockImmichApi = new Mock<ImmichApi>(); // ILogger, IHttpClientFactory, IOptions<AppSettings>
+        _mockImmichApi = new Mock<ImmichApi>("", null!); // ILogger, IHttpClientFactory, IOptions<AppSettings>
         _mockAccountSettings = new Mock<IAccountSettings>();
         _mockGeneralSettings = new Mock<IGeneralSettings>();
 
@@ -135,7 +135,7 @@ public class CachingApiAssetsPoolTests
         };
 
         // Setup cache to really cache after the first call
-        IEnumerable<AssetResponseDto> cachedValue = null;
+        IEnumerable<AssetResponseDto>? cachedValue = null;
         _mockApiCache.Setup(c => c.GetOrAddAsync(
                 It.IsAny<string>(),
                 It.IsAny<Func<Task<IEnumerable<AssetResponseDto>>>>()
