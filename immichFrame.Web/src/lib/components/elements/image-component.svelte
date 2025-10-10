@@ -50,6 +50,7 @@
 	let transitionDuration = $derived(
 		$instantTransition ? 0 : ($configStore.transitionDuration ?? 1) * 1000
 	);
+	let transitionDelay = $derived($instantTransition ? 0 : transitionDuration / 2 + 25);
 </script>
 
 {#if hasBday}
@@ -75,7 +76,7 @@
 		<div
 			class="grid absolute h-dvh-safe w-screen"
 			out:fade={{ duration: transitionDuration / 2 }}
-			in:fade={{ duration: transitionDuration / 2, delay: transitionDuration / 2 + 25 }}
+			in:fade={{ duration: transitionDuration / 2, delay: transitionDelay }}
 		>
 			{#if split}
 				<div class="grid grid-cols-2">
