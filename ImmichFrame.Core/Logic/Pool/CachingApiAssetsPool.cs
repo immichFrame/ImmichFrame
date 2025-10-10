@@ -3,27 +3,48 @@ using ImmichFrame.Core.Interfaces;
 
 namespace ImmichFrame.Core.Logic.Pool;
 
-public abstract class CachingApiAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings) : IAssetPool
+public abstract class CachingApiAssetsPool(IApiCache apiCache, IAccountSettings accountSettings) : IAssetPool
 {
-    private readonly Random _random = new();
-    
+    private int _next; //next asset to return
+
     public async Task<long> GetAssetCount(CancellationToken ct = default)
-    {
-        return (await AllAssets(ct)).Count();
-    }
+        => (await AllAssets(ct)).Count;
     
     public async Task<IEnumerable<AssetResponseDto>> GetAssets(int requested, CancellationToken ct = default)
     {
-        return (await AllAssets(ct)).OrderBy(_ => _random.Next()).Take(requested);
+        if (requested == 0)
+        {
+            return new List<AssetResponseDto>();
+        }
+        
+        var all = await AllAssets(ct);
+
+        if (all.Count < requested)
+        {
+            requested = all.Count; //limit request to what we have
+        }
+        
+        var tail = all.TakeLast(all.Count - _next).ToList();
+        
+        if (tail.Count >= requested)
+        {
+            _next += requested;
+            return tail.Take(requested);
+        }
+
+        // not enough left in tail; need to read head too
+        var overrun = requested - tail.Count;
+        _next = overrun;
+        return tail.Concat(all.Take(overrun));
     }
 
-    private async Task<IEnumerable<AssetResponseDto>> AllAssets(CancellationToken ct = default)
+    private async Task<IList<AssetResponseDto>> AllAssets(CancellationToken ct = default)
     {
         return await apiCache.GetOrAddAsync(GetType().FullName!, () => ApplyAccountFilters(LoadAssets(ct)));
     }
 
 
-    protected async Task<IEnumerable<AssetResponseDto>> ApplyAccountFilters(Task<IEnumerable<AssetResponseDto>> unfiltered)
+    protected async Task<IList<AssetResponseDto>> ApplyAccountFilters(Task<IList<AssetResponseDto>> unfiltered)
     {
         // Display only Images
         var assets = (await unfiltered).Where(x => x.Type == AssetTypeEnum.IMAGE);
@@ -47,9 +68,9 @@ public abstract class CachingApiAssetsPool(IApiCache apiCache, ImmichApi immichA
         {
             assets = assets.Where(x => x.ExifInfo.Rating == rating);
         }
-        
-        return assets;
+
+        return assets.ToList();
     }
-        
-    protected abstract Task<IEnumerable<AssetResponseDto>> LoadAssets(CancellationToken ct = default);
+
+    protected abstract Task<IList<AssetResponseDto>> LoadAssets(CancellationToken ct = default);
 }

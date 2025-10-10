@@ -61,8 +61,8 @@ builder.Services.AddSingleton<IAccountSelectionStrategy, TotalAccountImagesSelec
 builder.Services.AddHttpClient(); // Ensures IHttpClientFactory is available
 
 builder.Services.AddTransient<Func<IAccountSettings, IAccountImmichFrameLogic>>(srv =>
-    account => ActivatorUtilities.CreateInstance<PooledImmichFrameLogic>(srv, account));
-
+    account => 
+    ActivatorUtilities.CreateInstance<PooledImmichFrameLogic>(srv, account, ActivatorUtilities.CreateInstance<PoolConfiguration>(srv, account)));
 builder.Services.AddSingleton<IImmichFrameLogic, MultiImmichFrameLogicDelegate>();
 
 builder.Services.AddControllers();

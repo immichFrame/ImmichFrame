@@ -5,14 +5,14 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace ImmichFrame.Core.Logic.Pool;
 
-public class MemoryAssetsPool(ImmichApi immichApi, IAccountSettings accountSettings) : CachingApiAssetsPool(new DailyApiCache(), immichApi, accountSettings)
+public class MemoryAssetsPool(ImmichApi immichApi, IAccountSettings accountSettings) : CachingApiAssetsPool(new DailyApiCache(), accountSettings)
 {
-    protected override async Task<IEnumerable<AssetResponseDto>> LoadAssets(CancellationToken ct = default)
+    protected override async Task<IList<AssetResponseDto>> LoadAssets(CancellationToken ct = default)
     {
         var memories = await immichApi.SearchMemoriesAsync(DateTime.Now, null, null, null, ct);
 
         var memoryAssets = new List<AssetResponseDto>();
-        foreach (var memory in memories)
+        foreach (var memory in memories.OrderBy(m => m.MemoryAt))
         {
             var assets = memory.Assets.ToList();
             var yearsAgo = DateTime.Now.Year - memory.Data.Year;
@@ -25,7 +25,6 @@ public class MemoryAssetsPool(ImmichApi immichApi, IAccountSettings accountSetti
                     asset.ExifInfo = assetInfo.ExifInfo;
                     asset.People = assetInfo.People;
                 }
-
                 asset.ExifInfo.Description = $"{yearsAgo} {(yearsAgo == 1 ? "year" : "years")} ago";
             }
 

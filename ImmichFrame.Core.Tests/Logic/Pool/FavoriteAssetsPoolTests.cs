@@ -24,7 +24,7 @@ public class FavoriteAssetsPoolTests
         public TestableFavoriteAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings)
             : base(apiCache, immichApi, accountSettings) { }
 
-        public Task<IEnumerable<AssetResponseDto>> TestLoadAssets(CancellationToken ct = default)
+        public Task<IList<AssetResponseDto>> TestLoadAssets(CancellationToken ct = default)
         {
             return base.LoadAssets(ct);
         }

@@ -158,18 +158,37 @@ namespace ImmichFrame.WebApi.Tests.Controllers
                     Content = new StringContent(jsonResponse)
                 });
 
-            // Setup for ViewAssetAsync (thumbnail)
+            // Setup for ViewAssetAsync (asset images) - catch all asset view requests
             var mockImageData = new byte[] { 0xFF, 0xD8, 0xFF, 0xE0 }; // Minimal JPEG
             _mockHttpMessageHandler.Protected()
                 .Setup<Task<HttpResponseMessage>>(
                     "SendAsync",
-                    ItExpr.Is<HttpRequestMessage>(req => req.RequestUri!.ToString().Contains("/thumbnail")),
+                    ItExpr.Is<HttpRequestMessage>(req => 
+                        req.RequestUri!.ToString().Contains("/assets/") ||
+                        req.RequestUri!.ToString().Contains("/thumbnail")),
                     ItExpr.IsAny<CancellationToken>()
                 )
                 .ReturnsAsync(() => new HttpResponseMessage
                 {
                     StatusCode = HttpStatusCode.OK,
                     Content = new ByteArrayContent(mockImageData)
+                });
+
+            // Catch-all setup for any other requests to mock-immich-server.com that aren't already handled
+            _mockHttpMessageHandler.Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.Is<HttpRequestMessage>(req => 
+                        req.RequestUri!.Host == "mock-immich-server.com" && 
+                        !req.RequestUri!.ToString().Contains("/search/metadata") &&
+                        !req.RequestUri!.ToString().Contains("/assets/") &&
+                        !req.RequestUri!.ToString().Contains("/thumbnail")),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ReturnsAsync(() => new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json")
                 });
 
             var client = _factory.CreateClient();

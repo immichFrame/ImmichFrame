@@ -24,7 +24,7 @@ public class PersonAssetsPoolTests // Renamed from PeopleAssetsPoolTests to matc
         public TestablePersonAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings)
             : base(apiCache, immichApi, accountSettings) { }
 
-        public Task<IEnumerable<AssetResponseDto>> TestLoadAssets(CancellationToken ct = default)
+        public Task<IList<AssetResponseDto>> TestLoadAssets(CancellationToken ct = default)
         {
             return base.LoadAssets(ct);
         }
