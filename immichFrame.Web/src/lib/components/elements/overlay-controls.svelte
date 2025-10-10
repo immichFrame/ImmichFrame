@@ -7,7 +7,7 @@
 		mdiInformationOutline
 	} from '@mdi/js';
 	import Icon from './icon.svelte';
-	import { ProgressBarStatus } from './progress-bar.svelte';
+	import { ProgressBarStatus } from './progress-bar.types';
 
 	interface Props {
 		status: ProgressBarStatus;

@@ -1,29 +1,11 @@
-<script module lang="ts">
-	export enum ProgressBarStatus {
-		Playing = 'playing',
-		Paused = 'paused'
-	}
-
-	export enum ProgressBarLocation {
-		Top = 'top',
-		Bottom = 'bottom'
-	}
-</script>
-
 <script lang="ts">
 	import { handlePromiseError } from '$lib/utils';
 	import { onMount, untrack } from 'svelte';
 	import { tweened } from 'svelte/motion';
+	import { ProgressBarLocation, ProgressBarStatus } from './progress-bar.types';
 
 	interface Props {
-		/**
-		 * Autoplay on mount
-		 * @default false
-		 */
 		autoplay?: boolean;
-		/**
-		 * Progress bar status
-		 */
 		status?: ProgressBarStatus;
 		location?: ProgressBarLocation;
 		hidden?: boolean;
