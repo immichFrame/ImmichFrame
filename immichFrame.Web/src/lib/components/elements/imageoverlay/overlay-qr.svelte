@@ -2,12 +2,11 @@
 	import QrCode from '@castlenine/svelte-qrcode';
 
 	interface Props {
-		baseUrl: string;
 		id: string;
 	}
-	let { baseUrl, id }: Props = $props();
+	let { id }: Props = $props();
 
-	let imageUrl = `${baseUrl}/photos/${id}`;
+	let imageUrl = `https://my.immich.app/photos/${id}`;
 </script>
 
 <div
