@@ -11,6 +11,11 @@ public class ConfigLoader(ILogger<ConfigLoader> _logger)
 {
     private string FindConfigFile(string dir, params string[] fileNames)
     {
+        if (!Directory.Exists(dir))
+        {
+            return Path.Combine(dir, fileNames.First());
+        }
+
         return Directory.EnumerateFiles(dir, "*", SearchOption.TopDirectoryOnly)
             .FirstOrDefault(f => fileNames.Any(name => string.Equals(Path.GetFileName(f), name, StringComparison.OrdinalIgnoreCase)))
             ?? Path.Combine(dir, fileNames.First());

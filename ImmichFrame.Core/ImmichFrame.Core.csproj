@@ -13,16 +13,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="BloomFilter.NetCore" Version="2.5.2" />
+    <PackageReference Include="BloomFilter.NetCore" Version="2.5.3" />
     <PackageReference Include="Ical.Net" Version="4.3.1" />
-    <PackageReference Include="Microsoft.Extensions.ApiDescription.Client" Version="8.0.8">
+    <PackageReference Include="Microsoft.Extensions.ApiDescription.Client" Version="8.0.20">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.5" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="NSwag.ApiDescription.Client" Version="13.18.2">
+    <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="NSwag.ApiDescription.Client" Version="13.20.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
