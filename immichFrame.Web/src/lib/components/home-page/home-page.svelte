@@ -1,9 +1,6 @@
 <script lang="ts">
 	import * as api from '$lib/index';
-	import ProgressBar, {
-		ProgressBarLocation,
-		ProgressBarStatus
-	} from '$lib/components/elements/progress-bar.svelte';
+	import ProgressBar from '$lib/components/elements/progress-bar.svelte';
 	import { slideshowStore } from '$lib/stores/slideshow.store';
 	import { clientIdentifierStore, authSecretStore } from '$lib/stores/persist.store';
 	import { onDestroy, onMount, setContext } from 'svelte';
@@ -15,6 +12,7 @@
 	import Appointments from '../elements/appointments.svelte';
 	import LoadingElement from '../elements/LoadingElement.svelte';
 	import { page } from '$app/state';
+	import { ProgressBarLocation, ProgressBarStatus } from '../elements/progress-bar.types';
 
 	interface ImagesState {
 		images: [string, api.AssetResponseDto, api.AlbumResponseDto[]][];
