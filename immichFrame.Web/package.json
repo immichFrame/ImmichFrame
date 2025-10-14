@@ -10,7 +10,7 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
-		"api": "oazapfts http://localhost:5217/swagger/v1/swagger.json src/lib/immichFrameApi.ts"
+		"api": "oazapfts ../openApi/swagger.json src/lib/immichFrameApi.ts"
 	},
 	"devDependencies": {
 		"@castlenine/svelte-qrcode": "^2.3.0",
@@ -25,7 +25,7 @@
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.12.4",
 		"globals": "^16.4.0",
-		"oazapfts": "^6.1.0",
+		"oazapfts": "^6.3.1",
 		"openapi-fetch": "^0.14.1",
 		"openapi-typescript": "^7.3.3",
 		"postcss": "^8.4.44",

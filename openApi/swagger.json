@@ -1,0 +1,1244 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "ImmichFrame.WebApi",
+    "version": "1.0"
+  },
+  "paths": {
+    "/api/Asset": {
+      "get": {
+        "tags": [
+          "Asset"
+        ],
+        "operationId": "GetAsset",
+        "parameters": [
+          {
+            "name": "clientIdentifier",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AssetResponseDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AssetResponseDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AssetResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Asset/{id}/AssetInfo": {
+      "get": {
+        "tags": [
+          "Asset"
+        ],
+        "operationId": "GetAssetInfo",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "clientIdentifier",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssetResponseDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssetResponseDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssetResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Asset/{id}/AlbumInfo": {
+      "get": {
+        "tags": [
+          "Asset"
+        ],
+        "operationId": "GetAlbumInfo",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "clientIdentifier",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AlbumResponseDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AlbumResponseDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AlbumResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Asset/{id}/Image": {
+      "get": {
+        "tags": [
+          "Asset"
+        ],
+        "operationId": "GetImage",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "clientIdentifier",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/webp": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Asset/RandomImageAndInfo": {
+      "get": {
+        "tags": [
+          "Asset"
+        ],
+        "operationId": "GetRandomImageAndInfo",
+        "parameters": [
+          {
+            "name": "clientIdentifier",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImageResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Calendar": {
+      "get": {
+        "tags": [
+          "Calendar"
+        ],
+        "operationId": "GetAppointments",
+        "parameters": [
+          {
+            "name": "clientIdentifier",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/IAppointment"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/IAppointment"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/IAppointment"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Config": {
+      "get": {
+        "tags": [
+          "Config"
+        ],
+        "operationId": "GetConfig",
+        "parameters": [
+          {
+            "name": "clientIdentifier",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientSettingsDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientSettingsDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientSettingsDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Config/Version": {
+      "get": {
+        "tags": [
+          "Config"
+        ],
+        "operationId": "GetVersion",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Weather": {
+      "get": {
+        "tags": [
+          "Weather"
+        ],
+        "operationId": "GetWeather",
+        "parameters": [
+          {
+            "name": "clientIdentifier",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/IWeather"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IWeather"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IWeather"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AlbumResponseDto": {
+        "required": [
+          "albumName",
+          "albumUsers",
+          "assets",
+          "createdAt",
+          "description",
+          "id",
+          "owner",
+          "ownerId",
+          "updatedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "albumName": {
+            "type": "string"
+          },
+          "albumThumbnailAssetId": {
+            "type": "string",
+            "nullable": true
+          },
+          "albumUsers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AlbumUserResponseDto"
+            }
+          },
+          "assetCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "assets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssetResponseDto"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "description": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "hasSharedLink": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string"
+          },
+          "isActivityEnabled": {
+            "type": "boolean"
+          },
+          "lastModifiedAssetTimestamp": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "order": {
+            "$ref": "#/components/schemas/AssetOrder"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/UserResponseDto"
+          },
+          "ownerId": {
+            "type": "string"
+          },
+          "shared": {
+            "type": "boolean"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "nullable": true
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AlbumUserResponseDto": {
+        "required": [
+          "role",
+          "user"
+        ],
+        "type": "object",
+        "properties": {
+          "role": {
+            "$ref": "#/components/schemas/AlbumUserRole"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserResponseDto"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "nullable": true
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AlbumUserRole": {
+        "enum": [
+          0,
+          1
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "AssetFaceWithoutPersonResponseDto": {
+        "required": [
+          "id"
+        ],
+        "type": "object",
+        "properties": {
+          "boundingBoxX1": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "boundingBoxX2": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "boundingBoxY1": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "boundingBoxY2": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "imageHeight": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "imageWidth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sourceType": {
+            "$ref": "#/components/schemas/SourceType"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "nullable": true
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AssetOrder": {
+        "enum": [
+          0,
+          1
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "AssetResponseDto": {
+        "required": [
+          "checksum",
+          "deviceAssetId",
+          "deviceId",
+          "duration",
+          "fileCreatedAt",
+          "fileModifiedAt",
+          "id",
+          "localDateTime",
+          "originalFileName",
+          "originalPath",
+          "ownerId",
+          "type",
+          "updatedAt",
+          "visibility"
+        ],
+        "type": "object",
+        "properties": {
+          "immichServerUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "checksum": {
+            "type": "string"
+          },
+          "deviceAssetId": {
+            "type": "string"
+          },
+          "deviceId": {
+            "type": "string"
+          },
+          "duplicateId": {
+            "type": "string",
+            "nullable": true
+          },
+          "duration": {
+            "type": "string"
+          },
+          "exifInfo": {
+            "$ref": "#/components/schemas/ExifResponseDto"
+          },
+          "fileCreatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "fileModifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "hasMetadata": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string"
+          },
+          "isArchived": {
+            "type": "boolean"
+          },
+          "isFavorite": {
+            "type": "boolean"
+          },
+          "isOffline": {
+            "type": "boolean"
+          },
+          "isTrashed": {
+            "type": "boolean"
+          },
+          "libraryId": {
+            "type": "string",
+            "nullable": true,
+            "deprecated": true
+          },
+          "livePhotoVideoId": {
+            "type": "string",
+            "nullable": true
+          },
+          "localDateTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "originalFileName": {
+            "type": "string"
+          },
+          "originalMimeType": {
+            "type": "string",
+            "nullable": true
+          },
+          "originalPath": {
+            "type": "string"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/UserResponseDto"
+          },
+          "ownerId": {
+            "type": "string"
+          },
+          "people": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonWithFacesResponseDto"
+            },
+            "nullable": true
+          },
+          "resized": {
+            "type": "boolean",
+            "nullable": true,
+            "deprecated": true
+          },
+          "stack": {
+            "$ref": "#/components/schemas/AssetStackResponseDto"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TagResponseDto"
+            },
+            "nullable": true
+          },
+          "thumbhash": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "$ref": "#/components/schemas/AssetTypeEnum"
+          },
+          "unassignedFaces": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssetFaceWithoutPersonResponseDto"
+            },
+            "nullable": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "visibility": {
+            "$ref": "#/components/schemas/AssetVisibility"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "nullable": true
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AssetStackResponseDto": {
+        "required": [
+          "id",
+          "primaryAssetId"
+        ],
+        "type": "object",
+        "properties": {
+          "assetCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "id": {
+            "type": "string"
+          },
+          "primaryAssetId": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "nullable": true
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AssetTypeEnum": {
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "AssetVisibility": {
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "ClientSettingsDto": {
+        "type": "object",
+        "properties": {
+          "interval": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "transitionDuration": {
+            "type": "number",
+            "format": "double"
+          },
+          "downloadImages": {
+            "type": "boolean"
+          },
+          "renewImagesDuration": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "showClock": {
+            "type": "boolean"
+          },
+          "clockFormat": {
+            "type": "string",
+            "nullable": true
+          },
+          "clockDateFormat": {
+            "type": "string",
+            "nullable": true
+          },
+          "showPhotoDate": {
+            "type": "boolean"
+          },
+          "showProgressBar": {
+            "type": "boolean"
+          },
+          "photoDateFormat": {
+            "type": "string",
+            "nullable": true
+          },
+          "showImageDesc": {
+            "type": "boolean"
+          },
+          "showPeopleDesc": {
+            "type": "boolean"
+          },
+          "showAlbumName": {
+            "type": "boolean"
+          },
+          "showImageLocation": {
+            "type": "boolean"
+          },
+          "imageLocationFormat": {
+            "type": "string",
+            "nullable": true
+          },
+          "primaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "secondaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "style": {
+            "type": "string",
+            "nullable": true
+          },
+          "baseFontSize": {
+            "type": "string",
+            "nullable": true
+          },
+          "showWeatherDescription": {
+            "type": "boolean"
+          },
+          "weatherIconUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "imageZoom": {
+            "type": "boolean"
+          },
+          "imagePan": {
+            "type": "boolean"
+          },
+          "imageFill": {
+            "type": "boolean"
+          },
+          "layout": {
+            "type": "string",
+            "nullable": true
+          },
+          "language": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ExifResponseDto": {
+        "type": "object",
+        "properties": {
+          "city": {
+            "type": "string",
+            "nullable": true
+          },
+          "country": {
+            "type": "string",
+            "nullable": true
+          },
+          "dateTimeOriginal": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "exifImageHeight": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "exifImageWidth": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "exposureTime": {
+            "type": "string",
+            "nullable": true
+          },
+          "fNumber": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "fileSizeInByte": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "focalLength": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "iso": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "lensModel": {
+            "type": "string",
+            "nullable": true
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "make": {
+            "type": "string",
+            "nullable": true
+          },
+          "model": {
+            "type": "string",
+            "nullable": true
+          },
+          "modifyDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "orientation": {
+            "type": "string",
+            "nullable": true
+          },
+          "projectionType": {
+            "type": "string",
+            "nullable": true
+          },
+          "rating": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "state": {
+            "type": "string",
+            "nullable": true
+          },
+          "timeZone": {
+            "type": "string",
+            "nullable": true
+          },
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "nullable": true
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "IAppointment": {
+        "type": "object",
+        "properties": {
+          "startTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "duration": {
+            "type": "string",
+            "format": "date-span"
+          },
+          "endTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "location": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "IWeather": {
+        "type": "object",
+        "properties": {
+          "location": {
+            "type": "string",
+            "nullable": true
+          },
+          "temperature": {
+            "type": "number",
+            "format": "double"
+          },
+          "unit": {
+            "type": "string",
+            "nullable": true
+          },
+          "temperatureUnit": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "iconId": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ImageResponse": {
+        "required": [
+          "imageLocation",
+          "photoDate",
+          "randomImageBase64",
+          "thumbHashImageBase64"
+        ],
+        "type": "object",
+        "properties": {
+          "randomImageBase64": {
+            "type": "string",
+            "nullable": true
+          },
+          "thumbHashImageBase64": {
+            "type": "string",
+            "nullable": true
+          },
+          "photoDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "imageLocation": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PersonWithFacesResponseDto": {
+        "required": [
+          "faces",
+          "id",
+          "name",
+          "thumbnailPath"
+        ],
+        "type": "object",
+        "properties": {
+          "birthDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "color": {
+            "type": "string",
+            "nullable": true
+          },
+          "faces": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssetFaceWithoutPersonResponseDto"
+            }
+          },
+          "id": {
+            "type": "string"
+          },
+          "isFavorite": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "isHidden": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "thumbnailPath": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "nullable": true
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SourceType": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "TagResponseDto": {
+        "required": [
+          "createdAt",
+          "id",
+          "name",
+          "updatedAt",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "color": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "parentId": {
+            "type": "string",
+            "nullable": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "value": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "nullable": true
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserAvatarColor": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "UserResponseDto": {
+        "required": [
+          "avatarColor",
+          "email",
+          "id",
+          "name",
+          "profileChangedAt",
+          "profileImagePath"
+        ],
+        "type": "object",
+        "properties": {
+          "avatarColor": {
+            "$ref": "#/components/schemas/UserAvatarColor"
+          },
+          "email": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "profileChangedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "profileImagePath": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "nullable": true
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}
