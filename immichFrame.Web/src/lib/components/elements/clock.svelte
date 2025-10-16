@@ -5,10 +5,9 @@
 	import * as locale from 'date-fns/locale';
 	import { configStore } from '$lib/stores/config.store';
 	import { clientIdentifierStore } from '$lib/stores/persist.store';
+	import * as icons from '$lib/assets/icons';
 
 	api.init();
-
-	let weather = $state<api.IWeather | null>(null);
 
 	const localeToUse = $derived(
 		() => locale[$configStore.language as keyof typeof locale] ?? locale.enUS
@@ -29,27 +28,11 @@
 			now = new Date();
 		}, 1000);
 
-		getWeather();
-		const weatherInterval = setInterval(() => getWeather(), 10 * 60 * 1000);
-
 		return () => {
 			clearInterval(interval);
-			clearInterval(weatherInterval);
 		};
 	});
 
-	async function getWeather() {
-		try {
-			const weatherRequest = await api.getWeather({ clientIdentifier: $clientIdentifierStore });
-			if (weatherRequest.status === 200) {
-				weather = weatherRequest.data;
-			} else {
-				console.warn('Unexpected weather status:', weatherRequest.status);
-			}
-		} catch (err) {
-			console.error('Error fetching weather:', err);
-		}
-	}
 </script>
 
 <div
@@ -69,24 +52,4 @@
 	>
 		{timePortion()}
 	</p>
-	{#if weather}
-		<div id="clockweather">
-			<div
-				id="clockweatherinfo"
-				class="text-xl sm:text-xl md:text-2xl lg:text-3xl font-semibold text-shadow-sm weather-info"
-			>
-				{#if $configStore.weatherIconUrl }
-				<img src="{ $configStore.weatherIconUrl.replace('{IconId}', encodeURIComponent(weather.iconId)) }" class="icon-weather" alt="{weather.description}">
-				{/if}
-				<div class="weather-location">{weather.location},</div>
-				<div class="weather-temperature">{weather.temperature?.toFixed(1)}</div>
-				<div class="weather-unit">{weather.unit}</div>
-			</div>
-			{#if $configStore.showWeatherDescription}
-				<p id="clockweatherdesc" class="text-sm sm:text-sm md:text-md lg:text-xl text-shadow-sm">
-					{weather.description}
-				</p>
-			{/if}
-		</div>
-	{/if}
 </div>

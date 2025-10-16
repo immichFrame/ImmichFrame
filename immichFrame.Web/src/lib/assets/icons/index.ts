@@ -1,0 +1,15 @@
+export { default as clearday } from './clear-day.svg';
+export { default as clearnight } from './clear-night.svg';
+export { default as cloudy } from './cloudy.svg'
+export { default as fog } from './fog.svg';
+export { default as hail } from './hail.svg';
+export { default as irain } from './i-rain.svg';
+export { default as iwind } from './i-wind.svg';
+export { default as partlycloudyday } from './partly-cloudy-day.svg';
+export { default as partlycloudynight } from './partly-cloudy-night.svg';
+export { default as rain } from './rain.svg';
+export { default as sleet } from './sleet.svg';
+export { default as snow } from './snow.svg';
+export { default as thunderstorm } from './thunderstorm.svg';
+export { default as tornado } from './tornado.svg';
+export { default as wind } from './wind.svg';

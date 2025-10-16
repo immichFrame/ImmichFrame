@@ -89,3 +89,92 @@ img.icon-weather {
 	margin-top: -8px;	/* adjust icon top to line up with text */
 	order: 1;
 }
+
+/* Current Conditions */
+.current-conditions-wrapper .current.temperature {
+  line-height: 80px;
+  vertical-align: middle;
+}
+
+.current-conditions-wrapper .icon {
+  vertical-align: middle;
+  line-height: 80px;
+  margin-right: 20px;
+  width: 100px;
+  height: 100px;
+  display: inline-block;
+  position: relative;
+}
+
+/* Table Layout */
+.forecast-container {
+  display: table;
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 17px;
+  line-height: 1;
+  border-bottom: solid 1px #222;
+}
+
+.forecast-container .forecast-item,
+.forecast-container .header-row {
+  display: table-row;
+  border-top: solid 1px #222;
+}
+
+.forecast-container > div:first-child,
+.forecast-container .header-row {
+  border-top: none;
+}
+
+.forecast-container .header-row .date-time-header {
+  text-align: left;
+  overflow: visible;
+}
+
+.forecast-container .forecast-item > span,
+.forecast-container .header-row > span {
+  display: table-cell;
+  font-size: 17px;
+  text-align: center;
+  vertical-align: middle;
+  height: 40px;
+}
+
+.forecast-container .header-row > span {
+  height: 32px;
+  font-size: 14px;
+  text-transform: uppercase;
+  vertical-align: bottom;
+  padding-bottom: 2px;
+}
+
+.forecast-container .forecast-item > span:first-child {
+  text-align: left;
+}
+.forecast-container .forecast-item > span:last-child {
+  text-align: right;
+}
+
+.forecast-container .forecast-item .forecast-icon {
+  width: 30px;
+  height: 30px;
+  display: block;
+  vertical-align: middle;
+}
+
+.forecast-container .forecast-item .time,
+.forecast-container .forecast-item  .high-temperature,
+.forecast-container .forecast-item .low-temperature {
+  white-space: nowrap;
+}
+
+
+.inline-icon {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  margin-right: 0px;
+  vertical-align: bottom;
+  position: relative;
+}
