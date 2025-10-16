@@ -1,6 +1,7 @@
 using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.WebApi.Models;
+using ImmichFrame.Core.Services;
 using Microsoft.AspNetCore.Authentication;
 using System.Reflection;
 using ImmichFrame.Core.Logic;
@@ -56,7 +57,8 @@ builder.Services.AddSingleton<IServerSettings>(srv => srv.GetRequiredService<Con
 builder.Services.AddSingleton<IGeneralSettings>(srv => srv.GetRequiredService<IServerSettings>().GeneralSettings);
 
 // Register services
-builder.Services.AddSingleton<IWeatherService, OpenWeatherMapService>();
+//builder.Services.AddSingleton<IWeatherService, OpenWeatherMapService>();
+builder.Services.AddSingleton<IWeatherService, PirateWeatherService>();
 builder.Services.AddSingleton<ICalendarService, IcalCalendarService>();
 builder.Services.AddSingleton<IAssetAccountTracker, BloomFilterAssetAccountTracker>();
 builder.Services.AddSingleton<IAccountSelectionStrategy, TotalAccountImagesSelectionStrategy>();
