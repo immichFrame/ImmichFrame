@@ -53,12 +53,15 @@
 {#if appointments}
 	<div
 		id="appointments"
-		class="fixed top-0 right-0 w-auto z-10 text-center text-primary mr-1 mt-5 max-w-[20%] hidden lg:block md:min-w-[10%]"
+		class="fixed top-0 right-0 w-auto z-10 text-center text-primary mr-1 mt-5 max-w-[20%] hidden lg:block md:min-w-[10%]
+		{$configStore.style == 'transition' ? 'bg-gradient-to-r from-secondary from-0% pr-10' : ''}
+		{$configStore.style == 'solid' ? 'bg-secondary rounded-tl-2xl' : ''}
+		{$configStore.style == 'blur' ? 'backdrop-blur-lg rounded-tl-2xl' : ''}"
 	>
 		<!-- <div class="text-4xl mx-8 font-bold">Appointments</div> -->
 		<div class="">
 			{#each appointments as appointment}
-				<div class="bg-gray-600 bg-opacity-90 mb-2 text-left rounded-md p-3">
+				<div class="bg-opacity-90 mb-2 text-left rounded-md p-3">
 					<p class="text-s">
 						<b><u>{format(new Date(appointment.startTime ?? ''), 'EEEE MMMM dd, yyyy')}</u></b>
 					</p>
