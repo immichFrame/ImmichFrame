@@ -14,7 +14,9 @@ docs:
 	npm --prefix docs run start
 
 api:
+	curl http://localhost:5217/swagger/v1/swagger.json -o ./openApi/swagger.json
 	npm --prefix immichFrame.Web run api
+
 
 docker-build-prod:
 	docker buildx build --platform linux/amd64 --no-cache . --target final -t ghcr.io/immichframe/immichframe:latest --build-arg VERSION=1.0.0.0
