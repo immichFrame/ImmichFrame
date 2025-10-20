@@ -19,10 +19,14 @@ public class FavoriteAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccoun
                 Page = page,
                 Size = batchSize,
                 IsFavorite = true,
-                Type = AssetTypeEnum.IMAGE,
                 WithExif = true,
                 WithPeople = true
             };
+
+            if (!accountSettings.ShowVideos)
+            {
+                metadataBody.Type = AssetTypeEnum.IMAGE;
+            }
 
             var favoriteInfo = await immichApi.SearchAssetsAsync(metadataBody, ct);
 

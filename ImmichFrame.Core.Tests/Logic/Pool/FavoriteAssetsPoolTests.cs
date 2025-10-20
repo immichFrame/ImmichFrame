@@ -39,7 +39,7 @@ public class FavoriteAssetsPoolTests
         _favoriteAssetsPool = new TestableFavoriteAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
     }
 
-    private AssetResponseDto CreateAsset(string id) => new AssetResponseDto { Id = id, Type = AssetTypeEnum.IMAGE };
+    private AssetResponseDto CreateAsset(string id, AssetTypeEnum type = AssetTypeEnum.IMAGE) => new AssetResponseDto { Id = id, Type = type };
     private SearchResponseDto CreateSearchResult(List<AssetResponseDto> assets, int total) =>
         new SearchResponseDto { Assets = new SearchAssetResponseDto { Items = assets, Total = total } };
 
