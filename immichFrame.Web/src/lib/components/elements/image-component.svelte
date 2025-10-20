@@ -1,8 +1,10 @@
 <script lang="ts">
 	import type { AssetResponseDto } from '$lib/immichFrameApi';
+	import { createEventDispatcher } from 'svelte';
 	import * as api from '$lib/index';
 	import ErrorElement from './error-element.svelte';
 	import Image from './image.svelte';
+	import type ImageComponent from './image.svelte';
 	import LoadingElement from './LoadingElement.svelte';
 	import { fade } from 'svelte/transition';
 	import { configStore } from '$lib/stores/config.store';
@@ -51,6 +53,24 @@
 		$instantTransition ? 0 : ($configStore.transitionDuration ?? 1) * 1000
 	);
 	let transitionDelay = $derived($instantTransition ? 0 : transitionDuration / 2 + 25);
+	const dispatch = createEventDispatcher<{ ended: void }>();
+
+	let primaryImageComponent: ImageComponent;
+	let secondaryImageComponent: ImageComponent | undefined;
+
+	function handleMediaEnded() {
+		dispatch('ended');
+	}
+
+	export const pause = async () => {
+		await primaryImageComponent?.pause?.();
+		await secondaryImageComponent?.pause?.();
+	};
+
+	export const play = async () => {
+		await primaryImageComponent?.play?.();
+		await secondaryImageComponent?.play?.();
+	};
 </script>
 
 {#if hasBday}
@@ -92,6 +112,8 @@
 							{imageFill}
 							{imageZoom}
 							{imagePan}
+							bind:this={primaryImageComponent}
+							on:ended={handleMediaEnded}
 							bind:showInfo
 						/>
 					</div>
@@ -107,6 +129,8 @@
 							{imageFill}
 							{imageZoom}
 							{imagePan}
+							bind:this={secondaryImageComponent}
+							on:ended={handleMediaEnded}
 							bind:showInfo
 						/>
 					</div>
@@ -124,6 +148,8 @@
 						{imageFill}
 						{imageZoom}
 						{imagePan}
+						bind:this={primaryImageComponent}
+						on:ended={handleMediaEnded}
 						bind:showInfo
 					/>
 				</div>
