@@ -17,9 +17,8 @@ self.addEventListener('activate', (event) => {
                     }
                 })
             );
-        })
+        }).then(() => self.clients.claim())
     );
-    self.clients.claim(); // take control of pages
 });
 
 self.addEventListener('fetch', (event) => {
