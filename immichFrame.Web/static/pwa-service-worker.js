@@ -3,7 +3,7 @@ const CACHE_NAME = 'immichframe-v1';
 
 self.addEventListener('install', (event) => {
     console.log('Service worker installing...');
-    self.skipWaiting(); // activate immediately
+    event.waitUntil(self.skipWaiting());
 });
 
 self.addEventListener('activate', (event) => {
