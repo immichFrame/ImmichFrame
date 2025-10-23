@@ -34,6 +34,7 @@ General:
   ImagePan: true
   ImageFill: true
   Layout: Layout_TEST
+  ChronologicalImagesCount: 7
 Accounts:
 - ImmichServerUrl: Account1.ImmichServerUrl_TEST
   ApiKey: Account1.ApiKey_TEST

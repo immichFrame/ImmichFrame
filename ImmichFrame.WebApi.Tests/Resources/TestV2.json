@@ -34,7 +34,8 @@
     "ImageZoom": true,
     "ImagePan": true,
     "ImageFill": true,
-    "Layout": "Layout_TEST"
+    "Layout": "Layout_TEST",
+    "ChronologicalImagesCount": 7
   },
   "Accounts": [
     {

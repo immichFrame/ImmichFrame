@@ -31,7 +31,8 @@ public class MultiImmichFrameLogicDelegate : IImmichFrameLogic
 
 
     public async Task<IEnumerable<AssetResponseDto>> GetAssets()
-        => (await _accountSelectionStrategy.GetAssets()).Shuffle().Select(it => it.ToAsset());
+       // Preserve asset order from selection strategy (required for chronological grouping, no shuffling here)
+        => (await _accountSelectionStrategy.GetAssets()).Select(it => it.ToAsset());
 
 
     public Task<AssetResponseDto> GetAssetInfoById(Guid assetId)

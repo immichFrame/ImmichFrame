@@ -12,12 +12,16 @@ public abstract class CachingApiAssetsPool(IApiCache apiCache, ImmichApi immichA
         return (await AllAssets(ct)).Count();
     }
     
-    public async Task<IEnumerable<AssetResponseDto>> GetAssets(int requested, CancellationToken ct = default)
+    public virtual async Task<IEnumerable<AssetResponseDto>> GetAssets(int requested, CancellationToken ct = default)
     {
+        // Randomize the order of assets in the cache may destroy logic in other pools if they rely on order
+        // For example, PeopleAssetsPool relies on the order of assets to show the most recent
+        // So we should not randomize here
+        //
         return (await AllAssets(ct)).OrderBy(_ => _random.Next()).Take(requested);
     }
 
-    private async Task<IEnumerable<AssetResponseDto>> AllAssets(CancellationToken ct = default)
+    protected async Task<IEnumerable<AssetResponseDto>> AllAssets(CancellationToken ct = default)
     {
         return await apiCache.GetOrAddAsync(GetType().FullName!, () => ApplyAccountFilters(LoadAssets(ct)));
     }
