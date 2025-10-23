@@ -17,7 +17,6 @@ public class CachingApiAssetsPoolTests
     private Mock<IApiCache> _mockApiCache;
     private Mock<ImmichApi> _mockImmichApi; // Dependency for constructor, may not be used directly in base class tests
     private Mock<IAccountSettings> _mockAccountSettings;
-    private Mock<IGeneralSettings> _mockGeneralSettings;
     private TestableCachingApiAssetsPool _testPool;
 
     // Concrete implementation for testing the abstract class
@@ -25,8 +24,8 @@ public class CachingApiAssetsPoolTests
     {
         public Func<Task<IEnumerable<AssetResponseDto>>>? LoadAssetsFunc { get; set; }
 
-        public TestableCachingApiAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings, IGeneralSettings generalSettings)
-            : base(apiCache, immichApi, accountSettings, generalSettings)
+        public TestableCachingApiAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings)
+            : base(apiCache, immichApi, accountSettings)
         {
         }
 
@@ -42,9 +41,8 @@ public class CachingApiAssetsPoolTests
         _mockApiCache = new Mock<IApiCache>(); // ILogger, IOptions<AppSettings>
         _mockImmichApi = new Mock<ImmichApi>("", null!); // ILogger, IHttpClientFactory, IOptions<AppSettings>
         _mockAccountSettings = new Mock<IAccountSettings>();
-        _mockGeneralSettings = new Mock<IGeneralSettings>();
 
-        _testPool = new TestableCachingApiAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object, _mockGeneralSettings.Object);
+        _testPool = new TestableCachingApiAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
 
         // Default setup for ApiCache to execute the factory function
         _mockApiCache.Setup(c => c.GetOrAddAsync(

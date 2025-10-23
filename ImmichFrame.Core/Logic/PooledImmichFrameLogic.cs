@@ -39,23 +39,23 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
         
         if (!accountSettings.ShowFavorites && !accountSettings.ShowMemories && !accountSettings.Albums.Any() && !accountSettings.People.Any())
         {
-            basePool = new AllAssetsPool(_apiCache, _immichApi, accountSettings, _generalSettings);
+            basePool = new AllAssetsPool(_apiCache, _immichApi, accountSettings);
         }
         else
         {
             var pools = new List<IAssetPool>();
 
             if (accountSettings.ShowFavorites)
-                pools.Add(new FavoriteAssetsPool(_apiCache, _immichApi, accountSettings, _generalSettings));
+                pools.Add(new FavoriteAssetsPool(_apiCache, _immichApi, accountSettings));
 
             if (accountSettings.ShowMemories)
-                pools.Add(new MemoryAssetsPool(_immichApi, accountSettings, _generalSettings));
+                pools.Add(new MemoryAssetsPool(_immichApi, accountSettings));
 
             if (accountSettings.Albums.Any())
-                pools.Add(new AlbumAssetsPool(_apiCache, _immichApi, accountSettings, _generalSettings));
+                pools.Add(new AlbumAssetsPool(_apiCache, _immichApi, accountSettings));
 
             if (accountSettings.People.Any())
-                pools.Add(new PersonAssetsPool(_apiCache, _immichApi, accountSettings, _generalSettings));
+                pools.Add(new PersonAssetsPool(_apiCache, _immichApi, accountSettings));
 
             basePool = new MultiAssetPool(pools);
         }

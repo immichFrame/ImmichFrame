@@ -17,17 +17,15 @@ public class AllAssetsPoolTests
     private Mock<IApiCache> _mockApiCache;
     private Mock<ImmichApi> _mockImmichApi;
     private Mock<IAccountSettings> _mockAccountSettings;
-    private Mock<IGeneralSettings> _mockGeneralSettings;
     private AllAssetsPool _allAssetsPool;
 
     [SetUp]
     public void Setup()
     {
         _mockApiCache = new Mock<IApiCache>();
-        _mockImmichApi = new Mock<ImmichApi>(null, null);
+        _mockImmichApi = new Mock<ImmichApi>(null!, null!);
         _mockAccountSettings = new Mock<IAccountSettings>();
-        _mockGeneralSettings = new Mock<IGeneralSettings>();
-        _allAssetsPool = new AllAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object, _mockGeneralSettings.Object);
+        _allAssetsPool = new AllAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
 
         // Default account settings
         _mockAccountSettings.SetupGet(s => s.ShowArchived).Returns(false);
