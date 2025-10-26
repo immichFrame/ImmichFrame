@@ -60,10 +60,13 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
             basePool = new MultiAssetPool(pools);
         }
         
-        // Wrap with chronological logic if enabled
+        // Prefer actual chronological pool if enabled 
         if (_generalSettings.ChronologicalImagesCount > 0)
         {
-            return new ChronologicalAssetsPoolWrapper(basePool, _generalSettings);
+            var randomDatePool = new RandomDateAssetsPool(_apiCache, _immichApi, AccountSettings);
+            randomDatePool.ConfigureAssetsPerRandomDate(_generalSettings.ChronologicalImagesCount);
+            return randomDatePool;
+            //new ChronologicalAssetsPoolWrapper(randomDatePool, _generalSettings);
         }
         
         return basePool;
