@@ -22,7 +22,8 @@ public class RandomDateAssetsPoolTests
     private class TestableRandomDateAssetsPool : RandomDateAssetsPool
     {
         public TestableRandomDateAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings)
-            : base(apiCache, immichApi, accountSettings) { }
+            : base(apiCache, immichApi, accountSettings, enableClusterCaching: false) // Disable caching for tests
+        { }
 
         public Task<IEnumerable<AssetResponseDto>> TestLoadAssets(CancellationToken ct = default)
         {
@@ -98,6 +99,12 @@ public class RandomDateAssetsPoolTests
             It.Is<MetadataSearchDto>(dto => dto.TakenAfter.HasValue && dto.TakenBefore.HasValue && dto.Size >= 50),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(CreateSearchResult(randomDateAssets, randomDateAssets.Count));
+
+        // Setup monthly statistics queries (Size = 1, used for cluster initialization)
+        _mockImmichApi.Setup(api => api.SearchAssetsAsync(
+            It.Is<MetadataSearchDto>(dto => dto.Size == 1 && dto.TakenAfter.HasValue && dto.TakenBefore.HasValue),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(CreateSearchResult(new List<AssetResponseDto>(), 10)); // Return some count for monthly stats
 
         // Setup fallback query - return empty (should not be called)
         _mockImmichApi.Setup(api => api.SearchAssetsAsync(
@@ -182,6 +189,12 @@ public class RandomDateAssetsPoolTests
             It.Is<MetadataSearchDto>(dto => dto.TakenAfter.HasValue && dto.TakenBefore.HasValue && dto.Size >= 50),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(CreateSearchResult(fewAssets, fewAssets.Count));
+
+        // Setup monthly statistics queries (Size = 1, used for cluster initialization)
+        _mockImmichApi.Setup(api => api.SearchAssetsAsync(
+            It.Is<MetadataSearchDto>(dto => dto.Size == 1 && dto.TakenAfter.HasValue && dto.TakenBefore.HasValue),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(CreateSearchResult(new List<AssetResponseDto>(), 10)); // Return some count for monthly stats
 
         // Setup fallback query (no date filters, larger size)
         _mockImmichApi.Setup(api => api.SearchAssetsAsync(

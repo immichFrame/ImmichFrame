@@ -52,10 +52,28 @@ public class PhotoCluster
 /// Modern digital photography creates more photos than older analog photography,
 /// so uniform random date selection would favor older, sparser periods.
 /// </summary>
-public class RandomDateAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings) : IAssetPool
+public class RandomDateAssetsPool : IAssetPool
 {
-    // Random number generator for date and asset selection
-    private readonly Random _random = new();
+    private readonly IApiCache apiCache;
+    private readonly ImmichApi immichApi;
+    private readonly IAccountSettings accountSettings;
+
+    /// <summary>
+    /// Initializes a new instance of RandomDateAssetsPool.
+    /// </summary>
+    /// <param name="apiCache">API cache for caching expensive operations</param>
+    /// <param name="immichApi">Immich API client</param>
+    /// <param name="accountSettings">Account-specific settings</param>
+    /// <param name="enableClusterCaching">Enable cluster caching for production (default: true)</param>
+    public RandomDateAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings, bool enableClusterCaching = true)
+    {
+        this.apiCache = apiCache;
+        this.immichApi = immichApi;
+        this.accountSettings = accountSettings;
+        _enableClusterCaching = enableClusterCaching;
+    }
+    // Random number generator for date and asset selection - thread-safe in modern .NET
+    private readonly Random _random = Random.Shared;
     
     // Maximum number of retry attempts for finding assets on random dates
     private const int MaxRetryAttempts = 4;
@@ -79,6 +97,15 @@ public class RandomDateAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAcco
     // Threshold for identifying sparse clusters (photos per month)
     private const int SparseClusterThreshold = 5;
 
+    // Maximum range for cluster initialization to prevent excessive API calls
+    private const int MaxClusterRangeYears = 15;
+
+    // Cache key prefix for cluster data
+    private const string ClusterCachePrefix = "RandomDatePool:Clusters";
+
+    // Flag to enable cluster caching (disabled for testing to avoid interference)
+    private readonly bool _enableClusterCaching;
+
     /// <summary>
     /// Gets the total asset count for statistics purposes.
     /// For random pools, exact asset count is not meaningful as it's dynamic,
@@ -89,8 +116,9 @@ public class RandomDateAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAcco
     /// <returns>Total number of images in the account</returns>
     public async Task<long> GetAssetCount(CancellationToken ct = default)
     {
-        return (await apiCache.GetOrAddAsync(nameof(RandomDateAssetsPool),
-            () => immichApi.GetAssetStatisticsAsync(null, false, null, ct))).Images;
+        var cacheKey = $"{nameof(RandomDateAssetsPool)}:stats:v1:archived={accountSettings.ShowArchived}";
+        return (await apiCache.GetOrAddAsync(cacheKey,
+            () => immichApi.GetAssetStatisticsAsync(null, accountSettings.ShowArchived, null, ct))).Images;
     }
 
     /// <summary>
@@ -290,84 +318,6 @@ public class RandomDateAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAcco
     }
 
     /// <summary>
-    /// Legacy uniform random-date selection across the entire date range.
-    /// Retained for comparison and potential fallback. This approach tends to
-    /// over-represent older, sparser periods in modern libraries and is therefore
-    /// superseded by the cluster-based method.
-    /// </summary>
-    /// <param name="oldestDate">Earliest date in the library</param>
-    /// <param name="youngestDate">Latest date in the library</param>
-    /// <param name="ct">Cancellation token</param>
-    /// <returns>A list of assets selected via uniform random dates, or a fallback set</returns>
-    private async Task<List<AssetResponseDto>?> TryGetAssetsFromRandomDates(DateTime oldestDate, DateTime youngestDate, CancellationToken ct)
-    {
-        var allAssets = new List<AssetResponseDto>();
-        var attemptedDates = new HashSet<DateTime>();
-
-        var requiredDateBlocks = Math.Ceiling((double)_requestedAssetCount / _assetsPerRandomDate);
-        var maxDateAttempts = Math.Min((int)requiredDateBlocks * 4, 12);
-        DateTime? currentRandomDate = null;
-
-        for (int attempt = 0; attempt < maxDateAttempts && allAssets.Count < _requestedAssetCount; attempt++)
-        {
-            if (attempt % 4 == 0)
-            {
-                currentRandomDate = GenerateRandomDate(oldestDate, youngestDate, attemptedDates);
-
-                if (currentRandomDate == null)
-                {
-                    break;
-                }
-
-                attemptedDates.Add(currentRandomDate.Value);
-            }
-
-            if (currentRandomDate == null)
-            {
-                break;
-            }
-
-            // Escalate the time window on each attempt for this date (1..4)
-            var timeRangeAttempt = (attempt % 4) + 1;
-            var searchDate = currentRandomDate.Value.Date;
-            var assetsFromDate = await GetAssetsFromDate(searchDate, timeRangeAttempt, ct);
-
-            if (assetsFromDate.Any())
-            {
-                // Add only up to the per-date target to maintain date diversity
-                var assetsNeeded = Math.Min(_assetsPerRandomDate, _requestedAssetCount - allAssets.Count);
-                var assetsToAdd = assetsFromDate.Take(assetsNeeded).ToList();
-                allAssets.AddRange(assetsToAdd);
-
-                if (allAssets.Count >= _requestedAssetCount)
-                {
-                    return allAssets;
-                }
-            }
-
-            // After two complete 4-step cycles, move the sampling window earlier
-            if (attempt > 0 && attempt % 8 == 0)
-            {
-                var oldYoungestDate = youngestDate;
-                youngestDate = searchDate.AddDays(-30);
-                if (youngestDate <= oldestDate)
-                {
-                    break;
-                }
-            }
-        }
-
-        if (allAssets.Count >= Math.Min(_assetsPerRandomDate, _requestedAssetCount))
-        {
-            return allAssets;
-        }
-
-        var fallbackAssets = await GetAllAvailableAssets(ct);
-        var result = fallbackAssets.Take(Math.Max(100, _requestedAssetCount)).ToList();
-        return result;
-    }
-
-    /// <summary>
     /// Advanced cluster-based random date selection method (preferred approach).
     /// This method uses photo clusters to ensure balanced representation across different
     /// time periods, preventing over-representation of older photos in libraries with
@@ -384,11 +334,10 @@ public class RandomDateAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAcco
         }
 
         var allAssets = new List<AssetResponseDto>();
-        var usedClusters = new HashSet<PhotoCluster>();
 
         // Calculate how many different random dates are needed based on assets per date
         var requiredDateBlocks = Math.Ceiling((double)_requestedAssetCount / _assetsPerRandomDate);
-        var maxDateAttempts = Math.Min((int)requiredDateBlocks * 4, 12); // Limit total attempts to prevent infinite loops
+        var maxDateAttempts = Math.Min((int)requiredDateBlocks * 4, Math.Max(12, _requestedAssetCount / 2)); // Scale with request size
         PhotoCluster? currentCluster = null;
         DateTime? currentRandomDate = null;
 
@@ -400,7 +349,7 @@ public class RandomDateAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAcco
             {
                 currentCluster = SelectRandomCluster();
                 currentRandomDate = GenerateRandomDateFromCluster(currentCluster);
-                usedClusters.Add(currentCluster);
+                // Cluster tracking removed as it was unused
             }
             
             if (currentRandomDate == null || currentCluster == null)
@@ -537,44 +486,6 @@ public class RandomDateAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAcco
     }
 
     /// <summary>
-    /// Retrieves assets around a target date using escalating time windows.
-    /// </summary>
-    /// <param name="targetDate">Date to center the search on</param>
-    /// <param name="attemptNumber">Expansion level (1..4)</param>
-    /// <param name="ct">Cancellation token</param>
-    /// <returns>Assets found within the computed window</returns>
-    private async Task<List<AssetResponseDto>> GetAssetsFromDate(DateTime targetDate, int attemptNumber, CancellationToken ct)
-    {
-        try
-        {
-            // Compute the time window for this attempt
-            var (searchStart, searchEnd, description) = GetSearchTimeRange(targetDate, attemptNumber, false); // Legacy method assumes dense clusters
-
-            var searchDto = new MetadataSearchDto
-            {
-                TakenAfter = searchStart,
-                TakenBefore = searchEnd,
-                Size = Math.Max(_assetsPerRandomDate * 2, 50),
-                Page = 1,
-                Type = AssetTypeEnum.IMAGE,
-                WithExif = true,
-                Visibility = accountSettings.ShowArchived ? AssetVisibility.Archive : AssetVisibility.Timeline,
-                Order = AssetOrder.Desc
-            };
-
-            // Query the API for assets within the window
-            var result = await immichApi.SearchAssetsAsync(searchDto, ct);
-            var assets = result?.Assets?.Items?.ToList() ?? new List<AssetResponseDto>();
-
-            return assets;
-        }
-        catch
-        {
-            return new List<AssetResponseDto>();
-        }
-    }
-
-    /// <summary>
     /// Computes an escalating search window around a target date.
     /// Uses adaptive windowing: non-overlapping sequential windows for sparse clusters,
     /// traditional escalating windows for dense clusters.
@@ -597,25 +508,25 @@ public class RandomDateAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAcco
                     // Wide: ±6 months
                     searchStart = targetDate.AddMonths(-6);
                     searchEnd = targetDate.AddMonths(6);
-                    description = "(±6 Monate - sparse)";
+                    description = "6-month range (sparse)";
                     break;
                 case 2:
                     // Very wide: ±12 months
                     searchStart = targetDate.AddMonths(-12);
                     searchEnd = targetDate.AddMonths(12);
-                    description = "(±12 Monate - sparse)";
+                    description = "12-month range (sparse)";
                     break;
                 case 3:
                     // Extremely wide: ±18 months
                     searchStart = targetDate.AddMonths(-18);
                     searchEnd = targetDate.AddMonths(18);
-                    description = "(±18 Monate - sparse)";
+                    description = "18-month range (sparse)";
                     break;
                 default:
                     // Maximum: ±24 months
                     searchStart = targetDate.AddMonths(-24);
                     searchEnd = targetDate.AddMonths(24);
-                    description = "(±24 Monate - sparse)";
+                    description = "24-month range (sparse)";
                     break;
             }
         }
@@ -628,25 +539,25 @@ public class RandomDateAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAcco
                     // Narrow: ±7 days
                     searchStart = targetDate.AddDays(-7);
                     searchEnd = targetDate.AddDays(7);
-                    description = "(±7 Tage)";
+                    description = "7-day range";
                     break;
                 case 2:
                     // Medium: ±3 months
                     searchStart = targetDate.AddMonths(-3);
                     searchEnd = targetDate.AddMonths(3);
-                    description = "(±3 Monate)";
+                    description = "3-month range";
                     break;
                 case 3:
                     // Wide: ±6 months
                     searchStart = targetDate.AddMonths(-6);
                     searchEnd = targetDate.AddMonths(6);
-                    description = "(±6 Monate)";
+                    description = "6-month range";
                     break;
                 default:
                     // Widest: ±12 months
                     searchStart = targetDate.AddMonths(-12);
                     searchEnd = targetDate.AddMonths(12);
-                    description = "(±12 Monate)";
+                    description = "12-month range";
                     break;
             }
         }
@@ -700,6 +611,7 @@ public class RandomDateAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAcco
 
     /// <summary>
     /// Initializes the temporal clusters used for balanced selection.
+    /// Implements optional caching and range bounding to prevent expensive wide-range initialization.
     /// </summary>
     /// <param name="oldestDate">Library start</param>
     /// <param name="youngestDate">Library end</param>
@@ -711,11 +623,35 @@ public class RandomDateAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAcco
 
         try
         {
-            // 1) Gather monthly photo counts across the range
-            var monthlyStats = await GetMonthlyPhotoStatistics(oldestDate, youngestDate, ct);
-
-            // 2) Convert monthly stats into balanced clusters
-            _photoClusters = CreateBalancedClusters(monthlyStats);
+            // Bound the date range to prevent excessive API calls for very long libraries
+            var boundedOldestDate = BoundDateRange(oldestDate, youngestDate);
+            
+            // Use caching for large date ranges in production environments
+            var rangeYears = (youngestDate - boundedOldestDate).TotalDays / 365.25;
+            var shouldCache = _enableClusterCaching && rangeYears > 2; // Cache for ranges > 2 years
+            
+            if (shouldCache)
+            {
+                // Generate cache key for this specific date range and account settings
+                var cacheKey = GenerateClusterCacheKey(boundedOldestDate, youngestDate);
+                
+                // Try to get cached cluster data first
+                _photoClusters = await apiCache.GetOrAddAsync(cacheKey, async () =>
+                {
+                    // 1) Gather monthly photo counts across the bounded range
+                    var monthlyStats = await GetMonthlyPhotoStatistics(boundedOldestDate, youngestDate, ct);
+                    
+                    // 2) Convert monthly stats into balanced clusters
+                    return CreateBalancedClusters(monthlyStats);
+                });
+            }
+            else
+            {
+                // For smaller ranges or when caching is disabled, compute directly
+                var monthlyStats = await GetMonthlyPhotoStatistics(boundedOldestDate, youngestDate, ct);
+                _photoClusters = CreateBalancedClusters(monthlyStats);
+            }
+            
             _clustersInitialized = true;
         }
         catch (Exception)
@@ -728,7 +664,8 @@ public class RandomDateAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAcco
                     StartDate = oldestDate,
                     EndDate = youngestDate,
                     PhotoCount = 1000,
-                    Weight = 1.0
+                    Weight = 1.0,
+                    IsSparse = false
                 }
             };
             _clustersInitialized = true;
@@ -818,8 +755,10 @@ public class RandomDateAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAcco
         var currentPhotoCount = 0;
         bool firstMonth = true;
 
-        foreach (var (month, photoCount) in monthlyStats)
+        for (int i = 0; i < monthlyStats.Count; i++)
         {
+            var (month, photoCount) = monthlyStats[i];
+
             if (firstMonth)
             {
                 currentCluster.StartDate = month;
@@ -829,7 +768,7 @@ public class RandomDateAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAcco
             currentPhotoCount += photoCount;
             currentCluster.EndDate = month.AddMonths(1).AddDays(-1);
 
-            var isLastMonth = month == monthlyStats.Last().Month;
+            var isLastMonth = i == monthlyStats.Count - 1;
 
             if (currentPhotoCount >= targetPhotosPerCluster && !isLastMonth)
             {
@@ -887,5 +826,29 @@ public class RandomDateAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAcco
         }
 
         return _photoClusters.Last();
+    }
+
+    /// <summary>
+    /// Bounds the date range to prevent excessive cluster initialization for very long libraries.
+    /// Limits the oldest date to MaxClusterRangeYears from the youngest date.
+    /// </summary>
+    /// <param name="oldestDate">Original oldest date</param>
+    /// <param name="youngestDate">Youngest date (unchanged)</param>
+    /// <returns>Bounded oldest date</returns>
+    private DateTime BoundDateRange(DateTime oldestDate, DateTime youngestDate)
+    {
+        var maxOldestDate = youngestDate.AddYears(-MaxClusterRangeYears);
+        return oldestDate < maxOldestDate ? maxOldestDate : oldestDate;
+    }
+
+    /// <summary>
+    /// Generates a cache key for cluster data based on date range and account settings.
+    /// </summary>
+    /// <param name="oldestDate">Bounded oldest date</param>
+    /// <param name="youngestDate">Youngest date</param>
+    /// <returns>Cache key for cluster data</returns>
+    private string GenerateClusterCacheKey(DateTime oldestDate, DateTime youngestDate)
+    {
+        return $"{ClusterCachePrefix}:v1:range={oldestDate:yyyy-MM}to{youngestDate:yyyy-MM}:archived={accountSettings.ShowArchived}";
     }
 }
