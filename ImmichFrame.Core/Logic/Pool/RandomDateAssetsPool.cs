@@ -31,11 +31,17 @@ public class PhotoCluster
     public double Weight { get; set; }
 
     /// <summary>
+    /// Indicates if this cluster has sparse photo density requiring special handling
+    /// </summary>
+    public bool IsSparse { get; set; }
+
+    /// <summary>
     /// Returns a human-readable representation of the cluster
     /// </summary>
     public override string ToString()
     {
-        return $"Cluster: {StartDate:yyyy-MM-dd} to {EndDate:yyyy-MM-dd} ({PhotoCount} photos, weight: {Weight:F2})";
+        var sparseIndicator = IsSparse ? " [SPARSE]" : "";
+        return $"Cluster: {StartDate:yyyy-MM-dd} to {EndDate:yyyy-MM-dd} ({PhotoCount} photos, weight: {Weight:F2}){sparseIndicator}";
     }
 }
 
@@ -67,6 +73,12 @@ public class RandomDateAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAcco
     // Flag to track whether clusters have been initialized to avoid recomputation
     private bool _clustersInitialized = false;
 
+    // Track already-selected asset IDs to prevent duplicates
+    private readonly HashSet<string> _selectedAssetIds = new();
+
+    // Threshold for identifying sparse clusters (photos per month)
+    private const int SparseClusterThreshold = 5;
+
     /// <summary>
     /// Gets the total asset count for statistics purposes.
     /// For random pools, exact asset count is not meaningful as it's dynamic,
@@ -91,6 +103,9 @@ public class RandomDateAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAcco
     /// <returns>Collection of randomly selected assets</returns>
     public async Task<IEnumerable<AssetResponseDto>> GetAssets(int requested, CancellationToken ct = default)
     {
+        // Clear previous selection to ensure fresh results
+        _selectedAssetIds.Clear();
+        
         // Set the desired count for the LoadAssets method
         _requestedAssetCount = requested;
         var result = (await LoadAssets(ct)).Take(requested);
@@ -142,20 +157,26 @@ public class RandomDateAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAcco
         var takenBefore = accountSettings.ImagesUntilDate.HasValue ? accountSettings.ImagesUntilDate : null;
         if (takenBefore.HasValue)
         {
-            filteredAssets = filteredAssets.Where(x => x.ExifInfo.DateTimeOriginal <= takenBefore);
+            filteredAssets = filteredAssets.Where(x =>
+                (x.ExifInfo?.DateTimeOriginal?.DateTime ?? x.FileCreatedAt.DateTime) <= takenBefore.Value);
         }
 
         // Apply lower date boundary (either absolute date or relative days from today)
-        var takenAfter = accountSettings.ImagesFromDate.HasValue ? accountSettings.ImagesFromDate : accountSettings.ImagesFromDays.HasValue ? DateTime.Today.AddDays(-accountSettings.ImagesFromDays.Value) : null;
+        var takenAfter = accountSettings.ImagesFromDate.HasValue
+            ? accountSettings.ImagesFromDate
+            : accountSettings.ImagesFromDays.HasValue
+                ? DateTime.Today.AddDays(-accountSettings.ImagesFromDays.Value)
+                : (DateTime?)null;
         if (takenAfter.HasValue)
         {
-            filteredAssets = filteredAssets.Where(x => x.ExifInfo.DateTimeOriginal >= takenAfter);
+            filteredAssets = filteredAssets.Where(x =>
+                (x.ExifInfo?.DateTimeOriginal?.DateTime ?? x.FileCreatedAt.DateTime) >= takenAfter.Value);
         }
 
         // Apply rating filter if specified - only show assets with specific star rating
         if (accountSettings.Rating is int rating)
         {
-            filteredAssets = filteredAssets.Where(x => x.ExifInfo.Rating == rating);
+            filteredAssets = filteredAssets.Where(x => x.ExifInfo != null && x.ExifInfo.Rating == rating);
         }
 
         return filteredAssets;
@@ -389,8 +410,9 @@ public class RandomDateAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAcco
 
             // Determine the time range based on the current attempt (1-4 cycle)
             // This creates escalating search windows: ±7 days, ±3 months, ±6 months, ±12 months
+            // For sparse clusters, use wider, non-overlapping windows
             var timeRangeAttempt = (attempt % 4) + 1;
-            var (searchStartDate, searchEndDate, description) = GetSearchTimeRange(currentRandomDate.Value, timeRangeAttempt);
+            var (searchStartDate, searchEndDate, description) = GetSearchTimeRange(currentRandomDate.Value, timeRangeAttempt, currentCluster.IsSparse);
 
             var assets = await SearchAssetsInTimeRange(searchStartDate, searchEndDate, ct);
 
@@ -438,6 +460,7 @@ public class RandomDateAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAcco
 
     /// <summary>
     /// Queries assets within the provided time range and returns a randomized subset.
+    /// Implements deduplication to prevent returning the same assets multiple times.
     /// </summary>
     /// <param name="startDate">Inclusive start of the range</param>
     /// <param name="endDate">Exclusive end of the range</param>
@@ -451,7 +474,7 @@ public class RandomDateAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAcco
             {
                 TakenAfter = startDate,
                 TakenBefore = endDate,
-                Size = Math.Max(_assetsPerRandomDate * 2, 50),
+                Size = Math.Max(_assetsPerRandomDate * 4, 100), // Request more to account for deduplication
                 Page = 1,
                 Type = AssetTypeEnum.IMAGE,
                 WithExif = true,
@@ -463,8 +486,19 @@ public class RandomDateAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAcco
             var result = await immichApi.SearchAssetsAsync(searchDto, ct);
             var assets = result?.Assets?.Items?.ToList() ?? new List<AssetResponseDto>();
 
+            // Filter out already-selected assets to prevent duplicates
+            var newAssets = assets.Where(asset => !_selectedAssetIds.Contains(asset.Id)).ToList();
+
             // Shuffle to avoid bias from API ordering and take only what's needed
-            return assets.OrderBy(_ => _random.Next()).Take(_assetsPerRandomDate).ToList();
+            var selectedAssets = newAssets.OrderBy(_ => _random.Next()).Take(_assetsPerRandomDate).ToList();
+
+            // Track the selected assets to prevent future duplicates
+            foreach (var asset in selectedAssets)
+            {
+                _selectedAssetIds.Add(asset.Id);
+            }
+
+            return selectedAssets;
         }
         catch (Exception)
         {
@@ -514,7 +548,7 @@ public class RandomDateAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAcco
         try
         {
             // Compute the time window for this attempt
-            var (searchStart, searchEnd, description) = GetSearchTimeRange(targetDate, attemptNumber);
+            var (searchStart, searchEnd, description) = GetSearchTimeRange(targetDate, attemptNumber, false); // Legacy method assumes dense clusters
 
             var searchDto = new MetadataSearchDto
             {
@@ -542,41 +576,79 @@ public class RandomDateAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAcco
 
     /// <summary>
     /// Computes an escalating search window around a target date.
+    /// Uses adaptive windowing: non-overlapping sequential windows for sparse clusters,
+    /// traditional escalating windows for dense clusters.
     /// </summary>
     /// <param name="targetDate">Center of the search</param>
     /// <param name="attemptNumber">Attempt index that maps to window size</param>
+    /// <param name="isSparseCluster">Whether the current cluster is sparse</param>
     /// <returns>Tuple of start, end and a human-readable description</returns>
-    private (DateTime searchStart, DateTime searchEnd, string description) GetSearchTimeRange(DateTime targetDate, int attemptNumber)
+    private (DateTime searchStart, DateTime searchEnd, string description) GetSearchTimeRange(DateTime targetDate, int attemptNumber, bool isSparseCluster = false)
     {
         DateTime searchStart, searchEnd;
         string description;
 
-        switch (attemptNumber)
+        if (isSparseCluster)
         {
-            case 1:
-                // Narrow: ±7 days
-                searchStart = targetDate.AddDays(-7);
-                searchEnd = targetDate.AddDays(7);
-                description = "(±7 Tage)";
-                break;
-            case 2:
-                // Medium: ±3 months
-                searchStart = targetDate.AddMonths(-3);
-                searchEnd = targetDate.AddMonths(3);
-                description = "(±3 Monate)";
-                break;
-            case 3:
-                // Wide: ±6 months
-                searchStart = targetDate.AddMonths(-6);
-                searchEnd = targetDate.AddMonths(6);
-                description = "(±6 Monate)";
-                break;
-            default:
-                // Widest: ±12 months
-                searchStart = targetDate.AddMonths(-12);
-                searchEnd = targetDate.AddMonths(12);
-                description = "(±12 Monate)";
-                break;
+            // For sparse clusters: use larger, non-overlapping sequential windows
+            switch (attemptNumber)
+            {
+                case 1:
+                    // Wide: ±6 months
+                    searchStart = targetDate.AddMonths(-6);
+                    searchEnd = targetDate.AddMonths(6);
+                    description = "(±6 Monate - sparse)";
+                    break;
+                case 2:
+                    // Very wide: ±12 months
+                    searchStart = targetDate.AddMonths(-12);
+                    searchEnd = targetDate.AddMonths(12);
+                    description = "(±12 Monate - sparse)";
+                    break;
+                case 3:
+                    // Extremely wide: ±18 months
+                    searchStart = targetDate.AddMonths(-18);
+                    searchEnd = targetDate.AddMonths(18);
+                    description = "(±18 Monate - sparse)";
+                    break;
+                default:
+                    // Maximum: ±24 months
+                    searchStart = targetDate.AddMonths(-24);
+                    searchEnd = targetDate.AddMonths(24);
+                    description = "(±24 Monate - sparse)";
+                    break;
+            }
+        }
+        else
+        {
+            // For dense clusters: use traditional escalating windows
+            switch (attemptNumber)
+            {
+                case 1:
+                    // Narrow: ±7 days
+                    searchStart = targetDate.AddDays(-7);
+                    searchEnd = targetDate.AddDays(7);
+                    description = "(±7 Tage)";
+                    break;
+                case 2:
+                    // Medium: ±3 months
+                    searchStart = targetDate.AddMonths(-3);
+                    searchEnd = targetDate.AddMonths(3);
+                    description = "(±3 Monate)";
+                    break;
+                case 3:
+                    // Wide: ±6 months
+                    searchStart = targetDate.AddMonths(-6);
+                    searchEnd = targetDate.AddMonths(6);
+                    description = "(±6 Monate)";
+                    break;
+                default:
+                    // Widest: ±12 months
+                    searchStart = targetDate.AddMonths(-12);
+                    searchEnd = targetDate.AddMonths(12);
+                    description = "(±12 Monate)";
+                    break;
+            }
         }
 
         return (searchStart, searchEnd, description);
@@ -584,6 +656,7 @@ public class RandomDateAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAcco
 
     /// <summary>
     /// Broad fallback query across all images, used when date-scoped attempts fail.
+    /// Implements deduplication to prevent returning already-selected assets.
     /// </summary>
     /// <param name="ct">Cancellation token</param>
     /// <returns>Randomized list of assets from entire collection</returns>
@@ -593,7 +666,7 @@ public class RandomDateAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAcco
         {
             var searchDto = new MetadataSearchDto
             {
-                Size = Math.Max(200, _requestedAssetCount * 3),
+                Size = Math.Max(400, _requestedAssetCount * 6), // Request more to account for deduplication
                 Page = 1,
                 Type = AssetTypeEnum.IMAGE,
                 WithExif = true,
@@ -605,7 +678,19 @@ public class RandomDateAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAcco
             var result = await immichApi.SearchAssetsAsync(searchDto, ct);
             var assets = result?.Assets?.Items?.ToList() ?? new List<AssetResponseDto>();
 
-            return assets.OrderBy(_ => _random.Next()).ToList();
+            // Filter out already-selected assets to prevent duplicates
+            var newAssets = assets.Where(asset => !_selectedAssetIds.Contains(asset.Id)).ToList();
+
+            // Randomize and track selected assets
+            var selectedAssets = newAssets.OrderBy(_ => _random.Next()).ToList();
+            
+            // Track the selected assets (up to requested amount)
+            foreach (var asset in selectedAssets.Take(_requestedAssetCount))
+            {
+                _selectedAssetIds.Add(asset.Id);
+            }
+
+            return selectedAssets;
         }
         catch
         {
@@ -766,6 +851,11 @@ public class RandomDateAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAcco
         foreach (var cluster in clusters)
         {
             cluster.Weight = 1.0 / clusters.Count;
+            
+            // Mark clusters as sparse if they have very few photos relative to their time span
+            var clusterDurationMonths = Math.Max(1, (cluster.EndDate - cluster.StartDate).Days / 30.0);
+            var photosPerMonth = cluster.PhotoCount / clusterDurationMonths;
+            cluster.IsSparse = photosPerMonth < SparseClusterThreshold;
         }
 
         return clusters;

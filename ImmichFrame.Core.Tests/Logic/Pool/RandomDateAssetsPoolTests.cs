@@ -158,8 +158,8 @@ public class RandomDateAssetsPoolTests
         var oldestAsset = CreateAssetWithDate("oldest", oldestDate);
         var youngestAsset = CreateAssetWithDate("youngest", youngestDate);
         
-        // First few attempts return few/no assets
-        var fewAssets = new List<AssetResponseDto> { CreateAssetWithDate("few1") };
+    // Make date-range queries return none to force fallback
+    var fewAssets = new List<AssetResponseDto>(); // force zero
         
         // Fallback query returns more assets
         var fallbackAssets = Enumerable.Range(1, 50)
@@ -177,7 +177,7 @@ public class RandomDateAssetsPoolTests
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(CreateSearchResult(new List<AssetResponseDto> { youngestAsset }, 1));
 
-        // Setup date range queries to return insufficient results initially
+        // Setup date range queries to return zero to force fallback
         _mockImmichApi.Setup(api => api.SearchAssetsAsync(
             It.Is<MetadataSearchDto>(dto => dto.TakenAfter.HasValue && dto.TakenBefore.HasValue && dto.Size >= 50),
             It.IsAny<CancellationToken>()))
@@ -196,10 +196,14 @@ public class RandomDateAssetsPoolTests
         Assert.That(result, Is.Not.Empty);
         Assert.That(result.Count(), Is.GreaterThan(10)); // Should have triggered fallback
         
-        // Verify that both date-specific and fallback queries were attempted
+        // Verify both were attempted: date-scoped and broad fallback
         _mockImmichApi.Verify(api => api.SearchAssetsAsync(
             It.Is<MetadataSearchDto>(dto => dto.TakenAfter.HasValue && dto.TakenBefore.HasValue),
-            It.IsAny<CancellationToken>()), 
+            It.IsAny<CancellationToken>()),
+            Times.AtLeastOnce);
+        _mockImmichApi.Verify(api => api.SearchAssetsAsync(
+            It.Is<MetadataSearchDto>(dto => !dto.TakenAfter.HasValue && !dto.TakenBefore.HasValue && dto.Size >= 200),
+            It.IsAny<CancellationToken>()),
             Times.AtLeastOnce);
     }
 
