@@ -65,8 +65,7 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
         {
             var randomDatePool = new RandomDateAssetsPool(_apiCache, _immichApi, AccountSettings);
             randomDatePool.ConfigureAssetsPerRandomDate(_generalSettings.ChronologicalImagesCount);
-            return randomDatePool;
-            //new ChronologicalAssetsPoolWrapper(randomDatePool, _generalSettings);
+            return new ChronologicalAssetsPoolWrapper(randomDatePool, _generalSettings);
         }
         
         return basePool;

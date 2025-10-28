@@ -98,7 +98,7 @@ public class RandomDateAssetsPool : IAssetPool
     private const int SparseClusterThreshold = 5;
 
     // Maximum range for cluster initialization to prevent excessive API calls
-    private const int MaxClusterRangeYears = 15;
+    private const int MaxClusterRangeYears = 30;
 
     // Cache key prefix for cluster data
     private const string ClusterCachePrefix = "RandomDatePool:Clusters";
@@ -293,6 +293,7 @@ public class RandomDateAssetsPool : IAssetPool
         catch
         {
             // Return null values if any error occurs during the queries
+            // TODO: Log exception for troubleshooting waiting for a global error handling solution
             return (null, null);
         }
     }
@@ -337,7 +338,8 @@ public class RandomDateAssetsPool : IAssetPool
 
         // Calculate how many different random dates are needed based on assets per date
         var requiredDateBlocks = Math.Ceiling((double)_requestedAssetCount / _assetsPerRandomDate);
-        var maxDateAttempts = Math.Min((int)requiredDateBlocks * 4, Math.Max(12, _requestedAssetCount / 2)); // Scale with request size
+        // Scale attempts: 4x date blocks (to cycle through time ranges), capped at request/2, minimum 12
+        var maxDateAttempts = Math.Min((int)requiredDateBlocks * 4, Math.Max(12, _requestedAssetCount / 2));
         PhotoCluster? currentCluster = null;
         DateTime? currentRandomDate = null;
 
@@ -439,7 +441,7 @@ public class RandomDateAssetsPool : IAssetPool
             var newAssets = assets.Where(asset => !_selectedAssetIds.Contains(asset.Id)).ToList();
 
             // Shuffle to avoid bias from API ordering and take only what's needed
-            var selectedAssets = newAssets.OrderBy(_ => _random.Next()).Take(_assetsPerRandomDate).ToList();
+            var selectedAssets = Shuffle(newAssets, Random.Shared).Take(_assetsPerRandomDate).ToList();
 
             // Track the selected assets to prevent future duplicates
             foreach (var asset in selectedAssets)
@@ -451,6 +453,7 @@ public class RandomDateAssetsPool : IAssetPool
         }
         catch (Exception)
         {
+            // TODO: Waiting for a global log error Handling...
             return new List<AssetResponseDto>();
         }
     }
@@ -593,7 +596,7 @@ public class RandomDateAssetsPool : IAssetPool
             var newAssets = assets.Where(asset => !_selectedAssetIds.Contains(asset.Id)).ToList();
 
             // Randomize and track selected assets
-            var selectedAssets = newAssets.OrderBy(_ => _random.Next()).ToList();
+            var selectedAssets = Shuffle(newAssets, Random.Shared);
             
             // Track the selected assets (up to requested amount)
             foreach (var asset in selectedAssets.Take(_requestedAssetCount))
@@ -605,6 +608,7 @@ public class RandomDateAssetsPool : IAssetPool
         }
         catch
         {
+            // TODO: Waiting for a global log error Handling...
             return new List<AssetResponseDto>();
         }
     }
@@ -715,6 +719,7 @@ public class RandomDateAssetsPool : IAssetPool
             }
             catch
             {
+                // TODO: Waiting for a global log error Handling...
                 monthlyStats.Add((currentDate, 0));
             }
 
@@ -826,6 +831,25 @@ public class RandomDateAssetsPool : IAssetPool
         }
 
         return _photoClusters.Last();
+    }
+
+    /// <summary>
+    /// Efficiently shuffles a list using Fisher-Yates algorithm.
+    /// More efficient than OrderBy(_ => random.Next()) which is O(n log n).
+    /// </summary>
+    /// <typeparam name="T">Type of list elements</typeparam>
+    /// <param name="list">List to shuffle</param>
+    /// <param name="random">Random number generator</param>
+    /// <returns>The same list, shuffled in-place</returns>
+    private static List<T> Shuffle<T>(List<T> list, Random random)
+    {
+        var n = list.Count;
+        for (int i = n - 1; i > 0; i--)
+        {
+            var j = random.Next(i + 1);
+            (list[i], list[j]) = (list[j], list[i]);
+        }
+        return list;
     }
 
     /// <summary>

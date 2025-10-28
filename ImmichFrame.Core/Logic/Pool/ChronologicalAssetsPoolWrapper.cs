@@ -25,7 +25,7 @@ public class ChronologicalAssetsPoolWrapper(IAssetPool basePool, IGeneralSetting
     /// Default multiplier applied to requested asset count for fetching a larger pool.
     /// This ensures sufficient assets are available for chronological grouping.
     /// </summary>
-    private const int DefaultFetchMultiplier = 10;
+    private const int DefaultFetchMultiplier = 2;
 
     /// <summary>
     /// Maximum number of assets to fetch to prevent excessive memory usage.
