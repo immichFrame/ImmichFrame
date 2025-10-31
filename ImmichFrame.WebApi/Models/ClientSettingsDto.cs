@@ -24,6 +24,7 @@ public class ClientSettingsDto
     public string Style { get; set; }
     public string? BaseFontSize { get; set; }
     public bool ShowWeatherDescription { get; set; }
+    public int ChronologicalImagesCount { get; set; }
     public string? WeatherIconUrl { get; set; }
     public bool ImageZoom { get; set; }
     public bool ImagePan { get; set; }
@@ -59,6 +60,7 @@ public class ClientSettingsDto
         dto.ImagePan = generalSettings.ImagePan;
         dto.ImageFill = generalSettings.ImageFill;
         dto.Layout = generalSettings.Layout;
+        dto.ChronologicalImagesCount = generalSettings.ChronologicalImagesCount;
         dto.Language = generalSettings.Language;
         return dto;
     }
