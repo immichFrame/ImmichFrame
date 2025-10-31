@@ -167,8 +167,8 @@ public class ChronologicalAssetsPoolWrapperTests
         await _wrapper.GetAssets(5);
 
         // Assert
-        // Should fetch 5 * 10 (DefaultFetchMultiplier) = 50, but capped at 1000
-        _mockBasePool.Verify(x => x.GetAssets(50, It.IsAny<CancellationToken>()), Times.Once);
+        // Should fetch 5 * 2 (DefaultFetchMultiplier) = 10, but capped at 1000
+        _mockBasePool.Verify(x => x.GetAssets(10, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Test]
@@ -179,10 +179,10 @@ public class ChronologicalAssetsPoolWrapperTests
                     .ReturnsAsync(_testAssets);
 
         // Act
-        await _wrapper.GetAssets(200); // 200 * 10 = 2000, should be capped at 1000
+        await _wrapper.GetAssets(200); // 200 * 2 = 400, should not be capped
 
         // Assert
-        _mockBasePool.Verify(x => x.GetAssets(1000, It.IsAny<CancellationToken>()), Times.Once);
+        _mockBasePool.Verify(x => x.GetAssets(400, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Test]
