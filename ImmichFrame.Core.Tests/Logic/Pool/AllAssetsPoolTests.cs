@@ -23,7 +23,7 @@ public class AllAssetsPoolTests
     public void Setup()
     {
         _mockApiCache = new Mock<IApiCache>();
-        _mockImmichApi = new Mock<ImmichApi>(null!, null!);
+        _mockImmichApi = new Mock<ImmichApi>("", null!);
         _mockAccountSettings = new Mock<IAccountSettings>();
         _allAssetsPool = new AllAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
 
