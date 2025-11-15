@@ -23,7 +23,7 @@ public class AlbumAssetsPoolTests
         : AlbumAssetsPool(apiCache, immichApi, accountSettings)
     {
         // Expose LoadAssets for testing
-        public Task<IEnumerable<AssetResponseDto>> TestLoadAssets(CancellationToken ct = default) => base.LoadAssets(ct);
+        public Task<IList<AssetResponseDto>> TestLoadAssets(CancellationToken ct = default) => base.LoadAssets(ct);
     }
 
     [SetUp]
