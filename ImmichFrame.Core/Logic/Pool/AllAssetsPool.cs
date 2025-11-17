@@ -61,25 +61,9 @@ public class AllAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSett
         }
 
         var assets = await immichApi.SearchRandomAsync(searchDto, ct);
-        var excludedAlbumAssets = await GetExcludedAlbumAssets(ct);
+        var excludedAlbumAssets = await AssetHelper.GetExcludedAlbumAssets(immichApi, accountSettings, ct);
 
         return assets.ApplyAccountFilters(accountSettings, excludedAlbumAssets);
     }
 
-    private async Task<IEnumerable<AssetResponseDto>> GetExcludedAlbumAssets(CancellationToken ct = default)
-    {
-        var excludedAlbumAssets = new List<AssetResponseDto>();
-
-        foreach (var albumId in accountSettings?.ExcludedAlbums ?? new())
-        {
-            var albumInfo = await immichApi.GetAlbumInfoAsync(albumId, null, null, ct);
-
-            if (albumInfo.Assets != null)
-            {
-                excludedAlbumAssets.AddRange(albumInfo.Assets);
-            }
-        }
-
-        return excludedAlbumAssets;
-    }
 }
