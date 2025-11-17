@@ -34,6 +34,7 @@
     "ImageZoom": true,
     "ImagePan": true,
     "ImageFill": true,
+    "PlayAudio": true,
     "Layout": "Layout_TEST"
   },
   "Accounts": [

@@ -23,6 +23,7 @@
 		imagePan: boolean;
 		interval: number;
 		showInfo: boolean;
+		playAudio: boolean;
 	}
 
 	let {
@@ -36,7 +37,8 @@
 		imageZoom,
 		imagePan,
 		interval,
-		showInfo = $bindable(false)
+		showInfo = $bindable(false),
+		playAudio
 	}: Props = $props();
 
 	const dispatch = createEventDispatcher<{ ended: void }>();
@@ -44,7 +46,7 @@
 	let debug = false;
 	const isVideo = $derived(isVideoAsset(image[1]));
 
-	let videoElement: HTMLVideoElement | null = null;
+	let videoElement = $state<HTMLVideoElement | null>(null);
 
 	let hasPerson = $derived(image[1].people?.filter((x) => x.name).length ?? 0 > 0);
 	let zoomIn = $derived(zoomEffect());
@@ -195,11 +197,11 @@
 					: 'max-h-screen h-dvh-safe max-w-full object-contain'} w-full h-full"
 				src={image[0]}
 				autoplay
-				muted
+				muted={!playAudio}
 				playsinline
 				poster={thumbHashToDataURL(decodeBase64(image[1].thumbhash ?? ''))}
-				on:ended={() => dispatch('ended')}
-			/>
+				onended={() => dispatch('ended')}
+			></video>
 		{:else}
 			<img
 				class="{imageFill

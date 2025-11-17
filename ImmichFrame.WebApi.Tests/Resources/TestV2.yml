@@ -33,6 +33,7 @@ General:
   ImageZoom: true
   ImagePan: true
   ImageFill: true
+  PlayAudio: true
   Layout: Layout_TEST
 Accounts:
 - ImmichServerUrl: Account1.ImmichServerUrl_TEST
