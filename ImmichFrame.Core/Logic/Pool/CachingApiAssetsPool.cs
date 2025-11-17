@@ -33,7 +33,10 @@ public abstract class CachingApiAssetsPool(IApiCache apiCache, ImmichApi immichA
         {
             var albumInfo = await immichApi.GetAlbumInfoAsync(albumId, null, null, ct);
 
-            excludedAlbumAssets.AddRange(albumInfo.Assets);
+            if (albumInfo.Assets != null)
+            {
+                excludedAlbumAssets.AddRange(albumInfo.Assets);
+            }
         }
 
         return excludedAlbumAssets;
