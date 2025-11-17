@@ -1,5 +1,6 @@
 using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Interfaces;
+using ImmichFrame.WebApi.Helpers;
 
 namespace ImmichFrame.Core.Logic.Pool;
 
@@ -19,43 +20,24 @@ public abstract class CachingApiAssetsPool(IApiCache apiCache, ImmichApi immichA
 
     private async Task<IEnumerable<AssetResponseDto>> AllAssets(CancellationToken ct = default)
     {
-        return await apiCache.GetOrAddAsync(GetType().FullName!, () => ApplyAccountFilters(LoadAssets(ct)));
+        var excludedAlbumAssets = await apiCache.GetOrAddAsync($"{GetType().FullName}_ExcludedAlbums", () => GetExcludedAlbumAssets(ct));
+
+        return await apiCache.GetOrAddAsync(GetType().FullName!, () => LoadAssets(ct).ApplyAccountFilters(accountSettings, excludedAlbumAssets));
     }
 
-
-    protected async Task<IEnumerable<AssetResponseDto>> ApplyAccountFilters(Task<IEnumerable<AssetResponseDto>> unfiltered)
+    private async Task<IEnumerable<AssetResponseDto>> GetExcludedAlbumAssets(CancellationToken ct = default)
     {
-        // Display supported media types
-        var assets = (await unfiltered).Where(IsSupportedAsset);
+        var excludedAlbumAssets = new List<AssetResponseDto>();
 
-        if (!accountSettings.ShowVideos)
-            assets = assets.Where(x => x.Type == AssetTypeEnum.IMAGE);
-
-        if (!accountSettings.ShowArchived)
-            assets = assets.Where(x => x.IsArchived == false);
-
-        var takenBefore = accountSettings.ImagesUntilDate.HasValue ? accountSettings.ImagesUntilDate : null;
-        if (takenBefore.HasValue)
+        foreach (var albumId in accountSettings.ExcludedAlbums)
         {
-            assets = assets.Where(x => x.ExifInfo?.DateTimeOriginal != null && x.ExifInfo.DateTimeOriginal <= takenBefore);
+            var albumInfo = await immichApi.GetAlbumInfoAsync(albumId, null, null, ct);
+
+            excludedAlbumAssets.AddRange(albumInfo.Assets);
         }
 
-        var takenAfter = accountSettings.ImagesFromDate.HasValue ? accountSettings.ImagesFromDate : accountSettings.ImagesFromDays.HasValue ? DateTime.Today.AddDays(-accountSettings.ImagesFromDays.Value) : null;
-        if (takenAfter.HasValue)
-        {
-            assets = assets.Where(x => x.ExifInfo?.DateTimeOriginal != null && x.ExifInfo.DateTimeOriginal >= takenAfter);
-        }
-
-        if (accountSettings.Rating is int rating)
-        {
-            assets = assets.Where(x => x.ExifInfo?.Rating == rating);
-        }
-
-        return assets;
+        return excludedAlbumAssets;
     }
 
     protected abstract Task<IEnumerable<AssetResponseDto>> LoadAssets(CancellationToken ct = default);
-
-    private static bool IsSupportedAsset(AssetResponseDto asset) =>
-        asset.Type == AssetTypeEnum.IMAGE || asset.Type == AssetTypeEnum.VIDEO;
 }
