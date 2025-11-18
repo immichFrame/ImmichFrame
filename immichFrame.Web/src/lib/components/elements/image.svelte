@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
 	import {
 		type AlbumResponseDto,
 		type AssetResponseDto,
@@ -51,6 +50,18 @@
 	let panDirection = $derived(panEffect());
 	const enableZoom = $derived(imageZoom && !isVideo);
 	const enablePan = $derived(imagePan && !isVideo);
+
+	const thumbhashUrl = getThumbhashUrl();
+
+	function getThumbhashUrl() {
+		const hash = image[1].thumbhash;
+		if (!hash) return '';
+		try {
+			return thumbHashToDataURL(decodeBase64(hash));
+		} catch {
+			return '';
+		}
+	}
 
 	function GetFace(i: number) {
 		const people = image[1].people as PersonWithFacesResponseDto[];
@@ -161,8 +172,8 @@
 		class="relative w-full h-full {enableZoom ? 'zoom' : ''} {enablePan ? 'pan' : ''}"
 		style="
 			--interval: {interval + 2}s;
-			--originX: {hasPerson ? getFaceMetric(0, 'centerX') + '%' : 'center'};
-			--originY: {hasPerson ? getFaceMetric(0, 'centerY') + '%' : 'center'};
+			--originX: {hasPerson && !isVideo ? getFaceMetric(0, 'centerX') + '%' : 'center'};
+			--originY: {hasPerson && !isVideo ? getFaceMetric(0, 'centerY') + '%' : 'center'};
 			--start-scale: {scaleValues.startScale};
 			--end-scale: {scaleValues.endScale};
 			--pan-start-x: {panDirection === 'left' ? '5%' : panDirection === 'right' ? '-5%' : '0'};
@@ -188,6 +199,7 @@
 		{/if}
 
 		{#if isVideo}
+			<!-- Autoplay might be blocked by the browser when playAudio is enabled -->
 			<video
 				bind:this={videoElement}
 				class="{imageFill
@@ -197,7 +209,7 @@
 				autoplay
 				muted={!playAudio}
 				playsinline
-				poster={thumbHashToDataURL(decodeBase64(image[1].thumbhash ?? ''))}
+				poster={thumbhashUrl}
 			></video>
 		{:else}
 			<img
@@ -219,11 +231,7 @@
 	{showPeopleDesc}
 	{showAlbumName}
 />
-<img
-	class="absolute flex w-full h-full z-[-1]"
-	src={thumbHashToDataURL(decodeBase64(image[1].thumbhash ?? ''))}
-	alt="data"
-/>
+<img class="absolute flex w-full h-full z-[-1]" src={thumbhashUrl} alt="data" />
 
 <style>
 	.zoom {
