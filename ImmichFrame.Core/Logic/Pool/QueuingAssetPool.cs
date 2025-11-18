@@ -13,8 +13,8 @@ public class QueuingAssetPool(ILogger<QueuingAssetPool> _logger, IAssetPool @del
     private Channel<AssetResponseDto> _assetQueue = Channel.CreateUnbounded<AssetResponseDto>();
 
     public override Task<long> GetAssetCount(CancellationToken ct = default) => @delegate.GetAssetCount(ct);
-    
-    
+
+
     protected override async Task<AssetResponseDto?> GetNextAsset(CancellationToken ct)
     {
         try
@@ -47,6 +47,8 @@ public class QueuingAssetPool(ILogger<QueuingAssetPool> _logger, IAssetPool @del
             try
             {
                 _logger.LogDebug("Reloading assets");
+
+                // TODO: apply account filters - QueuingAssetPool is currently not used anywhere
                 foreach (var asset in await @delegate.GetAssets(RELOAD_BATCH_SIZE))
                 {
                     await _assetQueue.Writer.WriteAsync(asset);

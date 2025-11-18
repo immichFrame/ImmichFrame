@@ -42,8 +42,8 @@ public class MultiImmichFrameLogicDelegate : IImmichFrameLogic
         => _accountSelectionStrategy.ForAsset(assetId, logic => logic.GetAlbumInfoById(assetId));
 
 
-    public Task<(string fileName, string ContentType, Stream fileStream)> GetImage(Guid assetId)
-        => _accountSelectionStrategy.ForAsset(assetId, logic => logic.GetImage(assetId));
+    public Task<(string fileName, string ContentType, Stream fileStream)> GetAsset(Guid assetId, AssetTypeEnum? assetType = null)
+        => _accountSelectionStrategy.ForAsset(assetId, logic => logic.GetAsset(assetId, assetType));
 
     public async Task<long> GetTotalAssets()
     {
