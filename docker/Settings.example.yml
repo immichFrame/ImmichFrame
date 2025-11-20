@@ -35,7 +35,10 @@ General:
   Layout: splitview
 Accounts:
   - ImmichServerUrl: REQUIRED
-    ApiKey: REQUIRED
+    # Exactly one of ApiKey or ApiKeyFile must be set.
+    ApiKey: "super-secret-api-key"
+    # ApiKeyFile: "/path/to/api.key"
+
     ImagesFromDate: null
     ShowMemories: false
     ShowFavorites: false
