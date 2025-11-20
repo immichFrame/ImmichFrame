@@ -4,12 +4,15 @@
     {
         public IEnumerable<IAccountSettings> Accounts { get; }
         public IGeneralSettings GeneralSettings { get; }
+
+        public void validate();
     }
 
     public interface IAccountSettings
     {
         public string ImmichServerUrl { get; }
         public string ApiKey { get; }
+        public string? ApiKeyFile { get; }
         public bool ShowMemories { get; }
         public bool ShowFavorites { get; }
         public bool ShowArchived { get; }
@@ -20,6 +23,8 @@
         public List<Guid> ExcludedAlbums { get; }
         public List<Guid> People { get; }
         public int? Rating { get; }
+
+        public void validate();
     }
 
     public interface IGeneralSettings
@@ -57,5 +62,7 @@
         public bool ImageFill { get; }
         public string Layout { get; }
         public string Language { get; }
+
+        public void validate();
     }
 }

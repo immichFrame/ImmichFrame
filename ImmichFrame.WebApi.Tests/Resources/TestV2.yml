@@ -37,6 +37,7 @@ General:
 Accounts:
 - ImmichServerUrl: Account1.ImmichServerUrl_TEST
   ApiKey: Account1.ApiKey_TEST
+  ApiKeyFile: Account1.ApiKeyFile_TEST
   ImagesFromDate: '2020-01-02'
   ShowMemories: true
   ShowFavorites: true
@@ -52,6 +53,7 @@ Accounts:
   - 00000000-0000-0000-0000-000000000001
 - ImmichServerUrl: Account2.ImmichServerUrl_TEST
   ApiKey: Account2.ApiKey_TEST
+  ApiKeyFile: Account2.ApiKeyFile_TEST
   ImagesFromDate: '2020-01-02'
   ShowMemories: true
   ShowFavorites: true
