@@ -11,7 +11,7 @@ const config: Config = {
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.png',
 
-  url: 'https://immichframe.online',
+  url: 'https://immichframe.dev',
   baseUrl: '/',
   trailingSlash: false,
 
@@ -82,7 +82,7 @@ const config: Config = {
         },
         // { to: '/blog', label: 'Blog', position: 'left' },
         {
-          href: 'https://demo.immichframe.online',
+          href: 'https://demo.immichframe.dev',
           label: 'Demo',
           position: 'left',
         },
@@ -101,7 +101,7 @@ const config: Config = {
           items: [
             {
               label: 'View Demo',
-              to: 'https://demo.immichframe.online',
+              to: 'https://demo.immichframe.dev',
             },
             {
               label: 'Docker Setup',

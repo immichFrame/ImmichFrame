@@ -19,9 +19,9 @@
     <a href="https://immich.app/"><strong>Explore immich »</strong></a>
     <br />
     <br />
-    <a href="https://immichframe.online">Documentation</a>
+    <a href="https://immichframe.dev">Documentation</a>
     ·
-    <a href="https://demo.immichframe.online">Demo</a>
+    <a href="https://demo.immichframe.dev">Demo</a>
     ·
     <a href="https://github.com/3rob3/ImmichFrame/issues">Report Bug</a>
     ·
@@ -30,11 +30,11 @@
 </div>
 
 ## 📄 Documentation
-You can find the documentation [here](https://immichframe.online).
+You can find the documentation [here](https://immichframe.dev).
 
 ## 🖼️ Demo
 
-You can find a working demo [here](https://demo.immichframe.online).
+You can find a working demo [here](https://demo.immichframe.dev).
 
 <img src="/design/demo/web_demo.png" alt="Web Demo">
 
