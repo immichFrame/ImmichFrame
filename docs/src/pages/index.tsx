@@ -42,7 +42,7 @@ function HomepageHeader() {
 
           <Link
             className="flex place-items-center place-content-center py-3 px-8 border bg--primary  rounded-xl hover:no-underline text-primary font-bold"
-            to="https://demo.immichframe.online/"
+            to="https://demo.immichframe.dev/"
           >
             Open Demo
           </Link>
