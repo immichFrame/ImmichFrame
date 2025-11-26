@@ -4,9 +4,9 @@ using ImmichFrame.Core.Interfaces;
 
 namespace ImmichFrame.Core.Logic.Pool;
 
-public class AlbumAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings) : CachingApiAssetsPool(apiCache, immichApi, accountSettings)
+public class AlbumAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings) : CachingApiAssetsPool(apiCache, accountSettings)
 {
-    protected override async Task<IEnumerable<AssetResponseDto>> LoadAssets(CancellationToken ct = default)
+    protected override async Task<IList<AssetResponseDto>> LoadAssets(CancellationToken ct = default)
     {
         var excludedAlbumAssets = new List<AssetResponseDto>();
 
@@ -24,6 +24,6 @@ public class AlbumAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSe
             albumAssets.AddRange(albumInfo.Assets);
         }
 
-        return albumAssets.WhereExcludes(excludedAlbumAssets, t => t.Id);
+        return albumAssets.WhereExcludes(excludedAlbumAssets, t => t.Id).ToList();
     }
 }
