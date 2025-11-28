@@ -33,8 +33,8 @@ namespace ImmichFrame.WebApi.Controllers
             _settings = settings;
         }
 
-        [HttpGet(Name = "GetAsset")]
-        public async Task<List<AssetResponseDto>> GetAsset(string clientIdentifier = "")
+        [HttpGet(Name = "GetAssets")]
+        public async Task<List<AssetResponseDto>> GetAssets(string clientIdentifier = "")
         {
             var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
             _logger.LogDebug("Assets requested by '{sanitizedClientIdentifier}'", sanitizedClientIdentifier);
@@ -59,14 +59,23 @@ namespace ImmichFrame.WebApi.Controllers
             return (await _logic.GetAlbumInfoById(id)).ToList() ?? throw new AssetNotFoundException("No asset was found");
         }
 
+        [Obsolete("Use GetAsset instead.")]
         [HttpGet("{id}/Image", Name = "GetImage")]
         [Produces("image/jpeg", "image/webp")]
         [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status200OK)]
         public async Task<FileResult> GetImage(Guid id, string clientIdentifier = "")
         {
+            return await GetAsset(id, clientIdentifier, AssetTypeEnum.IMAGE);
+        }
+
+        [HttpGet("{id}/Asset", Name = "GetAsset")]
+        [Produces("image/jpeg", "image/webp", "video/mp4", "video/quicktime")]
+        [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status200OK)]
+        public async Task<FileResult> GetAsset(Guid id, string clientIdentifier = "", AssetTypeEnum? assetType = null)
+        {
             var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
-            _logger.LogDebug("Image '{id}' requested by '{sanitizedClientIdentifier}'", id, sanitizedClientIdentifier);
-            var image = await _logic.GetImage(id);
+            _logger.LogDebug("Asset '{id}' requested by '{sanitizedClientIdentifier}' (type hint: {assetType})", id, sanitizedClientIdentifier, assetType);
+            var image = await _logic.GetAsset(id, assetType);
 
             var notification = new ImageRequestedNotification(id, sanitizedClientIdentifier);
             _ = _logic.SendWebhookNotification(notification);
@@ -83,7 +92,7 @@ namespace ImmichFrame.WebApi.Controllers
 
             var randomImage = await _logic.GetNextAsset() ?? throw new AssetNotFoundException("No asset was found");
 
-            var image = await _logic.GetImage(new Guid(randomImage.Id));
+            var image = await _logic.GetAsset(new Guid(randomImage.Id), AssetTypeEnum.IMAGE);
             var notification = new ImageRequestedNotification(new Guid(randomImage.Id), sanitizedClientIdentifier);
             _ = _logic.SendWebhookNotification(notification);
 
