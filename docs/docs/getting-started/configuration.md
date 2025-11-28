@@ -89,7 +89,9 @@ Accounts:
   - # The URL of your Immich server e.g. `http://photos.yourdomain.com` / `http://192.168.0.100:2283`.
     ImmichServerUrl: 'REQUIRED'  # string, required, no default
     # Read more about how to obtain an Immich API key: https://immich.app/docs/features/command-line-interface#obtain-the-api-key
-    ApiKey: 'REQUIRED'  # string, required, no default
+    # Exactly one of ApiKey or ApiKeyFile must be set.
+    ApiKey: "super-secret-api-key"
+    # ApiKeyFile: "/path/to/api.key"
     # Show images after date. Overwrites the `ImagesFromDays`-Setting
     ImagesFromDate: null  # Date
     # If this is set, memories are displayed.
