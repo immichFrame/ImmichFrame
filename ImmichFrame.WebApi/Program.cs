@@ -46,7 +46,8 @@ builder.Services.AddLogging(builder =>
 
 
 // Setup Config
-var configPath = Directory.EnumerateDirectories(AppDomain.CurrentDomain.BaseDirectory, "*", SearchOption.TopDirectoryOnly)
+var configPath = Environment.GetEnvironmentVariable("IMMICHFRAME_CONFIG_PATH") ??
+        Directory.EnumerateDirectories(AppDomain.CurrentDomain.BaseDirectory, "*", SearchOption.TopDirectoryOnly)
         .FirstOrDefault(d => string.Equals(Path.GetFileName(d), "Config", StringComparison.OrdinalIgnoreCase))
         ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config");
 builder.Services.AddTransient<ConfigLoader>();
