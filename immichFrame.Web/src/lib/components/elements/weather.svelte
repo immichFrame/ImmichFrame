@@ -99,7 +99,7 @@
 			{#each weather.dailyForecast ?? [] as forecast, index}
 			<div class="forecast-item hourly">
 				<span class="day-name">{forecast.time != null ? new Date(Number(forecast.time) * 1000).toLocaleDateString(undefined, { weekday: 'short' }) : ''}</span>
-				<span class="forecast-icon-container"><img class="forecast-icon" src="{icons[(forecast.icon ?? '').replace('-','')]}" alt="an icon"/></span>
+				<span class="forecast-icon-container"><img class="forecast-icon" src="{icons[(forecast.icon ?? '').replaceAll('-','')]}" alt="{(forecast.icon ?? '').replaceAll('-','')}"/></span>
 				<span class="temperature-container small">
 					<span class="high-temperature" style="color:#F8DD70;">H {forecast.temperatureHigh !== undefined ? Math.round(forecast.temperatureHigh) : '--'}°</span>
 					<span class="temperature-separator dimmed">/</span>
