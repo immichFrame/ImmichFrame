@@ -3,9 +3,9 @@ using ImmichFrame.Core.Interfaces;
 
 namespace ImmichFrame.Core.Logic.Pool;
 
-public class PersonAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings) : CachingApiAssetsPool(apiCache, immichApi, accountSettings)
+public class PersonAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings) : CachingApiAssetsPool(apiCache, accountSettings)
 {
-    protected override async Task<IEnumerable<AssetResponseDto>> LoadAssets(CancellationToken ct = default)
+    protected override async Task<IList<AssetResponseDto>> LoadAssets(CancellationToken ct = default)
     {
         var personAssets = new List<AssetResponseDto>();
 
@@ -13,7 +13,7 @@ public class PersonAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountS
         {
             int page = 1;
             int batchSize = 1000;
-            int total;
+            int returned;
             do
             {
                 var metadataBody = new MetadataSearchDto
@@ -27,12 +27,12 @@ public class PersonAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountS
                 };
 
                 var personInfo = await immichApi.SearchAssetsAsync(metadataBody, ct);
-
-                total = personInfo.Assets.Total;
-
-                personAssets.AddRange(personInfo.Assets.Items);
+                
+                var items = personInfo.Assets.Items;
+                returned = items.Count;
+                personAssets.AddRange(items);
                 page++;
-            } while (total == batchSize);
+            } while (returned == batchSize && !ct.IsCancellationRequested);
         }
 
         return personAssets;
