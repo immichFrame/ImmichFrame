@@ -43,3 +43,10 @@
   height: 0.9em;
   width: 0.9em;
 }
+
+/*
+ * Override Tailwind's [default unstyled lists](https://github.com/tailwindlabs/tailwindcss/blob/v4.1.17/packages/tailwindcss/preflight.css#L193-L201).
+ */
+.markdown li {
+  list-style-type: decimal;
+}

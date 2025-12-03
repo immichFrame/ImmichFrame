@@ -4,6 +4,21 @@ sidebar_position: 2
 
 # 🔧 Configuration
 
+ImmichFrame looks for a configuration directory in the following places:
+
+1. It reads the `IMMICHFRAME_CONFIG_PATH` environment variable (if present).
+2. A `Config` directory relative to the ImmichFrame executable.
+3. A `Config` directory relative to the current working directory.
+
+Inside the configuration directory, ImmichFrame loads the first of these files:
+
+1. `Settings.json`
+2. `Settings.yml`
+3. `Settings.yaml`
+
+If none of these files are found, ImmichFrame loads its config from environment
+variables.
+
 ### Full configuration reference:
 
 :::warning
