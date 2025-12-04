@@ -25,11 +25,4 @@
     <ItemGroup>
         <ProjectReference Include="..\ImmichFrame.Core\ImmichFrame.Core.csproj" />
     </ItemGroup>
-
-    <ItemGroup>
-        <Reference Include="Microsoft.Extensions.Logging">
-            <HintPath>..\..\..\.dotnet\shared\Microsoft.AspNetCore.App\8.0.0\Microsoft.Extensions.Logging.dll</HintPath>
-        </Reference>
-    </ItemGroup>
-
 </Project>
