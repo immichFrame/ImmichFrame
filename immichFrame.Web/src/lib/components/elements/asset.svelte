@@ -4,13 +4,14 @@
 		type AssetResponseDto,
 		type PersonWithFacesResponseDto
 	} from '$lib/immichFrameApi';
+	import { isVideoAsset } from '$lib/constants/asset-type';
 	import { decodeBase64 } from '$lib/utils';
 	import { thumbHashToDataURL } from 'thumbhash';
 	import AssetInfo from '$lib/components/elements/asset-info.svelte';
 	import ImageOverlay from '$lib/components/elements/imageoverlay/image-overlay.svelte';
 
 	interface Props {
-		image: [url: string, asset: AssetResponseDto, albums: AlbumResponseDto[]];
+		asset: [url: string, asset: AssetResponseDto, albums: AlbumResponseDto[]];
 		showLocation: boolean;
 		showPhotoDate: boolean;
 		showImageDesc: boolean;
@@ -21,10 +22,11 @@
 		imagePan: boolean;
 		interval: number;
 		showInfo: boolean;
+		playAudio: boolean;
 	}
 
 	let {
-		image,
+		asset,
 		showLocation,
 		showPhotoDate,
 		showImageDesc,
@@ -34,17 +36,45 @@
 		imageZoom,
 		imagePan,
 		interval,
-		showInfo = $bindable(false)
+		showInfo = $bindable(false),
+		playAudio
 	}: Props = $props();
 
 	let debug = false;
+	const isVideo = $derived(isVideoAsset(asset[1]));
 
-	let hasPerson = $derived(image[1].people?.filter((x) => x.name).length ?? 0 > 0);
+	let videoElement = $state<HTMLVideoElement | null>(null);
+
+	$effect(() => {
+		// Cleanup when image changes or component unmounts
+		return () => {
+			if (videoElement) {
+				videoElement.pause();
+				videoElement.src = '';
+			}
+		};
+	});
+
+	let hasPerson = $derived(asset[1].people?.filter((x) => x.name).length ?? 0 > 0);
 	let zoomIn = $derived(zoomEffect());
 	let panDirection = $derived(panEffect());
+	const enableZoom = $derived(imageZoom && !isVideo);
+	const enablePan = $derived(imagePan && !isVideo);
+
+	const thumbhashUrl = $derived(getThumbhashUrl());
+
+	function getThumbhashUrl() {
+		const hash = asset[1].thumbhash;
+		if (!hash) return '';
+		try {
+			return thumbHashToDataURL(decodeBase64(hash));
+		} catch {
+			return '';
+		}
+	}
 
 	function GetFace(i: number) {
-		const people = image[1].people as PersonWithFacesResponseDto[];
+		const people = asset[1].people as PersonWithFacesResponseDto[];
 		const namedPeople = people.filter((x) => x.name);
 		return namedPeople[i]?.faces[0] ?? null;
 	}
@@ -124,20 +154,36 @@
 	}
 
 	let scaleValues = $derived(getScaleValues());
+
+	export const pause = async () => {
+		if (isVideo && videoElement) {
+			videoElement.pause();
+		}
+	};
+
+	export const play = async () => {
+		if (isVideo && videoElement) {
+			try {
+				await videoElement.play();
+			} catch {
+				// Autoplay might be blocked; ignore.
+			}
+		}
+	};
 </script>
 
 {#if showInfo}
-	<ImageOverlay asset={image[1]} albums={image[2]} />
+	<ImageOverlay asset={asset[1]} albums={asset[2]} />
 {/if}
 
 <div class="immichframe_image relative place-self-center overflow-hidden">
 	<!-- Container with zoom-effect -->
 	<div
-		class="relative w-full h-full {imageZoom ? 'zoom' : ''} {imagePan ? 'pan' : ''}"
+		class="relative w-full h-full {enableZoom ? 'zoom' : ''} {enablePan ? 'pan' : ''}"
 		style="
 			--interval: {interval + 2}s;
-			--originX: {hasPerson ? getFaceMetric(0, 'centerX') + '%' : 'center'};
-			--originY: {hasPerson ? getFaceMetric(0, 'centerY') + '%' : 'center'};
+			--originX: {hasPerson && !isVideo ? getFaceMetric(0, 'centerX') + '%' : 'center'};
+			--originY: {hasPerson && !isVideo ? getFaceMetric(0, 'centerY') + '%' : 'center'};
 			--start-scale: {scaleValues.startScale};
 			--end-scale: {scaleValues.endScale};
 			--pan-start-x: {panDirection === 'left' ? '5%' : panDirection === 'right' ? '-5%' : '0'};
@@ -146,7 +192,7 @@
 			--pan-end-y: {panDirection === 'up' ? '-5%' : panDirection === 'down' ? '5%' : '0'};"
 	>
 		{#if debug}
-			{#each image[1].people?.map((x) => x.name) ?? [] as _, i}
+			{#each asset[1].people?.map((x) => x.name) ?? [] as _, i}
 				<div
 					class="face z-[900] bg-red-600 absolute"
 					style="top: {getFaceMetric(i, 'y1')}%;
@@ -162,29 +208,41 @@
 			{/each}
 		{/if}
 
-		<img
-			class="{imageFill
-				? 'w-screen max-h-screen h-dvh-safe object-cover'
-				: 'max-h-screen h-dvh-safe max-w-full object-contain'} w-full h-full"
-			src={image[0]}
-			alt="data"
-		/>
+		{#if isVideo}
+			<!-- Autoplay might be blocked by the browser when playAudio is enabled -->
+			<video
+				bind:this={videoElement}
+				class="{imageFill
+					? 'w-screen max-h-screen h-dvh-safe object-cover'
+					: 'max-h-screen h-dvh-safe max-w-full object-contain'} w-full h-full"
+				src={asset[0]}
+				autoplay
+				muted={!playAudio}
+				playsinline
+				poster={thumbhashUrl}
+				onerror={() => console.error('Video failed to load:', asset[0])}
+			></video>
+		{:else}
+			<img
+				class="{imageFill
+					? 'w-screen max-h-screen h-dvh-safe object-cover'
+					: 'max-h-screen h-dvh-safe max-w-full object-contain'} w-full h-full"
+				src={asset[0]}
+				alt="data"
+			/>
+		{/if}
 	</div>
 </div>
 <AssetInfo
-	asset={image[1]}
-	albums={image[2]}
+	asset={asset[1]}
+	albums={asset[2]}
 	{showLocation}
 	{showPhotoDate}
 	{showImageDesc}
 	{showPeopleDesc}
 	{showAlbumName}
 />
-<img
-	class="absolute flex w-full h-full z-[-1]"
-	src={thumbHashToDataURL(decodeBase64(image[1].thumbhash ?? ''))}
-	alt="data"
-/>
+<img class="absolute flex w-full h-full z-[-1]" src={thumbhashUrl} alt="data" />
 
 <style>
 	.zoom {
@@ -212,19 +270,23 @@
 
 	@keyframes pan {
 		from {
-			transform: translateX(var(--pan-start-x, 0)) translateY(var(--pan-start-y, 0)) scale(var(--start-scale, 1));
+			transform: translateX(var(--pan-start-x, 0)) translateY(var(--pan-start-y, 0))
+				scale(var(--start-scale, 1));
 		}
 		to {
-			transform: translateX(var(--pan-end-x, 0)) translateY(var(--pan-end-y, 0)) scale(var(--end-scale, 1));
+			transform: translateX(var(--pan-end-x, 0)) translateY(var(--pan-end-y, 0))
+				scale(var(--end-scale, 1));
 		}
 	}
 
 	@keyframes zoom-pan {
 		from {
-			transform: translateX(var(--pan-start-x, 0)) translateY(var(--pan-start-y, 0)) scale(var(--start-scale, 1));
+			transform: translateX(var(--pan-start-x, 0)) translateY(var(--pan-start-y, 0))
+				scale(var(--start-scale, 1));
 		}
 		to {
-			transform: translateX(var(--pan-end-x, 0)) translateY(var(--pan-end-y, 0)) scale(var(--end-scale, 1.3));
+			transform: translateX(var(--pan-end-x, 0)) translateY(var(--pan-end-y, 0))
+				scale(var(--end-scale, 1.3));
 		}
 	}
 </style>
