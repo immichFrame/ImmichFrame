@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
     <Nullable>enable</Nullable>
-    <AvaloniaVersion>11.0.6</AvaloniaVersion>
+    <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
 </Project>

@@ -1,9 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,21 +11,21 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="BloomFilter.NetCore" Version="2.5.3" />
-    <PackageReference Include="Ical.Net" Version="4.3.1" />
-    <PackageReference Include="Microsoft.Extensions.ApiDescription.Client" Version="8.0.20">
+    <PackageReference Include="BloomFilter.NetCore" />
+    <PackageReference Include="Ical.Net" />
+    <PackageReference Include="Microsoft.Extensions.ApiDescription.Client">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.5" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-    <PackageReference Include="NSwag.ApiDescription.Client" Version="13.20.0">
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
+    <PackageReference Include="Microsoft.Extensions.Http" />
+    <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="NSwag.ApiDescription.Client">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="OpenWeatherMap.API" Version="2.1.2" />
-    <PackageReference Include="ThumbHash" Version="2.1.1" />
+    <PackageReference Include="OpenWeatherMap.API" />
+    <PackageReference Include="ThumbHash" />
   </ItemGroup>
 
 </Project>
