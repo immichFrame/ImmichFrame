@@ -13,7 +13,7 @@ See also: [ImmichFrame Apple TV repository][github-appletv-repo]
 You can "install" ImmichFrame as a PWA by opening in a browser and going to Share Menu-Add to Homescreen.
 
 ## Android
-The Android-Version of ImmichFrame is available on the [Google Play Store][play-store-link]. Download it via the store for automatic updates. You can also sideload via APK available in Releases.
+The Android-Version of ImmichFrame is available on the [Google Play Store][play-store-link]. Download it via the store for automatic updates. You can also sideload via APK available in [Releases][github-android-releases].
 
 See also: [ImmichFrame Android repository][github-android-repo]
 
@@ -67,7 +67,7 @@ curl "http://192.168.0.136:53287/brightness?value=0.5"
 ### Frameo
 ImmichFrame can be run on inexpensive Frameo digital photo frames with some additional effort. You can typically find these for ~$40 USD. These devices are low powered and run a very old Android version, so they cannot run the full WebView version of the app (however most of the main features are still supported except SplitView). We have found a method to update the WebView, but it is not without risks, see Frameo Webview Update below.  
  If you have not already, you will need to install ADB on your PC ([ADB instructions][ADB-link]).
-ADB is often enabled on these devices by default, if it is not go to Frameo Settings-About-Enable Beta Program. Toggle ADB Access On-Off-On. Use the ADB commands below to sideload ImmichFrame APK, configure it to your liking, then disable the Frameo app to to set ImmichFrame as default Home app:
+ADB is often enabled on these devices by default, if it is not go to Frameo Settings-About-Enable Beta Program. Toggle ADB Access On-Off-On. Use the ADB commands below to sideload [ImmichFrame APK][github-android-releases], configure it to your liking, then disable the Frameo app to to set ImmichFrame as default Home app:
   - Sideload ImmichFrame:
     ```bash
     adb install /path/to/ImmichFrame_vXX.apk
@@ -184,6 +184,7 @@ The screen is configured in a 3x3 gird. You can touch or click:
 <!-- MARKDOWN LINKS & IMAGES -->
 [play-store-link]: https://play.google.com/store/apps/details?id=com.immichframe.immichframe
 [github-android-repo]: https://github.com/immichFrame/ImmichFrame_Android
+[github-android-releases]: https://github.com/immichFrame/ImmichFrame_Android/releases
 [github-appletv-repo]: https://github.com/immichFrame/ImmichFrame_Apple
 [app-store-link]: https://apps.apple.com/us/app/immichframe/id6742748077
 [releases-url]: https://github.com/immichFrame/ImmichFrame_Desktop/releases/latest
