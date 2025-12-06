@@ -40,6 +40,7 @@
     {
       "ImmichServerUrl": "Account1.ImmichServerUrl_TEST",
       "ApiKey": "Account1.ApiKey_TEST",
+      "ApiKeyFile": "Account1.ApiKeyFile_TEST",
       "ImagesFromDate": "2020-01-02",
       "ShowMemories": true,
       "ShowFavorites": true,
@@ -60,6 +61,7 @@
     {
       "ImmichServerUrl": "Account2.ImmichServerUrl_TEST",
       "ApiKey": "Account2.ApiKey_TEST",
+      "ApiKeyFile": "Account2.ApiKeyFile_TEST",
       "ImagesFromDate": "2020-01-02",
       "ShowMemories": true,
       "ShowFavorites": true,
