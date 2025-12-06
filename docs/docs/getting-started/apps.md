@@ -13,7 +13,7 @@ See also: [ImmichFrame Apple TV repository][github-appletv-repo]
 You can "install" ImmichFrame as a PWA by opening in a browser and going to Share Menu-Add to Homescreen.
 
 ## Android
-The Android-Version of ImmichFrame is available on the [Google Play Store][play-store-link]. Download it via the store for automatic updates. You can also sideload via APK available in Releases.
+The Android-Version of ImmichFrame is available on the [Google Play Store][play-store-link]. Download it via the store for automatic updates. You can also sideload via APK available in [Releases][github-android-releases].
 
 See also: [ImmichFrame Android repository][github-android-repo]
 
