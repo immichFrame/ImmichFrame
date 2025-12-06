@@ -153,10 +153,13 @@ Depending on the device or Android version, the location to the webview apk may 
 ```shell
 adb shell pm path com.android.webview
 ```
+#### Alternative WebView Method
+If the above method does not work, or you receive permissions issue, try this [Alternative Method][alternate-webview-method]
+
 
 ## Desktop (Windows, MacOS, Linux)
 
-Get the latest Desktop-App from the [GitHub Releases][releases-url]-Page.
+Get the latest Desktop-App from the [GitHub Releases][releases-url] page.
 
 The screen is configured in a 3x3 gird. You can touch or click:
 
@@ -192,3 +195,4 @@ The screen is configured in a 3x3 gird. You can touch or click:
 [webview-update]: https://www.apkmirror.com/apk/lineageos/android-system-webview-2/android-system-webview-2-106-0-5249-126-release/android-system-webview-106-0-5249-126-12-android-apk-download/
 [setting-androidtv-screensaver]: https://youtu.be/m3Arh-hrWks
 [setting-androidtv-14-screensaver]: https://youtu.be/78z0Rs8KhsE?si=VQyuFnFITVTizYOf
+[alternate-webview-method]: https://docs.demonwarriortech.com/Documented%20Tutorials/Immich%20Frame/Frameo_Setup/#frameo-troubleshooting
