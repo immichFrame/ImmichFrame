@@ -1,6 +1,7 @@
 {
     "ImmichServerUrl": "ImmichServerUrl_TEST",
     "ApiKey": "ApiKey_TEST",
+    "ApiKeyFile": "ApiKeyFile_TEST",
     "AuthenticationSecret": "AuthenticationSecret_TEST",
     "Interval": 7,
     "TransitionDuration": 7.7,

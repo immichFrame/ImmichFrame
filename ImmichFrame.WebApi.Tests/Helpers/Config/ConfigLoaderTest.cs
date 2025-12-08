@@ -29,7 +29,7 @@ public class ConfigLoaderTest
     {
         var config = _configLoader.LoadConfigJson<ServerSettingsV1>(Path.Combine(
             TestContext.CurrentContext.TestDirectory, "Resources/TestV1.json"));
-        VerifyConfig(new ServerSettingsV1Adapter(config), false, true);
+        VerifyConfig(new ServerSettingsV1Adapter(config), false);
     }
 
     [Test]
@@ -39,7 +39,7 @@ public class ConfigLoaderTest
             TestContext.CurrentContext.TestDirectory, "Resources/TestV1.json"));
 
         var config = _configLoader.LoadConfigFromDictionary<ServerSettingsV1>(ToDictionary(jsonConfig));
-        VerifyConfig(new ServerSettingsV1Adapter(config), false, true);
+        VerifyConfig(new ServerSettingsV1Adapter(config), false);
     }
 
     [Test]
@@ -47,15 +47,15 @@ public class ConfigLoaderTest
     {
         var config = _configLoader.LoadConfigJson<ServerSettings>(Path.Combine(
             TestContext.CurrentContext.TestDirectory, "Resources/TestV2.json"));
-        VerifyConfig(config, true, false);
+        VerifyConfig(config, true);
     }
-    
+
     [Test]
     public void TestLoadConfigV2Json_NoGeneral()
     {
         var config = _configLoader.LoadConfigJson<ServerSettings>(Path.Combine(
             TestContext.CurrentContext.TestDirectory, "Resources/TestV2_NoGeneral.json"));
-        
+
         Assert.That(config.GeneralSettings, Is.Not.Null);
         config.GeneralSettings.Should().BeEquivalentTo(new GeneralSettings());
     }
@@ -65,26 +65,26 @@ public class ConfigLoaderTest
     {
         var config = _configLoader.LoadConfigYaml<ServerSettings>(Path.Combine(
             TestContext.CurrentContext.TestDirectory, "Resources/TestV2.yml"));
-        VerifyConfig(config, true, false);
+        VerifyConfig(config, true);
     }
 
-    private void VerifyConfig(IServerSettings serverSettings, bool usePrefix, bool expectNullApiKeyFile)
+    private void VerifyConfig(IServerSettings serverSettings, bool usePrefix)
     {
         VerifyProperties(serverSettings.GeneralSettings);
-        VerifyAccounts(serverSettings.Accounts, usePrefix, expectNullApiKeyFile);
+        VerifyAccounts(serverSettings.Accounts, usePrefix);
     }
 
-    private void VerifyAccounts(IEnumerable<IAccountSettings> accounts, bool usePrefix, bool expectNullApiKeyFile)
+    private void VerifyAccounts(IEnumerable<IAccountSettings> accounts, bool usePrefix)
     {
         var idx = 1;
         foreach (var account in accounts)
         {
-            VerifyProperties(account, usePrefix ? "Account" + idx + "." : "", expectNullApiKeyFile);
+            VerifyProperties(account, usePrefix ? "Account" + idx + "." : "");
             idx++;
         }
     }
 
-    private void VerifyProperties(object o, string? prefix = "", bool expectNullApiKeyFile = false)
+    private void VerifyProperties(object o, string? prefix = "")
     {
         foreach (var prop in o.GetType().GetProperties())
         {
@@ -107,14 +107,7 @@ public class ConfigLoaderTest
             switch (type)
             {
                 case var t when t == typeof(string):
-                    if (prop.Name.Equals("ApiKeyFile") && expectNullApiKeyFile)
-                    {
-                        Assert.That(value, Is.EqualTo(null), prop.Name);
-                    }
-                    else
-                    {
-                        Assert.That(value, Is.EqualTo(prefix + prop.Name + "_TEST"), prop.Name);
-                    }
+                    Assert.That(value, Is.EqualTo(prefix + prop.Name + "_TEST"), prop.Name);
                     break;
                 case var t when t == typeof(Boolean):
                     Assert.That(value, Is.EqualTo(true), prop.Name);
