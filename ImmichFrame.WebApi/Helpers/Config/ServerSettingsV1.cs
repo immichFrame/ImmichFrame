@@ -9,7 +9,6 @@ public class ServerSettingsV1 : IConfigSettable
 {
     public string ImmichServerUrl { get; set; } = string.Empty;
     public string ApiKey { get; set; } = string.Empty;
-    public string? ApiKeyFile { get; set; } = null;
     public bool ShowMemories { get; set; } = false;
     public bool ShowFavorites { get; set; } = false;
     public bool ShowArchived { get; set; } = false;
@@ -70,7 +69,7 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
     {
         public string ImmichServerUrl => _delegate.ImmichServerUrl;
         public string ApiKey => _delegate.ApiKey;
-        public string? ApiKeyFile => _delegate.ApiKeyFile;
+        public string? ApiKeyFile => null;  // V1 settings didn't support paths to api keys.
         public bool ShowMemories => _delegate.ShowMemories;
         public bool ShowFavorites => _delegate.ShowFavorites;
         public bool ShowArchived => _delegate.ShowArchived;
