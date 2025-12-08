@@ -5,7 +5,7 @@
         public IEnumerable<IAccountSettings> Accounts { get; }
         public IGeneralSettings GeneralSettings { get; }
 
-        public void validate();
+        public void Validate();
     }
 
     public interface IAccountSettings
@@ -24,7 +24,7 @@
         public List<Guid> People { get; }
         public int? Rating { get; }
 
-        public void validate();
+        public void Validate();
     }
 
     public interface IGeneralSettings
@@ -63,6 +63,6 @@
         public string Layout { get; }
         public string Language { get; }
 
-        public void validate();
+        public void Validate();
     }
 }

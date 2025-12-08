@@ -24,13 +24,13 @@ public class ServerSettings : IServerSettings, IConfigSettable
     [YamlIgnore]
     public IEnumerable<IAccountSettings> Accounts => AccountsImpl;
 
-    public void validate()
+    public void Validate()
     {
-        GeneralSettings.validate();
+        GeneralSettings.Validate();
 
         foreach (var account in Accounts)
         {
-            account.validate();
+            account.Validate();
         }
     }
 }
@@ -71,7 +71,7 @@ public class GeneralSettings : IGeneralSettings, IConfigSettable
     public string? Webhook { get; set; }
     public string? AuthenticationSecret { get; set; }
 
-    public void validate() {}
+    public void Validate() { }
 }
 
 public class ServerAccountSettings : IAccountSettings, IConfigSettable
@@ -91,7 +91,7 @@ public class ServerAccountSettings : IAccountSettings, IConfigSettable
     public List<Guid> People { get; set; } = new();
     public int? Rating { get; set; }
 
-    public void validate()
+    public void Validate()
     {
         if (!string.IsNullOrWhiteSpace(ApiKeyFile))
         {

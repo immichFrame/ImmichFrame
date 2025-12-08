@@ -23,7 +23,7 @@ public class ConfigLoader(ILogger<ConfigLoader> _logger)
     public IServerSettings LoadConfig(string configPath)
     {
         var config = LoadConfigRaw(configPath);
-        config.validate();
+        config.Validate();
         return config;
     }
     private IServerSettings LoadConfigRaw(string configPath)
