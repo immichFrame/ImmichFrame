@@ -63,11 +63,20 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
     public IEnumerable<IAccountSettings> Accounts => new List<AccountSettingsV1Adapter> { new(_delegate) };
     public IGeneralSettings GeneralSettings => new GeneralSettingsV1Adapter(_delegate);
 
+    public void Validate()
+    {
+        GeneralSettings.Validate();
+        foreach (var account in Accounts)
+        {
+            account.ValidateAndInitialize();
+        }
+    }
 
     class AccountSettingsV1Adapter(ServerSettingsV1 _delegate) : IAccountSettings
     {
         public string ImmichServerUrl => _delegate.ImmichServerUrl;
         public string ApiKey => _delegate.ApiKey;
+        public string? ApiKeyFile => null;  // V1 settings didn't support paths to api keys.
         public bool ShowMemories => _delegate.ShowMemories;
         public bool ShowFavorites => _delegate.ShowFavorites;
         public bool ShowArchived => _delegate.ShowArchived;
@@ -78,6 +87,8 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
         public List<Guid> ExcludedAlbums => _delegate.ExcludedAlbums;
         public List<Guid> People => _delegate.People;
         public int? Rating => _delegate.Rating;
+
+        public void ValidateAndInitialize() { }
     }
 
     class GeneralSettingsV1Adapter(ServerSettingsV1 _delegate) : IGeneralSettings
@@ -115,5 +126,7 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
         public bool ImageFill => _delegate.ImageFill;
         public string Layout => _delegate.Layout;
         public string Language => _delegate.Language;
+
+        public void Validate() { }
     }
 }

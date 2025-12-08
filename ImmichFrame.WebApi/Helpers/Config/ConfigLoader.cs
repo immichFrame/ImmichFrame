@@ -22,6 +22,12 @@ public class ConfigLoader(ILogger<ConfigLoader> _logger)
     }
     public IServerSettings LoadConfig(string configPath)
     {
+        var config = LoadConfigRaw(configPath);
+        config.Validate();
+        return config;
+    }
+    private IServerSettings LoadConfigRaw(string configPath)
+    {
         var jsonConfigPath = FindConfigFile(configPath, "Settings.json");
         if (File.Exists(jsonConfigPath))
         {

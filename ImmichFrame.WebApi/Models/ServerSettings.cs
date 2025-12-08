@@ -23,6 +23,16 @@ public class ServerSettings : IServerSettings, IConfigSettable
     [JsonIgnore]
     [YamlIgnore]
     public IEnumerable<IAccountSettings> Accounts => AccountsImpl;
+
+    public void Validate()
+    {
+        GeneralSettings.Validate();
+
+        foreach (var account in Accounts)
+        {
+            account.ValidateAndInitialize();
+        }
+    }
 }
 
 public class GeneralSettings : IGeneralSettings, IConfigSettable
@@ -60,12 +70,15 @@ public class GeneralSettings : IGeneralSettings, IConfigSettable
     public string? WeatherLatLong { get; set; } = "40.7128,74.0060";
     public string? Webhook { get; set; }
     public string? AuthenticationSecret { get; set; }
+
+    public void Validate() { }
 }
 
 public class ServerAccountSettings : IAccountSettings, IConfigSettable
 {
     public string ImmichServerUrl { get; set; } = string.Empty;
     public string ApiKey { get; set; } = string.Empty;
+    public string? ApiKeyFile { get; set; } = null;
     public bool ShowMemories { get; set; } = false;
     public bool ShowFavorites { get; set; } = false;
     public bool ShowArchived { get; set; } = false;
@@ -77,4 +90,21 @@ public class ServerAccountSettings : IAccountSettings, IConfigSettable
     public List<Guid> ExcludedAlbums { get; set; } = new();
     public List<Guid> People { get; set; } = new();
     public int? Rating { get; set; }
+
+    public void ValidateAndInitialize()
+    {
+        if (!string.IsNullOrWhiteSpace(ApiKeyFile))
+        {
+            if (!string.IsNullOrWhiteSpace(ApiKey))
+            {
+                throw new Exception("Cannot specify both ApiKey and ApiKeyFile. Please provide only one.");
+            }
+            ApiKey = File.ReadAllText(ApiKeyFile).Trim();
+        }
+
+        if (string.IsNullOrWhiteSpace(ApiKey))
+        {
+            throw new InvalidOperationException("Either ApiKey or ApiKeyFile must be provided.");
+        }
+    }
 }
