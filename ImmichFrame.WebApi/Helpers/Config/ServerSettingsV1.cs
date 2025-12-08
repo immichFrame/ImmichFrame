@@ -63,7 +63,14 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
     public IEnumerable<IAccountSettings> Accounts => new List<AccountSettingsV1Adapter> { new(_delegate) };
     public IGeneralSettings GeneralSettings => new GeneralSettingsV1Adapter(_delegate);
 
-    public void Validate() { }
+    public void Validate()
+    {
+        GeneralSettings.Validate();
+        foreach (var account in Accounts)
+        {
+            account.ValidateAndInitialize();
+        }
+    }
 
     class AccountSettingsV1Adapter(ServerSettingsV1 _delegate) : IAccountSettings
     {
@@ -81,7 +88,7 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
         public List<Guid> People => _delegate.People;
         public int? Rating => _delegate.Rating;
 
-        public void Validate() { }
+        public void ValidateAndInitialize() { }
     }
 
     class GeneralSettingsV1Adapter(ServerSettingsV1 _delegate) : IGeneralSettings

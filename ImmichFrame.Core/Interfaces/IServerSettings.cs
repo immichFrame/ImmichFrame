@@ -24,7 +24,7 @@
         public List<Guid> People { get; }
         public int? Rating { get; }
 
-        public void Validate();
+        public void ValidateAndInitialize();
     }
 
     public interface IGeneralSettings
