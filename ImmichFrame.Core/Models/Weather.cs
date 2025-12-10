@@ -14,6 +14,7 @@ namespace ImmichFrame.Core.Models
         public double TempHigh { get; set; } = 0d;
         public double TempLow { get; set; } = 0d;
         public double Precip { get; set; } = 0d;
+        public double FeelsLike { get; set; } = 0d;
         public DayForecast[] DailyForecast { get; set; } = [];
         public HourForecast[] HourlyForecast { get; set; } = [];
         public Currently Currently { get; set; } = new Currently();

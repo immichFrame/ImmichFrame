@@ -50,11 +50,12 @@ namespace ImmichFrame.Core.Services
                 {
                     IconId = data?.Currently?.Icon ?? "",
                     Temperature = data?.Currently?.Temperature ?? 0,
-                    TempHigh = data?.Daily?.Data?[0].TemperatureHigh ?? 0,
-                    TempLow = data?.Daily?.Data?[0].TemperatureLow ?? 0,
+                    TempHigh = data?.Daily?.Data?[0].TemperatureMax ?? 0,
+                    TempLow = data?.Daily?.Data?[0].TemperatureMin ?? 0,
                     Precip = data?.Currently?.PrecipProbability ?? 0,
                     Unit = units == "si" ? "°C" : "°F",
                     Description = summary ?? "",
+                    FeelsLike = data?.Currently?.ApparentTemperature ?? 0,
                     HourlyForecast = data?.Hourly?.Data?.Skip(1).Where((_, index) => index % 2 == 0).Take(6).ToArray() ?? [],
                     DailyForecast = data?.Daily?.Data?.Skip(1).Take(3).ToArray() ?? [],
                 };
