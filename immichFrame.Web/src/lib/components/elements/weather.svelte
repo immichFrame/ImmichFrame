@@ -61,10 +61,13 @@
          
             <div class="current temperature">{weather.temperature?.toFixed(1)}{weather.unit}</div>
         </div>
-        <div id = "weatherHighLow" style="margin-bottom: 10px;" class="text-sm sm:text-sm md:text-md lg:text-xl text-shadow-sm">
+        <div id = "weatherHighLow" style="margin-bottom: 1px;" class="text-sm sm:text-sm md:text-md lg:text-xl text-shadow-sm">
 				<span style="color:#F8DD70;">H {weather.tempHigh?.toFixed(0)}°</span> / <span style="color:#6FC4F5;margin-right:15px">L {weather.tempLow?.toFixed(0)}°</span> 
 				<img style = "display: inline-block;"src="{icons['irain']}" alt="An umbrella"/> {((weather?.precip ?? 0)*100).toFixed(0)}% 
         </div>
+		<div id = "weatherFeelsLike" style="margin-bottom: 10px;" class="text-sm sm:text-sm md:text-md lg:text-xl text-shadow-sm">
+				<span style="color:#F8DD70;font-style: italic;">Feels Like {weather.feelsLike?.toFixed(0)}{weather.unit}</span>
+		</div>
 
         {#if $configStore.showWeatherDescription}
             <p id="weatherdesc" class="text-sm sm:text-sm md:text-md lg:text-xl text-shadow-sm"
@@ -101,9 +104,9 @@
 				<span class="day-name">{forecast.time != null ? new Date(Number(forecast.time) * 1000).toLocaleDateString(undefined, { weekday: 'short' }) : ''}</span>
 				<span class="forecast-icon-container"><img class="forecast-icon" src="{icons[(forecast.icon ?? '').replaceAll('-','')]}" alt="{(forecast.icon ?? '').replaceAll('-','')}"/></span>
 				<span class="temperature-container small">
-					<span class="high-temperature" style="color:#F8DD70;">H {forecast.temperatureHigh !== undefined ? Math.round(forecast.temperatureHigh) : '--'}°</span>
+					<span class="high-temperature" style="color:#F8DD70;">H {forecast.temperatureMax !== undefined ? Math.round(forecast.temperatureMax) : '--'}°</span>
 					<span class="temperature-separator dimmed">/</span>
-					<span class="low-temperature" style="color:#6FC4F5;margin-right:15px">L {forecast.temperatureLow !== undefined ? Math.round(forecast.temperatureLow) : '--'}</span>
+					<span class="low-temperature" style="color:#6FC4F5;margin-right:15px">L {forecast.temperatureMin !== undefined ? Math.round(forecast.temperatureMin) : '--'}</span>
 				</span>
 				<span class="precipitation-container">
 					<span class="pop">{(Number(forecast?.precipProbability ?? 0) * 100).toFixed(0)}%</span>

@@ -43,6 +43,9 @@ namespace ImmichFrame.Core.Models
 
         [JsonPropertyName("precipProbability")]
         public double PrecipProbability { get; set; }
+
+        [JsonPropertyName("apparentTemperature")]
+        public double ApparentTemperature { get; set; }
     }
 
     public class Daily
@@ -65,11 +68,11 @@ namespace ImmichFrame.Core.Models
         [JsonPropertyName("icon")]
         public string? Icon { get; set; }
 
-        [JsonPropertyName("temperatureHigh")]
-        public double TemperatureHigh { get; set; }
+        [JsonPropertyName("temperatureMax")]
+        public double TemperatureMax { get; set; }
 
-        [JsonPropertyName("temperatureLow")]
-        public double TemperatureLow { get; set; }
+        [JsonPropertyName("temperatureMin")]
+        public double TemperatureMin { get; set; }
 
         [JsonPropertyName("precipProbability")]
         public double PrecipProbability { get; set; }
