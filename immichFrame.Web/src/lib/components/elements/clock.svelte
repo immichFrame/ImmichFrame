@@ -75,8 +75,14 @@
 				id="clockweatherinfo"
 				class="text-xl sm:text-xl md:text-2xl lg:text-3xl font-semibold text-shadow-sm weather-info"
 			>
-				{#if $configStore.weatherIconUrl }
-				<img src="{ $configStore.weatherIconUrl.replace('{IconId}', encodeURIComponent(weather.iconId)) }" class="icon-weather" alt="{weather.description}">
+				{#if $configStore.weatherIconUrl}
+					{#each weather.iconId?.split(',') ?? [] as icon (icon)}
+						<img
+							src={$configStore.weatherIconUrl.replace('{IconId}', encodeURIComponent(icon.trim()))}
+							class="icon-weather"
+							alt={weather.description}
+						/>
+					{/each}
 				{/if}
 				<div class="weather-location">{weather.location},</div>
 				<div class="weather-temperature">{weather.temperature?.toFixed(1)}</div>
