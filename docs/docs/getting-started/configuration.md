@@ -191,3 +191,6 @@ ImmichFrame can be customized even further using CSS. This will apply to browser
 volumes:  
       - /PATH/TO/YOUR/custom.css:/app/wwwroot/static/custom.css
 ```
+
+
+[openweathermap-url]: https://openweathermap.org/appid
