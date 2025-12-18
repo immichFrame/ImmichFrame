@@ -14,6 +14,7 @@
 		showImageDesc: boolean;
 		showPeopleDesc: boolean;
 		showAlbumName: boolean;
+		split: boolean;
 	}
 
 	let {
@@ -23,7 +24,8 @@
 		showPhotoDate,
 		showImageDesc,
 		showPeopleDesc,
-		showAlbumName
+		showAlbumName,
+		split,
 	}: Props = $props();
 
 	function formatLocation(format: string, city?: string, state?: string, country?: string) {
@@ -82,25 +84,25 @@
 		{#if showImageDesc && desc}
 			<p id="imagedescription" class="info-item">
 				<Icon path={mdiText} class="info-icon" />
-				<span class="info-text">{desc}</span>
+				<span class="info-text" class:short-text={split}>{desc}</span>
 			</p>
 		{/if}
 		{#if showAlbumName && albums && albums.length > 0}
 			<p id="imagealbums" class="info-item">
 				<Icon path={mdiImageAlbum} />
-				<span class="info-text">{albums.map((x) => x.albumName).join(', ')}</span>
+				<span class="info-text" class:short-text={split}>{albums.map((x) => x.albumName).join(', ')}</span>
 			</p>
 		{/if}
 		{#if showPeopleDesc && availablePeople && availablePeople.length > 0}
 			<p id="peopledescription" class="info-item">
 				<Icon path={mdiAccount} />
-				<span class="info-text">{availablePeople.map((x) => x.name).join(', ')}</span>
+				<span class="info-text" class:short-text={split}>{availablePeople.map((x) => x.name).join(', ')}</span>
 			</p>
 		{/if}
 		{#if showLocation && location}
 			<p id="imagelocation" class="info-item">
 				<Icon path={mdiMapMarker} />
-				<span class="info-text">{location}</span>
+				<span class="info-text" class:short-text={split}>{location}</span>
 			</p>
 		{/if}
 	</div>
@@ -114,9 +116,12 @@
 		margin: 0.2rem 0.5rem;
 	}
 	.info-text {
-		max-width: 22vw;
+		max-width: 40vw;
 		overflow: hidden;
 		text-wrap: nowrap;
 		text-overflow: ellipsis;
+	}
+	.short-text {
+		max-width: 22vw;
 	}
 </style>

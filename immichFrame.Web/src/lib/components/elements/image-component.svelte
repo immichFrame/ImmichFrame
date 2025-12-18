@@ -92,6 +92,7 @@
 							{imageFill}
 							{imageZoom}
 							{imagePan}
+							{split}
 							bind:showInfo
 						/>
 					</div>
@@ -107,6 +108,7 @@
 							{imageFill}
 							{imageZoom}
 							{imagePan}
+							{split}
 							bind:showInfo
 						/>
 					</div>
@@ -124,6 +126,7 @@
 						{imageFill}
 						{imageZoom}
 						{imagePan}
+						{split}
 						bind:showInfo
 					/>
 				</div>

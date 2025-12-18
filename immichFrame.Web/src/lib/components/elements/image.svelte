@@ -20,6 +20,7 @@
 		imageZoom: boolean;
 		imagePan: boolean;
 		interval: number;
+		split: boolean
 		showInfo: boolean;
 	}
 
@@ -34,6 +35,7 @@
 		imageZoom,
 		imagePan,
 		interval,
+		split,
 		showInfo = $bindable(false)
 	}: Props = $props();
 
@@ -179,6 +181,7 @@
 	{showImageDesc}
 	{showPeopleDesc}
 	{showAlbumName}
+	{split}
 />
 <img
 	class="absolute flex w-full h-full z-[-1]"
