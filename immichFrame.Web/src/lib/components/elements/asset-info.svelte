@@ -78,7 +78,7 @@
 		{#if showPhotoDate && formattedDate}
 			<p id="photodate" class="info-item">
 				<Icon path={mdiCalendar} class="info-icon" />
-				<span class="info-text">{formattedDate}</span>
+				<span class="info-text" class:short-text={split}>{formattedDate}</span>
 			</p>
 		{/if}
 		{#if showImageDesc && desc}
