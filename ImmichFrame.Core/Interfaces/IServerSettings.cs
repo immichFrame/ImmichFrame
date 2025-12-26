@@ -22,6 +22,7 @@
         public List<Guid> Albums { get; }
         public List<Guid> ExcludedAlbums { get; }
         public List<Guid> People { get; }
+        public List<string> Tags { get; }
         public int? Rating { get; }
 
         public void ValidateAndInitialize();
@@ -48,6 +49,7 @@
         public string? PhotoDateFormat { get; }
         public bool ShowImageDesc { get; }
         public bool ShowPeopleDesc { get; }
+        public bool ShowTagsDesc { get; }
         public bool ShowAlbumName { get; }
         public bool ShowImageLocation { get; }
         public string? ImageLocationFormat { get; }

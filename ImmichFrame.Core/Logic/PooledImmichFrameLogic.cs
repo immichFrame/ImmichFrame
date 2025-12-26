@@ -37,8 +37,9 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
     {
         var hasAlbums = accountSettings.Albums?.Any() ?? false;
         var hasPeople = accountSettings.People?.Any() ?? false;
+        var hasTags = accountSettings.Tags?.Any() ?? false;
 
-        if (!accountSettings.ShowFavorites && !accountSettings.ShowMemories && !hasAlbums && !hasPeople)
+        if (!accountSettings.ShowFavorites && !accountSettings.ShowMemories && !hasAlbums && !hasPeople && !hasTags)
         {
             return new AllAssetsPool(_apiCache, _immichApi, accountSettings);
         }
@@ -56,6 +57,9 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
 
         if (hasPeople)
             pools.Add(new PersonAssetsPool(_apiCache, _immichApi, accountSettings));
+
+        if (hasTags)
+            pools.Add(new TagAssetsPool(_apiCache, _immichApi, accountSettings));
 
         return new MultiAssetPool(pools);
     }

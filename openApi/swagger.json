@@ -821,6 +821,9 @@
           "showPeopleDesc": {
             "type": "boolean"
           },
+          "showTagsDesc": {
+            "type": "boolean"
+          },
           "showAlbumName": {
             "type": "boolean"
           },

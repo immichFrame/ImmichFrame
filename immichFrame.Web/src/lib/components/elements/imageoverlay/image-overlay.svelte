@@ -11,6 +11,7 @@
 		mdiFile,
 		mdiImageAlbum,
 		mdiStar,
+		mdiTag,
 		mdiText
 	} from '@mdi/js';
 	import OverlayItem from './overlay-item.svelte';
@@ -25,6 +26,7 @@
 	let { asset, albums }: Props = $props();
 
 	let availablePeople = $derived(asset.people?.filter((x) => x.name));
+	let availableTags = $derived(asset.tags?.filter((x) => x.name));
 	let exif: ExifResponseDto = $derived(asset.exifInfo ?? ({} as ExifResponseDto));
 
 	let close = getContext<() => void>('close');
@@ -76,6 +78,13 @@
 						icon={mdiAccount}
 						header="People"
 						items={availablePeople.map((x) => x.name)}
+					/>
+				{/if}
+				{#if availableTags && availableTags.length > 0}
+					<OverlayItem
+						icon={mdiTag}
+						header="Tags"
+						items={availableTags.map((x) => x.name)}
 					/>
 				{/if}
 				{#if albums && albums.length > 0}

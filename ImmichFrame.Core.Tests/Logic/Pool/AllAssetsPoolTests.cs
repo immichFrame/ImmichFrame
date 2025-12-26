@@ -29,6 +29,7 @@ public class AllAssetsPoolTests
         _mockAccountSettings.SetupGet(s => s.ImagesFromDays).Returns((int?)null);
         _mockAccountSettings.SetupGet(s => s.Rating).Returns((int?)null);
         _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns(new List<Guid>());
+        _mockAccountSettings.SetupGet(s => s.Tags).Returns(new List<string>());
 
         // Default ApiCache setup
         _mockApiCache.Setup(c => c.GetOrAddAsync(

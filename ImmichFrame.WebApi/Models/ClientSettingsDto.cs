@@ -16,6 +16,7 @@ public class ClientSettingsDto
     public string? PhotoDateFormat { get; set; }
     public bool ShowImageDesc { get; set; }
     public bool ShowPeopleDesc { get; set; }
+    public bool ShowTagsDesc { get; set; }
     public bool ShowAlbumName { get; set; }
     public bool ShowImageLocation { get; set; }
     public string? ImageLocationFormat { get; set; }
@@ -46,6 +47,7 @@ public class ClientSettingsDto
         dto.PhotoDateFormat = generalSettings.PhotoDateFormat;
         dto.ShowImageDesc = generalSettings.ShowImageDesc;
         dto.ShowPeopleDesc = generalSettings.ShowPeopleDesc;
+        dto.ShowTagsDesc = generalSettings.ShowTagsDesc;
         dto.ShowAlbumName = generalSettings.ShowAlbumName;
         dto.ShowImageLocation = generalSettings.ShowImageLocation;
         dto.ImageLocationFormat = generalSettings.ImageLocationFormat;
