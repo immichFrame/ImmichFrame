@@ -15,6 +15,7 @@
 		showPhotoDate: boolean;
 		showImageDesc: boolean;
 		showPeopleDesc: boolean;
+		showTagsDesc: boolean;
 		showAlbumName: boolean;
 		imageFill: boolean;
 		imageZoom: boolean;
@@ -30,6 +31,7 @@
 		showPhotoDate,
 		showImageDesc,
 		showPeopleDesc,
+		showTagsDesc,
 		showAlbumName,
 		imageFill,
 		imageZoom,
@@ -180,6 +182,7 @@
 	{showPhotoDate}
 	{showImageDesc}
 	{showPeopleDesc}
+	{showTagsDesc}
 	{showAlbumName}
 	{split}
 />

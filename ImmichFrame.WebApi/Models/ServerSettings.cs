@@ -50,6 +50,7 @@ public class GeneralSettings : IGeneralSettings, IConfigSettable
     public bool ShowPhotoDate { get; set; } = true;
     public bool ShowImageDesc { get; set; } = true;
     public bool ShowPeopleDesc { get; set; } = true;
+    public bool ShowTagsDesc { get; set; } = true;
     public bool ShowAlbumName { get; set; } = true;
     public bool ShowImageLocation { get; set; } = true;
     public string? PrimaryColor { get; set; }
@@ -89,6 +90,7 @@ public class ServerAccountSettings : IAccountSettings, IConfigSettable
     public List<Guid> Albums { get; set; } = new();
     public List<Guid> ExcludedAlbums { get; set; } = new();
     public List<Guid> People { get; set; } = new();
+    public List<string> Tags { get; set; } = new();
     public int? Rating { get; set; }
 
     public void ValidateAndInitialize()

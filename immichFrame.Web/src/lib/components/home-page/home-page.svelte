@@ -354,6 +354,7 @@
 				showPhotoDate={$configStore.showPhotoDate}
 				showImageDesc={$configStore.showImageDesc}
 				showPeopleDesc={$configStore.showPeopleDesc}
+				showTagsDesc={$configStore.showTagsDesc}
 				showAlbumName={$configStore.showAlbumName}
 				{...imagesState}
 				imageFill={$configStore.imageFill}

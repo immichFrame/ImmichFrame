@@ -51,6 +51,8 @@ Accounts:
   - 00000000-0000-0000-0000-000000000001
   People:
   - 00000000-0000-0000-0000-000000000001
+  Tags:
+  - Account1.Tags_TEST
 - ImmichServerUrl: Account2.ImmichServerUrl_TEST
   ApiKey: Account2.ApiKey_TEST
   ApiKeyFile: Account2.ApiKeyFile_TEST
@@ -67,3 +69,5 @@ Accounts:
   - 00000000-0000-0000-0000-000000000001
   People:
   - 00000000-0000-0000-0000-000000000001
+  Tags:
+  - Account2.Tags_TEST
