@@ -10,18 +10,26 @@ public class AlbumAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSe
     {
         var excludedAlbumAssets = new List<AssetResponseDto>();
 
-        foreach (var albumId in accountSettings.ExcludedAlbums)
+        var excludedAlbums = accountSettings.ExcludedAlbums;
+        if (excludedAlbums != null)
         {
-            var albumInfo = await immichApi.GetAlbumInfoAsync(albumId, null, null, ct);
-            excludedAlbumAssets.AddRange(albumInfo.Assets);
+            foreach (var albumId in excludedAlbums) 
+            {
+                var albumInfo = await immichApi.GetAlbumInfoAsync(albumId, null, null, ct);
+                excludedAlbumAssets.AddRange(albumInfo.Assets);
+            }
         }
 
         var albumAssets = new List<AssetResponseDto>();
 
-        foreach (var albumId in accountSettings.Albums)
+        var albums = accountSettings.Albums;
+        if (albums != null)
         {
-            var albumInfo = await immichApi.GetAlbumInfoAsync(albumId, null, null, ct);
-            albumAssets.AddRange(albumInfo.Assets);
+            foreach (var albumId in albums)
+            {
+                var albumInfo = await immichApi.GetAlbumInfoAsync(albumId, null, null, ct);
+                albumAssets.AddRange(albumInfo.Assets);
+            }
         }
 
         return albumAssets.WhereExcludes(excludedAlbumAssets, t => t.Id);

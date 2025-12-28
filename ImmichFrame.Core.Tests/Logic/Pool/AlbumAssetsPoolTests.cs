@@ -98,4 +98,30 @@ public class AlbumAssetsPoolTests
         Assert.That(result.Count, Is.EqualTo(1));
         Assert.That(result.Any(a => a.Id == "A"));
     }
+
+    [Test]
+    public async Task LoadAssets_NullAlbums_ReturnsEmpty()
+    {
+        _mockAccountSettings.SetupGet(s => s.Albums).Returns((List<Guid>)null);
+        _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns(new List<Guid>());
+
+        var result = (await _albumAssetsPool.TestLoadAssets()).ToList();
+        Assert.That(result, Is.Empty);
+        _mockImmichApi.Verify(api => api.GetAlbumInfoAsync(It.IsAny<Guid>(), null, null, It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Test]
+    public async Task LoadAssets_NullExcludedAlbums_ReturnsAlbumAssets()
+    {
+        var album1Id = Guid.NewGuid();
+        _mockAccountSettings.SetupGet(s => s.Albums).Returns(new List<Guid> { album1Id });
+        _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns((List<Guid>)null);
+
+        _mockImmichApi.Setup(api => api.GetAlbumInfoAsync(album1Id, null, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new AlbumResponseDto { Assets = new List<AssetResponseDto> { CreateAsset("A") } });
+
+        var result = (await _albumAssetsPool.TestLoadAssets()).ToList();
+        Assert.That(result.Count, Is.EqualTo(1));
+        Assert.That(result.Any(a => a.Id == "A"));
+    }
 }
