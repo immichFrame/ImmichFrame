@@ -92,6 +92,15 @@ public class PersonAssetsPoolTests // Renamed from PeopleAssetsPoolTests to matc
     }
 
     [Test]
+    public async Task LoadAssets_NullPeople_ReturnsEmpty()
+    {
+        _mockAccountSettings.SetupGet(s => s.People).Returns((List<Guid>)null);
+        var result = (await _personAssetsPool.TestLoadAssets()).ToList();
+        Assert.That(result, Is.Empty);
+        _mockImmichApi.Verify(api => api.SearchAssetsAsync(It.IsAny<MetadataSearchDto>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Test]
     public async Task LoadAssets_PersonHasNoAssets_DoesNotAffectOthers()
     {
         var person1Id = Guid.NewGuid(); // Has assets
