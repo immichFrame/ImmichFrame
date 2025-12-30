@@ -57,7 +57,8 @@ builder.Services.AddTransient<ConfigLoader>();
 builder.Services.AddSingleton<IServerSettings>(srv => srv.GetRequiredService<ConfigLoader>().LoadConfig(configPath));
 
 // Register sub-settings
-builder.Services.AddSingleton<IGeneralSettings>(srv => srv.GetRequiredService<IServerSettings>().GeneralSettings);
+builder.Services.AddSingleton<GeneralSettingsRuntime>();
+builder.Services.AddSingleton<IGeneralSettings>(srv => srv.GetRequiredService<GeneralSettingsRuntime>());
 
 // SQLite-backed override store (single row)
 builder.Services.AddDbContext<ConfigDbContext>(options =>
@@ -78,7 +79,9 @@ builder.Services.AddDbContext<ConfigDbContext>(options =>
     options.UseSqlite($"Data Source={dbPath}");
 });
 builder.Services.AddScoped<IAccountOverrideStore, SqliteAccountOverrideStore>();
+builder.Services.AddScoped<IGeneralSettingsStore, SqliteGeneralSettingsStore>();
 builder.Services.AddSingleton<IAccountOverrideChangeNotifier, AccountOverrideChangeNotifier>();
+builder.Services.AddSingleton<IGeneralSettingsChangeNotifier, GeneralSettingsChangeNotifier>();
 
 // Register services
 builder.Services.AddSingleton<IWeatherService, OpenWeatherMapService>();
@@ -150,6 +153,55 @@ using (var scope = app.Services.CreateScope())
             {
                 logger.LogInformation("AccountOverrides table already exists");
             }
+
+            var generalTableExists = db.Database.ExecuteSqlRaw(
+                "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='GeneralSettings'") > 0;
+            if (!generalTableExists)
+            {
+                logger.LogInformation("GeneralSettings table does not exist, creating it manually");
+                db.Database.ExecuteSqlRaw(@"
+                    CREATE TABLE IF NOT EXISTS GeneralSettings (
+                        Id INTEGER NOT NULL PRIMARY KEY,
+                        DownloadImages INTEGER NOT NULL,
+                        Language TEXT NOT NULL,
+                        ImageLocationFormat TEXT,
+                        PhotoDateFormat TEXT,
+                        Interval INTEGER NOT NULL,
+                        TransitionDuration REAL NOT NULL,
+                        ShowClock INTEGER NOT NULL,
+                        ClockFormat TEXT,
+                        ClockDateFormat TEXT,
+                        ShowProgressBar INTEGER NOT NULL,
+                        ShowPhotoDate INTEGER NOT NULL,
+                        ShowImageDesc INTEGER NOT NULL,
+                        ShowPeopleDesc INTEGER NOT NULL,
+                        ShowAlbumName INTEGER NOT NULL,
+                        ShowImageLocation INTEGER NOT NULL,
+                        PrimaryColor TEXT,
+                        SecondaryColor TEXT,
+                        Style TEXT NOT NULL,
+                        BaseFontSize TEXT,
+                        ShowWeatherDescription INTEGER NOT NULL,
+                        WeatherIconUrl TEXT,
+                        ImageZoom INTEGER NOT NULL,
+                        ImagePan INTEGER NOT NULL,
+                        ImageFill INTEGER NOT NULL,
+                        Layout TEXT NOT NULL,
+                        RenewImagesDuration INTEGER NOT NULL,
+                        Webcalendars TEXT,
+                        RefreshAlbumPeopleInterval INTEGER NOT NULL,
+                        WeatherApiKey TEXT,
+                        UnitSystem TEXT,
+                        WeatherLatLong TEXT,
+                        Webhook TEXT,
+                        UpdatedAtUtc TEXT NOT NULL
+                    )");
+                logger.LogInformation("GeneralSettings table created successfully");
+            }
+            else
+            {
+                logger.LogInformation("GeneralSettings table already exists");
+            }
         }
     }
     catch (Exception ex)
@@ -167,6 +219,18 @@ using (var scope = app.Services.CreateScope())
             throw;
         }
     }
+}
+
+// Seed general settings from config/env into SQLite (fresh installs) and prime the runtime snapshot.
+using (var scope = app.Services.CreateScope())
+{
+    var baseSettings = scope.ServiceProvider.GetRequiredService<IServerSettings>().GeneralSettings;
+    var store = scope.ServiceProvider.GetRequiredService<IGeneralSettingsStore>();
+    var runtime = scope.ServiceProvider.GetRequiredService<GeneralSettingsRuntime>();
+
+    var dto = await store.GetOrCreateFromBaseAsync(baseSettings);
+    var versionTicks = await store.GetVersionAsync();
+    runtime.ApplyFromDb(dto, versionTicks);
 }
 
 // Configure the HTTP request pipeline.

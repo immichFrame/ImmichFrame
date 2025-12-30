@@ -59,6 +59,28 @@
 	let cursorVisible = $state(true);
 	let timeoutId: number;
 	let overridesEventSource: EventSource | null = null;
+	let generalEventSource: EventSource | null = null;
+
+	// Keep document CSS vars in sync with config changes
+	$effect(() => {
+		if ($configStore.primaryColor) {
+			document.documentElement.style.setProperty('--primary-color', $configStore.primaryColor);
+		} else {
+			document.documentElement.style.removeProperty('--primary-color');
+		}
+
+		if ($configStore.secondaryColor) {
+			document.documentElement.style.setProperty('--secondary-color', $configStore.secondaryColor);
+		} else {
+			document.documentElement.style.removeProperty('--secondary-color');
+		}
+
+		if ($configStore.baseFontSize) {
+			document.documentElement.style.fontSize = $configStore.baseFontSize;
+		} else {
+			document.documentElement.style.fontSize = '';
+		}
+	});
 
 	const clientIdentifier = page.url.searchParams.get('client');
 	const authsecret = page.url.searchParams.get('authsecret');
@@ -153,6 +175,19 @@
 			}
 		}
 		await getNextAssets();
+	}
+
+	async function refreshClientConfig() {
+		try {
+			const res = await api.getConfig({ clientIdentifier: $clientIdentifierStore });
+			if (res.status === 200) {
+				configStore.ps(res.data);
+				// restart progress to reflect new interval/visual settings immediately
+				restartProgress.set(true);
+			}
+		} catch {
+			// ignore
+		}
 	}
 
 	const handleDone = async (previous: boolean = false, instant: boolean = false) => {
@@ -320,17 +355,10 @@
 	onMount(() => {
 		window.addEventListener('mousemove', showCursor);
 		window.addEventListener('click', showCursor);
-		if ($configStore.primaryColor) {
-			document.documentElement.style.setProperty('--primary-color', $configStore.primaryColor);
-		}
-
-		if ($configStore.secondaryColor) {
-			document.documentElement.style.setProperty('--secondary-color', $configStore.secondaryColor);
-		}
-
-		if ($configStore.baseFontSize) {
-			document.documentElement.style.fontSize = $configStore.baseFontSize;
-		}
+		// initial config-driven CSS
+		if ($configStore.primaryColor) document.documentElement.style.setProperty('--primary-color', $configStore.primaryColor);
+		if ($configStore.secondaryColor) document.documentElement.style.setProperty('--secondary-color', $configStore.secondaryColor);
+		if ($configStore.baseFontSize) document.documentElement.style.fontSize = $configStore.baseFontSize;
 
 		unsubscribeRestart = restartProgress.subscribe((value) => {
 			if (value) {
@@ -358,6 +386,19 @@
 			// If SSE isn't available, the slideshow will still update on the next normal asset refresh.
 		}
 
+		// Live updates when admin changes general (client) settings.
+		try {
+			generalEventSource = new EventSource('/api/Config/general-settings/events');
+			generalEventSource.onmessage = () => {
+				void refreshClientConfig();
+			};
+			generalEventSource.addEventListener('general-settings', () => {
+				void refreshClientConfig();
+			});
+		} catch {
+			// ignore
+		}
+
 		getNextAssets();
 
 		return () => {
@@ -370,6 +411,10 @@
 		if (overridesEventSource) {
 			overridesEventSource.close();
 			overridesEventSource = null;
+		}
+		if (generalEventSource) {
+			generalEventSource.close();
+			generalEventSource = null;
 		}
 
 		if (unsubscribeRestart) {
