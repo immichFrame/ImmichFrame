@@ -5,7 +5,10 @@ using Microsoft.AspNetCore.Authentication;
 using System.Reflection;
 using ImmichFrame.Core.Logic;
 using ImmichFrame.Core.Logic.AccountSelection;
+using ImmichFrame.WebApi.Data;
 using ImmichFrame.WebApi.Helpers.Config;
+using ImmichFrame.WebApi.Services;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 //log the version number
@@ -56,17 +59,37 @@ builder.Services.AddSingleton<IServerSettings>(srv => srv.GetRequiredService<Con
 // Register sub-settings
 builder.Services.AddSingleton<IGeneralSettings>(srv => srv.GetRequiredService<IServerSettings>().GeneralSettings);
 
+// SQLite-backed override store (single row)
+builder.Services.AddDbContext<ConfigDbContext>(options =>
+{
+    var configuredPath = Environment.GetEnvironmentVariable("IMMICHFRAME_DB_PATH");
+    var defaultPath = Directory.Exists("/data")
+        ? Path.Combine("/data", "immichframe.db")
+        : Path.Combine(AppContext.BaseDirectory, "data", "immichframe.db");
+
+    var dbPath = string.IsNullOrWhiteSpace(configuredPath) ? defaultPath : configuredPath;
+
+    var dbDir = Path.GetDirectoryName(dbPath);
+    if (!string.IsNullOrWhiteSpace(dbDir))
+    {
+        Directory.CreateDirectory(dbDir);
+    }
+
+    options.UseSqlite($"Data Source={dbPath}");
+});
+builder.Services.AddScoped<IAccountOverrideStore, SqliteAccountOverrideStore>();
+
 // Register services
 builder.Services.AddSingleton<IWeatherService, OpenWeatherMapService>();
 builder.Services.AddSingleton<ICalendarService, IcalCalendarService>();
 builder.Services.AddSingleton<IAssetAccountTracker, BloomFilterAssetAccountTracker>();
-builder.Services.AddSingleton<IAccountSelectionStrategy, TotalAccountImagesSelectionStrategy>();
+builder.Services.AddTransient<IAccountSelectionStrategy, TotalAccountImagesSelectionStrategy>();
 builder.Services.AddHttpClient(); // Ensures IHttpClientFactory is available
 
 builder.Services.AddTransient<Func<IAccountSettings, IAccountImmichFrameLogic>>(srv =>
     account => ActivatorUtilities.CreateInstance<PooledImmichFrameLogic>(srv, account));
 
-builder.Services.AddSingleton<IImmichFrameLogic, MultiImmichFrameLogicDelegate>();
+builder.Services.AddSingleton<IImmichFrameLogic, ReloadingImmichFrameLogic>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -79,6 +102,20 @@ builder.Services.AddAuthentication("ImmichFrameScheme")
     .AddScheme<AuthenticationSchemeOptions, ImmichFrameAuthenticationHandler>("ImmichFrameScheme", options => { });
 
 var app = builder.Build();
+
+// Ensure DB exists (prefer migrations when present; otherwise create schema)
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ConfigDbContext>();
+    try
+    {
+        db.Database.Migrate();
+    }
+    catch
+    {
+        db.Database.EnsureCreated();
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

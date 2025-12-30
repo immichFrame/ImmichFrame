@@ -7,5 +7,6 @@ services:
       - 8080:8080
     env_file:
       - .env
-    # volumes:
+    volumes:
       # - PATH/TO/CONFIG:/app/Config
+      - ../data:/data
