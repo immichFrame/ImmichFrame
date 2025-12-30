@@ -78,6 +78,7 @@ builder.Services.AddDbContext<ConfigDbContext>(options =>
     options.UseSqlite($"Data Source={dbPath}");
 });
 builder.Services.AddScoped<IAccountOverrideStore, SqliteAccountOverrideStore>();
+builder.Services.AddSingleton<IAccountOverrideChangeNotifier, AccountOverrideChangeNotifier>();
 
 // Register services
 builder.Services.AddSingleton<IWeatherService, OpenWeatherMapService>();

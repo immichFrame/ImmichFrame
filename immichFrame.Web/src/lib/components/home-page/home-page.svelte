@@ -58,6 +58,7 @@
 
 	let cursorVisible = $state(true);
 	let timeoutId: number;
+	let overridesEventSource: EventSource | null = null;
 
 	const clientIdentifier = page.url.searchParams.get('client');
 	const authsecret = page.url.searchParams.get('authsecret');
@@ -133,6 +134,25 @@
 		} catch {
 			error = true;
 		}
+	}
+
+	async function refreshAfterOverrideChange() {
+		// Clear any cached/preloaded state so the next fetch reflects the new override filters.
+		assetHistory = [];
+		assetBacklog = [];
+		imagePromisesDict = {};
+
+		await loadAssets();
+
+		// If the page is already running, immediately show a new asset from the refreshed backlog.
+		if (progressBar) {
+			try {
+				progressBar.restart(false);
+			} catch {
+				// ignore
+			}
+		}
+		await getNextAssets();
 	}
 
 	const handleDone = async (previous: boolean = false, instant: boolean = false) => {
@@ -324,6 +344,20 @@
 			}
 		});
 
+		// Live updates when admin changes SQLite-backed overrides.
+		try {
+			overridesEventSource = new EventSource('/api/Config/account-overrides/events');
+			overridesEventSource.onmessage = () => {
+				// Some browsers only fire 'message' even when 'event:' is set; handle both.
+				void refreshAfterOverrideChange();
+			};
+			overridesEventSource.addEventListener('account-overrides', () => {
+				void refreshAfterOverrideChange();
+			});
+		} catch {
+			// If SSE isn't available, the slideshow will still update on the next normal asset refresh.
+		}
+
 		getNextAssets();
 
 		return () => {
@@ -333,6 +367,11 @@
 	});
 
 	onDestroy(() => {
+		if (overridesEventSource) {
+			overridesEventSource.close();
+			overridesEventSource = null;
+		}
+
 		if (unsubscribeRestart) {
 			unsubscribeRestart();
 		}

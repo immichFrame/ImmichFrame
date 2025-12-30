@@ -15,7 +15,6 @@ public sealed class ReloadingImmichFrameLogic : IImmichFrameLogic
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IServerSettings _baseSettings;
-    private readonly IAccountOverrideStore _overrideStore;
     private readonly ILogger<ReloadingImmichFrameLogic> _logger;
     private readonly SemaphoreSlim _reloadLock = new(1, 1);
 
@@ -25,18 +24,22 @@ public sealed class ReloadingImmichFrameLogic : IImmichFrameLogic
     public ReloadingImmichFrameLogic(
         IServiceScopeFactory scopeFactory,
         IServerSettings baseSettings,
-        IAccountOverrideStore overrideStore,
         ILogger<ReloadingImmichFrameLogic> logger)
     {
         _scopeFactory = scopeFactory;
         _baseSettings = baseSettings;
-        _overrideStore = overrideStore;
         _logger = logger;
     }
 
     private async Task<IImmichFrameLogic> GetCurrentAsync(CancellationToken ct = default)
     {
-        var version = await _overrideStore.GetVersionAsync(ct);
+        long version;
+        using (var scope = _scopeFactory.CreateScope())
+        {
+            var overrideStore = scope.ServiceProvider.GetRequiredService<IAccountOverrideStore>();
+            version = await overrideStore.GetVersionAsync(ct);
+        }
+
         var existing = Volatile.Read(ref _current);
         if (existing != null && version == Volatile.Read(ref _currentVersion))
         {
@@ -68,10 +71,11 @@ public sealed class ReloadingImmichFrameLogic : IImmichFrameLogic
 
     private async Task<IImmichFrameLogic> BuildAsync(CancellationToken ct)
     {
-        var overrides = await _overrideStore.GetAsync(ct);
-        var mergedSettings = BuildMergedSettings(overrides);
-
         using var scope = _scopeFactory.CreateScope();
+        var overrideStore = scope.ServiceProvider.GetRequiredService<IAccountOverrideStore>();
+        var overrides = await overrideStore.GetAsync(ct);
+
+        var mergedSettings = BuildMergedSettings(overrides);
         var logicFactory = scope.ServiceProvider.GetRequiredService<Func<IAccountSettings, IAccountImmichFrameLogic>>();
         var strategy = scope.ServiceProvider.GetRequiredService<IAccountSelectionStrategy>();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<MultiImmichFrameLogicDelegate>>();
