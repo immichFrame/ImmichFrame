@@ -35,7 +35,7 @@ namespace ImmichFrame.WebApi.Controllers
             return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
         }
 
-        [HttpGet("account-overrides")]
+        [HttpGet("account-overrides", Name = "GetAccountOverrides")]
         public async Task<ActionResult<AccountOverrideDto?>> GetAccountOverrides(CancellationToken ct)
         {
             var dto = await _overrideStore.GetAsync(ct);
@@ -43,7 +43,7 @@ namespace ImmichFrame.WebApi.Controllers
         }
 
         [Authorize]
-        [HttpPut("account-overrides")]
+        [HttpPut("account-overrides", Name = "PutAccountOverrides")]
         public async Task<IActionResult> PutAccountOverrides([FromBody] AccountOverrideDto dto, CancellationToken ct)
         {
             if (dto.ImagesFromDays is < 0)

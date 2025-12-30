@@ -1,3 +1,4 @@
+using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.Core.Logic;
 using ImmichFrame.WebApi.Models;
@@ -131,7 +132,10 @@ public sealed class ReloadingImmichFrameLogic : IImmichFrameLogic
         => await (await GetCurrentAsync()).GetAssetInfoById(assetId);
 
     public async Task<IEnumerable<AlbumResponseDto>> GetAlbumInfoById(Guid assetId)
-        => await (await GetCurrentAsync()).GetAlbumInfoById(assetId);
+    {
+        var current = await GetCurrentAsync();
+        return await current.GetAlbumInfoById(assetId);
+    }
 
     public async Task<(string fileName, string ContentType, Stream fileStream)> GetImage(Guid id)
         => await (await GetCurrentAsync()).GetImage(id);

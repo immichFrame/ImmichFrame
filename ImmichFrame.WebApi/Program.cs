@@ -107,13 +107,64 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ConfigDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
     try
     {
-        db.Database.Migrate();
+        // Check if we have any migrations to apply
+        var pendingMigrations = db.Database.GetPendingMigrations().ToList();
+        if (pendingMigrations.Any())
+        {
+            logger.LogInformation("Applying {Count} pending migrations", pendingMigrations.Count);
+            db.Database.Migrate();
+        }
+        else
+        {
+            // No pending migrations - check if table exists, if not create it manually
+            logger.LogInformation("No pending migrations, checking if AccountOverrides table exists");
+            var tableExists = db.Database.ExecuteSqlRaw(
+                "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='AccountOverrides'") > 0;
+            
+            if (!tableExists)
+            {
+                logger.LogInformation("AccountOverrides table does not exist, creating it manually");
+                // Create the table manually since EnsureCreated() doesn't work when migrations history exists
+                db.Database.ExecuteSqlRaw(@"
+                    CREATE TABLE IF NOT EXISTS AccountOverrides (
+                        Id INTEGER NOT NULL PRIMARY KEY,
+                        ShowMemories INTEGER,
+                        ShowFavorites INTEGER,
+                        ShowArchived INTEGER,
+                        ImagesFromDays INTEGER,
+                        ImagesFromDate TEXT,
+                        ImagesUntilDate TEXT,
+                        Albums TEXT,
+                        ExcludedAlbums TEXT,
+                        People TEXT,
+                        Rating INTEGER,
+                        UpdatedAtUtc TEXT NOT NULL
+                    )");
+                logger.LogInformation("AccountOverrides table created successfully");
+            }
+            else
+            {
+                logger.LogInformation("AccountOverrides table already exists");
+            }
+        }
     }
-    catch
+    catch (Exception ex)
     {
-        db.Database.EnsureCreated();
+        // Fallback: ensure created if migrations fail
+        logger.LogError(ex, "Database initialization failed, attempting EnsureCreated");
+        try
+        {
+            db.Database.EnsureCreated();
+            logger.LogInformation("Fallback EnsureCreated() completed");
+        }
+        catch (Exception ex2)
+        {
+            logger.LogError(ex2, "EnsureCreated also failed");
+            throw;
+        }
     }
 }
 
