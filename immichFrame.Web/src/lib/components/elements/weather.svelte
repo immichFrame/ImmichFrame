@@ -59,7 +59,7 @@
 				<img src="{icons[weather.iconId.replaceAll('-','')]}" class="current icon" alt="{weather.iconId.replaceAll('-','')}">
 			{/if}
          
-            <div class="current temperature">{weather.temperature?.toFixed(1)}{weather.unit}</div>
+            <div class="current temperature">{weather.temperature?.toFixed(0)}{weather.unit}</div>
         </div>
         <div id = "weatherHighLow" style="margin-bottom: 1px;" class="text-sm sm:text-sm md:text-md lg:text-xl text-shadow-sm">
 				<span style="color:#F8DD70;">H {weather.tempHigh?.toFixed(0)}°</span> / <span style="color:#6FC4F5;margin-right:15px">L {weather.tempLow?.toFixed(0)}°</span> 
