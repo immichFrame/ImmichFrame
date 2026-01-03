@@ -39,7 +39,7 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
         var hasAlbums = albums != null && albums.Any();
 
         var people = accountSettings.People;
-        var hasPeople = people != null && people.Any();
+        var hasPeople = accountSettings.People?.Any() ?? false;
 
         if (!accountSettings.ShowFavorites && !accountSettings.ShowMemories && !hasAlbums && !hasPeople)
         {
