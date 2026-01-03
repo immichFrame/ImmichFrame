@@ -36,7 +36,7 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
     private IAssetPool BuildPool(IAccountSettings accountSettings)
     {
         var albums = accountSettings.Albums;
-        var hasAlbums = albums != null && albums.Any();
+        var hasAlbums = accountSettings.Albums?.Any() ?? false;
 
         var people = accountSettings.People;
         var hasPeople = accountSettings.People?.Any() ?? false;
