@@ -35,11 +35,8 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
 
     private IAssetPool BuildPool(IAccountSettings accountSettings)
     {
-        var albums = accountSettings.Albums;
-        var hasAlbums = accountSettings.Albums?.Any() ?? false;
-
-        var people = accountSettings.People;
-        var hasPeople = accountSettings.People?.Any() ?? false;
+        var hasAlbums = accountSettings.Albums?.Count > 0;
+        var hasPeople = accountSettings.People?.Count > 0;
 
         if (!accountSettings.ShowFavorites && !accountSettings.ShowMemories && !hasAlbums && !hasPeople)
         {
