@@ -48,8 +48,12 @@ ENV APP_VERSION=$VERSION
 COPY --from=publish-api /app ./
 COPY --from=build-node /app/build ./wwwroot
 
-# Set non-privileged user
+# Create persistent data dir for SQLite (mounted to /data in docker-compose)
 ARG APP_UID=1000
+USER root
+RUN mkdir -p /data && chown -R ${APP_UID}:${APP_UID} /data
+
+# Set non-privileged user
 USER $APP_UID
 
 ENTRYPOINT ["dotnet", "ImmichFrame.WebApi.dll"]
