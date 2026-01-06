@@ -210,6 +210,7 @@ export type ClientSettingsDto = {
     imageZoom?: boolean;
     imagePan?: boolean;
     imageFill?: boolean;
+    playAudio?: boolean;
     layout?: string | null;
     language?: string | null;
 };
