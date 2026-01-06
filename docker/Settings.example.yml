@@ -32,6 +32,7 @@ General:
   ImageZoom: true
   ImagePan: false
   ImageFill: false
+  PlayAudio: false
   Layout: splitview
 Accounts:
   - ImmichServerUrl: REQUIRED
