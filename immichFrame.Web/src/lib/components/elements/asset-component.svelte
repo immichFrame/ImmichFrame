@@ -2,7 +2,8 @@
 	import type { AssetResponseDto } from '$lib/immichFrameApi';
 	import * as api from '$lib/index';
 	import ErrorElement from './error-element.svelte';
-	import Image from './image.svelte';
+	import Asset from './asset.svelte';
+	import type AssetComponent from './asset.svelte';
 	import LoadingElement from './LoadingElement.svelte';
 	import { fade } from 'svelte/transition';
 	import { configStore } from '$lib/stores/config.store';
@@ -12,7 +13,7 @@
 	api.init();
 
 	interface Props {
-		images: [string, AssetResponseDto, api.AlbumResponseDto[]][];
+		assets: [string, AssetResponseDto, api.AlbumResponseDto[]][];
 		interval?: number;
 		error?: boolean;
 		loaded?: boolean;
@@ -27,10 +28,13 @@
 		imageZoom?: boolean;
 		imagePan?: boolean;
 		showInfo: boolean;
+		playAudio?: boolean;
+		onVideoWaiting?: () => void;
+		onVideoPlaying?: () => void;
 	}
 
 	let {
-		images,
+		assets,
 		interval = 20,
 		error = false,
 		loaded = false,
@@ -44,13 +48,29 @@
 		imageFill = false,
 		imageZoom = false,
 		imagePan = false,
-		showInfo = $bindable(false)
+		showInfo = $bindable(false),
+		playAudio = false,
+		onVideoWaiting = () => {},
+		onVideoPlaying = () => {}
 	}: Props = $props();
 	let instantTransition = slideshowStore.instantTransition;
 	let transitionDuration = $derived(
 		$instantTransition ? 0 : ($configStore.transitionDuration ?? 1) * 1000
 	);
 	let transitionDelay = $derived($instantTransition ? 0 : transitionDuration / 2 + 25);
+
+	let primaryAssetComponent = $state<AssetComponent | undefined>(undefined);
+	let secondaryAssetComponent = $state<AssetComponent | undefined>(undefined);
+
+	export const pause = async () => {
+		await primaryAssetComponent?.pause?.();
+		await secondaryAssetComponent?.pause?.();
+	};
+
+	export const play = async () => {
+		await primaryAssetComponent?.play?.();
+		await secondaryAssetComponent?.play?.();
+	};
 </script>
 
 {#if hasBday}
@@ -72,7 +92,7 @@
 {#if error}
 	<ErrorElement />
 {:else if loaded}
-	{#key images}
+	{#key assets}
 		<div
 			class="grid absolute h-dvh-safe w-screen"
 			out:fade={{ duration: transitionDuration / 2 }}
@@ -81,8 +101,8 @@
 			{#if split}
 				<div class="grid grid-cols-2">
 					<div id="image_portrait_1" class="relative grid border-r-2 border-primary h-dvh-safe">
-						<Image
-							image={images[0]}
+						<Asset
+							asset={assets[0]}
 							{interval}
 							{showLocation}
 							{showPhotoDate}
@@ -93,12 +113,16 @@
 							{imageZoom}
 							{imagePan}
 							{split}
+							{playAudio}
+							{onVideoWaiting}
+							{onVideoPlaying}
+							bind:this={primaryAssetComponent}
 							bind:showInfo
 						/>
 					</div>
 					<div id="image_portrait_2" class="relative grid border-l-2 border-primary h-dvh-safe">
-						<Image
-							image={images[1]}
+						<Asset
+							asset={assets[1]}
 							{interval}
 							{showLocation}
 							{showPhotoDate}
@@ -109,14 +133,18 @@
 							{imageZoom}
 							{imagePan}
 							{split}
+							{playAudio}
+							{onVideoWaiting}
+							{onVideoPlaying}
+							bind:this={secondaryAssetComponent}
 							bind:showInfo
 						/>
 					</div>
 				</div>
 			{:else}
 				<div id="image_default" class="relative grid h-dvh-safe w-screen">
-					<Image
-						image={images[0]}
+					<Asset
+						asset={assets[0]}
 						{interval}
 						{showLocation}
 						{showPhotoDate}
@@ -127,6 +155,10 @@
 						{imageZoom}
 						{imagePan}
 						{split}
+						{playAudio}
+						{onVideoWaiting}
+						{onVideoPlaying}
+						bind:this={primaryAssetComponent}
 						bind:showInfo
 					/>
 				</div>
