@@ -29,6 +29,8 @@
 		imagePan?: boolean;
 		showInfo: boolean;
 		playAudio?: boolean;
+		onVideoWaiting?: () => void;
+		onVideoPlaying?: () => void;
 	}
 
 	let {
@@ -47,7 +49,9 @@
 		imageZoom = false,
 		imagePan = false,
 		showInfo = $bindable(false),
-		playAudio = false
+		playAudio = false,
+		onVideoWaiting = () => {},
+		onVideoPlaying = () => {}
 	}: Props = $props();
 	let instantTransition = slideshowStore.instantTransition;
 	let transitionDuration = $derived(
@@ -110,6 +114,8 @@
 							{imagePan}
 							{split}
 							{playAudio}
+							{onVideoWaiting}
+							{onVideoPlaying}
 							bind:this={primaryAssetComponent}
 							bind:showInfo
 						/>
@@ -128,6 +134,8 @@
 							{imagePan}
 							{split}
 							{playAudio}
+							{onVideoWaiting}
+							{onVideoPlaying}
 							bind:this={secondaryAssetComponent}
 							bind:showInfo
 						/>
@@ -148,6 +156,8 @@
 						{imagePan}
 						{split}
 						{playAudio}
+						{onVideoWaiting}
+						{onVideoPlaying}
 						bind:this={primaryAssetComponent}
 						bind:showInfo
 					/>
