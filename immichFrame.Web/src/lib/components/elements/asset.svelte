@@ -48,7 +48,8 @@
 	let videoElement = $state<HTMLVideoElement | null>(null);
 
 	$effect(() => {
-		// Cleanup when image changes or component unmounts
+		// Track asset URL to cleanup when it changes
+		const currentUrl = asset[0];
 		return () => {
 			if (videoElement) {
 				videoElement.pause();
@@ -57,7 +58,7 @@
 		};
 	});
 
-	let hasPerson = $derived(asset[1].people?.filter((x) => x.name).length ?? 0 > 0);
+	let hasPerson = $derived((asset[1].people?.filter((x) => x.name).length ?? 0) > 0);
 	let zoomIn = $derived(zoomEffect());
 	let panDirection = $derived(panEffect());
 	const enableZoom = $derived(imageZoom && !isVideo);
