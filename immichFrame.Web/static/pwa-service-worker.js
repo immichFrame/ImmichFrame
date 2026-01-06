@@ -26,7 +26,6 @@ self.addEventListener('activate', (event) => {
 
 // Listen for auth secret updates from the main app
 self.addEventListener('message', (event) => {
-    console.log('Service worker received message:', event.data);
     if (event.data && event.data.type === 'SET_AUTH_SECRET') {
         authSecret = event.data.authSecret;
     }
