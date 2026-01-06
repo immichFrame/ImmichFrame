@@ -3,11 +3,6 @@ using Moq;
 using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.Core.Logic.Pool;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Threading;
 
 namespace ImmichFrame.Core.Tests.Logic.Pool;
 
@@ -166,19 +161,19 @@ public class CachingApiAssetsPoolTests
         };
 
         // Setup cache to really cache after the first call
-        IEnumerable<AssetResponseDto> cachedValue = null;
+        Dictionary<string, IEnumerable<AssetResponseDto>> cacheStore = new();
         _mockApiCache.Setup(c => c.GetOrAddAsync(
                 It.IsAny<string>(),
                 It.IsAny<Func<Task<IEnumerable<AssetResponseDto>>>>()
             ))
             .Returns<string, Func<Task<IEnumerable<AssetResponseDto>>>>(async (key, factory) =>
             {
-                if (cachedValue == null)
+                if (!cacheStore.ContainsKey(key))
                 {
-                    cachedValue = await factory();
+                    cacheStore[key] = await factory();
                 }
 
-                return cachedValue;
+                return cacheStore[key];
             });
 
         // Act
