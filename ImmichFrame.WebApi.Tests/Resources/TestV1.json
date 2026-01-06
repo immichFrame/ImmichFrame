@@ -12,6 +12,7 @@
     "ShowMemories": true,
     "ShowFavorites": true,
     "ShowArchived": true,
+    "ShowVideos": true,
     "ImagesFromDays": 7,
     "ImagesFromDate": "2020-01-02",
     "ImagesUntilDate": "2020-01-02",

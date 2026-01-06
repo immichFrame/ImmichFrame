@@ -64,7 +64,7 @@ public class CachingApiAssetsPoolTests
         return new List<AssetResponseDto>
         {
             new AssetResponseDto { Id = "1", Type = AssetTypeEnum.IMAGE, IsArchived = false, ExifInfo = new ExifResponseDto { DateTimeOriginal = DateTime.Now.AddDays(-10), Rating = 5 } },
-            new AssetResponseDto { Id = "2", Type = AssetTypeEnum.VIDEO, IsArchived = false, ExifInfo = new ExifResponseDto { DateTimeOriginal = DateTime.Now.AddDays(-10) } }, // Should be filtered out by type
+            new AssetResponseDto { Id = "2", Type = AssetTypeEnum.VIDEO, IsArchived = false, ExifInfo = new ExifResponseDto { DateTimeOriginal = DateTime.Now.AddDays(-10) } }, // Video asset
             new AssetResponseDto { Id = "3", Type = AssetTypeEnum.IMAGE, IsArchived = true, ExifInfo = new ExifResponseDto { DateTimeOriginal = DateTime.Now.AddDays(-5), Rating = 3 } }, // Potentially filtered by archive status
             new AssetResponseDto { Id = "4", Type = AssetTypeEnum.IMAGE, IsArchived = false, ExifInfo = new ExifResponseDto { DateTimeOriginal = DateTime.Now.AddDays(-2), Rating = 5 } },
             new AssetResponseDto { Id = "5", Type = AssetTypeEnum.IMAGE, IsArchived = false, ExifInfo = new ExifResponseDto { DateTimeOriginal = DateTime.Now.AddYears(-1), Rating = 1 } },
@@ -83,8 +83,25 @@ public class CachingApiAssetsPoolTests
         var count = await _testPool.GetAssetCount();
 
         // Assert
-        // Expected: Asset "1", "4", "5" (Asset "2" is video, Asset "3" is archived)
+        // Expected: Asset "1", "2", "4", "5" (Asset "2" is Video, Asset "3" is archived)
         Assert.That(count, Is.EqualTo(3));
+    }
+
+    [Test]
+    public async Task GetAssetCount_ReturnsCorrectCount_AfterFiltering_WithVideo()
+    {
+        // Arrange
+        var assets = CreateSampleAssets();
+        _testPool.LoadAssetsFunc = () => Task.FromResult<IEnumerable<AssetResponseDto>>(assets);
+        _mockAccountSettings.SetupGet(s => s.ShowArchived).Returns(false); // Filter out archived
+        _mockAccountSettings.SetupGet(s => s.ShowVideos).Returns(true); // Include videos
+
+        // Act
+        var count = await _testPool.GetAssetCount();
+
+        // Assert
+        // Expected: Asset "1", "2", "4", "5" (Asset "3" is archived)
+        Assert.That(count, Is.EqualTo(4));
     }
 
     [Test]
@@ -100,15 +117,15 @@ public class CachingApiAssetsPoolTests
 
         // Assert
         Assert.That(result.Count, Is.EqualTo(2));
-        // All returned assets should be images
-        Assert.That(result.All(a => a.Type == AssetTypeEnum.IMAGE));
+        // All returned assets should be supported media types (image/video)
+        Assert.That(result.All(a => a.Type == AssetTypeEnum.IMAGE || a.Type == AssetTypeEnum.VIDEO));
     }
 
     [Test]
     public async Task GetAssets_ReturnsAllAvailableIfLessThanRequested()
     {
         // Arrange
-        var assets = CreateSampleAssets().Where(a => a.Type == AssetTypeEnum.IMAGE && !a.IsArchived).ToList(); // 3 assets
+        var assets = CreateSampleAssets().Where(a => !a.IsArchived).ToList(); // Excludes archived asset only
         _testPool.LoadAssetsFunc = () => Task.FromResult<IEnumerable<AssetResponseDto>>(assets);
         _mockAccountSettings.SetupGet(s => s.ShowArchived).Returns(false);
 
@@ -117,6 +134,22 @@ public class CachingApiAssetsPoolTests
 
         // Assert
         Assert.That(result.Count, Is.EqualTo(3));
+    }
+
+    [Test]
+    public async Task GetAssets_ReturnsAllAvailableIfLessThanRequested_WithVideos()
+    {
+        // Arrange
+        var assets = CreateSampleAssets().Where(a => !a.IsArchived).ToList(); // Excludes archived asset only
+        _testPool.LoadAssetsFunc = () => Task.FromResult<IEnumerable<AssetResponseDto>>(assets);
+        _mockAccountSettings.SetupGet(s => s.ShowArchived).Returns(false);
+        _mockAccountSettings.SetupGet(s => s.ShowVideos).Returns(true);
+
+        // Act
+        var result = (await _testPool.GetAssets(5)).ToList(); // Request 5, but only 3 available after filtering
+
+        // Assert
+        Assert.That(result.Count, Is.EqualTo(4));
     }
 
 
@@ -169,8 +202,26 @@ public class CachingApiAssetsPoolTests
         var result = (await _testPool.GetAssets(5)).ToList(); // Request more than available to get all filtered
 
         // Assert
-        Assert.That(result.Any(a => a.Id == "3"), Is.False);
+        Assert.That(result.Any(a => a.Id == "2"), Is.False); // Video asset filtered out by default
+        Assert.That(result.Any(a => a.Id == "3"), Is.False); // Archived asset
         Assert.That(result.Count, Is.EqualTo(3)); // 1, 4, 5
+    }
+
+    [Test]
+    public async Task ApplyAccountFilters_FiltersArchived_WithVideo()
+    {
+        // Arrange
+        var assets = CreateSampleAssets(); // Asset "3" is archived
+        _testPool.LoadAssetsFunc = () => Task.FromResult<IEnumerable<AssetResponseDto>>(assets);
+        _mockAccountSettings.SetupGet(s => s.ShowArchived).Returns(false);
+        _mockAccountSettings.SetupGet(s => s.ShowVideos).Returns(true);
+
+        // Act
+        var result = (await _testPool.GetAssets(5)).ToList(); // Request more than available to get all filtered
+
+        // Assert
+        Assert.That(result.Any(a => a.Id == "3"), Is.False);
+        Assert.That(result.Count, Is.EqualTo(4)); // 1, 2, 4, 5
     }
 
     [Test]
@@ -189,10 +240,11 @@ public class CachingApiAssetsPoolTests
         // Assert (all are images already by default)
         // Assets: 1 (10d), 3 (5d, archived), 4 (2d), 5 (1y)
         // Filter: ShowArchived=true. UntilDate = -7d.
-        // Expected: Asset "1", "5"
-        Assert.That(result.All(a => a.ExifInfo.DateTimeOriginal <= untilDate));
+        // Expected: Assets "1", "5"
+        Assert.That(result.All(a => a.ExifInfo?.DateTimeOriginal <= untilDate));
         Assert.That(result.Count, Is.EqualTo(2), string.Join(",", result.Select(x => x.Id)));
         Assert.That(result.Any(a => a.Id == "1"));
+        Assert.That(result.Any(a => a.Id == "2"), Is.False); // Video asset
         Assert.That(result.Any(a => a.Id == "5"));
     }
 
@@ -213,7 +265,7 @@ public class CachingApiAssetsPoolTests
         // Assets: 1 (10d), 3 (5d, archived), 4 (2d), 5 (1y)
         // Filter: ShowArchived=true. FromDate = -7d.
         // Expected: Asset "3", "4"
-        Assert.That(result.All(a => a.ExifInfo.DateTimeOriginal >= fromDate));
+        Assert.That(result.All(a => a.ExifInfo?.DateTimeOriginal >= fromDate));
         Assert.That(result.Count, Is.EqualTo(2), string.Join(",", result.Select(x => x.Id)));
         Assert.That(result.Any(a => a.Id == "3"));
         Assert.That(result.Any(a => a.Id == "4"));
@@ -237,7 +289,7 @@ public class CachingApiAssetsPoolTests
         // Assets: 1 (10d), 3 (5d, archived), 4 (2d), 5 (1y)
         // Filter: ShowArchived=true. FromDays = 7 (so fromDate approx -7d from today).
         // Expected: Asset "3", "4"
-        Assert.That(result.All(a => a.ExifInfo.DateTimeOriginal >= fromDate));
+        Assert.That(result.All(a => a.ExifInfo?.DateTimeOriginal >= fromDate));
         Assert.That(result.Count, Is.EqualTo(2), string.Join(",", result.Select(x => x.Id)));
         Assert.That(result.Any(a => a.Id == "3"));
         Assert.That(result.Any(a => a.Id == "4"));
@@ -258,7 +310,7 @@ public class CachingApiAssetsPoolTests
 
         // Assert
         // Expected: Asset "1", "4" (both rating 5)
-        Assert.That(result.All(a => a.ExifInfo.Rating == 5));
+        Assert.That(result.All(a => a.ExifInfo?.Rating == 5));
         Assert.That(result.Count, Is.EqualTo(2), string.Join(",", result.Select(x => x.Id)));
         Assert.That(result.Any(a => a.Id == "1"));
         Assert.That(result.Any(a => a.Id == "4"));
