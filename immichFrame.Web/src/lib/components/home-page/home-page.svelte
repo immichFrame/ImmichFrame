@@ -109,23 +109,20 @@
 				assetPromisesDict[assetBacklog[i].id] = loadAsset(assetBacklog[i]);
 			}
 		}
-		// originally just deleted displayingAssets after they were no longer needed
-		// but this is more bulletproof to edge cases I think
-		for (let key in assetPromisesDict) {
-			if (
-				!(
-					displayingAssets.find((item) => item.id == key) ||
-					assetBacklog.find((item) => item.id == key)
-				)
-			) {
-				try {
-					const [url] = await assetPromisesDict[key];
-					revokeObjectUrl(url);
-				} catch (err) {
-					console.warn('Failed to resolve asset during cleanup:', err);
-				} finally {
-					delete assetPromisesDict[key];
-				}
+		// Collect keys to remove first to avoid modifying dict during async iteration
+		const keysToRemove = Object.keys(assetPromisesDict).filter(
+			(key) =>
+				!displayingAssets.find((item) => item.id === key) &&
+				!assetBacklog.find((item) => item.id === key)
+		);
+		for (const key of keysToRemove) {
+			try {
+				const [url] = await assetPromisesDict[key];
+				revokeObjectUrl(url);
+			} catch (err) {
+				console.warn('Failed to resolve asset during cleanup:', err);
+			} finally {
+				delete assetPromisesDict[key];
 			}
 		}
 	}
