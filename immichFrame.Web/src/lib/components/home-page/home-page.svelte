@@ -326,32 +326,47 @@
 	}
 
 	async function loadAsset(assetResponse: api.AssetResponseDto) {
-		let req = await api.getAsset(assetResponse.id, {
-			clientIdentifier: $clientIdentifierStore,
-			assetType: assetResponse.type
-		});
+		let assetUrl: string;
+
+		if (isVideoAsset(assetResponse)) {
+			// Stream videos directly instead of preloading
+			assetUrl = api.getAssetStreamUrl(
+				assetResponse.id,
+				$clientIdentifierStore,
+				assetResponse.type
+			);
+		} else {
+			// Preload images as blobs
+			const req = await api.getAsset(assetResponse.id, {
+				clientIdentifier: $clientIdentifierStore,
+				assetType: assetResponse.type
+			});
+			if (req.status != 200) {
+				throw new Error(`Failed to load asset ${assetResponse.id}: status ${req.status}`);
+			}
+			assetUrl = getObjectUrl(req.data);
+		}
+
 		let album: api.AlbumResponseDto[] | null = null;
 		if ($configStore.showAlbumName) {
-			let albumReq = await api.getAlbumInfo(assetResponse.id, {
+			const albumReq = await api.getAlbumInfo(assetResponse.id, {
 				clientIdentifier: $clientIdentifierStore
 			});
 			album = albumReq.data;
-		}
-
-		if (req.status != 200 || ($configStore.showAlbumName && album == null)) {
-			throw new Error(`Failed to load asset ${assetResponse.id}: status ${req.status}`);
+			if (album == null) {
+				throw new Error(`Failed to load album info for asset ${assetResponse.id}`);
+			}
 		}
 
 		// if the people array is already populated, there is no need to call the API again
 		if ($configStore.showPeopleDesc && (assetResponse.people ?? []).length == 0) {
-			let assetInfoRequest = await api.getAssetInfo(assetResponse.id, {
+			const assetInfoRequest = await api.getAssetInfo(assetResponse.id, {
 				clientIdentifier: $clientIdentifierStore
 			});
 			assetResponse.people = assetInfoRequest.data.people;
-			// assetResponse.exifInfo = assetInfoRequest.data.exifInfo;
 		}
 
-		return [getObjectUrl(req.data), assetResponse, album] as [
+		return [assetUrl, assetResponse, album] as [
 			string,
 			api.AssetResponseDto,
 			api.AlbumResponseDto[]
@@ -363,6 +378,8 @@
 	}
 
 	function revokeObjectUrl(url: string) {
+		// Only revoke blob URLs, not streaming URLs
+		if (!url.startsWith('blob:')) return;
 		try {
 			URL.revokeObjectURL(url);
 		} catch {

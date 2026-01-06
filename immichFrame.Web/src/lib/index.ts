@@ -20,3 +20,11 @@ export const setBearer = () => {
 	defaults.headers = defaults.headers || {};
 	defaults.headers['Authorization'] = "Bearer " + get(authSecretStore);
 };
+
+export const getAssetStreamUrl = (id: string, clientIdentifier?: string, assetType?: number) => {
+	const params = new URLSearchParams();
+	if (clientIdentifier) params.set('clientIdentifier', clientIdentifier);
+	if (assetType !== undefined) params.set('assetType', String(assetType));
+	const query = params.toString();
+	return `/api/Asset/${encodeURIComponent(id)}/Asset${query ? '?' + query : ''}`;
+};
