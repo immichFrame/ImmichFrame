@@ -20,26 +20,9 @@ public abstract class CachingApiAssetsPool(IApiCache apiCache, ImmichApi immichA
 
     private async Task<IEnumerable<AssetResponseDto>> AllAssets(CancellationToken ct = default)
     {
-        var excludedAlbumAssets = await apiCache.GetOrAddAsync($"{GetType().FullName}_ExcludedAlbums", () => GetExcludedAlbumAssets(ct));
+        var excludedAlbumAssets = await apiCache.GetOrAddAsync($"{GetType().FullName}_ExcludedAlbums", () => AssetHelper.GetExcludedAlbumAssets(immichApi, accountSettings, ct));
 
         return await apiCache.GetOrAddAsync(GetType().FullName!, () => LoadAssets(ct).ApplyAccountFilters(accountSettings, excludedAlbumAssets));
-    }
-
-    private async Task<IEnumerable<AssetResponseDto>> GetExcludedAlbumAssets(CancellationToken ct = default)
-    {
-        var excludedAlbumAssets = new List<AssetResponseDto>();
-
-        foreach (var albumId in accountSettings?.ExcludedAlbums ?? new())
-        {
-            var albumInfo = await immichApi.GetAlbumInfoAsync(albumId, null, null, ct);
-
-            if (albumInfo.Assets != null)
-            {
-                excludedAlbumAssets.AddRange(albumInfo.Assets);
-            }
-        }
-
-        return excludedAlbumAssets;
     }
 
     protected abstract Task<IEnumerable<AssetResponseDto>> LoadAssets(CancellationToken ct = default);
