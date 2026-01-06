@@ -355,10 +355,7 @@
 			const albumReq = await api.getAlbumInfo(assetResponse.id, {
 				clientIdentifier: $clientIdentifierStore
 			});
-			album = albumReq.data;
-			if (album == null) {
-				throw new Error(`Failed to load album info for asset ${assetResponse.id}`);
-			}
+			album = albumReq.data ?? [];
 		}
 
 		// if the people array is already populated, there is no need to call the API again
