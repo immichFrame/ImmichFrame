@@ -43,8 +43,6 @@
 		playAudio
 	}: Props = $props();
 
-	const dispatch = createEventDispatcher<{ ended: void }>();
-
 	let debug = false;
 	const isVideo = $derived(isVideoAsset(image[1]));
 
@@ -202,7 +200,6 @@
 				muted={!playAudio}
 				playsinline
 				poster={thumbHashToDataURL(decodeBase64(image[1].thumbhash ?? ''))}
-				onended={() => dispatch('ended')}
 			></video>
 		{:else}
 			<img
