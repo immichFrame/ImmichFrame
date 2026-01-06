@@ -75,12 +75,12 @@ namespace ImmichFrame.WebApi.Controllers
         {
             var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
             _logger.LogDebug("Asset '{id}' requested by '{sanitizedClientIdentifier}' (type hint: {assetType})", id, sanitizedClientIdentifier, assetType);
-            var image = await _logic.GetAsset(id, assetType);
+            var asset = await _logic.GetAsset(id, assetType);
 
-            var notification = new ImageRequestedNotification(id, sanitizedClientIdentifier);
+            var notification = new AssetRequestedNotification(id, sanitizedClientIdentifier);
             _ = _logic.SendWebhookNotification(notification);
 
-            return File(image.fileStream, image.ContentType, image.fileName); // returns a FileStreamResult
+            return File(asset.fileStream, asset.ContentType, asset.fileName); // returns a FileStreamResult
         }
 
         [HttpGet("RandomImageAndInfo", Name = "GetRandomImageAndInfo")]
@@ -90,33 +90,33 @@ namespace ImmichFrame.WebApi.Controllers
             var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
             _logger.LogDebug("Random image requested by '{sanitizedClientIdentifier}'", sanitizedClientIdentifier);
 
-            var randomImage = await _logic.GetNextAsset() ?? throw new AssetNotFoundException("No asset was found");
+            var randomAsset = await _logic.GetNextAsset() ?? throw new AssetNotFoundException("No asset was found");
 
-            var image = await _logic.GetAsset(new Guid(randomImage.Id), AssetTypeEnum.IMAGE);
-            var notification = new ImageRequestedNotification(new Guid(randomImage.Id), sanitizedClientIdentifier);
+            var asset = await _logic.GetAsset(new Guid(randomAsset.Id), AssetTypeEnum.IMAGE);
+            var notification = new AssetRequestedNotification(new Guid(randomAsset.Id), sanitizedClientIdentifier);
             _ = _logic.SendWebhookNotification(notification);
 
             string randomImageBase64;
             using (var memoryStream = new MemoryStream())
             {
-                await image.fileStream.CopyToAsync(memoryStream);
+                await asset.fileStream.CopyToAsync(memoryStream);
                 randomImageBase64 = Convert.ToBase64String(memoryStream.ToArray());
             }
 
-            randomImage.ThumbhashImage!.Position = 0;
-            byte[] byteArray = new byte[randomImage.ThumbhashImage.Length];
-            randomImage.ThumbhashImage.Read(byteArray, 0, byteArray.Length);
+            randomAsset.ThumbhashImage!.Position = 0;
+            byte[] byteArray = new byte[randomAsset.ThumbhashImage.Length];
+            randomAsset.ThumbhashImage.Read(byteArray, 0, byteArray.Length);
             string thumbHashBase64 = Convert.ToBase64String(byteArray);
 
             CultureInfo cultureInfo = new CultureInfo(_settings.Language);
             string photoDateFormat = _settings.PhotoDateFormat!.Replace("''", "\\'");
-            string photoDate = randomImage.LocalDateTime.ToString(photoDateFormat, cultureInfo) ?? string.Empty;
+            string photoDate = randomAsset.LocalDateTime.ToString(photoDateFormat, cultureInfo) ?? string.Empty;
 
             var locationFormat = _settings.ImageLocationFormat ?? "City,State,Country";
             var imageLocation = locationFormat
-                .Replace("City", randomImage.ExifInfo?.City ?? string.Empty)
-                .Replace("State", randomImage.ExifInfo?.State ?? string.Empty)
-                .Replace("Country", randomImage.ExifInfo?.Country ?? string.Empty);
+                .Replace("City", randomAsset.ExifInfo?.City ?? string.Empty)
+                .Replace("State", randomAsset.ExifInfo?.State ?? string.Empty)
+                .Replace("Country", randomAsset.ExifInfo?.Country ?? string.Empty);
             imageLocation = string.Join(",", imageLocation.Split(',').Where(s => !string.IsNullOrWhiteSpace(s)));
 
             return new ImageResponse
