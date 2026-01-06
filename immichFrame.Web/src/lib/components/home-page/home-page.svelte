@@ -32,7 +32,7 @@
 	let assetHistory: api.AssetResponseDto[] = [];
 	let assetBacklog: api.AssetResponseDto[] = [];
 
-	let displayingAssets: api.AssetResponseDto[] = $state() as api.AssetResponseDto[];
+	let displayingAssets: api.AssetResponseDto[] = $state([]);
 
 	const { restartProgress, stopProgress, instantTransition } = slideshowStore;
 
@@ -44,7 +44,7 @@
 	let error: boolean = $state(false);
 	let infoVisible: boolean = $state(false);
 	let authError: boolean = $state(false);
-	let errorMessage: string = $state() as string;
+	let errorMessage: string = $state('');
 	let assetsState: AssetsState = $state({
 		assets: [],
 		error: false,
@@ -169,39 +169,26 @@
 	};
 
 	async function getNextAssets() {
-		if (!assetBacklog || assetBacklog.length < 1) {
+		if (!assetBacklog.length) {
 			await loadAssets();
 		}
 
-		if (!error && assetBacklog.length == 0) {
+		if (!error && !assetBacklog.length) {
 			error = true;
 			errorMessage = 'No assets were found! Check your configuration.';
 			return;
 		}
 
-		let next: api.AssetResponseDto[];
-		if (
-			$configStore.layout?.trim().toLowerCase() == 'splitview' &&
-			assetBacklog.length > 1 &&
-			isImageAsset(assetBacklog[0]) &&
-			isImageAsset(assetBacklog[1]) &&
-			isPortrait(assetBacklog[0]) &&
-			isPortrait(assetBacklog[1])
-		) {
-			next = assetBacklog.splice(0, 2);
-		} else {
-			next = assetBacklog.splice(0, 1);
-		}
+		const useSplit = shouldUseSplitView(assetBacklog);
+		const next = assetBacklog.splice(0, useSplit ? 2 : 1);
 		assetBacklog = [...assetBacklog];
 
-		if (displayingAssets) {
-			// Push to History
+		if (displayingAssets.length) {
 			assetHistory.push(...displayingAssets);
 		}
 
-		// History max 250 Items
 		if (assetHistory.length > 250) {
-			assetHistory = assetHistory.splice(assetHistory.length - 250, 250);
+			assetHistory = assetHistory.slice(-250);
 		}
 
 		displayingAssets = next;
@@ -210,30 +197,18 @@
 	}
 
 	async function getPreviousAssets() {
-		if (!assetHistory || assetHistory.length < 1) {
+		if (!assetHistory.length) {
 			return;
 		}
 
-		let next: api.AssetResponseDto[];
-		if (
-			$configStore.layout?.trim().toLowerCase() == 'splitview' &&
-			assetHistory.length > 1 &&
-			isImageAsset(assetHistory[assetHistory.length - 1]) &&
-			isImageAsset(assetHistory[assetHistory.length - 2]) &&
-			isPortrait(assetHistory[assetHistory.length - 1]) &&
-			isPortrait(assetHistory[assetHistory.length - 2])
-		) {
-			next = assetHistory.splice(assetHistory.length - 2, 2);
-		} else {
-			next = assetHistory.splice(assetHistory.length - 1, 1);
-		}
-
+		const useSplit = shouldUseSplitView(assetHistory.slice(-2));
+		const next = assetHistory.splice(useSplit ? -2 : -1);
 		assetHistory = [...assetHistory];
 
-		// Unshift to Backlog
-		if (displayingAssets) {
+		if (displayingAssets.length) {
 			assetBacklog.unshift(...displayingAssets);
 		}
+
 		displayingAssets = next;
 		await updateAssetPromises();
 		assetsState = await pickAssets(next);
@@ -253,12 +228,23 @@
 		return assetHeight > assetWidth;
 	}
 
+	function shouldUseSplitView(assets: api.AssetResponseDto[]): boolean {
+		return (
+			$configStore.layout?.trim().toLowerCase() === 'splitview' &&
+			assets.length > 1 &&
+			isImageAsset(assets[0]) &&
+			isImageAsset(assets[1]) &&
+			isPortrait(assets[0]) &&
+			isPortrait(assets[1])
+		);
+	}
+
 	function hasBirthday(assets: api.AssetResponseDto[]) {
 		let today = new Date();
 		let hasBday: boolean = false;
 
 		for (let asset of assets) {
-			for (let person of asset.people ?? new Array()) {
+			for (let person of asset.people ?? []) {
 				let birthdate = new Date(person.birthDate ?? '');
 				if (birthdate.getDate() === today.getDate() && birthdate.getMonth() === today.getMonth()) {
 					hasBday = true;
@@ -450,7 +436,7 @@
 		<div class="absolute h-screen w-screen">
 			<AssetComponent
 				showLocation={$configStore.showImageLocation}
-				interval={$configStore.interval}
+				interval={currentDuration}
 				showPhotoDate={$configStore.showPhotoDate}
 				showImageDesc={$configStore.showImageDesc}
 				showPeopleDesc={$configStore.showPeopleDesc}
