@@ -44,6 +44,7 @@ Accounts:
     ShowMemories: false
     ShowFavorites: false
     ShowArchived: false
+    ShowVideos: false
     ImagesFromDays: null
     ImagesUntilDate: '2020-01-02'
     Rating: null
