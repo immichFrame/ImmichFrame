@@ -120,6 +120,7 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
         public string Style => _delegate.Style;
         public string? BaseFontSize => _delegate.BaseFontSize;
         public bool ShowWeatherDescription => _delegate.ShowWeatherDescription;
+        public int TemperatureDecimalDigits => 1;
         public string? WeatherIconUrl => _delegate.WeatherIconUrl;
         public bool ImageZoom => _delegate.ImageZoom;
         public bool ImagePan => _delegate.ImagePan;
@@ -127,6 +128,14 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
         public string Layout => _delegate.Layout;
         public string Language => _delegate.Language;
 
-        public void Validate() { }
+        public void Validate()
+        {
+            if (TemperatureDecimalDigits < 0 || TemperatureDecimalDigits > 2)
+            {
+                throw new ArgumentOutOfRangeException(nameof(TemperatureDecimalDigits),
+                    TemperatureDecimalDigits,
+                    "TemperatureDecimalDigits must be between 0 and 2.");
+            }
+        }
     }
 }
