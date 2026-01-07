@@ -72,7 +72,15 @@ public class GeneralSettings : IGeneralSettings, IConfigSettable
     public string? Webhook { get; set; }
     public string? AuthenticationSecret { get; set; }
 
-    public void Validate() { }
+    public void Validate()
+    {
+        if (TemperatureDecimalDigits < 0 || TemperatureDecimalDigits > 2)
+        {
+            throw new ArgumentOutOfRangeException(nameof(TemperatureDecimalDigits),
+                TemperatureDecimalDigits,
+                "TemperatureDecimalDigits must be between 0 and 2.");
+        }
+    }
 }
 
 public class ServerAccountSettings : IAccountSettings, IConfigSettable
