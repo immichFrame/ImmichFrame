@@ -90,7 +90,7 @@
             {/if}
 
             <div class="weather-location">{weather.location},</div>
-            <div class="weather-temperature">{$configStore.useWholeNumberTemperatures ? Math.round(weather.temperature ?? 0) : weather.temperature?.toFixed(1)}</div>
+            <div class="weather-temperature">{$configStore.useWholeNumberTemperatures ? Math.round(weather.temperature ?? 0) : (weather.temperature ?? 0).toFixed(1)}</div>
             <div class="weather-unit">{$configStore.showTemperatureUnit === false ? '°' : (weather.unit ?? '°')}</div>
         </div>
 

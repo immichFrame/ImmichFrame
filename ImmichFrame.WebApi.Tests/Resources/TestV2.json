@@ -31,6 +31,7 @@
     "BaseFontSize": "BaseFontSize_TEST",
     "ShowWeatherDescription": true,
     "ShowTemperatureUnit": true,
+    "UseWholeNumberTemperatures": true,
     "WeatherIconUrl": "WeatherIconUrl_TEST",
     "ImageZoom": true,
     "ImagePan": true,
