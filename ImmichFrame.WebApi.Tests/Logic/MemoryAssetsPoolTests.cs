@@ -1,15 +1,14 @@
-using NUnit.Framework;
-using Moq;
 using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Interfaces;
+using ImmichFrame.Core.Logic;
 using ImmichFrame.Core.Logic.Pool;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Threading;
+using ImmichFrame.Core.Tests.Logic.Pool;
+using ImmichFrame.WebApi.Controllers;
+using ImmichFrame.WebApi.Models;
+using Moq;
+using NUnit.Framework;
 
-namespace ImmichFrame.Core.Tests.Logic.Pool;
+namespace ImmichFrame.WebApi.Tests.Logic;
 
 [TestFixture]
 public class MemoryAssetsPoolTests
@@ -17,17 +16,20 @@ public class MemoryAssetsPoolTests
     private Mock<ImmichApi> _mockImmichApi;
     private Mock<IAccountSettings> _mockAccountSettings;
     private MemoryAssetsPool _memoryAssetsPool;
+    private IImmichFrameLogic _accountLogic;
+
 
     [SetUp]
     public void Setup()
     {
-        _mockImmichApi = new Mock<ImmichApi>(null, null); // Base constructor requires ILogger, IHttpClientFactory, IOptions, pass null
+        _mockImmichApi = new Mock<ImmichApi>(null!, null!); // Base constructor requires ILogger, IHttpClientFactory, IOptions, pass null
         _mockAccountSettings = new Mock<IAccountSettings>();
 
         _memoryAssetsPool = new MemoryAssetsPool(_mockImmichApi.Object, _mockAccountSettings.Object);
+        _accountLogic = new LogicPoolAdapter(_memoryAssetsPool, _mockImmichApi.Object, null);
     }
 
-    private List<AssetResponseDto> CreateSampleAssets(int count, bool withExif, int yearCreated)
+    private List<AssetResponseDto> CreateSampleAssets(int count, bool withExif, DateTime created)
     {
         var assets = new List<AssetResponseDto>();
         for (int i = 0; i < count; i++)
@@ -37,27 +39,33 @@ public class MemoryAssetsPoolTests
                 Id = Guid.NewGuid().ToString(),
                 OriginalPath = $"/path/to/image{i}.jpg",
                 Type = AssetTypeEnum.IMAGE,
-                ExifInfo = withExif ? new ExifResponseDto { DateTimeOriginal = new DateTime(yearCreated, 1, 1) } : null,
+                ExifInfo = withExif ? new ExifResponseDto { DateTimeOriginal = created } : null,
                 People = new List<PersonWithFacesResponseDto>()
             };
             assets.Add(asset);
         }
+
         return assets;
     }
 
     private List<MemoryResponseDto> CreateSampleMemories(int memoryCount, int assetsPerMemory, bool withExifInAssets, int memoryYear)
     {
+        var memoryAt = DateTimeOffset.Now;
+        memoryAt = memoryAt.AddYears(memoryYear - memoryAt.Year);
+
         var memories = new List<MemoryResponseDto>();
         for (int i = 0; i < memoryCount; i++)
         {
             var memory = new MemoryResponseDto
             {
                 Id = $"Memory {i}",
-                Assets = CreateSampleAssets(assetsPerMemory, withExifInAssets, memoryYear),
+                Assets = CreateSampleAssets(assetsPerMemory, withExifInAssets, new DateTime(memoryYear, 1, 1)),
+                MemoryAt = memoryAt,
                 Data = new OnThisDayDto { Year = memoryYear }
             };
             memories.Add(memory);
         }
+
         return memories;
     }
 
@@ -178,6 +186,90 @@ public class MemoryAssetsPoolTests
         Assert.That(loadedAssets, Is.Not.Null);
         Assert.That(loadedAssets.Count(), Is.EqualTo(4)); // 2 memories * 2 assets
         _mockImmichApi.VerifyAll();
+    }
+
+    [Test]
+    public async Task LoadAssets_ReturnsAssetsInChronologicalMemoryOrder()
+    {
+        // Arrange
+        var memories = new List<MemoryResponseDto>
+        {
+            CreateSampleMemories(1, 1, true, DateTime.Now.Year - 2).First(), // 2 years ago
+            CreateSampleMemories(1, 1, true, DateTime.Now.Year - 1).First() // 1 year ago
+        };
+
+        // Reverse memories to ensure they are not in order by default
+        memories.Reverse();
+
+        _mockImmichApi.Setup(x => x.SearchMemoriesAsync(It.IsAny<DateTimeOffset>(), null, null, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(memories);
+
+        // Act
+        var loadedAssets = await _memoryAssetsPool.GetAssets(2, CancellationToken.None); // Trigger load
+
+        // Assert
+        Assert.That(loadedAssets, Is.Not.Null);
+        Assert.That(loadedAssets.Count(), Is.EqualTo(2));
+        // Expecting assets to be sorted by memory date, oldest first
+        Assert.That(loadedAssets.First().ExifInfo.Description, Is.EqualTo("2 years ago"));
+        Assert.That(loadedAssets.Last().ExifInfo.Description, Is.EqualTo("1 year ago"));
+    }
+
+    [Test]
+    [Repeat(10)] // In case it accidentally passes due to random order
+    public async Task LoadAssetsFromApi_ReturnsAssetsInChronologicalMemoryOrder()
+    {
+        // Arrange
+        var memories = new List<MemoryResponseDto>
+        {
+            CreateSampleMemories(1, 1, true, DateTime.Now.Year - 2).First(), // 2 years ago
+            CreateSampleMemories(1, 1, true, DateTime.Now.Year - 1).First() // 1 year ago
+        };
+
+        // Shuffle memories to ensure they are not in order by default
+        memories = memories.OrderBy(x => Guid.NewGuid()).ToList();
+
+        _mockImmichApi.Setup(x => x.SearchMemoriesAsync(It.IsAny<DateTimeOffset>(), null, null, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(memories);
+
+        // Act - test the memory pool directly since that's what we're testing
+        var loadedAssets = await _memoryAssetsPool.GetAssets(2, CancellationToken.None);
+
+        // Assert
+        Assert.That(loadedAssets, Is.Not.Null);
+        Assert.That(loadedAssets.Count(), Is.EqualTo(2));
+        // Expecting assets to be sorted by memory date, oldest first
+        Assert.That(loadedAssets.First().ExifInfo.Description, Is.EqualTo("2 years ago"));
+        Assert.That(loadedAssets.Last().ExifInfo.Description, Is.EqualTo("1 year ago"));
+    }
+
+    [Test]
+    public async Task LoadAssetsFromApi_ReturnsAssetsInChronologicalMemoryOrderOverMultipleCalls()
+    {
+        // Arrange
+        var memories = new List<MemoryResponseDto>
+        {
+            CreateSampleMemories(1, 1, true, DateTime.Now.Year - 2).First(), // 2 years ago
+            CreateSampleMemories(1, 1, true, DateTime.Now.Year - 1).First() // 1 year ago
+        };
+
+        // Shuffle memories to ensure they are not in order by default
+        memories = memories.OrderBy(x => Guid.NewGuid()).ToList();
+
+        _mockImmichApi.Setup(x => x.SearchMemoriesAsync(It.IsAny<DateTimeOffset>(), null, null, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(memories);
+
+
+        // Act
+        var loadedAsset1 = await _accountLogic.GetNextAsset(); // Trigger load
+        var loadedAsset2 = await _accountLogic.GetNextAsset();
+
+        // Assert
+        Assert.That(loadedAsset1, Is.Not.Null);
+        Assert.That(loadedAsset2, Is.Not.Null);
         
+        // Expecting assets to be sorted by memory date, oldest first
+        Assert.That(loadedAsset1.ExifInfo.Description, Is.EqualTo("2 years ago"));
+        Assert.That(loadedAsset2.ExifInfo.Description, Is.EqualTo("1 year ago"));
     }
 }

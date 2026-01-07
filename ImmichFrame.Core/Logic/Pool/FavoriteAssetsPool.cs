@@ -3,9 +3,9 @@ using ImmichFrame.Core.Interfaces;
 
 namespace ImmichFrame.Core.Logic.Pool;
 
-public class FavoriteAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings) : CachingApiAssetsPool(apiCache, immichApi, accountSettings)
+public class FavoriteAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings) : CachingApiAssetsPool(apiCache, accountSettings)
 {
-    protected override async Task<IEnumerable<AssetResponseDto>> LoadAssets(CancellationToken ct = default)
+    protected override async Task<IList<AssetResponseDto>> LoadAssets(CancellationToken ct = default)
     {
         var favoriteAssets = new List<AssetResponseDto>();
 

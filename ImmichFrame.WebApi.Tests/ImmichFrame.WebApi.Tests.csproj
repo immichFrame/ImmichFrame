@@ -24,6 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ImmichFrame.Core.Tests\ImmichFrame.Core.Tests.csproj" />
     <ProjectReference Include="..\ImmichFrame.WebApi\ImmichFrame.WebApi.csproj" />
   </ItemGroup>
 
