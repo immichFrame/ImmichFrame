@@ -5,7 +5,8 @@ import { base } from '$app/paths';
 
 export const load = async () => {
 
-  setBaseUrl(base + "/");
+  const normalizedBase = base.endsWith('/') ? base.slice(0, -1) : base;
+  setBaseUrl(normalizedBase + "/");
 
   const configRequest = await api.getConfig({ clientIdentifier: "" });
 
