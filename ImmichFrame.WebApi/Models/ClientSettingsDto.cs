@@ -26,6 +26,7 @@ public class ClientSettingsDto
     public string? BaseFontSize { get; set; }
     public bool ShowWeatherDescription { get; set; }
     public bool ShowTemperatureUnit { get; set; }
+    public bool UseWholeNumberTemperatures { get; set; }
     public string? WeatherIconUrl { get; set; }
     public bool ImageZoom { get; set; }
     public bool ImagePan { get; set; }
@@ -59,6 +60,7 @@ public class ClientSettingsDto
         dto.BaseFontSize = generalSettings.BaseFontSize;
         dto.ShowWeatherDescription = generalSettings.ShowWeatherDescription;
         dto.ShowTemperatureUnit = generalSettings.ShowTemperatureUnit;
+        dto.UseWholeNumberTemperatures = generalSettings.UseWholeNumberTemperatures;
         dto.WeatherIconUrl = generalSettings.WeatherIconUrl;
         dto.ImageZoom = generalSettings.ImageZoom;
         dto.ImagePan = generalSettings.ImagePan;

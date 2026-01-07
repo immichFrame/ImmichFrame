@@ -129,6 +129,7 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
         public string? BaseFontSize => _delegate.BaseFontSize;
         public bool ShowWeatherDescription => _delegate.ShowWeatherDescription;
         public bool ShowTemperatureUnit => true;
+        public bool UseWholeNumberTemperatures => false;
         public string? WeatherIconUrl => _delegate.WeatherIconUrl;
         public bool ImageZoom => _delegate.ImageZoom;
         public bool ImagePan => _delegate.ImagePan;
