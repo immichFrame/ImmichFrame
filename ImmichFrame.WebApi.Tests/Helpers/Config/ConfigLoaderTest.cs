@@ -117,18 +117,18 @@ public class ConfigLoaderTest
                     }
                     break;
                 case var t when t == typeof(Boolean):
-                    // V1 config doesn't support UseWholeNumberTemperatures, so it defaults to false
-                    if (prop.Name.Equals("UseWholeNumberTemperatures") && expectNullApiKeyFile)
+                    Assert.That(value, Is.EqualTo(true), prop.Name);
+                    break;
+                case var t when t == typeof(int):
+                    // V1 config doesn't support TemperatureDecimalDigits, so it defaults to 1
+                    if (prop.Name.Equals("TemperatureDecimalDigits") && expectNullApiKeyFile)
                     {
-                        Assert.That(value, Is.EqualTo(false), prop.Name);
+                        Assert.That(value, Is.EqualTo(1), prop.Name);
                     }
                     else
                     {
-                        Assert.That(value, Is.EqualTo(true), prop.Name);
+                        Assert.That(value, Is.EqualTo(7), prop.Name);
                     }
-                    break;
-                case var t when t == typeof(int):
-                    Assert.That(value, Is.EqualTo(7), prop.Name);
                     break;
                 case var t when t == typeof(double):
                     Assert.That(value, Is.EqualTo(7.7d), prop.Name);

@@ -29,7 +29,7 @@ General:
   Style: Style_TEST
   BaseFontSize: BaseFontSize_TEST
   ShowWeatherDescription: true
-  UseWholeNumberTemperatures: true
+  TemperatureDecimalDigits: 7
   WeatherIconUrl: WeatherIconUrl_TEST
   ImageZoom: true
   ImagePan: true

@@ -57,7 +57,7 @@ public class GeneralSettings : IGeneralSettings, IConfigSettable
     public string Style { get; set; } = "none";
     public string? BaseFontSize { get; set; }
     public bool ShowWeatherDescription { get; set; } = true;
-    public bool UseWholeNumberTemperatures { get; set; } = false;
+    public int TemperatureDecimalDigits { get; set; } = 1;
     public string? WeatherIconUrl { get; set; } = "https://openweathermap.org/img/wn/{IconId}.png";
     public bool ImageZoom { get; set; } = true;
     public bool ImagePan { get; set; } = false;
