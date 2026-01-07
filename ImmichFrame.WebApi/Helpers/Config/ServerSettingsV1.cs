@@ -52,6 +52,7 @@ public class ServerSettingsV1 : IConfigSettable
     public bool ImagePan { get; set; } = false;
     public bool ImageFill { get; set; } = false;
     public string Layout { get; set; } = "splitview";
+    public string? BaseUrl { get; set; } = "/";
 }
 
 /// <summary>
@@ -126,6 +127,7 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
         public bool ImageFill => _delegate.ImageFill;
         public string Layout => _delegate.Layout;
         public string Language => _delegate.Language;
+        public string? BaseUrl => _delegate.BaseUrl;
 
         public void Validate() { }
     }

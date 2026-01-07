@@ -6,7 +6,7 @@ using ImmichFrame.WebApi.Helpers.Config;
 using ImmichFrame.WebApi.Models;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
-using AwesomeAssertions;
+using FluentAssertions;
 
 namespace ImmichFrame.WebApi.Tests.Helpers.Config;
 
