@@ -23,6 +23,7 @@ public class ConfigLoader(ILogger<ConfigLoader> _logger)
     public IServerSettings LoadConfig(string configPath)
     {
         var config = LoadConfigRaw(configPath);
+        ApplyEnvironmentVariables(config);
         config.Validate();
         return config;
     }
@@ -86,12 +87,23 @@ public class ConfigLoader(ILogger<ConfigLoader> _logger)
 
         throw new ImmichFrameException("Failed to load configuration");
     }
-
-    internal T LoadConfigFromDictionary<T>(IDictionary env) where T : IConfigSettable, new()
+    private void ApplyEnvironmentVariables(IServerSettings config)
     {
-        var config = new T();
-        var propertiesSet = 0;
+        var env = Environment.GetEnvironmentVariables();
+        if (config is ServerSettings serverSettings)
+        {
+            if (serverSettings.GeneralSettingsImpl == null)
+                serverSettings.GeneralSettingsImpl = new GeneralSettings();
 
+            MapDictionaryToConfig(serverSettings.GeneralSettingsImpl, env);
+        }
+        else if (config is ServerSettingsV1Adapter v1Adapter)
+        {
+            MapDictionaryToConfig(v1Adapter.Settings, env);
+        }
+    }
+    internal void MapDictionaryToConfig<T>(T config, IDictionary env) where T : IConfigSettable
+    {
         foreach (var key in env.Keys)
         {
             if (key == null) continue;
@@ -100,9 +112,29 @@ public class ConfigLoader(ILogger<ConfigLoader> _logger)
 
             if (propertyInfo != null)
             {
-                config.SetValue(propertyInfo, env[key]?.ToString() ?? string.Empty);
-                propertiesSet++;
+                var value = env[key]?.ToString() ?? string.Empty;
+                // Clean up quotes if present
+                if (value.StartsWith("'") && value.EndsWith("'"))
+                    value = value.Substring(1, value.Length - 2);
+                if (value.StartsWith("\"") && value.EndsWith("\""))
+                    value = value.Substring(1, value.Length - 2);
+
+                config.SetValue(propertyInfo, value);
             }
+        }
+    }
+    internal T LoadConfigFromDictionary<T>(IDictionary env) where T : IConfigSettable, new()
+    {
+        var config = new T();
+        MapDictionaryToConfig(config, env);
+
+        // Count set properties to see if we have anything
+        var propertiesSet = 0;
+        foreach (var key in env.Keys)
+        {
+            if (key == null) continue;
+            if (typeof(T).GetProperty(key.ToString() ?? string.Empty) != null)
+                propertiesSet++;
         }
 
         if (propertiesSet < 2)

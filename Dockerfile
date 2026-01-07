@@ -50,6 +50,21 @@ COPY --from=build-node /app/build ./wwwroot
 
 # Set non-privileged user
 ARG APP_UID=1000
+
+# Ensure the app user owns the files they need to modify
+RUN chown -R $APP_UID:$APP_UID /app/wwwroot
+
+# Create a startup script to handle BaseUrl replacement
+RUN echo '#!/bin/sh\n\
+if [ -n "$BaseUrl" ] && [ "$BaseUrl" != "/" ]; then\n\
+  BASE_PATH=$(echo "$BaseUrl" | sed "s|/*$||")\n\
+else\n\
+  BASE_PATH=""\n\
+fi\n\
+echo "Applying BaseUrl: $BASE_PATH"\n\
+find /app/wwwroot -type f \( -name "*.html" -o -name "*.js" -o -name "*.json" -o -name "*.webmanifest" -o -name "*.css" \) -exec sed -i "s|/__IMMICH_FRAME_BASE__|$BASE_PATH|g" {} +\n\
+exec dotnet ImmichFrame.WebApi.dll' > /app/entrypoint.sh && chmod +x /app/entrypoint.sh
+
 USER $APP_UID
 
-ENTRYPOINT ["dotnet", "ImmichFrame.WebApi.dll"]
+ENTRYPOINT ["/app/entrypoint.sh"]

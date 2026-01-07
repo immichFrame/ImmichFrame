@@ -58,11 +58,12 @@ public class ServerSettingsV1 : IConfigSettable
 /// <summary>
 /// Adapter to present a SettingsV1 object as an IServerSettings
 /// </summary>
-/// <param name="_delegate">the V1 settings object to wrap</param>
-public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettings
+/// <param name="Settings">the V1 settings object to wrap</param>
+public class ServerSettingsV1Adapter(ServerSettingsV1 Settings) : IServerSettings
 {
-    public IEnumerable<IAccountSettings> Accounts => new List<AccountSettingsV1Adapter> { new(_delegate) };
-    public IGeneralSettings GeneralSettings => new GeneralSettingsV1Adapter(_delegate);
+    public ServerSettingsV1 Settings { get; } = Settings;
+    public IEnumerable<IAccountSettings> Accounts => new List<AccountSettingsV1Adapter> { new(Settings) };
+    public IGeneralSettings GeneralSettings => new GeneralSettingsV1Adapter(Settings);
 
     public void Validate()
     {
@@ -73,61 +74,61 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
         }
     }
 
-    class AccountSettingsV1Adapter(ServerSettingsV1 _delegate) : IAccountSettings
+    class AccountSettingsV1Adapter(ServerSettingsV1 Settings) : IAccountSettings
     {
-        public string ImmichServerUrl => _delegate.ImmichServerUrl;
-        public string ApiKey => _delegate.ApiKey;
+        public string ImmichServerUrl => Settings.ImmichServerUrl;
+        public string ApiKey => Settings.ApiKey;
         public string? ApiKeyFile => null;  // V1 settings didn't support paths to api keys.
-        public bool ShowMemories => _delegate.ShowMemories;
-        public bool ShowFavorites => _delegate.ShowFavorites;
-        public bool ShowArchived => _delegate.ShowArchived;
-        public int? ImagesFromDays => _delegate.ImagesFromDays;
-        public DateTime? ImagesFromDate => _delegate.ImagesFromDate;
-        public DateTime? ImagesUntilDate => _delegate.ImagesUntilDate;
-        public List<Guid> Albums => _delegate.Albums;
-        public List<Guid> ExcludedAlbums => _delegate.ExcludedAlbums;
-        public List<Guid> People => _delegate.People;
-        public int? Rating => _delegate.Rating;
+        public bool ShowMemories => Settings.ShowMemories;
+        public bool ShowFavorites => Settings.ShowFavorites;
+        public bool ShowArchived => Settings.ShowArchived;
+        public int? ImagesFromDays => Settings.ImagesFromDays;
+        public DateTime? ImagesFromDate => Settings.ImagesFromDate;
+        public DateTime? ImagesUntilDate => Settings.ImagesUntilDate;
+        public List<Guid> Albums => Settings.Albums;
+        public List<Guid> ExcludedAlbums => Settings.ExcludedAlbums;
+        public List<Guid> People => Settings.People;
+        public int? Rating => Settings.Rating;
 
         public void ValidateAndInitialize() { }
     }
 
-    class GeneralSettingsV1Adapter(ServerSettingsV1 _delegate) : IGeneralSettings
+    class GeneralSettingsV1Adapter(ServerSettingsV1 Settings) : IGeneralSettings
     {
-        public List<string> Webcalendars => _delegate.Webcalendars;
-        public int RefreshAlbumPeopleInterval => _delegate.RefreshAlbumPeopleInterval;
-        public string? WeatherApiKey => _delegate.WeatherApiKey;
-        public string? WeatherLatLong => _delegate.WeatherLatLong;
-        public string? UnitSystem => _delegate.UnitSystem;
-        public string? Webhook => _delegate.Webhook;
-        public string? AuthenticationSecret => _delegate.AuthenticationSecret;
-        public int Interval => _delegate.Interval;
-        public double TransitionDuration => _delegate.TransitionDuration;
-        public bool DownloadImages => _delegate.DownloadImages;
-        public int RenewImagesDuration => _delegate.RenewImagesDuration;
-        public bool ShowClock => _delegate.ShowClock;
-        public string? ClockFormat => _delegate.ClockFormat;
-        public string? ClockDateFormat => _delegate.ClockDateFormat;
-        public bool ShowProgressBar => _delegate.ShowProgressBar;
-        public bool ShowPhotoDate => _delegate.ShowPhotoDate;
-        public string? PhotoDateFormat => _delegate.PhotoDateFormat;
-        public bool ShowImageDesc => _delegate.ShowImageDesc;
-        public bool ShowPeopleDesc => _delegate.ShowPeopleDesc;
-        public bool ShowAlbumName => _delegate.ShowAlbumName;
-        public bool ShowImageLocation => _delegate.ShowImageLocation;
-        public string? ImageLocationFormat => _delegate.ImageLocationFormat;
-        public string? PrimaryColor => _delegate.PrimaryColor;
-        public string? SecondaryColor => _delegate.SecondaryColor;
-        public string Style => _delegate.Style;
-        public string? BaseFontSize => _delegate.BaseFontSize;
-        public bool ShowWeatherDescription => _delegate.ShowWeatherDescription;
-        public string? WeatherIconUrl => _delegate.WeatherIconUrl;
-        public bool ImageZoom => _delegate.ImageZoom;
-        public bool ImagePan => _delegate.ImagePan;
-        public bool ImageFill => _delegate.ImageFill;
-        public string Layout => _delegate.Layout;
-        public string Language => _delegate.Language;
-        public string BaseUrl => _delegate.BaseUrl;
+        public List<string> Webcalendars => Settings.Webcalendars;
+        public int RefreshAlbumPeopleInterval => Settings.RefreshAlbumPeopleInterval;
+        public string? WeatherApiKey => Settings.WeatherApiKey;
+        public string? WeatherLatLong => Settings.WeatherLatLong;
+        public string? UnitSystem => Settings.UnitSystem;
+        public string? Webhook => Settings.Webhook;
+        public string? AuthenticationSecret => Settings.AuthenticationSecret;
+        public int Interval => Settings.Interval;
+        public double TransitionDuration => Settings.TransitionDuration;
+        public bool DownloadImages => Settings.DownloadImages;
+        public int RenewImagesDuration => Settings.RenewImagesDuration;
+        public bool ShowClock => Settings.ShowClock;
+        public string? ClockFormat => Settings.ClockFormat;
+        public string? ClockDateFormat => Settings.ClockDateFormat;
+        public bool ShowProgressBar => Settings.ShowProgressBar;
+        public bool ShowPhotoDate => Settings.ShowPhotoDate;
+        public string? PhotoDateFormat => Settings.PhotoDateFormat;
+        public bool ShowImageDesc => Settings.ShowImageDesc;
+        public bool ShowPeopleDesc => Settings.ShowPeopleDesc;
+        public bool ShowAlbumName => Settings.ShowAlbumName;
+        public bool ShowImageLocation => Settings.ShowImageLocation;
+        public string? ImageLocationFormat => Settings.ImageLocationFormat;
+        public string? PrimaryColor => Settings.PrimaryColor;
+        public string? SecondaryColor => Settings.SecondaryColor;
+        public string Style => Settings.Style;
+        public string? BaseFontSize => Settings.BaseFontSize;
+        public bool ShowWeatherDescription => Settings.ShowWeatherDescription;
+        public string? WeatherIconUrl => Settings.WeatherIconUrl;
+        public bool ImageZoom => Settings.ImageZoom;
+        public bool ImagePan => Settings.ImagePan;
+        public bool ImageFill => Settings.ImageFill;
+        public string Layout => Settings.Layout;
+        public string Language => Settings.Language;
+        public string BaseUrl => Settings.BaseUrl;
 
         public void Validate() { }
     }
