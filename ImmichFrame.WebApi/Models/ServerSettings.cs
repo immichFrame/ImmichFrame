@@ -72,7 +72,19 @@ public class GeneralSettings : IGeneralSettings, IConfigSettable
     public string? Webhook { get; set; }
     public string? AuthenticationSecret { get; set; }
 
-    public void Validate() { }
+    public void Validate()
+    {
+        if (!string.IsNullOrEmpty(BaseUrl) && !BaseUrl.StartsWith('/'))
+        {
+            throw new InvalidOperationException("BaseUrl must start with '/' or be empty.");
+        }
+
+        // Normalize trailing slash for consistency
+        if (!string.IsNullOrEmpty(BaseUrl) && BaseUrl != "/" && BaseUrl.EndsWith('/'))
+        {
+            BaseUrl = BaseUrl.TrimEnd('/');
+        }
+    }
 }
 
 public class ServerAccountSettings : IAccountSettings, IConfigSettable

@@ -11,7 +11,8 @@ export const load = async () => {
 
   const config = configRequest.data;
   if (config.baseUrl) {
-    setBaseUrl(config.baseUrl);
+    const normalizedUrl = config.baseUrl.endsWith('/') ? config.baseUrl : config.baseUrl + '/';
+    setBaseUrl(normalizedUrl);
   }
 
   configStore.ps(config);

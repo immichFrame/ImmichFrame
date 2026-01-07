@@ -99,6 +99,7 @@ General:
   # Allow two portrait images to be displayed next to each other
   Layout: 'splitview'  # single | splitview
   # The base URL the app is hosted on. Useful when using a reverse proxy.
+  # Example: For https://example.com/immichframe, set this to '/immichframe'
   BaseUrl: '/'  # string
 
 # multiple accounts permitted
