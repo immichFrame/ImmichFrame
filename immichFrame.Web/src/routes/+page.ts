@@ -5,15 +5,13 @@ import { base } from '$app/paths';
 
 export const load = async () => {
 
-  const normalizedBase = base.endsWith('/') ? base.slice(0, -1) : base;
-  setBaseUrl(normalizedBase + "/");
+  setBaseUrl(base + "/");
 
   const configRequest = await api.getConfig({ clientIdentifier: "" });
 
   const config = configRequest.data;
   if (config.baseUrl) {
-    const normalizedUrl = config.baseUrl.endsWith('/') ? config.baseUrl : config.baseUrl + '/';
-    setBaseUrl(normalizedUrl);
+    setBaseUrl(config.baseUrl);
   }
 
   configStore.ps(config);

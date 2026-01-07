@@ -50,49 +50,20 @@ COPY --from=build-node /app/build ./wwwroot
 
 # Set non-privileged user
 ARG APP_UID=1000
-# Don't use USER $APP_UID yet, as we need to write entrypoint.sh and then use it to perform runtime operations
 
-# Create entrypoint script
-RUN echo '#!/bin/bash\n\
-set -e\n\
-\n\
-# Use BASE_URL env var if set, otherwise try to extract from Settings.json/yml if they exist, else default to /\n\
-BASE_PATH="${BASE_URL}"\n\
-\n\
-if [ -z "$BASE_PATH" ]; then\n\
-    if [ -f "/app/Config/Settings.json" ]; then\n\
-        BASE_PATH=$(grep -oE "\"BaseUrl\":\s*\"[^\"]+\"" /app/Config/Settings.json | cut -d\" -f4 || echo "/")\n\
-    elif [ -f "/app/Config/Settings.yml" ]; then\n\
-        BASE_PATH=$(grep -E "^BaseUrl:" /app/Config/Settings.yml | awk \"{print \$2}\" || echo "/")\n\
-    fi\n\
+# Ensure the app user owns the files they need to modify
+RUN chown -R $APP_UID:$APP_UID /app/wwwroot
+
+# Create a startup script to handle BaseUrl replacement
+RUN echo '#!/bin/sh\n\
+if [ -n "$BaseUrl" ] && [ "$BaseUrl" != "/" ]; then\n\
+  BASE_PATH=$(echo "$BaseUrl" | sed "s|/*$||")\n\
+else\n\
+  BASE_PATH=""\n\
 fi\n\
-\n\
-BASE_PATH=${BASE_PATH:-/}\n\
-\n\
-# Ensure BASE_PATH starts with / and does not end with / (unless it is just /)\n\
-[[ "${BASE_PATH}" != /* ]] && BASE_PATH="/${BASE_PATH}"\n\
-[[ "${BASE_PATH}" != "/" ]] && BASE_PATH="${BASE_PATH%/}"\n\
-\n\
-echo "Setting base path to ${BASE_PATH}"\n\
-\n\
-# Copy wwwroot to runtime directory to keep original clean and allow re-runs\n\
-cp -rf /app/wwwroot /app/wwwroot-runtime\n\
-\n\
-# Replace placeholder with actual base path in the runtime copy\n\
-find /app/wwwroot-runtime -type f -exec sed -i "s|/__IMMICH_FRAME_BASE__|${BASE_PATH}|g" {} +\n\
-\n\
-# We need to make sure the app serves from wwwroot-runtime or we symlink it\n\
-rm -rf /app/wwwroot && ln -s /app/wwwroot-runtime /app/wwwroot\n\
-\n\
-exec dotnet ImmichFrame.WebApi.dll "$@"' > /app/entrypoint.sh \
-    && chmod +x /app/entrypoint.sh
-
-# Now we can set the user, but we need to make sure the user has permissions to the runtime directory
-# Actually, it might be better to run as root for the setup part of the entrypoint and then gosu/su-exec
-# but the original Dockerfile uses USER $APP_UID. 
-# If we want to stay with USER $APP_UID, we must ensure /app is writable by it.
-
-RUN chown -R $APP_UID /app
+echo "Applying BaseUrl: $BASE_PATH"\n\
+find /app/wwwroot -type f \( -name "*.html" -o -name "*.js" -o -name "*.json" -o -name "*.webmanifest" -o -name "*.css" \) -exec sed -i "s|/__IMMICH_FRAME_BASE__|$BASE_PATH|g" {} +\n\
+exec dotnet ImmichFrame.WebApi.dll' > /app/entrypoint.sh && chmod +x /app/entrypoint.sh
 
 USER $APP_UID
 
