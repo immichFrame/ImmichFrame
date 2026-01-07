@@ -206,6 +206,7 @@ export type ClientSettingsDto = {
     style?: string | null;
     baseFontSize?: string | null;
     showWeatherDescription?: boolean;
+    useWholeNumberTemperatures?: boolean;
     weatherIconUrl?: string | null;
     imageZoom?: boolean;
     imagePan?: boolean;

@@ -79,7 +79,7 @@
 				<img src="{ $configStore.weatherIconUrl.replace('{IconId}', encodeURIComponent(weather.iconId)) }" class="icon-weather" alt="{weather.description}">
 				{/if}
 				<div class="weather-location">{weather.location},</div>
-				<div class="weather-temperature">{weather.temperature?.toFixed(1)}</div>
+				<div class="weather-temperature">{$configStore.useWholeNumberTemperatures ? Math.round(weather.temperature ?? 0) : weather.temperature?.toFixed(1)}</div>
 				<div class="weather-unit">{weather.unit}</div>
 			</div>
 			{#if $configStore.showWeatherDescription}
