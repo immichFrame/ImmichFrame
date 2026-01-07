@@ -212,6 +212,7 @@ export type ClientSettingsDto = {
     imageFill?: boolean;
     layout?: string | null;
     language?: string | null;
+    baseUrl?: string | null;
 };
 export type IWeather = {
     location?: string | null;

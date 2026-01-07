@@ -3,15 +3,15 @@
 
 <head>
 	<meta charset="utf-8" />
-	<link rel="icon" href="%sveltekit.assets%/favicon.png" />
+	<link rel="icon" href="favicon.png" />
 	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 	<!-- iOS PWA Meta Tags -->
 	<meta name="apple-mobile-web-app-capable" content="yes" />
 	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 	<meta name="apple-mobile-web-app-title" content="ImmichFrame" />
-	<link rel="apple-touch-icon" href="%sveltekit.assets%/favicon.png" />
+	<link rel="apple-touch-icon" href="favicon.png" />
 	<!-- Android/Desktop PWA -->
-	<link rel="manifest" href="/manifest.webmanifest" />
+	<link rel="manifest" href="manifest.webmanifest" />
 	<meta name="theme-color" content="#000000" />
 	%sveltekit.head%
 </head>
@@ -22,7 +22,7 @@
 		if ('serviceWorker' in navigator) {
 			window.addEventListener('load', () => {
 				navigator.serviceWorker
-					.register('/pwa-service-worker.js')
+					.register('pwa-service-worker.js')
 					.then(() => console.log('PWA service worker registered'))
 					.catch(console.error);
 			});
