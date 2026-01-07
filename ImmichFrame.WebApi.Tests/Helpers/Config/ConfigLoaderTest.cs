@@ -68,6 +68,31 @@ public class ConfigLoaderTest
         VerifyConfig(config, true, false);
     }
 
+    [Test]
+    public void TestApplyEnvironmentVariables_V1()
+    {
+        var v1 = new ServerSettingsV1 { BaseUrl = "/" };
+        var adapter = new ServerSettingsV1Adapter(v1);
+
+        var env = new Dictionary<string, string> { { "BaseUrl", "'/new-path'" } };
+
+        _configLoader.MapDictionaryToConfig(v1, env);
+
+        Assert.That(v1.BaseUrl, Is.EqualTo("/new-path"));
+    }
+
+    [Test]
+    public void TestApplyEnvironmentVariables_V2()
+    {
+        var settings = new ServerSettings { GeneralSettingsImpl = new GeneralSettings { BaseUrl = "/" } };
+
+        var env = new Dictionary<string, string> { { "BaseUrl", "\"/new-path\"" } };
+
+        _configLoader.MapDictionaryToConfig(settings.GeneralSettingsImpl, env);
+
+        Assert.That(settings.GeneralSettings.BaseUrl, Is.EqualTo("/new-path"));
+    }
+
     private void VerifyConfig(IServerSettings serverSettings, bool usePrefix, bool expectNullApiKeyFile)
     {
         VerifyProperties(serverSettings.GeneralSettings);
