@@ -60,7 +60,7 @@
         public string? BaseFontSize { get; }
         public bool ShowWeatherDescription { get; }
         public bool ShowTemperatureUnit { get; }
-        public bool UseWholeNumberTemperatures { get; }
+        public int TemperatureDecimalDigits { get; }
         public string? WeatherIconUrl { get; }
         public bool ImageZoom { get; }
         public bool ImagePan { get; }
