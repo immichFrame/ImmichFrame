@@ -33,6 +33,7 @@ General:
   ImagePan: false
   ImageFill: false
   Layout: splitview
+  TemperatureDecimalDigits: 1
 Accounts:
   - ImmichServerUrl: REQUIRED
     # Exactly one of ApiKey or ApiKeyFile must be set.
