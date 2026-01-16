@@ -63,6 +63,9 @@
       ],
       "Tags": [
         "Account1.Tags_TEST"
+      ],
+      "ExcludedPeople": [
+        "00000000-0000-0000-0000-000000000001"
       ]
     },
     {
@@ -88,6 +91,9 @@
       ],
       "Tags": [
         "Account2.Tags_TEST"
+      ],
+      "ExcludedPeople": [
+        "00000000-0000-0000-0000-000000000001"
       ]
     }
   ]

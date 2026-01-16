@@ -22,6 +22,7 @@ public class ServerSettingsV1 : IConfigSettable
     public List<Guid> ExcludedAlbums { get; set; } = new List<Guid>();
     public List<Guid> People { get; set; } = new List<Guid>();
     public List<string> Tags { get; set; } = new List<string>();
+    public List<Guid> ExcludedPeople { get; set; } = new List<Guid>();
     public int? Rating { get; set; }
     public List<string> Webcalendars { get; set; } = new List<string>();
     public int RefreshAlbumPeopleInterval { get; set; } = 12;
@@ -93,6 +94,7 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
         public List<Guid> ExcludedAlbums => _delegate.ExcludedAlbums;
         public List<Guid> People => _delegate.People;
         public List<string> Tags => _delegate.Tags;
+        public List<Guid> ExcludedPeople => _delegate.ExcludedPeople;
         public int? Rating => _delegate.Rating;
 
         public void ValidateAndInitialize() { }

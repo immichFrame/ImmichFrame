@@ -57,3 +57,5 @@ Accounts:
     Tags:
       - Vacation
       - Travel/Europe
+    ExcludedPeople:
+      - UUID

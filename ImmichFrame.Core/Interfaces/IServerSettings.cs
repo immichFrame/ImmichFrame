@@ -24,6 +24,7 @@
         public List<Guid> ExcludedAlbums { get; }
         public List<Guid> People { get; }
         public List<string> Tags { get; }
+        public List<Guid> ExcludedPeople { get; }
         public int? Rating { get; }
 
         public void ValidateAndInitialize();
