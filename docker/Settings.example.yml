@@ -52,3 +52,5 @@ Accounts:
       - UUID
     People:
       - UUID
+    ExcludedPeople:
+      - UUID
