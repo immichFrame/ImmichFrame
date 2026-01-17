@@ -8,8 +8,13 @@ const config: Config = {
   title: 'ImmichFrame',
   tagline: 'An awesome way to display your photos as an digital photo frame',
   onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.png',
+
+  markdown: {
+    hooks: {
+      onBrokenMarkdownLinks: 'warn',
+    },
+  },
 
   url: 'https://immichframe.dev',
   baseUrl: '/',
