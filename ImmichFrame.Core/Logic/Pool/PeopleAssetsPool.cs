@@ -30,7 +30,7 @@ public class PersonAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountS
         var assets = new List<AssetResponseDto>();
         int page = 1;
         int batchSize = 1000;
-        int total;
+        int lastPageCount;
 
         do
         {
@@ -46,11 +46,11 @@ public class PersonAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountS
 
             var personInfo = await immichApi.SearchAssetsAsync(metadataBody, ct);
 
-            total = personInfo.Assets.Total;
+            lastPageCount = personInfo.Assets.Items.Count;
 
             assets.AddRange(personInfo.Assets.Items);
             page++;
-        } while (total == batchSize);
+        } while (lastPageCount == batchSize);
 
         return assets;
     }
