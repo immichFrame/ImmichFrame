@@ -199,7 +199,7 @@
 		imagesState = await loadImages(next);
 	}
 
-	function isHorizontal(asset: api.AssetResponseDto) {
+	function isPortrait(asset: api.AssetResponseDto) {
 		const isFlipped = (orientation: number) => [5, 6, 7, 8].includes(orientation);
 		let imageHeight = asset.exifInfo?.exifImageHeight ?? 0;
 		let imageWidth = asset.exifInfo?.exifImageWidth ?? 0;
@@ -215,7 +215,8 @@
 	}
 
 	// Selects which assets to display based on layout and orientation
-	// For splitview, tries to pair horizontal images together
+	// For splitview, tries to pair portrait images together, to be shown side by side
+	// Landscape images are shown alone
 	function selectAssetsForDisplay(layout: string | undefined, candidates: api.AssetResponseDto[]): number[] {
 		if (candidates.length < 1) {
 			return [];
@@ -224,27 +225,30 @@
 			return [0];
 		}
 
-		const h0 = isHorizontal(candidates[0]);
-		const h1 = candidates.length > 1 ? isHorizontal(candidates[1]) : false;
-		const h2 = candidates.length > 2 ? isHorizontal(candidates[2]) : false;
+		const isImage0Portrait = isPortrait(candidates[0]);
+		const isImage1Portrait = candidates.length > 1 ? isPortrait(candidates[1]) : false;
+		const isImage2Portrait = candidates.length > 2 ? isPortrait(candidates[2]) : false;
 
-		if (!h0) {
-			// first image is vertical, show it alone
+		if (!isImage0Portrait) {
+			// first image is landscape, show it alone
 			return [0];
 		}
 
-		// pair with second if it's also horizontal
-		if (candidates.length > 1 && h1) {
+		
+		if (candidates.length > 1 && isImage1Portrait) {
+			// pair with second if it's also portrait
 			return [0, 1];
 		}
 
-		// pair with third if it's horizontal (skip non-horizontal second)
-		if (candidates.length > 2 && h2) {
+		
+		if (candidates.length > 2 && isImage2Portrait) {
+			// pair with third if it's portrait (skip landscape second)
 			return [0, 2];
 		}
+
 		
-		// no horizontal pair found, show second instead (skip lone horizontal)
-		if (candidates.length > 1) {
+		if (candidates[1] != null) {
+			// no portrait pair found, show second (landscape) instead
 			return [1];
 		}
 		return [0];
