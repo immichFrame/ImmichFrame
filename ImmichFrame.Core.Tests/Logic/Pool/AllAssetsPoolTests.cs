@@ -13,7 +13,6 @@ public class AllAssetsPoolTests
     private Mock<ImmichApi> _mockImmichApi;
     private Mock<IAccountSettings> _mockAccountSettings;
     private AllAssetsPool _allAssetsPool;
-    private List<Guid> excludedAlbums;
 
     [SetUp]
     public void Setup()
@@ -29,9 +28,7 @@ public class AllAssetsPoolTests
         _mockAccountSettings.SetupGet(s => s.ImagesUntilDate).Returns((DateTime?)null);
         _mockAccountSettings.SetupGet(s => s.ImagesFromDays).Returns((int?)null);
         _mockAccountSettings.SetupGet(s => s.Rating).Returns((int?)null);
-
-        excludedAlbums = new List<Guid>();
-        _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns(() => excludedAlbums);
+        _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns(new List<Guid>());
 
         // Default ApiCache setup
         _mockApiCache.Setup(c => c.GetOrAddAsync(
@@ -96,8 +93,8 @@ public class AllAssetsPoolTests
     {
         _mockAccountSettings.SetupGet(s => s.ImagesFromDays).Returns(10);
         var expectedFromDate = DateTime.Today.AddDays(-10);
-         _mockImmichApi.Setup(api => api.SearchRandomAsync(It.IsAny<RandomSearchDto>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<AssetResponseDto>());
+        _mockImmichApi.Setup(api => api.SearchRandomAsync(It.IsAny<RandomSearchDto>(), It.IsAny<CancellationToken>()))
+           .ReturnsAsync(new List<AssetResponseDto>());
 
         await _allAssetsPool.GetAssets(5);
 
@@ -115,7 +112,7 @@ public class AllAssetsPoolTests
         var assetsToReturnFromSearch = new List<AssetResponseDto>(mainAssets) { excludedAsset };
 
         var excludedAlbumId = Guid.NewGuid();
-        excludedAlbums = new List<Guid> { excludedAlbumId };
+        _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns(new List<Guid> { excludedAlbumId });
 
         _mockImmichApi.Setup(api => api.SearchRandomAsync(It.IsAny<RandomSearchDto>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(assetsToReturnFromSearch);
@@ -135,7 +132,7 @@ public class AllAssetsPoolTests
     [Test]
     public async Task GetAssets_NullExcludedAlbums_Succeeds()
     {
-        excludedAlbums = null;
+        _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns((List<Guid>)null);
 
         // Create a set of assets to verify that the code was actually exercised (minimize risk of false positives)
         var allAssets = CreateSampleAssets(5, "asset");

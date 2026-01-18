@@ -13,8 +13,6 @@ public class AlbumAssetsPoolTests
     private Mock<ImmichApi> _mockImmichApi;
     private Mock<IAccountSettings> _mockAccountSettings;
     private TestableAlbumAssetsPool _albumAssetsPool;
-    private List<Guid> albums;
-    private List<Guid> excludedAlbums;
 
     private class TestableAlbumAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings)
         : AlbumAssetsPool(apiCache, immichApi, accountSettings)
@@ -31,11 +29,8 @@ public class AlbumAssetsPoolTests
         _mockAccountSettings = new Mock<IAccountSettings>();
         _albumAssetsPool = new TestableAlbumAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
 
-        albums = new List<Guid>();
-        excludedAlbums = new List<Guid>();
-
-        _mockAccountSettings.SetupGet(s => s.Albums).Returns(() => albums);
-        _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns(() => excludedAlbums);
+        _mockAccountSettings.SetupGet(s => s.Albums).Returns(new List<Guid>());
+        _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns(new List<Guid>());
     }
 
     private AssetResponseDto CreateAsset(string id) => new AssetResponseDto { Id = id, Type = AssetTypeEnum.IMAGE };
@@ -52,9 +47,9 @@ public class AlbumAssetsPoolTests
         var assetC = CreateAsset("C"); // In excludedAlbum only
         var assetD = CreateAsset("D"); // In album1 only (but not B)
 
-        albums = new List<Guid> { album1Id };
-        excludedAlbums = new List<Guid> { excludedAlbumId };
-        
+        _mockAccountSettings.SetupGet(s => s.Albums).Returns(new List<Guid> { album1Id });
+        _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns(new List<Guid> { excludedAlbumId });
+
         _mockImmichApi.Setup(api => api.GetAlbumInfoAsync(album1Id, null, null, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new AlbumResponseDto { Assets = new List<AssetResponseDto> { assetA, assetB, assetD } });
         _mockImmichApi.Setup(api => api.GetAlbumInfoAsync(excludedAlbumId, null, null, It.IsAny<CancellationToken>()))
@@ -74,7 +69,8 @@ public class AlbumAssetsPoolTests
     [Test]
     public async Task LoadAssets_NoIncludedAlbums_ReturnsEmpty()
     {
-        excludedAlbums = new List<Guid> { Guid.NewGuid() };
+        _mockAccountSettings.SetupGet(s => s.Albums).Returns(new List<Guid>());
+        _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns(new List<Guid> { Guid.NewGuid() });
         _mockImmichApi.Setup(api => api.GetAlbumInfoAsync(It.IsAny<Guid>(), null, null, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new AlbumResponseDto { Assets = new List<AssetResponseDto> { CreateAsset("excluded_only") } });
 
@@ -87,7 +83,8 @@ public class AlbumAssetsPoolTests
     public async Task LoadAssets_NoExcludedAlbums_ReturnsAlbums()
     {
         var album1Id = Guid.NewGuid();
-        albums = new List<Guid> { album1Id };
+        _mockAccountSettings.SetupGet(s => s.Albums).Returns(new List<Guid> { album1Id });
+        _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns(new List<Guid>()); // Empty excluded
 
         _mockImmichApi.Setup(api => api.GetAlbumInfoAsync(album1Id, null, null, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new AlbumResponseDto { Assets = new List<AssetResponseDto> { CreateAsset("A") } });
@@ -100,7 +97,7 @@ public class AlbumAssetsPoolTests
     [Test]
     public async Task LoadAssets_NullAlbums_ReturnsEmpty()
     {
-        albums = null;
+        _mockAccountSettings.SetupGet(s => s.Albums).Returns((List<Guid>)null);
 
         var result = (await _albumAssetsPool.TestLoadAssets()).ToList();
         Assert.That(result, Is.Empty);
@@ -111,8 +108,8 @@ public class AlbumAssetsPoolTests
     [Test]
     public async Task LoadAssets_NullExcludedAlbums_Succeeds()
     {
-        excludedAlbums = null;
-        
+        _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns((List<Guid>)null);
+
         var result = (await _albumAssetsPool.TestLoadAssets()).ToList();
         Assert.That(result, Is.Empty);
 

@@ -18,7 +18,6 @@ public class PersonAssetsPoolTests // Renamed from PeopleAssetsPoolTests to matc
     private Mock<ImmichApi> _mockImmichApi;
     private Mock<IAccountSettings> _mockAccountSettings;
     private TestablePersonAssetsPool _personAssetsPool;
-    private List<Guid> people;
 
     private class TestablePersonAssetsPool : PersonAssetsPool
     {
@@ -39,8 +38,7 @@ public class PersonAssetsPoolTests // Renamed from PeopleAssetsPoolTests to matc
         _mockAccountSettings = new Mock<IAccountSettings>();
         _personAssetsPool = new TestablePersonAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
 
-        people = new List<Guid>();
-        _mockAccountSettings.SetupGet(s => s.People).Returns(() => people);
+        _mockAccountSettings.SetupGet(s => s.People).Returns(new List<Guid>());
     }
 
     private AssetResponseDto CreateAsset(string id) => new AssetResponseDto { Id = id, Type = AssetTypeEnum.IMAGE };
@@ -53,7 +51,7 @@ public class PersonAssetsPoolTests // Renamed from PeopleAssetsPoolTests to matc
         // Arrange
         var person1Id = Guid.NewGuid();
         var person2Id = Guid.NewGuid();
-        people = new List<Guid> { person1Id, person2Id };
+        _mockAccountSettings.SetupGet(s => s.People).Returns(new List<Guid> { person1Id, person2Id });
 
         var batchSize = 1000; // From PersonAssetsPool.cs
         var p1AssetsPage1 = Enumerable.Range(0, batchSize).Select(i => CreateAsset($"p1_p1_{i}")).ToList();
@@ -87,6 +85,8 @@ public class PersonAssetsPoolTests // Renamed from PeopleAssetsPoolTests to matc
     [Test]
     public async Task LoadAssets_NoPeopleConfigured_ReturnsEmpty()
     {
+        _mockAccountSettings.SetupGet(s => s.People).Returns(new List<Guid>());
+
         var result = (await _personAssetsPool.TestLoadAssets()).ToList();
         Assert.That(result, Is.Empty);
         _mockImmichApi.Verify(api => api.SearchAssetsAsync(It.IsAny<MetadataSearchDto>(), It.IsAny<CancellationToken>()), Times.Never);
@@ -95,8 +95,8 @@ public class PersonAssetsPoolTests // Renamed from PeopleAssetsPoolTests to matc
     [Test]
     public async Task LoadAssets_NullPeople_ReturnsEmpty()
     {
-        people = null;
-        
+        _mockAccountSettings.SetupGet(s => s.People).Returns((List<Guid>)null);
+
         var result = (await _personAssetsPool.TestLoadAssets()).ToList();
         Assert.That(result, Is.Empty);
         _mockImmichApi.Verify(api => api.SearchAssetsAsync(It.IsAny<MetadataSearchDto>(), It.IsAny<CancellationToken>()), Times.Never);
