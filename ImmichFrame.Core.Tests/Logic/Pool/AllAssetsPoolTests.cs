@@ -136,8 +136,8 @@ public class AllAssetsPoolTests
     public async Task GetAssets_NullExcludedAlbums_Succeeds()
     {
         excludedAlbums = null;
-        
-        // Create a single asset to verify that the code was actually exercised (minimize risk of false positives)
+
+        // Create a set of assets to verify that the code was actually exercised (minimize risk of false positives)
         var allAssets = CreateSampleAssets(5, "asset");
 
         _mockImmichApi.Setup(api => api.SearchRandomAsync(It.IsAny<RandomSearchDto>(), It.IsAny<CancellationToken>()))
