@@ -118,7 +118,7 @@
 
 	async function loadAssets() {
 		try {
-			let assetRequest = await api.getAsset();
+			let assetRequest = await api.getAsset({ clientIdentifier: $clientIdentifierStore });
 
 			if (assetRequest.status != 200) {
 				if (assetRequest.status == 401) {
@@ -154,18 +154,10 @@
 			return;
 		}
 
-		let next: api.AssetResponseDto[];
-		if (
-			$configStore.layout?.trim().toLowerCase() == 'splitview' &&
-			assetBacklog.length > 1 &&
-			isHorizontal(assetBacklog[0]) &&
-			isHorizontal(assetBacklog[1])
-		) {
-			next = assetBacklog.splice(0, 2);
-		} else {
-			next = assetBacklog.splice(0, 1);
-		}
-		assetBacklog = [...assetBacklog];
+		const candidates = assetBacklog.slice(0, 3);
+		const selectedIndices = selectAssetsForDisplay($configStore.layout, candidates);
+		const next = selectedIndices.map((i) => assetBacklog[i]);
+		assetBacklog = removeAtIndices(assetBacklog, selectedIndices);
 
 		if (displayingAssets) {
 			// Push to History
@@ -187,19 +179,16 @@
 			return;
 		}
 
-		let next: api.AssetResponseDto[];
-		if (
-			$configStore.layout?.trim().toLowerCase() == 'splitview' &&
-			assetHistory.length > 1 &&
-			isHorizontal(assetHistory[assetHistory.length - 1]) &&
-			isHorizontal(assetHistory[assetHistory.length - 2])
-		) {
-			next = assetHistory.splice(assetHistory.length - 2, 2);
-		} else {
-			next = assetHistory.splice(assetHistory.length - 1, 1);
-		}
+		// get up to 3 candidates from the end of history, reversed for selection logic
+		const historyLength = assetHistory.length;
+		const candidateCount = Math.min(3, historyLength);
+		const candidates = assetHistory.slice(historyLength - candidateCount).reverse();
+		const selectedIndices = selectAssetsForDisplay($configStore.layout, candidates);
 
-		assetHistory = [...assetHistory];
+		// convert indices back to history positions
+		const historyIndices = selectedIndices.map((i) => historyLength - 1 - i);
+		const next = historyIndices.map((i) => assetHistory[i]);
+		assetHistory = removeAtIndices(assetHistory, historyIndices);
 
 		// Unshift to Backlog
 		if (displayingAssets) {
@@ -218,6 +207,47 @@
 			[imageHeight, imageWidth] = [imageWidth, imageHeight];
 		}
 		return imageHeight > imageWidth; // or imageHeight > imageWidth * 1.25;
+	}
+
+	function removeAtIndices<T>(arr: T[], indicesToRemove: number[]): T[] {
+		const skipSet = new Set(indicesToRemove);
+		return arr.filter((_, i) => !skipSet.has(i));
+	}
+
+	// Selects which assets to display based on layout and orientation
+	// For splitview, tries to pair horizontal images together
+	function selectAssetsForDisplay(layout: string | undefined, candidates: api.AssetResponseDto[]): number[] {
+		if (candidates.length < 1) {
+			return [];
+		}
+		if (candidates.length === 1 || layout?.trim().toLowerCase() !== 'splitview') {
+			return [0];
+		}
+
+		const h0 = isHorizontal(candidates[0]);
+		const h1 = candidates.length > 1 ? isHorizontal(candidates[1]) : false;
+		const h2 = candidates.length > 2 ? isHorizontal(candidates[2]) : false;
+
+		if (!h0) {
+			// first image is vertical, show it alone
+			return [0];
+		}
+
+		// pair with second if it's also horizontal
+		if (candidates.length > 1 && h1) {
+			return [0, 1];
+		}
+
+		// pair with third if it's horizontal (skip non-horizontal second)
+		if (candidates.length > 2 && h2) {
+			return [0, 2];
+		}
+		
+		// no horizontal pair found, show second instead (skip lone horizontal)
+		if (candidates.length > 1) {
+			return [1];
+		}
+		return [0];
 	}
 
 	function hasBirthday(assets: api.AssetResponseDto[]) {
