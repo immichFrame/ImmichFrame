@@ -19,6 +19,7 @@ public class PooledImmichFrameLogicTests
     private Mock<HttpClient> _mockHttpClient;
     private PooledImmichFrameLogic _logic;
     private List<Guid> people;
+    private List<Guid> albums;
 
     [SetUp]
     public void Setup()
@@ -35,6 +36,9 @@ public class PooledImmichFrameLogicTests
         people = new List<Guid>();
         _mockAccountSettings.SetupGet(s => s.People).Returns(() => people);
 
+        albums = new List<Guid>();
+        _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns(() => albums);
+
         _mockHttpClientFactory.Setup(f => f.CreateClient("ImmichApiAccountClient")).Returns(_mockHttpClient.Object);
 
         _logic = new PooledImmichFrameLogic(_mockAccountSettings.Object, _mockGeneralSettings.Object, _mockHttpClientFactory.Object);
@@ -44,13 +48,23 @@ public class PooledImmichFrameLogicTests
     /// Ensures that when accountSettings.People is null, BuildPool does not fail
     /// </summary>
     [Test]
-    public void BuildPool_WithNullPeople_DoesNotAddPersonAssetsPool()
+    public void BuildPool_WithNullPeople_Succeeds()
     {
         // Arrange
         people = null;
+        
+        // The absence of an error during construction (because people information is loaded during construction)
+        // is sufficient to validate that the code handles null people gracefully.
+        Assert.DoesNotThrow(() => new PooledImmichFrameLogic(_mockAccountSettings.Object, _mockGeneralSettings.Object, _mockHttpClientFactory.Object));
+    }
 
-        Assert.That(_logic.AccountSettings.People, Is.Null);
+    [Test]
+    public void BuildPool_WithNullAlbums_Succeeds()
+    {
+        albums = null;
 
-        // The absence of an error indicates success in this case, as it previously threw a null reference exception
+        // The absence of an error during construction (because album information is loaded during construction)
+        // is sufficient to validate that the code handles null albums gracefully.
+        Assert.DoesNotThrow(() => new PooledImmichFrameLogic(_mockAccountSettings.Object, _mockGeneralSettings.Object, _mockHttpClientFactory.Object));
     }
 }
