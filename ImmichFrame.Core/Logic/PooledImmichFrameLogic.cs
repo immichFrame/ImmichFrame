@@ -64,7 +64,7 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
 
     public Task<IEnumerable<AssetResponseDto>> GetAssets()
     {
-        return _pool.GetAssets(25);
+        return _pool.GetAssets(_generalSettings.AssetBatchSize);
     }
 
     public Task<AssetResponseDto> GetAssetInfoById(Guid assetId) => _immichApi.GetAssetInfoAsync(assetId, null);

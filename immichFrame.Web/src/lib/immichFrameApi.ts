@@ -212,6 +212,9 @@ export type ClientSettingsDto = {
     imageFill?: boolean;
     layout?: string | null;
     language?: string | null;
+    assetBatchSize?: number;
+    clientPersistAssetQueue?: boolean;
+    clientPersistAssetHistory?: boolean;
 };
 export type IWeather = {
     location?: string | null;

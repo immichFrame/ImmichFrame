@@ -62,6 +62,9 @@
         public bool ImageFill { get; }
         public string Layout { get; }
         public string Language { get; }
+        public int AssetBatchSize { get; }
+        public bool ClientPersistAssetQueue { get; }
+        public bool ClientPersistAssetHistory { get; }
 
         public void Validate();
     }

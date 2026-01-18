@@ -14,6 +14,23 @@ function persistStore(key: string, defaultValue: string | null) {
     return store;
 }
 
+function persistArrayStore<T>(key: string, defaultValue: T[]) {
+    const storedValue = localStorage?.getItem(key);
+    const initialValue: T[] = storedValue ? JSON.parse(storedValue) : defaultValue;
+
+    const store = writable(initialValue);
+
+    store.subscribe((value) => {
+        localStorage?.setItem(key, JSON.stringify(value));
+    });
+
+    return store;
+}
+
+export function clearPersistedStore(key: string) {
+    localStorage?.removeItem(key);
+}
+
 function generateGUID() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         const r = (Math.random() * 16) | 0,
@@ -24,3 +41,6 @@ function generateGUID() {
 
 export const clientIdentifierStore = persistStore('clientIdentifier', generateGUID());
 export const authSecretStore = persistStore('authSecret', null);
+export const assetBacklogStore = persistArrayStore<unknown>('assetBacklog', []);
+export const assetHistoryStore = persistArrayStore<unknown>('assetHistory', []);
+export const displayingAssetsStore = persistArrayStore<unknown>('displayingAssets', []);
