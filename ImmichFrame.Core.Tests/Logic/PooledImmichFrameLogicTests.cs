@@ -17,6 +17,7 @@ public class PooledImmichFrameLogicTests
     private Mock<IGeneralSettings> _mockGeneralSettings;
     private Mock<IHttpClientFactory> _mockHttpClientFactory;
     private Mock<HttpClient> _mockHttpClient;
+    private PooledImmichFrameLogic _logic;
     private List<Guid> people;
 
     [SetUp]
@@ -35,6 +36,8 @@ public class PooledImmichFrameLogicTests
         _mockAccountSettings.SetupGet(s => s.People).Returns(() => people);
 
         _mockHttpClientFactory.Setup(f => f.CreateClient("ImmichApiAccountClient")).Returns(_mockHttpClient.Object);
+
+        _logic = new PooledImmichFrameLogic(_mockAccountSettings.Object, _mockGeneralSettings.Object, _mockHttpClientFactory.Object);
     }
 
     /// <summary>
@@ -46,10 +49,7 @@ public class PooledImmichFrameLogicTests
         // Arrange
         people = null;
 
-        // Act
-        var logic = new PooledImmichFrameLogic(_mockAccountSettings.Object, _mockGeneralSettings.Object, _mockHttpClientFactory.Object);
-
-        Assert.That(logic.AccountSettings.People, Is.Null);
+        Assert.That(_logic.AccountSettings.People, Is.Null);
 
         // The absence of an error indicates success in this case, as it previously threw a null reference exception
     }
