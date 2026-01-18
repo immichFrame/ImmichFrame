@@ -9,7 +9,13 @@ public class PersonAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountS
     {
         var personAssets = new List<AssetResponseDto>();
 
-        foreach (var personId in accountSettings.People)
+        var people = accountSettings.People;
+        if (people == null)
+        {
+            return personAssets;
+        }
+        
+        foreach (var personId in people)
         {
             int page = 1;
             int batchSize = 1000;

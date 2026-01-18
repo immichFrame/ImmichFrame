@@ -3,11 +3,6 @@ using Moq;
 using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.Core.Logic.Pool;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Threading;
 
 namespace ImmichFrame.Core.Tests.Logic.Pool;
 
@@ -98,8 +93,8 @@ public class AllAssetsPoolTests
     {
         _mockAccountSettings.SetupGet(s => s.ImagesFromDays).Returns(10);
         var expectedFromDate = DateTime.Today.AddDays(-10);
-         _mockImmichApi.Setup(api => api.SearchRandomAsync(It.IsAny<RandomSearchDto>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<AssetResponseDto>());
+        _mockImmichApi.Setup(api => api.SearchRandomAsync(It.IsAny<RandomSearchDto>(), It.IsAny<CancellationToken>()))
+           .ReturnsAsync(new List<AssetResponseDto>());
 
         await _allAssetsPool.GetAssets(5);
 
@@ -132,5 +127,27 @@ public class AllAssetsPoolTests
         Assert.That(result.Any(a => a.Id == "excluded1"), Is.False);
         Assert.That(result.All(a => a.Id.StartsWith("main")));
         _mockImmichApi.Verify(api => api.GetAlbumInfoAsync(excludedAlbumId, null, null, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Test]
+    public async Task GetAssets_NullExcludedAlbums_Succeeds()
+    {
+        _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns((List<Guid>)null);
+
+        // Create a set of assets to verify that the code was actually exercised (minimize risk of false positives)
+        var allAssets = CreateSampleAssets(5, "asset");
+
+        _mockImmichApi.Setup(api => api.SearchRandomAsync(It.IsAny<RandomSearchDto>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(allAssets);
+
+        // Act
+        var result = (await _allAssetsPool.GetAssets(5)).ToList();
+
+        // Assert
+        Assert.That(result.Count, Is.EqualTo(5));
+        Assert.That(result, Is.EqualTo(allAssets));
+
+        // Verify that GetAlbumInfoAsync was never called since ExcludedAlbums is null
+        _mockImmichApi.Verify(api => api.GetAlbumInfoAsync(It.IsAny<Guid>(), null, null, It.IsAny<CancellationToken>()), Times.Never);
     }
 }

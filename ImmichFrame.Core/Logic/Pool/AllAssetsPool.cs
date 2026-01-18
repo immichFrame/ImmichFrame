@@ -50,7 +50,7 @@ public class AllAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSett
 
         var assets = await immichApi.SearchRandomAsync(searchDto, ct);
 
-        if (accountSettings.ExcludedAlbums.Any())
+        if (accountSettings.ExcludedAlbums?.Any() ?? false)
         {
             var excludedAssetList = await GetExcludedAlbumAssets(ct);
             var excludedAssetSet = excludedAssetList.Select(x => x.Id).ToHashSet();

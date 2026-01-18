@@ -3,11 +3,6 @@ using Moq;
 using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.Core.Logic.Pool;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Threading;
 
 namespace ImmichFrame.Core.Tests.Logic.Pool;
 
@@ -97,5 +92,27 @@ public class AlbumAssetsPoolTests
         var result = (await _albumAssetsPool.TestLoadAssets()).ToList();
         Assert.That(result.Count, Is.EqualTo(1));
         Assert.That(result.Any(a => a.Id == "A"));
+    }
+
+    [Test]
+    public async Task LoadAssets_NullAlbums_ReturnsEmpty()
+    {
+        _mockAccountSettings.SetupGet(s => s.Albums).Returns((List<Guid>)null);
+
+        var result = (await _albumAssetsPool.TestLoadAssets()).ToList();
+        Assert.That(result, Is.Empty);
+
+        // the absence of an error, whereas before a null pointer exception would be thrown, indicates success.
+    }
+
+    [Test]
+    public async Task LoadAssets_NullExcludedAlbums_Succeeds()
+    {
+        _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns((List<Guid>)null);
+
+        var result = (await _albumAssetsPool.TestLoadAssets()).ToList();
+        Assert.That(result, Is.Empty);
+
+        // the absence of an error, whereas before a null pointer exception would be thrown, indicates success.
     }
 }
