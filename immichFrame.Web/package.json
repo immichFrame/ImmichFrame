@@ -25,7 +25,7 @@
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.12.4",
 		"globals": "^17.0.0",
-		"oazapfts": "^6.3.1",
+		"oazapfts": "^7.0.1",
 		"postcss": "^8.4.44",
 		"prettier": "^3.1.1",
 		"prettier-plugin-svelte": "^3.2.6",
