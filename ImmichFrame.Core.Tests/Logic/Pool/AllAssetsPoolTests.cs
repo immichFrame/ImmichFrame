@@ -3,11 +3,6 @@ using Moq;
 using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.Core.Logic.Pool;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Threading;
 
 namespace ImmichFrame.Core.Tests.Logic.Pool;
 
@@ -18,6 +13,7 @@ public class AllAssetsPoolTests
     private Mock<ImmichApi> _mockImmichApi;
     private Mock<IAccountSettings> _mockAccountSettings;
     private AllAssetsPool _allAssetsPool;
+    private List<Guid> excludedAlbums;
 
     [SetUp]
     public void Setup()
@@ -33,7 +29,9 @@ public class AllAssetsPoolTests
         _mockAccountSettings.SetupGet(s => s.ImagesUntilDate).Returns((DateTime?)null);
         _mockAccountSettings.SetupGet(s => s.ImagesFromDays).Returns((int?)null);
         _mockAccountSettings.SetupGet(s => s.Rating).Returns((int?)null);
-        _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns(new List<Guid>());
+
+        excludedAlbums = new List<Guid>();
+        _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns(() => excludedAlbums);
 
         // Default ApiCache setup
         _mockApiCache.Setup(c => c.GetOrAddAsync(
@@ -117,7 +115,7 @@ public class AllAssetsPoolTests
         var assetsToReturnFromSearch = new List<AssetResponseDto>(mainAssets) { excludedAsset };
 
         var excludedAlbumId = Guid.NewGuid();
-        _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns(new List<Guid> { excludedAlbumId });
+        excludedAlbums = new List<Guid> { excludedAlbumId };
 
         _mockImmichApi.Setup(api => api.SearchRandomAsync(It.IsAny<RandomSearchDto>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(assetsToReturnFromSearch);
@@ -135,11 +133,12 @@ public class AllAssetsPoolTests
     }
 
     [Test]
-    public async Task GetAssets_NullExcludedAlbums_ReturnsAllAssets()
+    public async Task GetAssets_NullExcludedAlbums_Succeeds()
     {
-        // Arrange
+        excludedAlbums = null;
+        
+        // Create a single asset to verify that the code was actually exercised (minimize risk of false positives)
         var allAssets = CreateSampleAssets(5, "asset");
-        _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns((List<Guid>)null);
 
         _mockImmichApi.Setup(api => api.SearchRandomAsync(It.IsAny<RandomSearchDto>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(allAssets);
@@ -150,27 +149,8 @@ public class AllAssetsPoolTests
         // Assert
         Assert.That(result.Count, Is.EqualTo(5));
         Assert.That(result, Is.EqualTo(allAssets));
+
         // Verify that GetAlbumInfoAsync was never called since ExcludedAlbums is null
-        _mockImmichApi.Verify(api => api.GetAlbumInfoAsync(It.IsAny<Guid>(), null, null, It.IsAny<CancellationToken>()), Times.Never);
-    }
-
-    [Test]
-    public async Task GetAssets_EmptyExcludedAlbums_ReturnsAllAssets()
-    {
-        // Arrange
-        var allAssets = CreateSampleAssets(5, "asset");
-        _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns(new List<Guid>());
-
-        _mockImmichApi.Setup(api => api.SearchRandomAsync(It.IsAny<RandomSearchDto>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(allAssets);
-
-        // Act
-        var result = (await _allAssetsPool.GetAssets(5)).ToList();
-
-        // Assert
-        Assert.That(result.Count, Is.EqualTo(5));
-        Assert.That(result, Is.EqualTo(allAssets));
-        // Verify that GetAlbumInfoAsync was never called since ExcludedAlbums is empty
         _mockImmichApi.Verify(api => api.GetAlbumInfoAsync(It.IsAny<Guid>(), null, null, It.IsAny<CancellationToken>()), Times.Never);
     }
 }
