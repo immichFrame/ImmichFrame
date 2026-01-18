@@ -74,7 +74,13 @@ public class GeneralSettings : IGeneralSettings, IConfigSettable
     public bool ClientPersistAssetQueue { get; set; } = false;
     public bool ClientPersistAssetHistory { get; set; } = false;
 
-    public void Validate() { }
+    public void Validate()
+    {
+        if (AssetBatchSize < 1)
+        {
+            AssetBatchSize = 1;
+        }
+    }
 }
 
 public class ServerAccountSettings : IAccountSettings, IConfigSettable
