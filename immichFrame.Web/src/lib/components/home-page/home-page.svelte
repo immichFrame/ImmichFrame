@@ -181,8 +181,7 @@
 
 		// get up to 3 candidates from the end of history, reversed for selection logic
 		const historyLength = assetHistory.length;
-		const candidateCount = Math.min(3, historyLength);
-		const candidates = assetHistory.slice(historyLength - candidateCount).reverse();
+		const candidates = assetHistory.slice(historyLength - Math.min(3, historyLength)).reverse();
 		const selectedIndices = selectAssetsForDisplay($configStore.layout, candidates);
 
 		// convert indices back to history positions
@@ -234,6 +233,7 @@
 			return [0];
 		}
 
+		// otherwise, first image is portrait
 		
 		if (candidates.length > 1 && isImage1Portrait) {
 			// pair with second if it's also portrait
@@ -251,6 +251,8 @@
 			// no portrait pair found, show second (landscape) instead
 			return [1];
 		}
+
+		// Unreachable state, but fallback to returning the first image.
 		return [0];
 	}
 
