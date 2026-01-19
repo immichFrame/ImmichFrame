@@ -101,12 +101,10 @@ General:
   # Number of assets to fetch per batch request
   AssetBatchSize: 25  # int
   # Persist current and upcoming assets in client localStorage across restarts.
-  # WARNING: Assets may become stale if removed from albums while stored locally.
-  # Set to false and restart clients to clear stored data.
+  # Note: A server restart will clear the queue on all clients.
   ClientPersistAssetQueue: false  # boolean
-  # Persist asset history (back button) in client localStorage across restarts
-  # WARNING: Assets may become stale if removed from albums while stored locally.
-  # Set to false and restart clients to clear stored data.
+  # Persist asset history (back button) in client localStorage across restarts.
+  # Note: A server restart will clear the history on all clients.
   ClientPersistAssetHistory: false  # boolean
 
 # multiple accounts permitted
