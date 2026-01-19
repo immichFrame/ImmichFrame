@@ -184,8 +184,8 @@
 		const candidates = assetHistory.slice(historyLength - Math.min(3, historyLength)).reverse();
 		const selectedIndices = selectAssetsForDisplay($configStore.layout, candidates);
 
-		// convert indices back to history positions
-		const historyIndices = selectedIndices.map((i) => historyLength - 1 - i);
+		// convert indices back to history positions and reverse to restore original display order
+		const historyIndices = selectedIndices.map((i) => historyLength - 1 - i).reverse();
 		const next = historyIndices.map((i) => assetHistory[i]);
 		assetHistory = removeAtIndices(assetHistory, historyIndices);
 
