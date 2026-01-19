@@ -57,6 +57,7 @@ public class GeneralSettings : IGeneralSettings, IConfigSettable
     public string Style { get; set; } = "none";
     public string? BaseFontSize { get; set; }
     public bool ShowWeatherDescription { get; set; } = true;
+    public int TemperatureDecimalDigits { get; set; } = 1;
     public string? WeatherIconUrl { get; set; } = "https://openweathermap.org/img/wn/{IconId}.png";
     public bool ImageZoom { get; set; } = true;
     public bool ImagePan { get; set; } = false;
@@ -71,7 +72,15 @@ public class GeneralSettings : IGeneralSettings, IConfigSettable
     public string? Webhook { get; set; }
     public string? AuthenticationSecret { get; set; }
 
-    public void Validate() { }
+    public void Validate()
+    {
+        if (TemperatureDecimalDigits < 0 || TemperatureDecimalDigits > 2)
+        {
+            throw new ArgumentOutOfRangeException(nameof(TemperatureDecimalDigits),
+                TemperatureDecimalDigits,
+                "TemperatureDecimalDigits must be between 0 and 2.");
+        }
+    }
 }
 
 public class ServerAccountSettings : IAccountSettings, IConfigSettable
