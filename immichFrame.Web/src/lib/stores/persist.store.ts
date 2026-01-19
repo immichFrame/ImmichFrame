@@ -41,6 +41,7 @@ function generateGUID() {
 
 export const clientIdentifierStore = persistStore('clientIdentifier', generateGUID());
 export const authSecretStore = persistStore('authSecret', null);
+export const serverSessionIdStore = persistStore('serverSessionId', null);
 export const assetBacklogStore = persistArrayStore<unknown>('assetBacklog', []);
 export const assetHistoryStore = persistArrayStore<unknown>('assetHistory', []);
 export const displayingAssetsStore = persistArrayStore<unknown>('displayingAssets', []);

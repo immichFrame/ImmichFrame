@@ -1,4 +1,5 @@
 using ImmichFrame.Core.Interfaces;
+using ImmichFrame.WebApi.Helpers;
 using ImmichFrame.WebApi.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,11 +11,13 @@ namespace ImmichFrame.WebApi.Controllers
     {
         private readonly ILogger<AssetController> _logger;
         private readonly IGeneralSettings _settings;
+        private readonly ServerSession _serverSession;
 
-        public ConfigController(ILogger<AssetController> logger, IGeneralSettings settings)
+        public ConfigController(ILogger<AssetController> logger, IGeneralSettings settings, ServerSession serverSession)
         {
             _logger = logger;
             _settings = settings;
+            _serverSession = serverSession;
         }
 
         [HttpGet(Name = "GetConfig")]
@@ -22,7 +25,7 @@ namespace ImmichFrame.WebApi.Controllers
         {
             var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
             _logger.LogDebug("Config requested by '{sanitizedClientIdentifier}'", sanitizedClientIdentifier);
-            return ClientSettingsDto.FromGeneralSettings(_settings);
+            return ClientSettingsDto.FromGeneralSettings(_settings, _serverSession.SessionId);
         }
 
         [HttpGet("Version", Name = "GetVersion")]

@@ -2,7 +2,7 @@
 	import * as api from '$lib/index';
 	import ProgressBar from '$lib/components/elements/progress-bar.svelte';
 	import { slideshowStore } from '$lib/stores/slideshow.store';
-	import { clientIdentifierStore, authSecretStore, assetBacklogStore, assetHistoryStore, displayingAssetsStore, clearPersistedStore } from '$lib/stores/persist.store';
+	import { clientIdentifierStore, authSecretStore, serverSessionIdStore, assetBacklogStore, assetHistoryStore, displayingAssetsStore, clearPersistedStore } from '$lib/stores/persist.store';
 	import { onDestroy, onMount, setContext } from 'svelte';
 	import OverlayControls from '../elements/overlay-controls.svelte';
 	import ImageComponent from '../elements/image-component.svelte';
@@ -341,7 +341,18 @@
 			document.documentElement.style.fontSize = $configStore.baseFontSize;
 		}
 
-		// load or clear persisted asset queue and displaying assets
+		// Check if server session changed (server restarted) - if so, clear persisted asset data
+		// This prevents stale assets that the server's BloomFilter doesn't know about
+		const currentServerSessionId = $configStore.serverSessionId;
+		const storedServerSessionId = $serverSessionIdStore;
+		if (currentServerSessionId == null || storedServerSessionId !== currentServerSessionId) {
+			clearPersistedStore('assetBacklog');
+			clearPersistedStore('assetHistory');
+			clearPersistedStore('displayingAssets');
+			serverSessionIdStore.set(currentServerSessionId);
+		}
+
+		// load persisted asset queue and displaying assets
 		let restoredDisplaying = false;
 		if ($configStore.clientPersistAssetQueue) {
 			const storedBacklog = $assetBacklogStore as api.AssetResponseDto[];
@@ -353,19 +364,14 @@
 				displayingAssets = storedDisplaying;
 				restoredDisplaying = true;
 			}
-		} else {
-			clearPersistedStore('assetBacklog');
-			clearPersistedStore('displayingAssets');
 		}
 
-		// load or clear persisted asset history
+		// load persisted asset history
 		if ($configStore.clientPersistAssetHistory) {
 			const stored = $assetHistoryStore as api.AssetResponseDto[];
 			if (stored && stored.length > 0) {
 				assetHistory = stored;
 			}
-		} else {
-			clearPersistedStore('assetHistory');
 		}
 
 		unsubscribeRestart = restartProgress.subscribe((value) => {
