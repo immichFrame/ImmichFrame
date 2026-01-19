@@ -345,16 +345,21 @@
 		// This prevents stale assets that the server's BloomFilter doesn't know about
 		const currentServerSessionId = $configStore.serverSessionId;
 		const storedServerSessionId = $serverSessionIdStore;
-		if (currentServerSessionId == null || storedServerSessionId !== currentServerSessionId) {
+		const sessionChanged = currentServerSessionId == null || storedServerSessionId !== currentServerSessionId;
+		if (sessionChanged) {
 			clearPersistedStore('assetBacklog');
 			clearPersistedStore('assetHistory');
 			clearPersistedStore('displayingAssets');
+			// Also reset the in-memory stores
+			assetBacklogStore.set([]);
+			assetHistoryStore.set([]);
+			displayingAssetsStore.set([]);
 			serverSessionIdStore.set(currentServerSessionId);
 		}
 
 		// load persisted asset queue and displaying assets
 		let restoredDisplaying = false;
-		if ($configStore.clientPersistAssetQueue) {
+		if ($configStore.clientPersistAssetQueue && !sessionChanged) {
 			const storedBacklog = $assetBacklogStore as api.AssetResponseDto[];
 			if (storedBacklog && storedBacklog.length > 0) {
 				assetBacklog = storedBacklog;
@@ -367,7 +372,7 @@
 		}
 
 		// load persisted asset history
-		if ($configStore.clientPersistAssetHistory) {
+		if ($configStore.clientPersistAssetHistory && !sessionChanged) {
 			const stored = $assetHistoryStore as api.AssetResponseDto[];
 			if (stored && stored.length > 0) {
 				assetHistory = stored;
