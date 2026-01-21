@@ -31,8 +31,12 @@ public class ClientSettingsDto
     public bool ImageFill { get; set; }
     public string Layout { get; set; }
     public string Language { get; set; }
+    public int AssetBatchSize { get; set; }
+    public bool ClientPersistAssetQueue { get; set; }
+    public bool ClientPersistAssetHistory { get; set; }
+    public string ServerSessionId { get; set; } = string.Empty;
 
-    public static ClientSettingsDto FromGeneralSettings(IGeneralSettings generalSettings)
+    public static ClientSettingsDto FromGeneralSettings(IGeneralSettings generalSettings, string serverSessionId = "")
     {
         ClientSettingsDto dto = new ClientSettingsDto();
         dto.Interval = generalSettings.Interval;
@@ -62,6 +66,10 @@ public class ClientSettingsDto
         dto.ImageFill = generalSettings.ImageFill;
         dto.Layout = generalSettings.Layout;
         dto.Language = generalSettings.Language;
+        dto.AssetBatchSize = generalSettings.AssetBatchSize;
+        dto.ClientPersistAssetQueue = generalSettings.ClientPersistAssetQueue;
+        dto.ClientPersistAssetHistory = generalSettings.ClientPersistAssetHistory;
+        dto.ServerSessionId = serverSessionId;
         return dto;
     }
 }

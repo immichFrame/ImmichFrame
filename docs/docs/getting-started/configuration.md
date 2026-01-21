@@ -100,6 +100,14 @@ General:
   ImageFill: false  # boolean
   # Allow two portrait images to be displayed next to each other
   Layout: 'splitview'  # single | splitview
+  # Number of assets to fetch per batch request
+  AssetBatchSize: 25  # int
+  # Persist current and upcoming assets in client localStorage across restarts.
+  # Note: A server restart will clear the queue on all clients.
+  ClientPersistAssetQueue: false  # boolean
+  # Persist asset history (back button) in client localStorage across restarts.
+  # Note: A server restart will clear the history on all clients.
+  ClientPersistAssetHistory: false  # boolean
 
 # multiple accounts permitted
 Accounts:

@@ -130,6 +130,9 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
         public bool ImageFill => _delegate.ImageFill;
         public string Layout => _delegate.Layout;
         public string Language => _delegate.Language;
+        public int AssetBatchSize => 25;  // Default value for V1 config
+        public bool ClientPersistAssetQueue => false;  // Default value for V1 config
+        public bool ClientPersistAssetHistory => false;  // Default value for V1 config
 
         public void Validate() { }
     }

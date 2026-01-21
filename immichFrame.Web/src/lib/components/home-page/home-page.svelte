@@ -2,7 +2,7 @@
 	import * as api from '$lib/index';
 	import ProgressBar from '$lib/components/elements/progress-bar.svelte';
 	import { slideshowStore } from '$lib/stores/slideshow.store';
-	import { clientIdentifierStore, authSecretStore } from '$lib/stores/persist.store';
+	import { clientIdentifierStore, authSecretStore, serverSessionIdStore, assetBacklogStore, assetHistoryStore, displayingAssetsStore, clearPersistedStore } from '$lib/stores/persist.store';
 	import { onDestroy, onMount, setContext } from 'svelte';
 	import OverlayControls from '../elements/overlay-controls.svelte';
 	import ImageComponent from '../elements/image-component.svelte';
@@ -29,6 +29,32 @@
 
 	let assetHistory: api.AssetResponseDto[] = [];
 	let assetBacklog: api.AssetResponseDto[] = [];
+
+	// persist helpers - save to localStorage if enabled
+	function persistBacklog() {
+		if ($configStore.clientPersistAssetQueue) {
+			assetBacklogStore.set(assetBacklog);
+		}
+	}
+
+	function persistHistory() {
+		if ($configStore.clientPersistAssetHistory) {
+			assetHistoryStore.set(assetHistory);
+		}
+	}
+
+	function persistDisplaying() {
+		if ($configStore.clientPersistAssetQueue) {
+			displayingAssetsStore.set(displayingAssets);
+		}
+	}
+
+	async function showAssets(assets: api.AssetResponseDto[]) {
+		displayingAssets = assets;
+		persistDisplaying();
+		updateImagePromises();
+		imagesState = await loadImages(assets);
+	}
 
 	let displayingAssets: api.AssetResponseDto[] = $state() as api.AssetResponseDto[];
 
@@ -118,7 +144,7 @@
 
 	async function loadAssets() {
 		try {
-			let assetRequest = await api.getAsset();
+			let assetRequest = await api.getAsset({ clientIdentifier: $clientIdentifierStore });
 
 			if (assetRequest.status != 200) {
 				if (assetRequest.status == 401) {
@@ -130,6 +156,7 @@
 
 			error = false;
 			assetBacklog = assetRequest.data;
+			persistBacklog();
 		} catch {
 			error = true;
 		}
@@ -166,6 +193,7 @@
 			next = assetBacklog.splice(0, 1);
 		}
 		assetBacklog = [...assetBacklog];
+		persistBacklog();
 
 		if (displayingAssets) {
 			// Push to History
@@ -176,10 +204,9 @@
 		if (assetHistory.length > 250) {
 			assetHistory = assetHistory.splice(assetHistory.length - 250, 250);
 		}
+		persistHistory();
 
-		displayingAssets = next;
-		updateImagePromises();
-		imagesState = await loadImages(next);
+		await showAssets(next);
 	}
 
 	async function getPreviousAssets() {
@@ -200,14 +227,16 @@
 		}
 
 		assetHistory = [...assetHistory];
+		persistHistory();
 
 		// Unshift to Backlog
 		if (displayingAssets) {
 			assetBacklog.unshift(...displayingAssets);
 		}
-		displayingAssets = next;
-		updateImagePromises();
-		imagesState = await loadImages(next);
+		assetBacklog = [...assetBacklog];
+		persistBacklog();
+
+		await showAssets(next);
 	}
 
 	function isHorizontal(asset: api.AssetResponseDto) {
@@ -312,6 +341,44 @@
 			document.documentElement.style.fontSize = $configStore.baseFontSize;
 		}
 
+		// Check if server session changed (server restarted) - if so, clear persisted asset data
+		// This prevents stale assets that the server's BloomFilter doesn't know about
+		const currentServerSessionId = $configStore.serverSessionId;
+		const storedServerSessionId = $serverSessionIdStore;
+		const sessionChanged = currentServerSessionId == null || storedServerSessionId !== currentServerSessionId;
+		if (sessionChanged) {
+			clearPersistedStore('assetBacklog');
+			clearPersistedStore('assetHistory');
+			clearPersistedStore('displayingAssets');
+			// Also reset the in-memory stores
+			assetBacklogStore.set([]);
+			assetHistoryStore.set([]);
+			displayingAssetsStore.set([]);
+			serverSessionIdStore.set(currentServerSessionId);
+		}
+
+		// load persisted asset queue and displaying assets
+		let restoredDisplaying = false;
+		if ($configStore.clientPersistAssetQueue && !sessionChanged) {
+			const storedBacklog = $assetBacklogStore as api.AssetResponseDto[];
+			if (storedBacklog && storedBacklog.length > 0) {
+				assetBacklog = storedBacklog;
+			}
+			const storedDisplaying = $displayingAssetsStore as api.AssetResponseDto[];
+			if (storedDisplaying && storedDisplaying.length > 0) {
+				displayingAssets = storedDisplaying;
+				restoredDisplaying = true;
+			}
+		}
+
+		// load persisted asset history
+		if ($configStore.clientPersistAssetHistory && !sessionChanged) {
+			const stored = $assetHistoryStore as api.AssetResponseDto[];
+			if (stored && stored.length > 0) {
+				assetHistory = stored;
+			}
+		}
+
 		unsubscribeRestart = restartProgress.subscribe((value) => {
 			if (value) {
 				progressBar.restart(value);
@@ -324,7 +391,11 @@
 			}
 		});
 
-		getNextAssets();
+		if (restoredDisplaying) {
+			showAssets(displayingAssets);
+		} else {
+			getNextAssets();
+		}
 
 		return () => {
 			window.removeEventListener('mousemove', showCursor);
