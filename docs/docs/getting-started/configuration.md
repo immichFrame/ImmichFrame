@@ -74,6 +74,8 @@ General:
   ShowImageDesc: true  # boolean
   # Displays a comma separated list of names of all the people that are assigned in immich.
   ShowPeopleDesc: true  # boolean
+  # Displays a comma separated list of names of all the tags that are assigned in immich.
+  ShowTagsDesc: true  # boolean
   # Displays a comma separated list of names of all the albums for an image.
   ShowAlbumName: true  # boolean
   # Displays the location of the current image.
@@ -130,6 +132,10 @@ Accounts:
     # UUID of People
     People:  # string[]
       - UUID
+    # Tag values (full hierarchical paths, case-sensitive)
+    Tags:  # string[]
+      - "Vacation"
+      - "Travel/Europe"
 
   ```
 ### Security
@@ -139,6 +145,13 @@ If this is enabled, the web api required the `Authorization`-Header with `Bearer
 
 ### Filtering on Albums or People
 You can get the UUIDs from the URL of the album/person. For this URL: `https://demo.immich.app/albums/85c85b29-c95d-4a8b-90f7-c87da1d518ba` this is the UUID: `85c85b29-c95d-4a8b-90f7-c87da1d518ba`
+
+### Filtering on Tags
+For tags, use the full hierarchical path (the `value` field) as it appears in Immich. Tags in Immich support hierarchical structures using forward slashes (e.g., `Parent/Child`). Matching is case-sensitive, and the full path will be automatically resolved to the tag ID.
+
+**Examples:**
+- `"Vacation"` - matches a top-level tag named "Vacation"
+- `"Travel/Europe"` - matches a tag "Europe" under parent "Travel"
 
 ### Weather
 Weather is enabled by entering an API key. Get yours free from [OpenWeatherMap][openweathermap-url]
@@ -176,6 +189,7 @@ For full ImmichFrame functionality, the API key being used needs the following p
 - `memory.read`
 - `person.read`
 - `person.statistics`
+- `tag.read`
 
 
 ### Custom CSS
