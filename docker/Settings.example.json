@@ -34,7 +34,8 @@
     "ImageZoom": true,
     "ImagePan": false,
     "ImageFill": false,
-    "Layout": "splitview"
+    "Layout": "splitview",
+    "BaseUrl": "/"
   },
   "Accounts": [
     {
