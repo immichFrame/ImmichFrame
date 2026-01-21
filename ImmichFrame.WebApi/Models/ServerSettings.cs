@@ -89,6 +89,7 @@ public class ServerAccountSettings : IAccountSettings, IConfigSettable
     public List<Guid> Albums { get; set; } = new();
     public List<Guid> ExcludedAlbums { get; set; } = new();
     public List<Guid> People { get; set; } = new();
+    public List<Guid> ExcludedPeople { get; set; } = new();
     public int? Rating { get; set; }
 
     public void ValidateAndInitialize()

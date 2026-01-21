@@ -39,6 +39,7 @@ public class PersonAssetsPoolTests // Renamed from PeopleAssetsPoolTests to matc
         _personAssetsPool = new TestablePersonAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
 
         _mockAccountSettings.SetupGet(s => s.People).Returns(new List<Guid>());
+        _mockAccountSettings.SetupGet(s => s.ExcludedPeople).Returns(new List<Guid>());
     }
 
     private AssetResponseDto CreateAsset(string id) => new AssetResponseDto { Id = id, Type = AssetTypeEnum.IMAGE };
