@@ -118,7 +118,7 @@
 
 	async function loadAssets() {
 		try {
-			let assetRequest = await api.getAsset();
+			let assetRequest = await api.getAsset({ clientIdentifier: $clientIdentifierStore });
 
 			if (assetRequest.status != 200) {
 				if (assetRequest.status == 401) {
@@ -154,18 +154,10 @@
 			return;
 		}
 
-		let next: api.AssetResponseDto[];
-		if (
-			$configStore.layout?.trim().toLowerCase() == 'splitview' &&
-			assetBacklog.length > 1 &&
-			isHorizontal(assetBacklog[0]) &&
-			isHorizontal(assetBacklog[1])
-		) {
-			next = assetBacklog.splice(0, 2);
-		} else {
-			next = assetBacklog.splice(0, 1);
-		}
-		assetBacklog = [...assetBacklog];
+		const candidates = assetBacklog.slice(0, 3);
+		const selectedIndices = selectAssetsForDisplay($configStore.layout, candidates);
+		const next = selectedIndices.map((i) => assetBacklog[i]);
+		assetBacklog = removeAtIndices(assetBacklog, selectedIndices);
 
 		if (displayingAssets) {
 			// Push to History
@@ -187,19 +179,15 @@
 			return;
 		}
 
-		let next: api.AssetResponseDto[];
-		if (
-			$configStore.layout?.trim().toLowerCase() == 'splitview' &&
-			assetHistory.length > 1 &&
-			isHorizontal(assetHistory[assetHistory.length - 1]) &&
-			isHorizontal(assetHistory[assetHistory.length - 2])
-		) {
-			next = assetHistory.splice(assetHistory.length - 2, 2);
-		} else {
-			next = assetHistory.splice(assetHistory.length - 1, 1);
-		}
+		// get up to 3 candidates from the end of history, reversed for selection logic
+		const historyLength = assetHistory.length;
+		const candidates = assetHistory.slice(historyLength - Math.min(3, historyLength)).reverse();
+		const selectedIndices = selectAssetsForDisplay($configStore.layout, candidates);
 
-		assetHistory = [...assetHistory];
+		// convert indices back to history positions and reverse to restore original display order
+		const historyIndices = selectedIndices.map((i) => historyLength - 1 - i).reverse();
+		const next = historyIndices.map((i) => assetHistory[i]);
+		assetHistory = removeAtIndices(assetHistory, historyIndices);
 
 		// Unshift to Backlog
 		if (displayingAssets) {
@@ -210,7 +198,7 @@
 		imagesState = await loadImages(next);
 	}
 
-	function isHorizontal(asset: api.AssetResponseDto) {
+	function isPortrait(asset: api.AssetResponseDto) {
 		const isFlipped = (orientation: number) => [5, 6, 7, 8].includes(orientation);
 		let imageHeight = asset.exifInfo?.exifImageHeight ?? 0;
 		let imageWidth = asset.exifInfo?.exifImageWidth ?? 0;
@@ -218,6 +206,54 @@
 			[imageHeight, imageWidth] = [imageWidth, imageHeight];
 		}
 		return imageHeight > imageWidth; // or imageHeight > imageWidth * 1.25;
+	}
+
+	function removeAtIndices<T>(arr: T[], indicesToRemove: number[]): T[] {
+		const skipSet = new Set(indicesToRemove);
+		return arr.filter((_, i) => !skipSet.has(i));
+	}
+
+	// Selects which assets to display based on layout and orientation
+	// For splitview, tries to pair portrait images together, to be shown side by side
+	// Landscape images are shown alone
+	function selectAssetsForDisplay(layout: string | undefined, candidates: api.AssetResponseDto[]): number[] {
+		if (candidates.length < 1) {
+			return [];
+		}
+		if (candidates.length === 1 || layout?.trim().toLowerCase() !== 'splitview') {
+			return [0];
+		}
+
+		const isImage0Portrait = isPortrait(candidates[0]);
+		const isImage1Portrait = candidates.length > 1 ? isPortrait(candidates[1]) : false;
+		const isImage2Portrait = candidates.length > 2 ? isPortrait(candidates[2]) : false;
+
+		if (!isImage0Portrait) {
+			// first image is landscape, show it alone
+			return [0];
+		}
+
+		// otherwise, first image is portrait
+		
+		if (candidates.length > 1 && isImage1Portrait) {
+			// pair with second if it's also portrait
+			return [0, 1];
+		}
+
+		
+		if (candidates.length > 2 && isImage2Portrait) {
+			// pair with third if it's portrait (skip landscape second)
+			return [0, 2];
+		}
+
+		
+		if (candidates[1] != null) {
+			// no portrait pair found, show second (landscape) instead
+			return [1];
+		}
+
+		// Unreachable state, but fallback to returning the first image.
+		return [0];
 	}
 
 	function hasBirthday(assets: api.AssetResponseDto[]) {
