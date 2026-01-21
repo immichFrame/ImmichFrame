@@ -72,6 +72,18 @@ public class TagAssetsPoolTests
     }
 
     [Test]
+    public async Task LoadAssets_NullTagsConfigured_ReturnsEmpty()
+    {
+        _settings.SetupGet(s => s.Tags).Returns(null as List<string>);
+        _api.Setup(a => a.GetAllTagsAsync(default)).ReturnsAsync([]);
+
+        var result = await _pool.LoadAssetsPublic();
+
+        Assert.That(result, Is.Empty);
+        _api.Verify(a => a.SearchAssetsAsync(It.IsAny<MetadataSearchDto>(), default), Times.Never);
+    }
+
+    [Test]
     public async Task LoadAssets_NoTagsConfigured_ReturnsEmpty()
     {
         _settings.SetupGet(s => s.Tags).Returns(new List<string>());

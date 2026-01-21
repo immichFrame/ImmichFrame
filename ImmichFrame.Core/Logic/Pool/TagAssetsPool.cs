@@ -8,6 +8,12 @@ public class TagAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSett
     protected override async Task<IEnumerable<AssetResponseDto>> LoadAssets(CancellationToken ct = default)
     {
         var tagAssets = new List<AssetResponseDto>();
+
+        if (accountSettings.Tags == null)
+        {
+            return tagAssets;
+        }
+
         var allTags = await apiCache.GetOrAddAsync($"allTags_{accountSettings.ImmichServerUrl}",
             () => immichApi.GetAllTagsAsync(ct));
         var tagValueToTag = allTags.ToDictionary(t => t.Value);
