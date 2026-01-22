@@ -55,6 +55,7 @@
 
 	let unsubscribeRestart: () => void;
 	let unsubscribeStop: () => void;
+	let refreshInterval: number;
 
 	let cursorVisible = $state(true);
 	let timeoutId: number;
@@ -300,6 +301,12 @@
 	onMount(() => {
 		window.addEventListener('mousemove', showCursor);
 		window.addEventListener('click', showCursor);
+
+		// 30 second reload on error
+		refreshInterval = window.setInterval(() => {
+			if (error) window.location.reload();
+		}, 30000);
+
 		if ($configStore.primaryColor) {
 			document.documentElement.style.setProperty('--primary-color', $configStore.primaryColor);
 		}
@@ -329,6 +336,7 @@
 		return () => {
 			window.removeEventListener('mousemove', showCursor);
 			window.removeEventListener('click', showCursor);
+			window.clearInterval(refreshInterval);
 		};
 	});
 
