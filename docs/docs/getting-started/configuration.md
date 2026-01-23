@@ -166,9 +166,6 @@ Example:
 No Auth: `https://calendar.google.com/calendar/ical/XXXXXX/public/basic.ics`
 With Auth: `https://username:password@calendar.google.com/calendar/ical/XXXXXX/public/basic.ics`
 
-### Metadata
-Needs documentation
-
 ### Misc
 #### Webhook
 A webhook to notify an external service is available. This is only enabled when the `Webhook`-Setting is set in your configuration. Your configured Webhook will be notified via `HTTP POST`-request.
