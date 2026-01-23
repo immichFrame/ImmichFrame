@@ -40,7 +40,7 @@ General:
   RenewImagesDuration: 30  # int
   # A list of webcalendar URIs in the .ics format. Supports basic auth via standard URL format.
   # e.g. https://calendar.google.com/calendar/ical/XXXXXX/public/basic.ics
-  # e.g. https://user:pass@calendar.example.com/basic.ics
+  # e.g. https://user:pass@calendar.immichframe.dev/dav/calendars/basic.ics
   Webcalendars:  # string[]
     - UUID
   # Interval in hours. Determines how often images are pulled from a person in immich.
@@ -164,7 +164,7 @@ If you are using Google Calendar, more information can be found [here](https://s
 Calendar supports basic authentication using the standard URL userinfo format:
 Example:
 No Auth: `https://calendar.google.com/calendar/ical/XXXXXX/public/basic.ics`
-With Auth: `https://username:password@calendar.google.com/calendar/ical/XXXXXX/public/basic.ics`
+With Auth: `https://username:password@calendar.immichframe.dev/dav/calendars/basic.ics`
 
 ### Misc
 #### Webhook
