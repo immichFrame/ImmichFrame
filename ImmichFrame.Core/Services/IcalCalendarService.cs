@@ -69,7 +69,7 @@ public class IcalCalendarService : ICalendarService
 
             string httpUrl = calendar.url.Replace("webcal://", "https://");
 
-            var request = new HttpRequestMessage(HttpMethod.Get, httpUrl);
+            using var request = new HttpRequestMessage(HttpMethod.Get, httpUrl);
 
             if (!string.IsNullOrEmpty(calendar.auth))
             {
@@ -77,7 +77,7 @@ public class IcalCalendarService : ICalendarService
                 request.Headers.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
             }
 
-            HttpResponseMessage response = await client.SendAsync(request);
+            using var response = await client.SendAsync(request);
             if (response.IsSuccessStatusCode)
             {
                 icals.Add(await response.Content.ReadAsStringAsync());
