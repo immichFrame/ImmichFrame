@@ -73,7 +73,7 @@ public class IcalCalendarService : ICalendarService
 
             if (!string.IsNullOrEmpty(calendar.auth))
             {
-                var byteArray = Encoding.ASCII.GetBytes(calendar.auth);
+                var byteArray = Encoding.UTF8.GetBytes(calendar.auth);
                 request.Headers.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
             }
 
