@@ -38,7 +38,9 @@ General:
   DownloadImages: false  # boolean
   # if images are downloaded, re-download if age (in days) is more than this
   RenewImagesDuration: 30  # int
-  # A list of webcalendar URIs in the .ics format. e.g. https://calendar.google.com/calendar/ical/XXXXXX/public/basic.ics
+  # A list of webcalendar URIs in the .ics format. Supports basic auth via standard URL format.
+  # e.g. https://calendar.google.com/calendar/ical/XXXXXX/public/basic.ics
+  # e.g. https://user:pass@calendar.example.com/basic.ics
   Webcalendars:  # string[]
     - UUID
   # Interval in hours. Determines how often images are pulled from a person in immich.
@@ -158,6 +160,14 @@ Weather is enabled by entering an API key. Get yours free from [OpenWeatherMap][
 
 ### Calendar
 If you are using Google Calendar, more information can be found [here](https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Cget-your-calendar-view-only).
+
+Calendar supports basic authentication using the standard URL userinfo format:
+Example:
+No Auth: `https://calendar.google.com/calendar/ical/XXXXXX/public/basic.ics`
+With Auth: `https://username:password@calendar.google.com/calendar/ical/XXXXXX/public/basic.ics`
+
+### Metadata
+Needs documentation
 
 ### Misc
 #### Webhook
