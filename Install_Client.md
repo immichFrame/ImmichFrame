@@ -73,7 +73,7 @@ You can "install" ImmichFrame as a PWA by opening in a browser and going to Shar
 ImmichFrame is available on the [Apple TV App Store][app-store-link].
 
 ### Android
-The Android-Version of ImmichFrame is available on the [Google Play Store][play-store-link]. Download it via the store for automatic updates. You can also sideload via APK available in Releases.
+The Android-Version of ImmichFrame is available on the [Google Play Store][play-store-link]. Download it via the store for automatic updates. You can also sideload via APK available in [ImmichFrame_Android Releases](https://github.com/immichFrame/ImmichFrame_Android/releases).
 
 
 #### Android Screensaver
