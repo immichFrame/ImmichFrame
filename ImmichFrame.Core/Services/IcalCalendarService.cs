@@ -1,16 +1,23 @@
+using System.Net.Http.Headers;
+using System.Text;
 using Ical.Net;
 using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.WebApi.Helpers;
+using Microsoft.Extensions.Logging;
 
 public class IcalCalendarService : ICalendarService
 {
     private readonly IGeneralSettings _serverSettings;
-    private readonly IApiCache _appointmentCache = new ApiCache(TimeSpan.FromMinutes(15));
+    private readonly ILogger<IcalCalendarService> _logger;
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly ApiCache _appointmentCache = new(TimeSpan.FromMinutes(15));
 
-    public IcalCalendarService(IGeneralSettings serverSettings)
+    public IcalCalendarService(IGeneralSettings serverSettings, ILogger<IcalCalendarService> logger, IHttpClientFactory httpClientFactory)
     {
+        _logger = logger;
         _serverSettings = serverSettings;
+        _httpClientFactory = httpClientFactory;
     }
 
     public async Task<List<IAppointment>> GetAppointments()
@@ -19,7 +26,26 @@ public class IcalCalendarService : ICalendarService
         {
             var appointments = new List<IAppointment>();
 
-            var icals = await GetCalendars(_serverSettings.Webcalendars);
+            List<(string? auth, string url)> cals = _serverSettings.Webcalendars.Select<string, (string? auth, string url)?>(x =>
+            {
+                try
+                {
+                    var uri = new Uri(x.Replace("webcal://", "https://"));
+                    if (!string.IsNullOrEmpty(uri.UserInfo))
+                    {
+                        var url = uri.GetComponents(UriComponents.AbsoluteUri & ~UriComponents.UserInfo, UriFormat.UriEscaped);
+                        return (Uri.UnescapeDataString(uri.UserInfo), url);
+                    }
+                    return (null, x);
+                }
+                catch (UriFormatException)
+                {
+                    _logger.LogError($"Invalid calendar URL: '{x}'");
+                    return null;
+                }
+            }).Where(x => x != null).Select(x => x!.Value).ToList();
+
+            var icals = await GetCalendars(cals);
 
             foreach (var ical in icals)
             {
@@ -32,29 +58,36 @@ public class IcalCalendarService : ICalendarService
         });
     }
 
-    public async Task<List<string>> GetCalendars(IEnumerable<string> calendars)
+    public async Task<List<string>> GetCalendars(IEnumerable<(string? auth, string url)> calendars)
     {
         var icals = new List<string>();
+        var client = _httpClientFactory.CreateClient();
 
-        foreach (var webcal in calendars)
+        foreach (var calendar in calendars)
         {
-            string httpUrl = webcal.Replace("webcal://", "https://");
+            _logger.LogDebug($"Loading calendar: {(calendar.auth != null ? "[authenticated]" : "no auth")} - {calendar.url}");
 
-            using (HttpClient client = new HttpClient())
+            string httpUrl = calendar.url.Replace("webcal://", "https://");
+
+            using var request = new HttpRequestMessage(HttpMethod.Get, httpUrl);
+
+            if (!string.IsNullOrEmpty(calendar.auth))
             {
-                HttpResponseMessage response = await client.GetAsync(httpUrl);
-                if (response.IsSuccessStatusCode)
-                {
-                    icals.Add(await response.Content.ReadAsStringAsync());
-                }
-                else
-                {
-                    throw new Exception("Failed to load calendar data");
-                }
+                var byteArray = Encoding.UTF8.GetBytes(calendar.auth);
+                request.Headers.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
+            }
+
+            using var response = await client.SendAsync(request);
+            if (response.IsSuccessStatusCode)
+            {
+                icals.Add(await response.Content.ReadAsStringAsync());
+            }
+            else
+            {
+                _logger.LogError($"Failed to load calendar data from '{httpUrl}' (Status: {response.StatusCode})");
             }
         }
 
         return icals;
     }
-
 }
