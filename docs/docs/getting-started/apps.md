@@ -4,13 +4,20 @@ sidebar_position: 3
 
 # 📱 Apps
 
-## Apple TV
+## Apple
+### Apple TV
 ImmichFrame is available on the [Apple TV App Store][app-store-link].
+#### Limitations:
+Apple does not allow WebViews for tvOS. This app mimics the WebView look with native controls. It does support the [Remote Control](https://immichframe.dev/docs/getting-started/apps#remote-control)
 
-See also: [ImmichFrame Apple TV repository][github-appletv-repo]
+### iOS (iPhone, iPad, Mac with Apple Silicon)
+ImmichFrame is available on the [Apple App Store][app-store-link] for iOS 17+ (iPad 6th gen and newer). Also supports [Remote Control](https://immichframe.dev/docs/getting-started/apps#remote-control)
 
-## iOS and iPadOS
-You can "install" ImmichFrame as a PWA by opening in a browser and going to Share Menu-Add to Homescreen.
+You can alternatively "install" ImmichFrame as a PWA by opening in a browser and going to Share Menu-Add to Homescreen.
+
+See also: [ImmichFrame Apple repository][github-apple-repo]
+
+
 
 ## Android
 The Android-Version of ImmichFrame is available on the [Google Play Store][play-store-link]. Download it via the store for automatic updates. You can also sideload via APK available in [Releases][github-android-releases].
@@ -188,7 +195,7 @@ The screen is configured in a 3x3 gird. You can touch or click:
 [play-store-link]: https://play.google.com/store/apps/details?id=com.immichframe.immichframe
 [github-android-repo]: https://github.com/immichFrame/ImmichFrame_Android
 [github-android-releases]: https://github.com/immichFrame/ImmichFrame_Android/releases
-[github-appletv-repo]: https://github.com/immichFrame/ImmichFrame_Apple
+[github-apple-repo]: https://github.com/immichFrame/ImmichFrame_Apple
 [app-store-link]: https://apps.apple.com/us/app/immichframe/id6742748077
 [releases-url]: https://github.com/immichFrame/ImmichFrame_Desktop/releases/latest
 [ADB-link]: https://www.xda-developers.com/install-adb-windows-macos-linux/
