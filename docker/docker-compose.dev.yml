@@ -2,10 +2,11 @@ services:
   immichframe:
     build:
       context: ..
-      target: dev
+      target: final
     ports:
       - 8080:8080
     env_file:
       - .env
-    # volumes:
+    volumes:
       # - PATH/TO/CONFIG:/app/Config
+      - ../data:/data

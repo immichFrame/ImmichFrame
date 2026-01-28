@@ -5,7 +5,10 @@ using Microsoft.AspNetCore.Authentication;
 using System.Reflection;
 using ImmichFrame.Core.Logic;
 using ImmichFrame.Core.Logic.AccountSelection;
+using ImmichFrame.WebApi.Data;
 using ImmichFrame.WebApi.Helpers.Config;
+using ImmichFrame.WebApi.Services;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 //log the version number
@@ -54,19 +57,43 @@ builder.Services.AddTransient<ConfigLoader>();
 builder.Services.AddSingleton<IServerSettings>(srv => srv.GetRequiredService<ConfigLoader>().LoadConfig(configPath));
 
 // Register sub-settings
-builder.Services.AddSingleton<IGeneralSettings>(srv => srv.GetRequiredService<IServerSettings>().GeneralSettings);
+builder.Services.AddSingleton<GeneralSettingsRuntime>();
+builder.Services.AddSingleton<IGeneralSettings>(srv => srv.GetRequiredService<GeneralSettingsRuntime>());
+
+// SQLite-backed override store (single row)
+builder.Services.AddDbContext<ConfigDbContext>(options =>
+{
+    var configuredPath = Environment.GetEnvironmentVariable("IMMICHFRAME_DB_PATH");
+    var defaultPath = Directory.Exists("/data")
+        ? Path.Combine("/data", "immichframe.db")
+        : Path.Combine(AppContext.BaseDirectory, "data", "immichframe.db");
+
+    var dbPath = string.IsNullOrWhiteSpace(configuredPath) ? defaultPath : configuredPath;
+
+    var dbDir = Path.GetDirectoryName(dbPath);
+    if (!string.IsNullOrWhiteSpace(dbDir))
+    {
+        Directory.CreateDirectory(dbDir);
+    }
+
+    options.UseSqlite($"Data Source={dbPath}");
+});
+builder.Services.AddScoped<IAccountOverrideStore, SqliteAccountOverrideStore>();
+builder.Services.AddScoped<IGeneralSettingsStore, SqliteGeneralSettingsStore>();
+builder.Services.AddSingleton<IAccountOverrideChangeNotifier, AccountOverrideChangeNotifier>();
+builder.Services.AddSingleton<IGeneralSettingsChangeNotifier, GeneralSettingsChangeNotifier>();
 
 // Register services
 builder.Services.AddSingleton<IWeatherService, OpenWeatherMapService>();
 builder.Services.AddSingleton<ICalendarService, IcalCalendarService>();
 builder.Services.AddSingleton<IAssetAccountTracker, BloomFilterAssetAccountTracker>();
-builder.Services.AddSingleton<IAccountSelectionStrategy, TotalAccountImagesSelectionStrategy>();
+builder.Services.AddTransient<IAccountSelectionStrategy, TotalAccountImagesSelectionStrategy>();
 builder.Services.AddHttpClient(); // Ensures IHttpClientFactory is available
 
 builder.Services.AddTransient<Func<IAccountSettings, IAccountImmichFrameLogic>>(srv =>
     account => ActivatorUtilities.CreateInstance<PooledImmichFrameLogic>(srv, account));
 
-builder.Services.AddSingleton<IImmichFrameLogic, MultiImmichFrameLogicDelegate>();
+builder.Services.AddSingleton<IImmichFrameLogic, ReloadingImmichFrameLogic>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -79,6 +106,132 @@ builder.Services.AddAuthentication("ImmichFrameScheme")
     .AddScheme<AuthenticationSchemeOptions, ImmichFrameAuthenticationHandler>("ImmichFrameScheme", options => { });
 
 var app = builder.Build();
+
+// Ensure DB exists (prefer migrations when present; otherwise create schema)
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ConfigDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    try
+    {
+        // Check if we have any migrations to apply
+        var pendingMigrations = db.Database.GetPendingMigrations().ToList();
+        if (pendingMigrations.Any())
+        {
+            logger.LogInformation("Applying {Count} pending migrations", pendingMigrations.Count);
+            db.Database.Migrate();
+        }
+        else
+        {
+            // No pending migrations - check if table exists, if not create it manually
+            logger.LogInformation("No pending migrations, checking if AccountOverrides table exists");
+            var tableExists = db.Database.ExecuteSqlRaw(
+                "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='AccountOverrides'") > 0;
+            
+            if (!tableExists)
+            {
+                logger.LogInformation("AccountOverrides table does not exist, creating it manually");
+                // Create the table manually since EnsureCreated() doesn't work when migrations history exists
+                db.Database.ExecuteSqlRaw(@"
+                    CREATE TABLE IF NOT EXISTS AccountOverrides (
+                        Id INTEGER NOT NULL PRIMARY KEY,
+                        ShowMemories INTEGER,
+                        ShowFavorites INTEGER,
+                        ShowArchived INTEGER,
+                        ImagesFromDays INTEGER,
+                        ImagesFromDate TEXT,
+                        ImagesUntilDate TEXT,
+                        Albums TEXT,
+                        ExcludedAlbums TEXT,
+                        People TEXT,
+                        Rating INTEGER,
+                        UpdatedAtUtc TEXT NOT NULL
+                    )");
+                logger.LogInformation("AccountOverrides table created successfully");
+            }
+            else
+            {
+                logger.LogInformation("AccountOverrides table already exists");
+            }
+
+            var generalTableExists = db.Database.ExecuteSqlRaw(
+                "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='GeneralSettings'") > 0;
+            if (!generalTableExists)
+            {
+                logger.LogInformation("GeneralSettings table does not exist, creating it manually");
+                db.Database.ExecuteSqlRaw(@"
+                    CREATE TABLE IF NOT EXISTS GeneralSettings (
+                        Id INTEGER NOT NULL PRIMARY KEY,
+                        DownloadImages INTEGER NOT NULL,
+                        Language TEXT NOT NULL,
+                        ImageLocationFormat TEXT,
+                        PhotoDateFormat TEXT,
+                        Interval INTEGER NOT NULL,
+                        TransitionDuration REAL NOT NULL,
+                        ShowClock INTEGER NOT NULL,
+                        ClockFormat TEXT,
+                        ClockDateFormat TEXT,
+                        ShowProgressBar INTEGER NOT NULL,
+                        ShowPhotoDate INTEGER NOT NULL,
+                        ShowImageDesc INTEGER NOT NULL,
+                        ShowPeopleDesc INTEGER NOT NULL,
+                        ShowAlbumName INTEGER NOT NULL,
+                        ShowImageLocation INTEGER NOT NULL,
+                        PrimaryColor TEXT,
+                        SecondaryColor TEXT,
+                        Style TEXT NOT NULL,
+                        BaseFontSize TEXT,
+                        ShowWeatherDescription INTEGER NOT NULL,
+                        WeatherIconUrl TEXT,
+                        ImageZoom INTEGER NOT NULL,
+                        ImagePan INTEGER NOT NULL,
+                        ImageFill INTEGER NOT NULL,
+                        Layout TEXT NOT NULL,
+                        RenewImagesDuration INTEGER NOT NULL,
+                        Webcalendars TEXT,
+                        RefreshAlbumPeopleInterval INTEGER NOT NULL,
+                        WeatherApiKey TEXT,
+                        UnitSystem TEXT,
+                        WeatherLatLong TEXT,
+                        Webhook TEXT,
+                        UpdatedAtUtc TEXT NOT NULL
+                    )");
+                logger.LogInformation("GeneralSettings table created successfully");
+            }
+            else
+            {
+                logger.LogInformation("GeneralSettings table already exists");
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        // Fallback: ensure created if migrations fail
+        logger.LogError(ex, "Database initialization failed, attempting EnsureCreated");
+        try
+        {
+            db.Database.EnsureCreated();
+            logger.LogInformation("Fallback EnsureCreated() completed");
+        }
+        catch (Exception ex2)
+        {
+            logger.LogError(ex2, "EnsureCreated also failed");
+            throw;
+        }
+    }
+}
+
+// Seed general settings from config/env into SQLite (fresh installs) and prime the runtime snapshot.
+using (var scope = app.Services.CreateScope())
+{
+    var baseSettings = scope.ServiceProvider.GetRequiredService<IServerSettings>().GeneralSettings;
+    var store = scope.ServiceProvider.GetRequiredService<IGeneralSettingsStore>();
+    var runtime = scope.ServiceProvider.GetRequiredService<GeneralSettingsRuntime>();
+
+    var dto = await store.GetOrCreateFromBaseAsync(baseSettings);
+    var versionTicks = await store.GetVersionAsync();
+    runtime.ApplyFromDb(dto, versionTicks);
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
