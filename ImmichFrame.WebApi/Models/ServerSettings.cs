@@ -63,6 +63,7 @@ public class GeneralSettings : IGeneralSettings, IConfigSettable
     public bool ImagePan { get; set; } = false;
     public bool ImageFill { get; set; } = false;
     public string Layout { get; set; } = "splitview";
+    public string? BaseUrl { get; set; } = "/";
     public int RenewImagesDuration { get; set; } = 30;
     public List<string> Webcalendars { get; set; } = new();
     public int RefreshAlbumPeopleInterval { get; set; } = 12;
@@ -72,7 +73,19 @@ public class GeneralSettings : IGeneralSettings, IConfigSettable
     public string? Webhook { get; set; }
     public string? AuthenticationSecret { get; set; }
 
-    public void Validate() { }
+    public void Validate()
+    {
+        if (!string.IsNullOrEmpty(BaseUrl) && !BaseUrl.StartsWith('/'))
+        {
+            throw new InvalidOperationException("BaseUrl must start with '/' or be empty.");
+        }
+
+        // Normalize trailing slash for consistency
+        if (!string.IsNullOrEmpty(BaseUrl) && BaseUrl != "/" && BaseUrl.EndsWith('/'))
+        {
+            BaseUrl = BaseUrl.TrimEnd('/');
+        }
+    }
 }
 
 public class ServerAccountSettings : IAccountSettings, IConfigSettable
