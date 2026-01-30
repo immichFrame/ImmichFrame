@@ -8,6 +8,26 @@ export * from './immichFrameApi.js';
 
 export const init = () => {
 	setBearer();
+	sendAuthSecretToServiceWorker();
+};
+
+export const sendAuthSecretToServiceWorker = () => {
+	if (!('serviceWorker' in navigator)) return;
+
+	const sendMessage = () => {
+		if (navigator.serviceWorker.controller) {
+			navigator.serviceWorker.controller.postMessage({
+				type: 'SET_AUTH_SECRET',
+				authSecret: get(authSecretStore)
+			});
+		}
+	};
+
+	// Send immediately if controller is ready
+	sendMessage();
+
+	// Also send when service worker becomes ready (for initial page load)
+	navigator.serviceWorker.ready.then(sendMessage);
 };
 
 export const getBaseUrl = () => defaults.baseUrl;
