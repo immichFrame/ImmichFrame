@@ -12,14 +12,7 @@ public class AlbumAssetsPoolTests
     private Mock<IApiCache> _mockApiCache;
     private Mock<ImmichApi> _mockImmichApi;
     private Mock<IAccountSettings> _mockAccountSettings;
-    private TestableAlbumAssetsPool _albumAssetsPool;
-
-    private class TestableAlbumAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings)
-        : AlbumAssetsPool(apiCache, immichApi, accountSettings)
-    {
-        // Expose LoadAssets for testing
-        public async Task<IEnumerable<AssetResponseDto>> TestLoadAssets(CancellationToken ct = default) => await base.GetAssets(25, ct);
-    }
+    private AlbumAssetsPool _albumAssetsPool;
 
     [SetUp]
     public void Setup()
@@ -34,7 +27,7 @@ public class AlbumAssetsPoolTests
 
         _mockImmichApi = new Mock<ImmichApi>("", null);
         _mockAccountSettings = new Mock<IAccountSettings>();
-        _albumAssetsPool = new TestableAlbumAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
+        _albumAssetsPool = new AlbumAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
 
         _mockAccountSettings.SetupGet(s => s.Albums).Returns(new List<Guid>());
         _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns(new List<Guid>());
@@ -63,7 +56,7 @@ public class AlbumAssetsPoolTests
             .ReturnsAsync(new AlbumResponseDto { Assets = new List<AssetResponseDto> { assetB, assetC } });
 
         // Act
-        var result = (await _albumAssetsPool.TestLoadAssets()).ToList();
+        var result = (await _albumAssetsPool.GetAssets(25)).ToList();
 
         // Assert
         Assert.That(result.Count, Is.EqualTo(2));
@@ -82,7 +75,7 @@ public class AlbumAssetsPoolTests
             .ReturnsAsync(new AlbumResponseDto { Assets = new List<AssetResponseDto> { CreateAsset("excluded_only") } });
 
 
-        var result = (await _albumAssetsPool.TestLoadAssets()).ToList();
+        var result = (await _albumAssetsPool.GetAssets(25)).ToList();
         Assert.That(result, Is.Empty);
     }
 
@@ -96,7 +89,7 @@ public class AlbumAssetsPoolTests
         _mockImmichApi.Setup(api => api.GetAlbumInfoAsync(album1Id, null, null, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new AlbumResponseDto { Assets = new List<AssetResponseDto> { CreateAsset("A") } });
 
-        var result = (await _albumAssetsPool.TestLoadAssets()).ToList();
+        var result = (await _albumAssetsPool.GetAssets(25)).ToList();
         Assert.That(result.Count, Is.EqualTo(1));
         Assert.That(result.Any(a => a.Id == "A"));
     }

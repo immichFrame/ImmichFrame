@@ -1,8 +1,7 @@
 using ImmichFrame.Core.Api;
-using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
 
-namespace ImmichFrame.WebApi.Helpers
+namespace ImmichFrame.Core.Helpers
 {
     public static class AssetExtensionMethods
     {
