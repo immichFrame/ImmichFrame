@@ -57,14 +57,9 @@
 		$instantTransition ? 0 : ($configStore.transitionDuration ?? 1) * 1000
 	);
 	let transitionDelay = $derived($instantTransition ? 0 : transitionDuration / 2 + 25);
-	const dispatch = createEventDispatcher<{ ended: void }>();
 
 	let primaryImageComponent = $state<ImageComponent | undefined>(undefined);
 	let secondaryImageComponent = $state<ImageComponent | undefined>(undefined);
-
-	function handleMediaEnded() {
-		dispatch('ended');
-	}
 
 	export const pause = async () => {
 		await primaryImageComponent?.pause?.();
@@ -120,7 +115,6 @@
 							{split}
 							{playAudio}
 							bind:this={primaryImageComponent}
-							on:ended={handleMediaEnded}
 							bind:showInfo
 						/>
 					</div>
@@ -140,7 +134,6 @@
 							{split}
 							{playAudio}
 							bind:this={secondaryImageComponent}
-							on:ended={handleMediaEnded}
 							bind:showInfo
 						/>
 					</div>
@@ -162,7 +155,6 @@
 						{split}
 						{playAudio}
 						bind:this={primaryImageComponent}
-						on:ended={handleMediaEnded}
 						bind:showInfo
 					/>
 				</div>

@@ -153,8 +153,8 @@
 			if (previous) await getPreviousAssets();
 			else await getNextAssets();
 			await tick();
-			await imageComponent?.play?.();
-			await progressBar.play();
+			imageComponent?.play?.();
+			progressBar.play();
 		} finally {
 			isHandlingAssetTransition = false;
 		}
@@ -436,7 +436,6 @@
 				imageZoom={$configStore.imageZoom}
 				imagePan={$configStore.imagePan}
 				bind:this={imageComponent}
-				on:ended={() => handleDone(false, false)}
 				bind:showInfo={infoVisible}
 				playAudio={$configStore.playAudio}
 			/>
