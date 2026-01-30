@@ -90,7 +90,21 @@ namespace ImmichFrame.WebApi.Controllers
             var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
             _logger.LogDebug("Random image requested by '{sanitizedClientIdentifier}'", sanitizedClientIdentifier);
 
-            var randomAsset = await _logic.GetNextAsset() ?? throw new AssetNotFoundException("No asset was found");
+            AssetResponseDto? randomAsset = null;
+            const int maxAttempts = 10;
+            for (int i = 0; i < maxAttempts; i++)
+            {
+                var candidate = await _logic.GetNextAsset();
+                if (candidate == null) break;
+                if (candidate.Type == AssetTypeEnum.IMAGE)
+                {
+                    randomAsset = candidate;
+                    break;
+                }
+            }
+
+            if (randomAsset == null)
+                throw new AssetNotFoundException("No image asset was found");
 
             var asset = await _logic.GetAsset(new Guid(randomAsset.Id), AssetTypeEnum.IMAGE);
             var notification = new AssetRequestedNotification(new Guid(randomAsset.Id), sanitizedClientIdentifier);
