@@ -121,7 +121,7 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
                 {
                     var fs = File.OpenRead(file);
 
-                    var ex = Path.GetExtension(file);
+                    var ex = Path.GetExtension(file).TrimStart('.');
 
                     return (Path.GetFileName(file), $"image/{ex}", fs);
                 }
