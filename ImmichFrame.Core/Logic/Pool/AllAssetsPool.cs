@@ -1,5 +1,6 @@
 using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Interfaces;
+using ImmichFrame.WebApi.Helpers;
 
 namespace ImmichFrame.Core.Logic.Pool;
 
@@ -60,18 +61,10 @@ public class AllAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSett
         }
 
         var assets = await immichApi.SearchRandomAsync(searchDto, ct);
-        assets = assets.Where(asset => asset.Type == AssetTypeEnum.IMAGE || asset.Type == AssetTypeEnum.VIDEO).ToList();
+        var excludedAlbumAssets = await GetExcludedAlbumAssets(ct);
 
-        if (accountSettings.ExcludedAlbums?.Any() ?? false)
-        {
-            var excludedAssetList = await GetExcludedAlbumAssets(ct);
-            var excludedAssetSet = excludedAssetList.Select(x => x.Id).ToHashSet();
-            assets = assets.Where(x => !excludedAssetSet.Contains(x.Id)).ToList();
-        }
-
-        return assets;
+        return assets.ApplyAccountFilters(accountSettings, excludedAlbumAssets);
     }
-
 
     private async Task<IEnumerable<AssetResponseDto>> GetExcludedAlbumAssets(CancellationToken ct = default)
     {

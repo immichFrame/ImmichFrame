@@ -82,27 +82,25 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
 
     public async Task<(string fileName, string ContentType, Stream fileStream)> GetAsset(Guid id, AssetTypeEnum? assetType = null)
     {
-        AssetResponseDto? assetInfo = null;
-        var resolvedType = assetType;
-
-        if (!resolvedType.HasValue)
+        if (!assetType.HasValue)
         {
-            assetInfo = await _immichApi.GetAssetInfoAsync(id, null);
-            resolvedType = assetInfo.Type;
+            var assetInfo = await _immichApi.GetAssetInfoAsync(id, null);
+            if (assetInfo == null)
+                throw new AssetNotFoundException($"Assetinfo for asset '{id}' was not found!");
+            assetType = assetInfo.Type;
         }
 
-        if (resolvedType == AssetTypeEnum.IMAGE)
+        if (assetType == AssetTypeEnum.IMAGE)
         {
             return await GetImageAsset(id);
         }
 
-        if (resolvedType == AssetTypeEnum.VIDEO)
+        if (assetType == AssetTypeEnum.VIDEO)
         {
-            assetInfo ??= await _immichApi.GetAssetInfoAsync(id, null);
-            return await GetVideoAsset(id, assetInfo);
+            return await GetVideoAsset(id);
         }
 
-        throw new AssetNotFoundException($"Asset {id} is not a supported media type ({resolvedType}).");
+        throw new AssetNotFoundException($"Asset {id} is not a supported media type ({assetType}).");
     }
 
     private async Task<(string fileName, string ContentType, Stream fileStream)> GetImageAsset(Guid id)
@@ -162,7 +160,7 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
         return (fileName, contentType, data.Stream);
     }
 
-    private async Task<(string fileName, string ContentType, Stream fileStream)> GetVideoAsset(Guid id, AssetResponseDto assetInfo)
+    private async Task<(string fileName, string ContentType, Stream fileStream)> GetVideoAsset(Guid id)
     {
         var videoResponse = await _immichApi.PlayAssetVideoAsync(id, string.Empty);
 
@@ -180,11 +178,7 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
             contentType = "video/mp4";
         }
 
-        var fileName = assetInfo.OriginalFileName;
-        if (string.IsNullOrWhiteSpace(fileName))
-        {
-            fileName = $"{id}.mp4";
-        }
+        var fileName = $"{id}.mp4";
 
         return (fileName, contentType, videoResponse.Stream);
     }

@@ -17,6 +17,11 @@ public class MemoryAssetsPool(ImmichApi immichApi, IAccountSettings accountSetti
             var assets = memory.Assets.ToList();
             var yearsAgo = DateTime.Now.Year - memory.Data.Year;
 
+            if (!accountSettings.ShowVideos)
+            {
+                assets = assets.Where(a => a.Type == AssetTypeEnum.IMAGE).ToList();
+            }
+
             foreach (var asset in assets)
             {
                 if (asset.ExifInfo == null)
@@ -39,9 +44,9 @@ public class MemoryAssetsPool(ImmichApi immichApi, IAccountSettings accountSetti
 class DailyApiCache : ApiCache
 {
     public DailyApiCache() : base(() => new MemoryCacheEntryOptions
-        {
-            AbsoluteExpiration = DateTimeOffset.Now.Date.AddDays(1)
-        }
+    {
+        AbsoluteExpiration = DateTimeOffset.Now.Date.AddDays(1)
+    }
     )
     {
     }
