@@ -16,6 +16,7 @@
         public bool ShowMemories { get; }
         public bool ShowFavorites { get; }
         public bool ShowArchived { get; }
+        public bool ShowVideos { get; }
         public int? ImagesFromDays { get; }
         public DateTime? ImagesFromDate { get; }
         public DateTime? ImagesUntilDate { get; }
@@ -62,6 +63,7 @@
         public bool ImageZoom { get; }
         public bool ImagePan { get; }
         public bool ImageFill { get; }
+        public bool PlayAudio { get; }
         public string Layout { get; }
         public string Language { get; }
 

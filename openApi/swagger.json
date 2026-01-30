@@ -10,7 +10,7 @@
         "tags": [
           "Asset"
         ],
-        "operationId": "GetAsset",
+        "operationId": "GetAssets",
         "parameters": [
           {
             "name": "clientIdentifier",
@@ -197,6 +197,72 @@
                 }
               },
               "image/webp": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/api/Asset/{id}/Asset": {
+      "get": {
+        "tags": [
+          "Asset"
+        ],
+        "operationId": "GetAsset",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "clientIdentifier",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "assetType",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/AssetTypeEnum"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/webp": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "video/mp4": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "video/quicktime": {
                 "schema": {
                   "type": "string",
                   "format": "binary"
@@ -864,6 +930,9 @@
             "type": "boolean"
           },
           "imageFill": {
+            "type": "boolean"
+          },
+          "playAudio": {
             "type": "boolean"
           },
           "layout": {

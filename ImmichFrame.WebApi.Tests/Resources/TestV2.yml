@@ -33,6 +33,7 @@ General:
   ImageZoom: true
   ImagePan: true
   ImageFill: true
+  PlayAudio: true
   Layout: Layout_TEST
 Accounts:
 - ImmichServerUrl: Account1.ImmichServerUrl_TEST
@@ -42,6 +43,7 @@ Accounts:
   ShowMemories: true
   ShowFavorites: true
   ShowArchived: true
+  ShowVideos: true
   ImagesFromDays: 7
   ImagesUntilDate: '2020-01-02'
   Rating: 7
@@ -60,6 +62,7 @@ Accounts:
   ShowMemories: true
   ShowFavorites: true
   ShowArchived: true
+  ShowVideos: true
   ImagesFromDays: 7
   ImagesUntilDate: '2020-01-02'
   Rating: 7

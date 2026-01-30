@@ -12,22 +12,22 @@ public class AlbumAssetsPoolTests
     private Mock<IApiCache> _mockApiCache;
     private Mock<ImmichApi> _mockImmichApi;
     private Mock<IAccountSettings> _mockAccountSettings;
-    private TestableAlbumAssetsPool _albumAssetsPool;
-
-    private class TestableAlbumAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings)
-        : AlbumAssetsPool(apiCache, immichApi, accountSettings)
-    {
-        // Expose LoadAssets for testing
-        public Task<IEnumerable<AssetResponseDto>> TestLoadAssets(CancellationToken ct = default) => base.LoadAssets(ct);
-    }
+    private AlbumAssetsPool _albumAssetsPool;
 
     [SetUp]
     public void Setup()
     {
         _mockApiCache = new Mock<IApiCache>();
+
+        _mockApiCache
+            .Setup(m => m.GetOrAddAsync(
+                It.IsAny<string>(),
+                It.IsAny<Func<Task<IEnumerable<AssetResponseDto>>>>()))
+            .Returns<string, Func<Task<IEnumerable<AssetResponseDto>>>>((_, factory) => factory());
+
         _mockImmichApi = new Mock<ImmichApi>("", null);
         _mockAccountSettings = new Mock<IAccountSettings>();
-        _albumAssetsPool = new TestableAlbumAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
+        _albumAssetsPool = new AlbumAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
 
         _mockAccountSettings.SetupGet(s => s.Albums).Returns(new List<Guid>());
         _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns(new List<Guid>());
@@ -45,7 +45,7 @@ public class AlbumAssetsPoolTests
         var assetA = CreateAsset("A"); // In album1
         var assetB = CreateAsset("B"); // In album1 and excludedAlbum
         var assetC = CreateAsset("C"); // In excludedAlbum only
-        var assetD = CreateAsset("D"); // In album1 only (but not B)
+        var assetD = CreateAsset("D"); // In album1 only
 
         _mockAccountSettings.SetupGet(s => s.Albums).Returns(new List<Guid> { album1Id });
         _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns(new List<Guid> { excludedAlbumId });
@@ -56,7 +56,7 @@ public class AlbumAssetsPoolTests
             .ReturnsAsync(new AlbumResponseDto { Assets = new List<AssetResponseDto> { assetB, assetC } });
 
         // Act
-        var result = (await _albumAssetsPool.TestLoadAssets()).ToList();
+        var result = (await _albumAssetsPool.GetAssets(25)).ToList();
 
         // Assert
         Assert.That(result.Count, Is.EqualTo(2));
@@ -75,7 +75,7 @@ public class AlbumAssetsPoolTests
             .ReturnsAsync(new AlbumResponseDto { Assets = new List<AssetResponseDto> { CreateAsset("excluded_only") } });
 
 
-        var result = (await _albumAssetsPool.TestLoadAssets()).ToList();
+        var result = (await _albumAssetsPool.GetAssets(25)).ToList();
         Assert.That(result, Is.Empty);
     }
 
@@ -89,7 +89,7 @@ public class AlbumAssetsPoolTests
         _mockImmichApi.Setup(api => api.GetAlbumInfoAsync(album1Id, null, null, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new AlbumResponseDto { Assets = new List<AssetResponseDto> { CreateAsset("A") } });
 
-        var result = (await _albumAssetsPool.TestLoadAssets()).ToList();
+        var result = (await _albumAssetsPool.GetAssets(25)).ToList();
         Assert.That(result.Count, Is.EqualTo(1));
         Assert.That(result.Any(a => a.Id == "A"));
     }
@@ -99,7 +99,7 @@ public class AlbumAssetsPoolTests
     {
         _mockAccountSettings.SetupGet(s => s.Albums).Returns((List<Guid>)null);
 
-        var result = (await _albumAssetsPool.TestLoadAssets()).ToList();
+        var result = (await _albumAssetsPool.GetAssets(25)).ToList();
         Assert.That(result, Is.Empty);
 
         // the absence of an error, whereas before a null pointer exception would be thrown, indicates success.
@@ -110,7 +110,7 @@ public class AlbumAssetsPoolTests
     {
         _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns((List<Guid>)null);
 
-        var result = (await _albumAssetsPool.TestLoadAssets()).ToList();
+        var result = (await _albumAssetsPool.GetAssets(25)).ToList();
         Assert.That(result, Is.Empty);
 
         // the absence of an error, whereas before a null pointer exception would be thrown, indicates success.

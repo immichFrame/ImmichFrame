@@ -30,10 +30,11 @@
     "Style": "none",
     "BaseFontSize": "17px",
     "ShowWeatherDescription": true,
-    "WeatherIconUrl" : "https://openweathermap.org/img/wn/{IconId}.png",
+    "WeatherIconUrl": "https://openweathermap.org/img/wn/{IconId}.png",
     "ImageZoom": true,
     "ImagePan": false,
     "ImageFill": false,
+    "PlayAudio": false,
     "Layout": "splitview"
   },
   "Accounts": [
@@ -45,6 +46,7 @@
       "ShowMemories": false,
       "ShowFavorites": false,
       "ShowArchived": false,
+      "ShowVideos": false,
       "ImagesFromDays": null,
       "ImagesUntilDate": "2020-01-02",
       "Rating": null,

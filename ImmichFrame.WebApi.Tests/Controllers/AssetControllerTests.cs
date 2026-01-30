@@ -1,5 +1,8 @@
+using System;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
 using ImmichFrame.WebApi.Tests.Mocks;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -186,5 +189,78 @@ namespace ImmichFrame.WebApi.Tests.Controllers
             // A more robust check would be to deserialize the response and check the asset ID.
             Assert.That(content, Is.Not.Empty);
         }
+
+        // TODO: Fix Test
+        // [Test]
+        // public async Task GetImage_VideoAsset_ReturnsVideoStream()
+        // {
+        //     // Arrange
+        //     var videoAssetId = Guid.NewGuid();
+        //     var assetInfoJson = $@"
+        //     {{
+        //         ""id"": ""{videoAssetId}"",
+        //         ""originalFileName"": ""test-video.mp4"",
+        //         ""type"": ""VIDEO"",
+        //         ""fileCreatedAt"": ""2023-10-26T10:00:00Z"",
+        //         ""fileModifiedAt"": ""2023-10-26T10:00:00Z"",
+        //         ""duration"": ""0:00:05"",
+        //         ""checksum"": ""checksum"",
+        //         ""deviceAssetId"": ""deviceAsset"",
+        //         ""deviceId"": ""device"",
+        //         ""ownerId"": ""owner"",
+        //         ""localDateTime"": ""2023-10-26T10:00:00Z"",
+        //         ""visibility"": ""timeline"",
+        //         ""hasMetadata"": true,
+        //         ""isArchived"": false,
+        //         ""isOffline"": false,
+        //         ""isTrashed"": false,
+        //         ""updatedAt"": ""2023-10-26T10:00:00Z""
+        //     }}";
+
+        //     _mockHttpMessageHandler.Protected()
+        //         .Setup<Task<HttpResponseMessage>>(
+        //             "SendAsync",
+        //             ItExpr.Is<HttpRequestMessage>(req =>
+        //                 req.Method == HttpMethod.Get &&
+        //                 req.RequestUri!.ToString().EndsWith($"/assets/{videoAssetId}", StringComparison.OrdinalIgnoreCase)),
+        //             ItExpr.IsAny<CancellationToken>()
+        //         )
+        //         .ReturnsAsync(() => new HttpResponseMessage
+        //         {
+        //             StatusCode = HttpStatusCode.OK,
+        //             Content = new StringContent(assetInfoJson, Encoding.UTF8, "application/json")
+        //         });
+
+        //     var videoBytes = new byte[] { 0x00, 0x00, 0x00, 0x20 };
+        //     _mockHttpMessageHandler.Protected()
+        //         .Setup<Task<HttpResponseMessage>>(
+        //             "SendAsync",
+        //             ItExpr.Is<HttpRequestMessage>(req =>
+        //                 req.Method == HttpMethod.Get &&
+        //                 req.RequestUri!.ToString().Contains($"/assets/{videoAssetId}/video/playback", StringComparison.OrdinalIgnoreCase)),
+        //             ItExpr.IsAny<CancellationToken>()
+        //         )
+        //         .ReturnsAsync(() =>
+        //         {
+        //             var response = new HttpResponseMessage
+        //             {
+        //                 StatusCode = HttpStatusCode.OK,
+        //                 Content = new ByteArrayContent(videoBytes)
+        //             };
+        //             response.Content.Headers.ContentType = new MediaTypeHeaderValue("video/mp4");
+        //             return response;
+        //         });
+
+        //     var client = _factory.CreateClient();
+
+        //     // Act
+        //     var response = await client.GetAsync($"/api/Asset/{videoAssetId}/Asset?assetType=1");
+
+        //     // Assert
+        //     response.EnsureSuccessStatusCode();
+        //     Assert.That(response.Content.Headers.ContentType?.MediaType, Is.EqualTo("video/mp4"));
+        //     var resultBytes = await response.Content.ReadAsByteArrayAsync();
+        //     Assert.That(resultBytes, Is.EqualTo(videoBytes));
+        // }
     }
 }

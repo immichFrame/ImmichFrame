@@ -5,9 +5,40 @@ import { get } from 'svelte/store';
 
 export * from './immichFrameApi.js';
 
+let isAuthListenerRegistered = false;
 
 export const init = () => {
 	setBearer();
+	sendAuthSecretToServiceWorker();
+};
+
+const sendMessage = () => {
+	if (navigator.serviceWorker.controller) {
+		navigator.serviceWorker.controller.postMessage({
+			type: 'SET_AUTH_SECRET',
+			authSecret: get(authSecretStore)
+		});
+	}
+};
+
+export const sendAuthSecretToServiceWorker = () => {
+	if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return;
+
+	// Send immediately if controller is ready
+	sendMessage();
+
+	// Also send when service worker becomes ready (for initial page load)
+	navigator.serviceWorker.ready.then(sendMessage);
+
+	// Listen for auth secret requests from service worker (register only once)
+	if (!isAuthListenerRegistered) {
+		isAuthListenerRegistered = true;
+		navigator.serviceWorker.addEventListener('message', (event) => {
+			if (event.data && event.data.type === 'REQUEST_AUTH_SECRET') {
+				sendMessage();
+			}
+		});
+	}
 };
 
 export const getBaseUrl = () => defaults.baseUrl;
@@ -19,4 +50,12 @@ export const setBaseUrl = (baseUrl: string) => {
 export const setBearer = () => {
 	defaults.headers = defaults.headers || {};
 	defaults.headers['Authorization'] = "Bearer " + get(authSecretStore);
+};
+
+export const getAssetStreamUrl = (id: string, clientIdentifier?: string, assetType?: number) => {
+	const params = new URLSearchParams();
+	if (clientIdentifier) params.set('clientIdentifier', clientIdentifier);
+	if (assetType !== undefined) params.set('assetType', String(assetType));
+	const query = params.toString();
+	return `/api/Asset/${encodeURIComponent(id)}/Asset${query ? '?' + query : ''}`;
 };

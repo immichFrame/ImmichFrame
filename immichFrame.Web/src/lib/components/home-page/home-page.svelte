@@ -3,9 +3,10 @@
 	import ProgressBar from '$lib/components/elements/progress-bar.svelte';
 	import { slideshowStore } from '$lib/stores/slideshow.store';
 	import { clientIdentifierStore, authSecretStore } from '$lib/stores/persist.store';
-	import { onDestroy, onMount, setContext } from 'svelte';
+	import { onDestroy, onMount, setContext, tick } from 'svelte';
 	import OverlayControls from '../elements/overlay-controls.svelte';
-	import ImageComponent from '../elements/image-component.svelte';
+	import AssetComponent from '../elements/asset-component.svelte';
+	import type AssetComponentInstance from '../elements/asset-component.svelte';
 	import { configStore } from '$lib/stores/config.store';
 	import ErrorElement from '../elements/error-element.svelte';
 	import Clock from '../elements/clock.svelte';
@@ -13,9 +14,10 @@
 	import LoadingElement from '../elements/LoadingElement.svelte';
 	import { page } from '$app/state';
 	import { ProgressBarLocation, ProgressBarStatus } from '../elements/progress-bar.types';
+	import { isImageAsset, isVideoAsset } from '$lib/constants/asset-type';
 
-	interface ImagesState {
-		images: [string, api.AssetResponseDto, api.AlbumResponseDto[]][];
+	interface AssetsState {
+		assets: [string, api.AssetResponseDto, api.AlbumResponseDto[]][];
 		error: boolean;
 		loaded: boolean;
 		split: boolean;
@@ -25,30 +27,33 @@
 	api.init();
 
 	// TODO: make this configurable?
-	const PRELOAD_IMAGES = 5;
+	const PRELOAD_ASSETS = 5;
 
 	let assetHistory: api.AssetResponseDto[] = [];
 	let assetBacklog: api.AssetResponseDto[] = [];
 
-	let displayingAssets: api.AssetResponseDto[] = $state() as api.AssetResponseDto[];
+	let displayingAssets: api.AssetResponseDto[] = $state([]);
 
 	const { restartProgress, stopProgress, instantTransition } = slideshowStore;
 
 	let progressBarStatus: ProgressBarStatus = $state(ProgressBarStatus.Playing);
 	let progressBar: ProgressBar = $state() as ProgressBar;
+	let assetComponent: AssetComponentInstance = $state() as AssetComponentInstance;
+	let currentDuration: number = $state($configStore.interval ?? 20);
+	let userPaused: boolean = $state(false);
 
 	let error: boolean = $state(false);
 	let infoVisible: boolean = $state(false);
 	let authError: boolean = $state(false);
-	let errorMessage: string = $state() as string;
-	let imagesState: ImagesState = $state({
-		images: [],
+	let errorMessage: string = $state('');
+	let assetsState: AssetsState = $state({
+		assets: [],
 		error: false,
 		loaded: false,
 		split: false,
 		hasBday: false
 	});
-	let imagePromisesDict: Record<
+	let assetPromisesDict: Record<
 		string,
 		Promise<[string, api.AssetResponseDto, api.AlbumResponseDto[]]>
 	> = {};
@@ -79,6 +84,8 @@
 
 	async function provideClose() {
 		infoVisible = false;
+		userPaused = false;
+		await assetComponent?.play?.();
 		await progressBar.play();
 	}
 
@@ -88,37 +95,41 @@
 		timeoutId = setTimeout(hideCursor, 2000);
 	};
 
-	async function updateImagePromises() {
+	async function updateAssetPromises() {
 		for (let asset of displayingAssets) {
-			if (!(asset.id in imagePromisesDict)) {
-				imagePromisesDict[asset.id] = loadImage(asset);
+			if (!(asset.id in assetPromisesDict)) {
+				assetPromisesDict[asset.id] = loadAsset(asset);
 			}
 		}
-		for (let i = 0; i < PRELOAD_IMAGES; i++) {
+		for (let i = 0; i < PRELOAD_ASSETS; i++) {
 			if (i >= assetBacklog.length) {
 				break;
 			}
-			if (!(assetBacklog[i].id in imagePromisesDict)) {
-				imagePromisesDict[assetBacklog[i].id] = loadImage(assetBacklog[i]);
+			if (!(assetBacklog[i].id in assetPromisesDict)) {
+				assetPromisesDict[assetBacklog[i].id] = loadAsset(assetBacklog[i]);
 			}
 		}
-		// originally just deleted displayingAssets after they were no longer needed
-		// but this is more bulletproof to edge cases I think
-		for (let key in imagePromisesDict) {
-			if (
-				!(
-					displayingAssets.find((item) => item.id == key) ||
-					assetBacklog.find((item) => item.id == key)
-				)
-			) {
-				delete imagePromisesDict[key];
+		// Collect keys to remove first to avoid modifying dict during async iteration
+		const keysToRemove = Object.keys(assetPromisesDict).filter(
+			(key) =>
+				!displayingAssets.find((item) => item.id === key) &&
+				!assetBacklog.find((item) => item.id === key)
+		);
+		for (const key of keysToRemove) {
+			try {
+				const [url] = await assetPromisesDict[key];
+				revokeObjectUrl(url);
+			} catch (err) {
+				console.warn('Failed to resolve asset during cleanup:', err);
+			} finally {
+				delete assetPromisesDict[key];
 			}
 		}
 	}
 
 	async function loadAssets() {
 		try {
-			let assetRequest = await api.getAsset();
+			let assetRequest = await api.getAssets();
 
 			if (assetRequest.status != 200) {
 				if (assetRequest.status == 401) {
@@ -129,95 +140,103 @@
 			}
 
 			error = false;
-			assetBacklog = assetRequest.data;
+			assetBacklog = assetRequest.data.filter(
+				(asset) => isImageAsset(asset) || isVideoAsset(asset)
+			);
 		} catch {
 			error = true;
 		}
 	}
 
+	let isHandlingAssetTransition = false;
 	const handleDone = async (previous: boolean = false, instant: boolean = false) => {
-		progressBar.restart(false);
-		$instantTransition = instant;
-		if (previous) await getPreviousAssets();
-		else await getNextAssets();
-		progressBar.play();
+		if (isHandlingAssetTransition) {
+			return;
+		}
+		isHandlingAssetTransition = true;
+		try {
+			userPaused = false;
+			progressBar.restart(false);
+			$instantTransition = instant;
+			if (previous) await getPreviousAssets();
+			else await getNextAssets();
+			await tick();
+			await assetComponent?.play?.();
+			progressBar.play();
+		} finally {
+			isHandlingAssetTransition = false;
+		}
 	};
 
 	async function getNextAssets() {
-		if (!assetBacklog || assetBacklog.length < 1) {
+		if (!assetBacklog.length) {
 			await loadAssets();
 		}
 
-		if (!error && assetBacklog.length == 0) {
+		if (!error && !assetBacklog.length) {
 			error = true;
 			errorMessage = 'No assets were found! Check your configuration.';
 			return;
 		}
 
-		let next: api.AssetResponseDto[];
-		if (
-			$configStore.layout?.trim().toLowerCase() == 'splitview' &&
-			assetBacklog.length > 1 &&
-			isHorizontal(assetBacklog[0]) &&
-			isHorizontal(assetBacklog[1])
-		) {
-			next = assetBacklog.splice(0, 2);
-		} else {
-			next = assetBacklog.splice(0, 1);
-		}
+		const useSplit = shouldUseSplitView(assetBacklog);
+		const next = assetBacklog.splice(0, useSplit ? 2 : 1);
 		assetBacklog = [...assetBacklog];
 
-		if (displayingAssets) {
-			// Push to History
+		if (displayingAssets.length) {
 			assetHistory.push(...displayingAssets);
 		}
 
-		// History max 250 Items
 		if (assetHistory.length > 250) {
-			assetHistory = assetHistory.splice(assetHistory.length - 250, 250);
+			assetHistory = assetHistory.slice(-250);
 		}
 
 		displayingAssets = next;
-		updateImagePromises();
-		imagesState = await loadImages(next);
+		await updateAssetPromises();
+		assetsState = await pickAssets(next);
 	}
 
 	async function getPreviousAssets() {
-		if (!assetHistory || assetHistory.length < 1) {
+		if (!assetHistory.length) {
 			return;
 		}
 
-		let next: api.AssetResponseDto[];
-		if (
-			$configStore.layout?.trim().toLowerCase() == 'splitview' &&
-			assetHistory.length > 1 &&
-			isHorizontal(assetHistory[assetHistory.length - 1]) &&
-			isHorizontal(assetHistory[assetHistory.length - 2])
-		) {
-			next = assetHistory.splice(assetHistory.length - 2, 2);
-		} else {
-			next = assetHistory.splice(assetHistory.length - 1, 1);
-		}
-
+		const useSplit = shouldUseSplitView(assetHistory.slice(-2));
+		const next = assetHistory.splice(useSplit ? -2 : -1);
 		assetHistory = [...assetHistory];
 
-		// Unshift to Backlog
-		if (displayingAssets) {
+		if (displayingAssets.length) {
 			assetBacklog.unshift(...displayingAssets);
 		}
+
 		displayingAssets = next;
-		updateImagePromises();
-		imagesState = await loadImages(next);
+		await updateAssetPromises();
+		assetsState = await pickAssets(next);
 	}
 
-	function isHorizontal(asset: api.AssetResponseDto) {
-		const isFlipped = (orientation: number) => [5, 6, 7, 8].includes(orientation);
-		let imageHeight = asset.exifInfo?.exifImageHeight ?? 0;
-		let imageWidth = asset.exifInfo?.exifImageWidth ?? 0;
-		if (isFlipped(Number(asset.exifInfo?.orientation ?? 0))) {
-			[imageHeight, imageWidth] = [imageWidth, imageHeight];
+	function isPortrait(asset: api.AssetResponseDto) {
+		if (isVideoAsset(asset)) {
+			return false;
 		}
-		return imageHeight > imageWidth; // or imageHeight > imageWidth * 1.25;
+
+		const isFlipped = (orientation: number) => [5, 6, 7, 8].includes(orientation);
+		let assetHeight = asset.exifInfo?.exifImageHeight ?? 0;
+		let assetWidth = asset.exifInfo?.exifImageWidth ?? 0;
+		if (isFlipped(Number(asset.exifInfo?.orientation ?? 0))) {
+			[assetHeight, assetWidth] = [assetWidth, assetHeight];
+		}
+		return assetHeight > assetWidth;
+	}
+
+	function shouldUseSplitView(assets: api.AssetResponseDto[]): boolean {
+		return (
+			$configStore.layout?.trim().toLowerCase() === 'splitview' &&
+			assets.length > 1 &&
+			isImageAsset(assets[0]) &&
+			isImageAsset(assets[1]) &&
+			isPortrait(assets[0]) &&
+			isPortrait(assets[1])
+		);
 	}
 
 	function hasBirthday(assets: api.AssetResponseDto[]) {
@@ -225,7 +244,7 @@
 		let hasBday: boolean = false;
 
 		for (let asset of assets) {
-			for (let person of asset.people ?? new Array()) {
+			for (let person of asset.people ?? []) {
 				let birthdate = new Date(person.birthDate ?? '');
 				if (birthdate.getDate() === today.getDate() && birthdate.getMonth() === today.getMonth()) {
 					hasBday = true;
@@ -238,23 +257,66 @@
 		return hasBday;
 	}
 
-	async function loadImages(assets: api.AssetResponseDto[]) {
-		let newImages = [];
+	function updateCurrentDuration(assets: api.AssetResponseDto[]) {
+		const durations = assets
+			.map((asset) => getAssetDurationSeconds(asset))
+			.filter((value) => value > 0);
+		const fallback = $configStore.interval ?? 20;
+		currentDuration = durations.length ? Math.max(...durations) : fallback;
+	}
+
+	function getAssetDurationSeconds(asset: api.AssetResponseDto) {
+		if (isVideoAsset(asset)) {
+			const parsed = parseAssetDuration(asset.duration);
+			const fallback = $configStore.interval ?? 20;
+			return parsed > 0 ? parsed : fallback;
+		}
+		return $configStore.interval ?? 20;
+	}
+
+	function parseAssetDuration(duration?: string | null) {
+		if (!duration) {
+			return 0;
+		}
+		const parts = duration.split(':').map((value) => value.trim().replace(',', '.'));
+
+		if (parts.length === 0 || parts.length > 3) {
+			return 0;
+		}
+
+		const multipliers = [3600, 60, 1]; // hours, minutes, seconds
+		const offset = multipliers.length - parts.length;
+
+		let total = 0;
+		for (let i = 0; i < parts.length; i++) {
+			const numeric = parseFloat(parts[i]);
+			if (Number.isNaN(numeric)) {
+				return 0;
+			}
+			total += numeric * multipliers[offset + i];
+		}
+		return total;
+	}
+
+	async function pickAssets(assets: api.AssetResponseDto[]) {
+		let newAssets = [];
 		try {
+			updateCurrentDuration(assets);
 			for (let asset of assets) {
-				let img = await imagePromisesDict[asset.id];
-				newImages.push(img);
+				let img = await assetPromisesDict[asset.id];
+				newAssets.push(img);
 			}
 			return {
-				images: newImages,
+				assets: newAssets,
 				error: false,
 				loaded: true,
-				split: assets.length == 2,
+				split: assets.length == 2 && assets.every(isImageAsset),
 				hasBday: hasBirthday(assets)
 			};
 		} catch {
+			updateCurrentDuration([]);
 			return {
-				images: [],
+				assets: [],
 				error: true,
 				loaded: false,
 				split: false,
@@ -263,38 +325,63 @@
 		}
 	}
 
-	async function loadImage(assetResponse: api.AssetResponseDto) {
-		let req = await api.getImage(assetResponse.id, { clientIdentifier: $clientIdentifierStore });
-		let album: api.AlbumResponseDto[] | null = null;
-		if ($configStore.showAlbumName) {
-			let albumReq = await api.getAlbumInfo(assetResponse.id, {
-				clientIdentifier: $clientIdentifierStore
+	async function loadAsset(assetResponse: api.AssetResponseDto) {
+		let assetUrl: string;
+
+		if (isVideoAsset(assetResponse)) {
+			// Stream videos directly instead of preloading
+			assetUrl = api.getAssetStreamUrl(
+				assetResponse.id,
+				$clientIdentifierStore,
+				assetResponse.type
+			);
+		} else {
+			// Preload images as blobs
+			const req = await api.getAsset(assetResponse.id, {
+				clientIdentifier: $clientIdentifierStore,
+				assetType: assetResponse.type
 			});
-			album = albumReq.data;
+			if (req.status != 200) {
+				throw new Error(`Failed to load asset ${assetResponse.id}: status ${req.status}`);
+			}
+			assetUrl = getObjectUrl(req.data);
 		}
 
-		if (req.status != 200 || ($configStore.showAlbumName && album == null)) {
-			return ['', assetResponse, []] as [string, api.AssetResponseDto, api.AlbumResponseDto[]];
+		let album: api.AlbumResponseDto[] | null = null;
+		if ($configStore.showAlbumName) {
+			const albumReq = await api.getAlbumInfo(assetResponse.id, {
+				clientIdentifier: $clientIdentifierStore
+			});
+			album = albumReq.data ?? [];
 		}
 
 		// if the people array is already populated, there is no need to call the API again
 		if ($configStore.showPeopleDesc && (assetResponse.people ?? []).length == 0) {
-			let assetInfoRequest = await api.getAssetInfo(assetResponse.id, {
+			const assetInfoRequest = await api.getAssetInfo(assetResponse.id, {
 				clientIdentifier: $clientIdentifierStore
 			});
 			assetResponse.people = assetInfoRequest.data.people;
-			// assetResponse.exifInfo = assetInfoRequest.data.exifInfo;
 		}
 
-		return [getImageUrl(req.data), assetResponse, album] as [
+		return [assetUrl, assetResponse, album] as [
 			string,
 			api.AssetResponseDto,
 			api.AlbumResponseDto[]
 		];
 	}
 
-	function getImageUrl(image: Blob) {
+	function getObjectUrl(image: Blob) {
 		return URL.createObjectURL(image);
+	}
+
+	function revokeObjectUrl(url: string) {
+		// Only revoke blob URLs, not streaming URLs
+		if (!url.startsWith('blob:')) return;
+		try {
+			URL.revokeObjectURL(url);
+		} catch {
+			console.warn('Failed to revoke object URL:', url);
+		}
 	}
 
 	onMount(() => {
@@ -315,12 +402,14 @@
 		unsubscribeRestart = restartProgress.subscribe((value) => {
 			if (value) {
 				progressBar.restart(value);
+				assetComponent?.play?.();
 			}
 		});
 
 		unsubscribeStop = stopProgress.subscribe((value) => {
 			if (value) {
 				progressBar.restart(false);
+				assetComponent?.pause?.();
 			}
 		});
 
@@ -332,7 +421,7 @@
 		};
 	});
 
-	onDestroy(() => {
+	onDestroy(async () => {
 		if (unsubscribeRestart) {
 			unsubscribeRestart();
 		}
@@ -340,6 +429,17 @@
 		if (unsubscribeStop) {
 			unsubscribeStop();
 		}
+
+		const revokes = Object.values(assetPromisesDict).map(async (p) => {
+			try {
+				const [url] = await p;
+				revokeObjectUrl(url);
+			} catch (err) {
+				console.warn('Failed to resolve asset during destroy cleanup:', err);
+			}
+		});
+		await Promise.allSettled(revokes);
+		assetPromisesDict = {};
 	});
 </script>
 
@@ -348,19 +448,29 @@
 		<ErrorElement {authError} message={errorMessage} />
 	{:else if displayingAssets}
 		<div class="absolute h-screen w-screen">
-			<ImageComponent
+			<AssetComponent
 				showLocation={$configStore.showImageLocation}
-				interval={$configStore.interval}
+				interval={currentDuration}
 				showPhotoDate={$configStore.showPhotoDate}
 				showImageDesc={$configStore.showImageDesc}
 				showPeopleDesc={$configStore.showPeopleDesc}
 				showTagsDesc={$configStore.showTagsDesc}
 				showAlbumName={$configStore.showAlbumName}
-				{...imagesState}
+				{...assetsState}
 				imageFill={$configStore.imageFill}
 				imageZoom={$configStore.imageZoom}
 				imagePan={$configStore.imagePan}
+				bind:this={assetComponent}
 				bind:showInfo={infoVisible}
+				playAudio={$configStore.playAudio}
+				onVideoWaiting={async () => {
+					await progressBar.pause();
+				}}
+				onVideoPlaying={async () => {
+					if (!userPaused) {
+						await progressBar.play();
+					}
+				}}
 			/>
 		</div>
 
@@ -382,17 +492,25 @@
 			pause={async () => {
 				infoVisible = false;
 				if (progressBarStatus == ProgressBarStatus.Paused) {
+					userPaused = false;
+					await assetComponent?.play?.();
 					await progressBar.play();
 				} else {
+					userPaused = true;
+					await assetComponent?.pause?.();
 					await progressBar.pause();
 				}
 			}}
 			showInfo={async () => {
 				if (infoVisible) {
 					infoVisible = false;
+					userPaused = false;
+					await assetComponent?.play?.();
 					await progressBar.play();
 				} else {
 					infoVisible = true;
+					userPaused = true;
+					await assetComponent?.pause?.();
 					await progressBar.pause();
 				}
 			}}
@@ -403,7 +521,7 @@
 
 		<ProgressBar
 			autoplay
-			duration={$configStore.interval}
+			duration={currentDuration}
 			hidden={!$configStore.showProgressBar}
 			location={ProgressBarLocation.Bottom}
 			bind:this={progressBar}

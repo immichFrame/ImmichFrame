@@ -4,13 +4,14 @@
 		type AssetResponseDto,
 		type PersonWithFacesResponseDto
 	} from '$lib/immichFrameApi';
+	import { isVideoAsset } from '$lib/constants/asset-type';
 	import { decodeBase64 } from '$lib/utils';
 	import { thumbHashToDataURL } from 'thumbhash';
 	import AssetInfo from '$lib/components/elements/asset-info.svelte';
 	import ImageOverlay from '$lib/components/elements/imageoverlay/image-overlay.svelte';
 
 	interface Props {
-		image: [url: string, asset: AssetResponseDto, albums: AlbumResponseDto[]];
+		asset: [url: string, asset: AssetResponseDto, albums: AlbumResponseDto[]];
 		showLocation: boolean;
 		showPhotoDate: boolean;
 		showImageDesc: boolean;
@@ -21,12 +22,15 @@
 		imageZoom: boolean;
 		imagePan: boolean;
 		interval: number;
-		split: boolean
+		split: boolean;
 		showInfo: boolean;
+		playAudio: boolean;
+		onVideoWaiting?: () => void;
+		onVideoPlaying?: () => void;
 	}
 
 	let {
-		image,
+		asset,
 		showLocation,
 		showPhotoDate,
 		showImageDesc,
@@ -38,17 +42,51 @@
 		imagePan,
 		interval,
 		split,
-		showInfo = $bindable(false)
+		showInfo = $bindable(false),
+		playAudio,
+		onVideoWaiting = () => {},
+		onVideoPlaying = () => {}
 	}: Props = $props();
 
 	let debug = false;
+	const isVideo = $derived(isVideoAsset(asset[1]));
 
-	let hasPerson = $derived(image[1].people?.filter((x) => x.name).length ?? 0 > 0);
+	let videoElement = $state<HTMLVideoElement | null>(null);
+
+	$effect(() => {
+		// Track asset URL to cleanup when it changes
+		asset[0];
+		return () => {
+			if (videoElement) {
+				videoElement.pause();
+				videoElement.src = '';
+				videoElement.removeAttribute('src');
+				videoElement.srcObject = null;
+				videoElement.load();
+			}
+		};
+	});
+
+	let hasPerson = $derived((asset[1].people?.filter((x) => x.name).length ?? 0) > 0);
 	let zoomIn = $derived(zoomEffect());
 	let panDirection = $derived(panEffect());
+	const enableZoom = $derived(imageZoom && !isVideo);
+	const enablePan = $derived(imagePan && !isVideo);
+
+	const thumbhashUrl = $derived(getThumbhashUrl());
+
+	function getThumbhashUrl() {
+		const hash = asset[1].thumbhash;
+		if (!hash) return '';
+		try {
+			return thumbHashToDataURL(decodeBase64(hash));
+		} catch {
+			return '';
+		}
+	}
 
 	function GetFace(i: number) {
-		const people = image[1].people as PersonWithFacesResponseDto[];
+		const people = asset[1].people as PersonWithFacesResponseDto[];
 		const namedPeople = people.filter((x) => x.name);
 		return namedPeople[i]?.faces[0] ?? null;
 	}
@@ -128,20 +166,38 @@
 	}
 
 	let scaleValues = $derived(getScaleValues());
+
+	export const pause = async () => {
+		if (!asset) return;
+		if (isVideo && videoElement) {
+			videoElement.pause();
+		}
+	};
+
+	export const play = async () => {
+		if (!asset) return;
+		if (isVideo && videoElement) {
+			try {
+				await videoElement.play();
+			} catch {
+				// Autoplay might be blocked; ignore.
+			}
+		}
+	};
 </script>
 
 {#if showInfo}
-	<ImageOverlay asset={image[1]} albums={image[2]} />
+	<ImageOverlay asset={asset[1]} albums={asset[2]} />
 {/if}
 
 <div class="immichframe_image relative place-self-center overflow-hidden">
 	<!-- Container with zoom-effect -->
 	<div
-		class="relative w-full h-full {imageZoom ? 'zoom' : ''} {imagePan ? 'pan' : ''}"
+		class="relative w-full h-full {enableZoom ? 'zoom' : ''} {enablePan ? 'pan' : ''}"
 		style="
 			--interval: {interval + 2}s;
-			--originX: {hasPerson ? getFaceMetric(0, 'centerX') + '%' : 'center'};
-			--originY: {hasPerson ? getFaceMetric(0, 'centerY') + '%' : 'center'};
+			--originX: {hasPerson && !isVideo ? getFaceMetric(0, 'centerX') + '%' : 'center'};
+			--originY: {hasPerson && !isVideo ? getFaceMetric(0, 'centerY') + '%' : 'center'};
 			--start-scale: {scaleValues.startScale};
 			--end-scale: {scaleValues.endScale};
 			--pan-start-x: {panDirection === 'left' ? '5%' : panDirection === 'right' ? '-5%' : '0'};
@@ -150,7 +206,7 @@
 			--pan-end-y: {panDirection === 'up' ? '-5%' : panDirection === 'down' ? '5%' : '0'};"
 	>
 		{#if debug}
-			{#each image[1].people?.map((x) => x.name) ?? [] as _, i}
+			{#each asset[1].people?.map((x) => x.name) ?? [] as _, i}
 				<div
 					class="face z-[900] bg-red-600 absolute"
 					style="top: {getFaceMetric(i, 'y1')}%;
@@ -166,18 +222,48 @@
 			{/each}
 		{/if}
 
-		<img
-			class="{imageFill
-				? 'w-screen max-h-screen h-dvh-safe object-cover'
-				: 'max-h-screen h-dvh-safe max-w-full object-contain'} w-full h-full"
-			src={image[0]}
-			alt="data"
-		/>
+		{#if isVideo}
+			<!-- Autoplay might be blocked by the browser when playAudio is enabled -->
+			<video
+				bind:this={videoElement}
+				class="{imageFill
+					? 'w-screen max-h-screen h-dvh-safe object-cover'
+					: 'max-h-screen h-dvh-safe max-w-full object-contain'} w-full h-full"
+				src={asset[0]}
+				autoplay={!playAudio}
+				muted={!playAudio}
+				playsinline
+				preload="metadata"
+				disableRemotePlayback
+				poster={thumbhashUrl}
+				onloadstart={async (e) => {
+					e.currentTarget.currentTime = 0;
+					if (playAudio) {
+						try {
+							await play();
+						} catch {
+							// Autoplay might be blocked; ignore.
+						}
+					}
+				}}
+				onerror={() => console.error('Video failed to load:', asset[0])}
+				onwaiting={onVideoWaiting}
+				onplaying={onVideoPlaying}
+			></video>
+		{:else}
+			<img
+				class="{imageFill
+					? 'w-screen max-h-screen h-dvh-safe object-cover'
+					: 'max-h-screen h-dvh-safe max-w-full object-contain'} w-full h-full"
+				src={asset[0]}
+				alt="data"
+			/>
+		{/if}
 	</div>
 </div>
 <AssetInfo
-	asset={image[1]}
-	albums={image[2]}
+	asset={asset[1]}
+	albums={asset[2]}
 	{showLocation}
 	{showPhotoDate}
 	{showImageDesc}
@@ -186,11 +272,7 @@
 	{showAlbumName}
 	{split}
 />
-<img
-	class="absolute flex w-full h-full z-[-1]"
-	src={thumbHashToDataURL(decodeBase64(image[1].thumbhash ?? ''))}
-	alt="data"
-/>
+<img class="absolute flex w-full h-full z-[-1]" src={thumbhashUrl} alt="data" />
 
 <style>
 	.zoom {
@@ -218,19 +300,23 @@
 
 	@keyframes pan {
 		from {
-			transform: translateX(var(--pan-start-x, 0)) translateY(var(--pan-start-y, 0)) scale(var(--start-scale, 1));
+			transform: translateX(var(--pan-start-x, 0)) translateY(var(--pan-start-y, 0))
+				scale(var(--start-scale, 1));
 		}
 		to {
-			transform: translateX(var(--pan-end-x, 0)) translateY(var(--pan-end-y, 0)) scale(var(--end-scale, 1));
+			transform: translateX(var(--pan-end-x, 0)) translateY(var(--pan-end-y, 0))
+				scale(var(--end-scale, 1));
 		}
 	}
 
 	@keyframes zoom-pan {
 		from {
-			transform: translateX(var(--pan-start-x, 0)) translateY(var(--pan-start-y, 0)) scale(var(--start-scale, 1));
+			transform: translateX(var(--pan-start-x, 0)) translateY(var(--pan-start-y, 0))
+				scale(var(--start-scale, 1));
 		}
 		to {
-			transform: translateX(var(--pan-end-x, 0)) translateY(var(--pan-end-y, 0)) scale(var(--end-scale, 1.3));
+			transform: translateX(var(--pan-end-x, 0)) translateY(var(--pan-end-y, 0))
+				scale(var(--end-scale, 1.3));
 		}
 	}
 </style>
