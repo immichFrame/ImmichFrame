@@ -80,7 +80,7 @@ namespace ImmichFrame.WebApi.Controllers
             var notification = new AssetRequestedNotification(id, sanitizedClientIdentifier);
             _ = _logic.SendWebhookNotification(notification);
 
-            return File(asset.fileStream, asset.ContentType, asset.fileName); // returns a FileStreamResult
+            return File(asset.fileStream, asset.ContentType, asset.fileName, enableRangeProcessing: true);
         }
 
         [HttpGet("RandomImageAndInfo", Name = "GetRandomImageAndInfo")]
