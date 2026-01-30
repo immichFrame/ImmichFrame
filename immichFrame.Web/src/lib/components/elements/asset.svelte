@@ -60,6 +60,9 @@
 			if (videoElement) {
 				videoElement.pause();
 				videoElement.src = '';
+				videoElement.removeAttribute('src');
+				videoElement.srcObject = null;
+				videoElement.load();
 			}
 		};
 	});
@@ -230,6 +233,8 @@
 				autoplay={!playAudio}
 				muted={!playAudio}
 				playsinline
+				preload="metadata"
+				disableRemotePlayback
 				poster={thumbhashUrl}
 				onloadstart={async (e) => {
 					e.currentTarget.currentTime = 0;
