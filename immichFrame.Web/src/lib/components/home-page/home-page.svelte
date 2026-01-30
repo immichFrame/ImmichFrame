@@ -92,7 +92,7 @@
 		timeoutId = setTimeout(hideCursor, 2000);
 	};
 
-	async function updateAssetPromises() {
+	function updateAssetPromises() {
 		for (let asset of displayingAssets) {
 			if (!(asset.id in assetPromisesDict)) {
 				assetPromisesDict[asset.id] = loadAsset(asset);
@@ -141,14 +141,23 @@
 		}
 	}
 
+	let isHandlingAssetTransition = false;
 	const handleDone = async (previous: boolean = false, instant: boolean = false) => {
-		progressBar.restart(false);
-		$instantTransition = instant;
-		if (previous) await getPreviousAssets();
-		else await getNextAssets();
-		await tick();
-		await imageComponent?.play?.();
-		await progressBar.play();
+		if (isHandlingAssetTransition) {
+			return;
+		}
+		isHandlingAssetTransition = true;
+		try {
+			progressBar.restart(false);
+			$instantTransition = instant;
+			if (previous) await getPreviousAssets();
+			else await getNextAssets();
+			await tick();
+			await imageComponent?.play?.();
+			await progressBar.play();
+		} finally {
+			isHandlingAssetTransition = false;
+		}
 	};
 
 	async function getNextAssets() {
