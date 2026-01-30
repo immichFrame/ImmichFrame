@@ -12,7 +12,7 @@ export const init = () => {
 };
 
 export const sendAuthSecretToServiceWorker = () => {
-	if (!('serviceWorker' in navigator)) return;
+	if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return;
 
 	const sendMessage = () => {
 		if (navigator.serviceWorker.controller) {
