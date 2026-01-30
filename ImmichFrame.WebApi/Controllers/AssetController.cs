@@ -63,7 +63,7 @@ namespace ImmichFrame.WebApi.Controllers
         [HttpGet("{id}/Image", Name = "GetImage")]
         [Produces("image/jpeg", "image/webp")]
         [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetImage(Guid id, string clientIdentifier = "")
+        public async Task<FileResult> GetImage(Guid id, string clientIdentifier = "")
         {
             return await GetAsset(id, clientIdentifier, AssetTypeEnum.IMAGE);
         }
@@ -71,39 +71,15 @@ namespace ImmichFrame.WebApi.Controllers
         [HttpGet("{id}/Asset", Name = "GetAsset")]
         [Produces("image/jpeg", "image/webp", "video/mp4", "video/quicktime")]
         [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetAsset(Guid id, string clientIdentifier = "", AssetTypeEnum? assetType = null)
+        public async Task<FileResult> GetAsset(Guid id, string clientIdentifier = "", AssetTypeEnum? assetType = null)
         {
             var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
             _logger.LogDebug("Asset '{id}' requested by '{sanitizedClientIdentifier}' (type hint: {assetType})", id, sanitizedClientIdentifier, assetType);
+            var asset = await _logic.GetAsset(id, assetType);
 
             var notification = new AssetRequestedNotification(id, sanitizedClientIdentifier);
             _ = _logic.SendWebhookNotification(notification);
 
-            if (assetType == AssetTypeEnum.VIDEO)
-            {
-                var rangeHeader = Request.Headers.Range.ToString();
-                var videoResponse = await _logic.GetVideoStream(id, string.IsNullOrEmpty(rangeHeader) ? null : rangeHeader);
-
-                Response.StatusCode = videoResponse.StatusCode;
-
-                if (videoResponse.ContentType != null)
-                    Response.ContentType = videoResponse.ContentType;
-
-                if (videoResponse.ContentRange != null)
-                    Response.Headers["Content-Range"] = videoResponse.ContentRange;
-
-                if (videoResponse.ContentLength.HasValue)
-                    Response.ContentLength = videoResponse.ContentLength;
-
-                Response.Headers["Accept-Ranges"] = "bytes";
-
-                await videoResponse.Stream.CopyToAsync(Response.Body, HttpContext.RequestAborted);
-                videoResponse.Dispose();
-
-                return new EmptyResult();
-            }
-
-            var asset = await _logic.GetAsset(id, assetType);
             return File(asset.fileStream, asset.ContentType, asset.fileName, enableRangeProcessing: true);
         }
 

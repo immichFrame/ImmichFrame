@@ -45,9 +45,6 @@ public class MultiImmichFrameLogicDelegate : IImmichFrameLogic
     public Task<(string fileName, string ContentType, Stream fileStream)> GetAsset(Guid assetId, AssetTypeEnum? assetType = null)
         => _accountSelectionStrategy.ForAsset(assetId, logic => logic.GetAsset(assetId, assetType));
 
-    public Task<VideoStreamResponse> GetVideoStream(Guid assetId, string? rangeHeader)
-        => _accountSelectionStrategy.ForAsset(assetId, logic => logic.GetVideoStream(assetId, rangeHeader));
-
     public async Task<long> GetTotalAssets()
     {
         var allInts = await Task.WhenAll(_accountToDelegate.Values.Select(account => account.GetTotalAssets()));
