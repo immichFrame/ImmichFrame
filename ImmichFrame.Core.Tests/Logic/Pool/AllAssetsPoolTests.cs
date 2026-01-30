@@ -37,6 +37,12 @@ public class AllAssetsPoolTests
                 It.IsAny<Func<Task<AssetStatsResponseDto>>>() // For GetAssetCount
             ))
             .Returns<string, Func<Task<AssetStatsResponseDto>>>(async (key, factory) => await factory());
+
+        _mockApiCache.Setup(c => c.GetOrAddAsync(
+            It.IsAny<string>(),
+            It.IsAny<Func<Task<IEnumerable<AssetResponseDto>>>>()
+        ))
+        .Returns<string, Func<Task<IEnumerable<AssetResponseDto>>>>(async (key, factory) => await factory());
     }
 
     private List<AssetResponseDto> CreateSampleAssets(int count, string idPrefix, AssetTypeEnum type, int? rating = null)
