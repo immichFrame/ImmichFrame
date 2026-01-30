@@ -165,12 +165,14 @@
 	let scaleValues = $derived(getScaleValues());
 
 	export const pause = async () => {
+		if (!asset) return;
 		if (isVideo && videoElement) {
 			videoElement.pause();
 		}
 	};
 
 	export const play = async () => {
+		if (!asset) return;
 		if (isVideo && videoElement) {
 			try {
 				await videoElement.play();
