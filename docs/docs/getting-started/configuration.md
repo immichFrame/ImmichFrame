@@ -177,7 +177,7 @@ Events will always contain a `Name`, `ClientIdentifier` and a `DateTime` to diff
 
 | **Event**                  | **Description**                      | **Payload**                                                                                                                                             |
 | -------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| AssetRequestedNotification | Notifies when an image is requested. | `{"Name":"AssetRequestedNotification", "ClientIdentifier": "Frame_Kitchen", "DateTime":"2024-11-16T21:37:19.4933981+01:00", "RequestedAssetId":"UUID"}` |
+| AssetRequestedNotification | Notifies when an asset is requested. | `{"Name":"AssetRequestedNotification", "ClientIdentifier": "Frame_Kitchen", "DateTime":"2024-11-16T21:37:19.4933981+01:00", "RequestedAssetId":"UUID"}` |
 
 ### Multiple Immich Accounts
 ImmichFrame can be configured to access multiple Immich accounts, on the same or different servers.
