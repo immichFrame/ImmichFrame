@@ -11,7 +11,7 @@
 	import ImageOverlay from '$lib/components/elements/imageoverlay/image-overlay.svelte';
 
 	interface Props {
-		image: [url: string, asset: AssetResponseDto, albums: AlbumResponseDto[]];
+		asset: [url: string, asset: AssetResponseDto, albums: AlbumResponseDto[]];
 		showLocation: boolean;
 		showPhotoDate: boolean;
 		showImageDesc: boolean;
@@ -28,7 +28,7 @@
 	}
 
 	let {
-		image,
+		asset,
 		showLocation,
 		showPhotoDate,
 		showImageDesc,
@@ -45,20 +45,30 @@
 	}: Props = $props();
 
 	let debug = false;
-	const isVideo = $derived(isVideoAsset(image[1]));
+	const isVideo = $derived(isVideoAsset(asset[1]));
 
 	let videoElement = $state<HTMLVideoElement | null>(null);
 
-	let hasPerson = $derived(image[1].people?.filter((x) => x.name).length ?? 0 > 0);
+	$effect(() => {
+		// Cleanup when image changes or component unmounts
+		return () => {
+			if (videoElement) {
+				videoElement.pause();
+				videoElement.src = '';
+			}
+		};
+	});
+
+	let hasPerson = $derived(asset[1].people?.filter((x) => x.name).length ?? 0 > 0);
 	let zoomIn = $derived(zoomEffect());
 	let panDirection = $derived(panEffect());
 	const enableZoom = $derived(imageZoom && !isVideo);
 	const enablePan = $derived(imagePan && !isVideo);
 
-	const thumbhashUrl = getThumbhashUrl();
+	const thumbhashUrl = $derived(getThumbhashUrl());
 
 	function getThumbhashUrl() {
-		const hash = image[1].thumbhash;
+		const hash = asset[1].thumbhash;
 		if (!hash) return '';
 		try {
 			return thumbHashToDataURL(decodeBase64(hash));
@@ -68,7 +78,7 @@
 	}
 
 	function GetFace(i: number) {
-		const people = image[1].people as PersonWithFacesResponseDto[];
+		const people = asset[1].people as PersonWithFacesResponseDto[];
 		const namedPeople = people.filter((x) => x.name);
 		return namedPeople[i]?.faces[0] ?? null;
 	}
@@ -167,7 +177,7 @@
 </script>
 
 {#if showInfo}
-	<ImageOverlay asset={image[1]} albums={image[2]} />
+	<ImageOverlay asset={asset[1]} albums={asset[2]} />
 {/if}
 
 <div class="immichframe_image relative place-self-center overflow-hidden">
@@ -186,7 +196,7 @@
 			--pan-end-y: {panDirection === 'up' ? '-5%' : panDirection === 'down' ? '5%' : '0'};"
 	>
 		{#if debug}
-			{#each image[1].people?.map((x) => x.name) ?? [] as _, i}
+			{#each asset[1].people?.map((x) => x.name) ?? [] as _, i}
 				<div
 					class="face z-[900] bg-red-600 absolute"
 					style="top: {getFaceMetric(i, 'y1')}%;
@@ -209,26 +219,27 @@
 				class="{imageFill
 					? 'w-screen max-h-screen h-dvh-safe object-cover'
 					: 'max-h-screen h-dvh-safe max-w-full object-contain'} w-full h-full"
-				src={image[0]}
+				src={asset[0]}
 				autoplay
 				muted={!playAudio}
 				playsinline
 				poster={thumbhashUrl}
+				onerror={() => console.error('Video failed to load:', asset[0])}
 			></video>
 		{:else}
 			<img
 				class="{imageFill
 					? 'w-screen max-h-screen h-dvh-safe object-cover'
 					: 'max-h-screen h-dvh-safe max-w-full object-contain'} w-full h-full"
-				src={image[0]}
+				src={asset[0]}
 				alt="data"
 			/>
 		{/if}
 	</div>
 </div>
 <AssetInfo
-	asset={image[1]}
-	albums={image[2]}
+	asset={asset[1]}
+	albums={asset[2]}
 	{showLocation}
 	{showPhotoDate}
 	{showImageDesc}

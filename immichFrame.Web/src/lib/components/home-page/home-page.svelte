@@ -5,8 +5,8 @@
 	import { clientIdentifierStore, authSecretStore } from '$lib/stores/persist.store';
 	import { onDestroy, onMount, setContext, tick } from 'svelte';
 	import OverlayControls from '../elements/overlay-controls.svelte';
-	import ImageComponent from '../elements/image-component.svelte';
-	import type ImageComponentInstance from '../elements/image-component.svelte';
+	import AssetComponent from '../elements/asset-component.svelte';
+	import type AssetComponentInstance from '../elements/asset-component.svelte';
 	import { configStore } from '$lib/stores/config.store';
 	import ErrorElement from '../elements/error-element.svelte';
 	import Clock from '../elements/clock.svelte';
@@ -16,8 +16,8 @@
 	import { ProgressBarLocation, ProgressBarStatus } from '../elements/progress-bar.types';
 	import { isImageAsset, isVideoAsset } from '$lib/constants/asset-type';
 
-	interface ImagesState {
-		images: [string, api.AssetResponseDto, api.AlbumResponseDto[]][];
+	interface AssetsState {
+		assets: [string, api.AssetResponseDto, api.AlbumResponseDto[]][];
 		error: boolean;
 		loaded: boolean;
 		split: boolean;
@@ -38,15 +38,15 @@
 
 	let progressBarStatus: ProgressBarStatus = $state(ProgressBarStatus.Playing);
 	let progressBar: ProgressBar = $state() as ProgressBar;
-	let imageComponent: ImageComponentInstance = $state() as ImageComponentInstance;
+	let assetComponent: AssetComponentInstance = $state() as AssetComponentInstance;
 	let currentDuration: number = $state($configStore.interval ?? 20);
 
 	let error: boolean = $state(false);
 	let infoVisible: boolean = $state(false);
 	let authError: boolean = $state(false);
 	let errorMessage: string = $state() as string;
-	let imagesState: ImagesState = $state({
-		images: [],
+	let assetsState: AssetsState = $state({
+		assets: [],
 		error: false,
 		loaded: false,
 		split: false,
@@ -83,7 +83,7 @@
 
 	async function provideClose() {
 		infoVisible = false;
-		await imageComponent?.play?.();
+		await assetComponent?.play?.();
 		await progressBar.play();
 	}
 
@@ -161,7 +161,7 @@
 			if (previous) await getPreviousAssets();
 			else await getNextAssets();
 			await tick();
-			await imageComponent?.play?.();
+			await assetComponent?.play?.();
 			progressBar.play();
 		} finally {
 			isHandlingAssetTransition = false;
@@ -206,7 +206,7 @@
 
 		displayingAssets = next;
 		await updateAssetPromises();
-		imagesState = await loadImages(next);
+		assetsState = await pickAssets(next);
 	}
 
 	async function getPreviousAssets() {
@@ -236,7 +236,7 @@
 		}
 		displayingAssets = next;
 		await updateAssetPromises();
-		imagesState = await loadImages(next);
+		assetsState = await pickAssets(next);
 	}
 
 	function isHorizontal(asset: api.AssetResponseDto) {
@@ -245,12 +245,12 @@
 		}
 
 		const isFlipped = (orientation: number) => [5, 6, 7, 8].includes(orientation);
-		let imageHeight = asset.exifInfo?.exifImageHeight ?? 0;
-		let imageWidth = asset.exifInfo?.exifImageWidth ?? 0;
+		let assetHeight = asset.exifInfo?.exifImageHeight ?? 0;
+		let assetWidth = asset.exifInfo?.exifImageWidth ?? 0;
 		if (isFlipped(Number(asset.exifInfo?.orientation ?? 0))) {
-			[imageHeight, imageWidth] = [imageWidth, imageHeight];
+			[assetHeight, assetWidth] = [assetWidth, assetHeight];
 		}
-		return imageHeight > imageWidth; // or imageHeight > imageWidth * 1.25;
+		return assetHeight > assetWidth; // or imageHeight > imageWidth * 1.25;
 	}
 
 	function hasBirthday(assets: api.AssetResponseDto[]) {
@@ -314,16 +314,16 @@
 		return total;
 	}
 
-	async function loadImages(assets: api.AssetResponseDto[]) {
-		let newImages = [];
+	async function pickAssets(assets: api.AssetResponseDto[]) {
+		let newAssets = [];
 		try {
 			updateCurrentDuration(assets);
 			for (let asset of assets) {
 				let img = await assetPromisesDict[asset.id];
-				newImages.push(img);
+				newAssets.push(img);
 			}
 			return {
-				images: newImages,
+				assets: newAssets,
 				error: false,
 				loaded: true,
 				split: assets.length == 2 && assets.every(isImageAsset),
@@ -332,7 +332,7 @@
 		} catch {
 			updateCurrentDuration([]);
 			return {
-				images: [],
+				assets: [],
 				error: true,
 				loaded: false,
 				split: false,
@@ -355,7 +355,7 @@
 		}
 
 		if (req.status != 200 || ($configStore.showAlbumName && album == null)) {
-			return ['', assetResponse, []] as [string, api.AssetResponseDto, api.AlbumResponseDto[]];
+			throw new Error(`Failed to load asset ${assetResponse.id}: status ${req.status}`);
 		}
 
 		// if the people array is already populated, there is no need to call the API again
@@ -404,14 +404,14 @@
 		unsubscribeRestart = restartProgress.subscribe((value) => {
 			if (value) {
 				progressBar.restart(value);
-				imageComponent?.play?.();
+				assetComponent?.play?.();
 			}
 		});
 
 		unsubscribeStop = stopProgress.subscribe((value) => {
 			if (value) {
 				progressBar.restart(false);
-				imageComponent?.pause?.();
+				assetComponent?.pause?.();
 			}
 		});
 
@@ -450,7 +450,7 @@
 		<ErrorElement {authError} message={errorMessage} />
 	{:else if displayingAssets}
 		<div class="absolute h-screen w-screen">
-			<ImageComponent
+			<AssetComponent
 				showLocation={$configStore.showImageLocation}
 				interval={$configStore.interval}
 				showPhotoDate={$configStore.showPhotoDate}
@@ -458,11 +458,11 @@
 				showPeopleDesc={$configStore.showPeopleDesc}
 				showTagsDesc={$configStore.showTagsDesc}
 				showAlbumName={$configStore.showAlbumName}
-				{...imagesState}
+				{...assetsState}
 				imageFill={$configStore.imageFill}
 				imageZoom={$configStore.imageZoom}
 				imagePan={$configStore.imagePan}
-				bind:this={imageComponent}
+				bind:this={assetComponent}
 				bind:showInfo={infoVisible}
 				playAudio={$configStore.playAudio}
 			/>
@@ -486,21 +486,21 @@
 			pause={async () => {
 				infoVisible = false;
 				if (progressBarStatus == ProgressBarStatus.Paused) {
-					await imageComponent?.play?.();
+					await assetComponent?.play?.();
 					await progressBar.play();
 				} else {
-					await imageComponent?.pause?.();
+					await assetComponent?.pause?.();
 					await progressBar.pause();
 				}
 			}}
 			showInfo={async () => {
 				if (infoVisible) {
 					infoVisible = false;
-					await imageComponent?.play?.();
+					await assetComponent?.play?.();
 					await progressBar.play();
 				} else {
 					infoVisible = true;
-					await imageComponent?.pause?.();
+					await assetComponent?.pause?.();
 					await progressBar.pause();
 				}
 			}}
