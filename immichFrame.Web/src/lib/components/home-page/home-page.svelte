@@ -185,8 +185,8 @@
 			assetBacklog.length > 1 &&
 			isImageAsset(assetBacklog[0]) &&
 			isImageAsset(assetBacklog[1]) &&
-			isHorizontal(assetBacklog[0]) &&
-			isHorizontal(assetBacklog[1])
+			isPortrait(assetBacklog[0]) &&
+			isPortrait(assetBacklog[1])
 		) {
 			next = assetBacklog.splice(0, 2);
 		} else {
@@ -220,8 +220,8 @@
 			assetHistory.length > 1 &&
 			isImageAsset(assetHistory[assetHistory.length - 1]) &&
 			isImageAsset(assetHistory[assetHistory.length - 2]) &&
-			isHorizontal(assetHistory[assetHistory.length - 1]) &&
-			isHorizontal(assetHistory[assetHistory.length - 2])
+			isPortrait(assetHistory[assetHistory.length - 1]) &&
+			isPortrait(assetHistory[assetHistory.length - 2])
 		) {
 			next = assetHistory.splice(assetHistory.length - 2, 2);
 		} else {
@@ -239,7 +239,7 @@
 		assetsState = await pickAssets(next);
 	}
 
-	function isHorizontal(asset: api.AssetResponseDto) {
+	function isPortrait(asset: api.AssetResponseDto) {
 		if (isVideoAsset(asset)) {
 			return false;
 		}
@@ -250,7 +250,7 @@
 		if (isFlipped(Number(asset.exifInfo?.orientation ?? 0))) {
 			[assetHeight, assetWidth] = [assetWidth, assetHeight];
 		}
-		return assetHeight > assetWidth; // or imageHeight > imageWidth * 1.25;
+		return assetHeight > assetWidth;
 	}
 
 	function hasBirthday(assets: api.AssetResponseDto[]) {

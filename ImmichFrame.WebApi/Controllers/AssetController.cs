@@ -38,7 +38,7 @@ namespace ImmichFrame.WebApi.Controllers
         {
             var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
             _logger.LogDebug("Assets requested by '{sanitizedClientIdentifier}'", sanitizedClientIdentifier);
-            return (await _logic.GetAssets()).ToList() ?? throw new AssetNotFoundException("No asset was found");
+            return (await _logic.GetAssets()).ToList();
         }
 
         [HttpGet("{id}/AssetInfo", Name = "GetAssetInfo")]
