@@ -92,7 +92,7 @@
 		timeoutId = setTimeout(hideCursor, 2000);
 	};
 
-	function updateAssetPromises() {
+	async function updateAssetPromises() {
 		for (let asset of displayingAssets) {
 			if (!(asset.id in assetPromisesDict)) {
 				assetPromisesDict[asset.id] = loadAsset(asset);
@@ -115,6 +115,7 @@
 					assetBacklog.find((item) => item.id == key)
 				)
 			) {
+				revokeObjectUrl((await assetPromisesDict[key])[0]);
 				delete assetPromisesDict[key];
 			}
 		}
@@ -197,7 +198,7 @@
 		}
 
 		displayingAssets = next;
-		updateAssetPromises();
+		await updateAssetPromises();
 		imagesState = await loadImages(next);
 	}
 
@@ -227,7 +228,7 @@
 			assetBacklog.unshift(...displayingAssets);
 		}
 		displayingAssets = next;
-		updateAssetPromises();
+		await updateAssetPromises();
 		imagesState = await loadImages(next);
 	}
 
@@ -370,6 +371,14 @@
 		return URL.createObjectURL(image);
 	}
 
+	function revokeObjectUrl(url: string) {
+		try {
+			URL.revokeObjectURL(url);
+		} catch {
+			console.warn('Failed to revoke object URL:', url);
+		}
+	}
+
 	onMount(() => {
 		window.addEventListener('mousemove', showCursor);
 		window.addEventListener('click', showCursor);
@@ -407,7 +416,7 @@
 		};
 	});
 
-	onDestroy(() => {
+	onDestroy(async () => {
 		if (unsubscribeRestart) {
 			unsubscribeRestart();
 		}
@@ -415,6 +424,12 @@
 		if (unsubscribeStop) {
 			unsubscribeStop();
 		}
+
+		const revokes = Object.values(assetPromisesDict).map(async (p) =>
+			revokeObjectUrl((await p)[0])
+		);
+		await Promise.all(revokes);
+		assetPromisesDict = {};
 	});
 </script>
 
