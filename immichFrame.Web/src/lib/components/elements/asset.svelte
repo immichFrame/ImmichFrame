@@ -25,6 +25,8 @@
 		split: boolean;
 		showInfo: boolean;
 		playAudio: boolean;
+		onVideoWaiting?: () => void;
+		onVideoPlaying?: () => void;
 	}
 
 	let {
@@ -41,7 +43,9 @@
 		interval,
 		split,
 		showInfo = $bindable(false),
-		playAudio
+		playAudio,
+		onVideoWaiting = () => {},
+		onVideoPlaying = () => {}
 	}: Props = $props();
 
 	let debug = false;
@@ -227,6 +231,8 @@
 				poster={thumbhashUrl}
 				onloadstart={(e) => (e.currentTarget.currentTime = 0)}
 				onerror={() => console.error('Video failed to load:', asset[0])}
+				onwaiting={onVideoWaiting}
+				onplaying={onVideoPlaying}
 			></video>
 		{:else}
 			<img

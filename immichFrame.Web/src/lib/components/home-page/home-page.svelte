@@ -40,6 +40,7 @@
 	let progressBar: ProgressBar = $state() as ProgressBar;
 	let assetComponent: AssetComponentInstance = $state() as AssetComponentInstance;
 	let currentDuration: number = $state($configStore.interval ?? 20);
+	let userPaused: boolean = $state(false);
 
 	let error: boolean = $state(false);
 	let infoVisible: boolean = $state(false);
@@ -83,6 +84,7 @@
 
 	async function provideClose() {
 		infoVisible = false;
+		userPaused = false;
 		await assetComponent?.play?.();
 		await progressBar.play();
 	}
@@ -156,6 +158,7 @@
 		}
 		isHandlingAssetTransition = true;
 		try {
+			userPaused = false;
 			progressBar.restart(false);
 			$instantTransition = instant;
 			if (previous) await getPreviousAssets();
@@ -466,6 +469,14 @@
 				bind:this={assetComponent}
 				bind:showInfo={infoVisible}
 				playAudio={$configStore.playAudio}
+				onVideoWaiting={async () => {
+					await progressBar.pause();
+				}}
+				onVideoPlaying={async () => {
+					if (!userPaused) {
+						await progressBar.play();
+					}
+				}}
 			/>
 		</div>
 
@@ -487,9 +498,11 @@
 			pause={async () => {
 				infoVisible = false;
 				if (progressBarStatus == ProgressBarStatus.Paused) {
+					userPaused = false;
 					await assetComponent?.play?.();
 					await progressBar.play();
 				} else {
+					userPaused = true;
 					await assetComponent?.pause?.();
 					await progressBar.pause();
 				}
@@ -497,10 +510,12 @@
 			showInfo={async () => {
 				if (infoVisible) {
 					infoVisible = false;
+					userPaused = false;
 					await assetComponent?.play?.();
 					await progressBar.play();
 				} else {
 					infoVisible = true;
+					userPaused = true;
 					await assetComponent?.pause?.();
 					await progressBar.pause();
 				}
