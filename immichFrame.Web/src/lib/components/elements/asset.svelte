@@ -225,11 +225,20 @@
 					? 'w-screen max-h-screen h-dvh-safe object-cover'
 					: 'max-h-screen h-dvh-safe max-w-full object-contain'} w-full h-full"
 				src={asset[0]}
-				autoplay
+				autoplay={!playAudio}
 				muted={!playAudio}
 				playsinline
 				poster={thumbhashUrl}
-				onloadstart={(e) => (e.currentTarget.currentTime = 0)}
+				onloadstart={async (e) => {
+					e.currentTarget.currentTime = 0;
+					if (playAudio) {
+						try {
+							await play();
+						} catch {
+							// Autoplay might be blocked; ignore.
+						}
+					}
+				}}
 				onerror={() => console.error('Video failed to load:', asset[0])}
 				onwaiting={onVideoWaiting}
 				onplaying={onVideoPlaying}
