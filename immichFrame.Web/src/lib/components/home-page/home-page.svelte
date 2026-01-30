@@ -161,7 +161,7 @@
 			if (previous) await getPreviousAssets();
 			else await getNextAssets();
 			await tick();
-			imageComponent?.play?.();
+			await imageComponent?.play?.();
 			progressBar.play();
 		} finally {
 			isHandlingAssetTransition = false;
