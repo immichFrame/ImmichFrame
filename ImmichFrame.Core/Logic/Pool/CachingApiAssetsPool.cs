@@ -29,7 +29,7 @@ public abstract class CachingApiAssetsPool(IApiCache apiCache, ImmichApi immichA
     {
         var excludedAlbumAssets = new List<AssetResponseDto>();
 
-        foreach (var albumId in accountSettings.ExcludedAlbums)
+        foreach (var albumId in accountSettings?.ExcludedAlbums ?? new())
         {
             var albumInfo = await immichApi.GetAlbumInfoAsync(albumId, null, null, ct);
 

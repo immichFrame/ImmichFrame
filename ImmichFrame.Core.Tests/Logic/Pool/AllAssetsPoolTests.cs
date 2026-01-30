@@ -39,21 +39,21 @@ public class AllAssetsPoolTests
             .Returns<string, Func<Task<AssetStatsResponseDto>>>(async (key, factory) => await factory());
     }
 
-    private List<AssetResponseDto> CreateSampleAssets(int count, string idPrefix, AssetTypeEnum type)
+    private List<AssetResponseDto> CreateSampleAssets(int count, string idPrefix, AssetTypeEnum type, int? rating = null)
     {
         return Enumerable.Range(0, count)
-            .Select(i => new AssetResponseDto { Id = $"{idPrefix}{i}", Type = type })
+            .Select(i => new AssetResponseDto { Id = $"{idPrefix}{i}", Type = type, ExifInfo = new ExifResponseDto { Rating = rating } })
             .ToList();
     }
 
-    private List<AssetResponseDto> CreateSampleImageAssets(int count, string idPrefix = "asset")
+    private List<AssetResponseDto> CreateSampleImageAssets(int count, string idPrefix = "asset", int? rating = null)
     {
-        return CreateSampleAssets(count, idPrefix, AssetTypeEnum.IMAGE);
+        return CreateSampleAssets(count, idPrefix, AssetTypeEnum.IMAGE, rating);
     }
 
-    private List<AssetResponseDto> CreateSampleVideoAssets(int count, string idPrefix = "asset")
+    private List<AssetResponseDto> CreateSampleVideoAssets(int count, string idPrefix = "asset", int? rating = null)
     {
-        return CreateSampleAssets(count, idPrefix, AssetTypeEnum.VIDEO);
+        return CreateSampleAssets(count, idPrefix, AssetTypeEnum.VIDEO, rating);
     }
 
     [Test]
@@ -96,10 +96,11 @@ public class AllAssetsPoolTests
         // Arrange
         var requestedImageCount = 5;
         var requestedVideoCount = 8;
+        var rating = 3;
         _mockAccountSettings.SetupGet(s => s.ShowArchived).Returns(true);
         _mockAccountSettings.SetupGet(s => s.Rating).Returns(3);
-        var returnedAssets = CreateSampleImageAssets(requestedImageCount);
-        returnedAssets.AddRange(CreateSampleVideoAssets(requestedVideoCount));
+        var returnedAssets = CreateSampleImageAssets(requestedImageCount, rating: rating);
+        returnedAssets.AddRange(CreateSampleVideoAssets(requestedVideoCount, rating: rating));
         _mockImmichApi.Setup(api => api.SearchRandomAsync(It.IsAny<RandomSearchDto>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(returnedAssets.Where(a => a.Type == AssetTypeEnum.IMAGE).ToList());
 
@@ -115,7 +116,7 @@ public class AllAssetsPoolTests
                 dto.WithExif == true &&
                 dto.WithPeople == true &&
                 dto.Visibility == AssetVisibility.Archive && // ShowArchived = true
-                dto.Rating == 3
+                dto.Rating == rating
             ), It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -125,11 +126,12 @@ public class AllAssetsPoolTests
         // Arrange
         var requestedImageCount = 5;
         var requestedVideoCount = 8;
+        var rating = 3;
         _mockAccountSettings.SetupGet(s => s.ShowArchived).Returns(true);
         _mockAccountSettings.SetupGet(s => s.ShowVideos).Returns(true);
         _mockAccountSettings.SetupGet(s => s.Rating).Returns(3);
-        var returnedAssets = CreateSampleImageAssets(requestedImageCount);
-        returnedAssets.AddRange(CreateSampleVideoAssets(requestedVideoCount));
+        var returnedAssets = CreateSampleImageAssets(requestedImageCount, rating: rating);
+        returnedAssets.AddRange(CreateSampleVideoAssets(requestedVideoCount, rating: rating));
         _mockImmichApi.Setup(api => api.SearchRandomAsync(It.IsAny<RandomSearchDto>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(returnedAssets.ToList());
 
@@ -145,7 +147,7 @@ public class AllAssetsPoolTests
                 dto.WithExif == true &&
                 dto.WithPeople == true &&
                 dto.Visibility == AssetVisibility.Archive && // ShowArchived = true
-                dto.Rating == 3
+                dto.Rating == rating
             ), It.IsAny<CancellationToken>()), Times.Once);
     }
 

@@ -18,13 +18,20 @@ public class AlbumAssetsPoolTests
         : AlbumAssetsPool(apiCache, immichApi, accountSettings)
     {
         // Expose LoadAssets for testing
-        public Task<IEnumerable<AssetResponseDto>> TestLoadAssets(CancellationToken ct = default) => base.LoadAssets(ct);
+        public async Task<IEnumerable<AssetResponseDto>> TestLoadAssets(CancellationToken ct = default) => await base.GetAssets(25, ct);
     }
 
     [SetUp]
     public void Setup()
     {
         _mockApiCache = new Mock<IApiCache>();
+
+        _mockApiCache
+            .Setup(m => m.GetOrAddAsync(
+                It.IsAny<string>(),
+                It.IsAny<Func<Task<IEnumerable<AssetResponseDto>>>>()))
+            .Returns<string, Func<Task<IEnumerable<AssetResponseDto>>>>((_, factory) => factory());
+
         _mockImmichApi = new Mock<ImmichApi>("", null);
         _mockAccountSettings = new Mock<IAccountSettings>();
         _albumAssetsPool = new TestableAlbumAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
@@ -45,7 +52,7 @@ public class AlbumAssetsPoolTests
         var assetA = CreateAsset("A"); // In album1
         var assetB = CreateAsset("B"); // In album1 and excludedAlbum
         var assetC = CreateAsset("C"); // In excludedAlbum only
-        var assetD = CreateAsset("D"); // In album1 only (but not B)
+        var assetD = CreateAsset("D"); // In album1 only
 
         _mockAccountSettings.SetupGet(s => s.Albums).Returns(new List<Guid> { album1Id });
         _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns(new List<Guid> { excludedAlbumId });
