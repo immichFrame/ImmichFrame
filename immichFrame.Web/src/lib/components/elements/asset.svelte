@@ -51,7 +51,7 @@
 
 	$effect(() => {
 		// Track asset URL to cleanup when it changes
-		const currentUrl = asset[0];
+		asset[0];
 		return () => {
 			if (videoElement) {
 				videoElement.pause();
@@ -225,6 +225,7 @@
 				muted={!playAudio}
 				playsinline
 				poster={thumbhashUrl}
+				onloadstart={(e) => (e.currentTarget.currentTime = 0)}
 				onerror={() => console.error('Video failed to load:', asset[0])}
 			></video>
 		{:else}
