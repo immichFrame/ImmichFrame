@@ -5,7 +5,7 @@ sidebar_position: 1
 
 # What is ImmichFrame?
 
-**ImmichFrame** is a companion project to [Immich][immich-github-url], built to turn your photo collection into a beautiful digital photo frame experience.
+**ImmichFrame** is a companion project to [Immich][immich-github-url], built to turn your photo and video collection into a beautiful digital photo frame experience.
 
 [Immich][immich-github-url] is an excellent self-hosted media management solution – like your private Google Photos. But what if you want to display your favorite photos in a living room, hallway, or even on an e-ink display?
 

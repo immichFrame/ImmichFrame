@@ -100,6 +100,8 @@ General:
   ImagePan: false  # boolean
   # Whether image should fill available space. Aspect ratio maintained but may be cropped.
   ImageFill: false  # boolean
+  # Whether to play audio for videos that have audio tracks.
+  PlayAudio: false  # boolean
   # Allow two portrait images to be displayed next to each other
   Layout: 'splitview'  # single | splitview
 
@@ -119,6 +121,8 @@ Accounts:
     ShowFavorites: false  # boolean
     # If this is set, assets marked archived are displayed.
     ShowArchived: false  # boolean
+    # If this is set, video assets are included in the slideshow.
+    ShowVideos: false  # boolean
     # Show images from the last X days, e.g., 365 -> show images from the last year
     ImagesFromDays: null  # int
     # Show images before date.

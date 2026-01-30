@@ -15,7 +15,19 @@ No. ImmichFrame is optional. It is intended for display purposes only.
 
 ### Does ImmichFrame store any photos?
 
-No. ImmichFrame pulls media directly from immich. Images can be cached via ImmichFrame.
+No. ImmichFrame pulls media directly from Immich. Images can be cached via ImmichFrame, while videos are always streamed directly.
+
+---
+
+### Does ImmichFrame support videos?
+
+Yes! ImmichFrame can display videos from your Immich library. Video playback is disabled by default - enable it by setting `ShowVideos: true` in your account configuration. See the [Video Playback](/docs/features/video-playback) documentation for more details.
+
+---
+
+### Can I play audio with videos?
+
+Yes. Set `PlayAudio: true` in your General settings. Note that some browsers may block autoplay with audio due to their policies.
 
 ---
 
