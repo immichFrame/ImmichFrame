@@ -95,11 +95,6 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
             return await GetImageAsset(id);
         }
 
-        if (assetType == AssetTypeEnum.VIDEO)
-        {
-            return await GetVideoAsset(id);
-        }
-
         throw new AssetNotFoundException($"Asset {id} is not a supported media type ({assetType}).");
     }
 
@@ -160,28 +155,8 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
         return (fileName, contentType, data.Stream);
     }
 
-    private async Task<(string fileName, string ContentType, Stream fileStream)> GetVideoAsset(Guid id)
-    {
-        var videoResponse = await _immichApi.PlayAssetVideoAsync(id, string.Empty);
-
-        if (videoResponse == null)
-            throw new AssetNotFoundException($"Video asset {id} was not found!");
-
-        var contentType = "";
-        if (videoResponse.Headers.ContainsKey("Content-Type"))
-        {
-            contentType = videoResponse.Headers["Content-Type"].FirstOrDefault() ?? "";
-        }
-
-        if (string.IsNullOrWhiteSpace(contentType))
-        {
-            contentType = "video/mp4";
-        }
-
-        var fileName = $"{id}.mp4";
-
-        return (fileName, contentType, videoResponse.Stream);
-    }
+    public Task<VideoStreamResponse> GetVideoStream(Guid id, string? rangeHeader)
+        => _immichApi.PlayAssetVideoWithRangeAsync(id, rangeHeader);
 
     public Task SendWebhookNotification(IWebhookNotification notification) =>
         WebhookHelper.SendWebhookNotification(notification, _generalSettings.Webhook);

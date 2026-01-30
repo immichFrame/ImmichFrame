@@ -10,6 +10,7 @@ namespace ImmichFrame.Core.Interfaces
         public Task<AssetResponseDto> GetAssetInfoById(Guid assetId);
         public Task<IEnumerable<AlbumResponseDto>> GetAlbumInfoById(Guid assetId);
         public Task<(string fileName, string ContentType, Stream fileStream)> GetAsset(Guid id, AssetTypeEnum? assetType = null);
+        public Task<VideoStreamResponse> GetVideoStream(Guid id, string? rangeHeader);
         public Task<long> GetTotalAssets();
         public Task SendWebhookNotification(IWebhookNotification notification);
     }
