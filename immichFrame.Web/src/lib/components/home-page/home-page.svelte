@@ -83,6 +83,7 @@
 
 	async function provideClose() {
 		infoVisible = false;
+		await imageComponent?.play?.();
 		await progressBar.play();
 	}
 
@@ -115,8 +116,14 @@
 					assetBacklog.find((item) => item.id == key)
 				)
 			) {
-				revokeObjectUrl((await assetPromisesDict[key])[0]);
-				delete assetPromisesDict[key];
+				try {
+					const [url] = await assetPromisesDict[key];
+					revokeObjectUrl(url);
+				} catch (err) {
+					console.warn('Failed to resolve asset during cleanup:', err);
+				} finally {
+					delete assetPromisesDict[key];
+				}
 			}
 		}
 	}
@@ -425,10 +432,15 @@
 			unsubscribeStop();
 		}
 
-		const revokes = Object.values(assetPromisesDict).map(async (p) =>
-			revokeObjectUrl((await p)[0])
-		);
-		await Promise.all(revokes);
+		const revokes = Object.values(assetPromisesDict).map(async (p) => {
+			try {
+				const [url] = await p;
+				revokeObjectUrl(url);
+			} catch (err) {
+				console.warn('Failed to resolve asset during destroy cleanup:', err);
+			}
+		});
+		await Promise.allSettled(revokes);
 		assetPromisesDict = {};
 	});
 </script>
