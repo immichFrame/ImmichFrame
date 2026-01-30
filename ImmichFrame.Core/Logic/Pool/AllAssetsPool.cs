@@ -7,20 +7,31 @@ public class AllAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSett
 {
     public async Task<long> GetAssetCount(CancellationToken ct = default)
     {
-        //Retrieve total images count (unfiltered); will update to query filtered stats from Immich
-        return (await apiCache.GetOrAddAsync(nameof(AllAssetsPool),
-            () => immichApi.GetAssetStatisticsAsync(null, false, null, ct))).Images;
+        // Retrieve total media count (images + videos); will update to query filtered stats from Immich
+        var stats = await apiCache.GetOrAddAsync(nameof(AllAssetsPool),
+            () => immichApi.GetAssetStatisticsAsync(null, false, null, ct));
+
+        if (accountSettings.ShowVideos)
+        {
+            return stats.Images + stats.Videos;
+        }
+
+        return stats.Images;
     }
-    
+
     public async Task<IEnumerable<AssetResponseDto>> GetAssets(int requested, CancellationToken ct = default)
     {
         var searchDto = new RandomSearchDto
         {
             Size = requested,
-            Type = AssetTypeEnum.IMAGE,
             WithExif = true,
             WithPeople = true
         };
+
+        if (!accountSettings.ShowVideos)
+        {
+            searchDto.Type = AssetTypeEnum.IMAGE;
+        }
 
         if (accountSettings.ShowArchived)
         {
@@ -49,6 +60,7 @@ public class AllAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSett
         }
 
         var assets = await immichApi.SearchRandomAsync(searchDto, ct);
+        assets = assets.Where(asset => asset.Type == AssetTypeEnum.IMAGE || asset.Type == AssetTypeEnum.VIDEO).ToList();
 
         if (accountSettings.ExcludedAlbums?.Any() ?? false)
         {
@@ -71,8 +83,7 @@ public class AllAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSett
 
             excludedAlbumAssets.AddRange(albumInfo.Assets);
         }
-        
+
         return excludedAlbumAssets;
     }
-    
 }

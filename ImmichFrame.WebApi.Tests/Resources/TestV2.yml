@@ -42,6 +42,7 @@ Accounts:
   ShowMemories: true
   ShowFavorites: true
   ShowArchived: true
+  ShowVideos: true
   ImagesFromDays: 7
   ImagesUntilDate: '2020-01-02'
   Rating: 7
@@ -60,6 +61,7 @@ Accounts:
   ShowMemories: true
   ShowFavorites: true
   ShowArchived: true
+  ShowVideos: true
   ImagesFromDays: 7
   ImagesUntilDate: '2020-01-02'
   Rating: 7

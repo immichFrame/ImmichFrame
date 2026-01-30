@@ -1,9 +1,11 @@
 <script lang="ts">
+	import { createEventDispatcher } from 'svelte';
 	import {
 		type AlbumResponseDto,
 		type AssetResponseDto,
 		type PersonWithFacesResponseDto
 	} from '$lib/immichFrameApi';
+	import { isVideoAsset } from '$lib/constants/asset-type';
 	import { decodeBase64 } from '$lib/utils';
 	import { thumbHashToDataURL } from 'thumbhash';
 	import AssetInfo from '$lib/components/elements/asset-info.svelte';
@@ -41,11 +43,18 @@
 		showInfo = $bindable(false)
 	}: Props = $props();
 
+	const dispatch = createEventDispatcher<{ ended: void }>();
+
 	let debug = false;
+	const isVideo = $derived(isVideoAsset(image[1]));
+
+	let videoElement: HTMLVideoElement | null = null;
 
 	let hasPerson = $derived(image[1].people?.filter((x) => x.name).length ?? 0 > 0);
 	let zoomIn = $derived(zoomEffect());
 	let panDirection = $derived(panEffect());
+	const enableZoom = $derived(imageZoom && !isVideo);
+	const enablePan = $derived(imagePan && !isVideo);
 
 	function GetFace(i: number) {
 		const people = image[1].people as PersonWithFacesResponseDto[];
@@ -128,6 +137,22 @@
 	}
 
 	let scaleValues = $derived(getScaleValues());
+
+	export const pause = async () => {
+		if (isVideo && videoElement) {
+			videoElement.pause();
+		}
+	};
+
+	export const play = async () => {
+		if (isVideo && videoElement) {
+			try {
+				await videoElement.play();
+			} catch {
+				// Autoplay might be blocked; ignore.
+			}
+		}
+	};
 </script>
 
 {#if showInfo}
@@ -137,7 +162,7 @@
 <div class="immichframe_image relative place-self-center overflow-hidden">
 	<!-- Container with zoom-effect -->
 	<div
-		class="relative w-full h-full {imageZoom ? 'zoom' : ''} {imagePan ? 'pan' : ''}"
+		class="relative w-full h-full {enableZoom ? 'zoom' : ''} {enablePan ? 'pan' : ''}"
 		style="
 			--interval: {interval + 2}s;
 			--originX: {hasPerson ? getFaceMetric(0, 'centerX') + '%' : 'center'};
@@ -166,13 +191,28 @@
 			{/each}
 		{/if}
 
-		<img
-			class="{imageFill
-				? 'w-screen max-h-screen h-dvh-safe object-cover'
-				: 'max-h-screen h-dvh-safe max-w-full object-contain'} w-full h-full"
-			src={image[0]}
-			alt="data"
-		/>
+		{#if isVideo}
+			<video
+				bind:this={videoElement}
+				class="{imageFill
+					? 'w-screen max-h-screen h-dvh-safe object-cover'
+					: 'max-h-screen h-dvh-safe max-w-full object-contain'} w-full h-full"
+				src={image[0]}
+				autoplay
+				muted
+				playsinline
+				poster={thumbHashToDataURL(decodeBase64(image[1].thumbhash ?? ''))}
+				on:ended={() => dispatch('ended')}
+			/>
+		{:else}
+			<img
+				class="{imageFill
+					? 'w-screen max-h-screen h-dvh-safe object-cover'
+					: 'max-h-screen h-dvh-safe max-w-full object-contain'} w-full h-full"
+				src={image[0]}
+				alt="data"
+			/>
+		{/if}
 	</div>
 </div>
 <AssetInfo
@@ -218,19 +258,23 @@
 
 	@keyframes pan {
 		from {
-			transform: translateX(var(--pan-start-x, 0)) translateY(var(--pan-start-y, 0)) scale(var(--start-scale, 1));
+			transform: translateX(var(--pan-start-x, 0)) translateY(var(--pan-start-y, 0))
+				scale(var(--start-scale, 1));
 		}
 		to {
-			transform: translateX(var(--pan-end-x, 0)) translateY(var(--pan-end-y, 0)) scale(var(--end-scale, 1));
+			transform: translateX(var(--pan-end-x, 0)) translateY(var(--pan-end-y, 0))
+				scale(var(--end-scale, 1));
 		}
 	}
 
 	@keyframes zoom-pan {
 		from {
-			transform: translateX(var(--pan-start-x, 0)) translateY(var(--pan-start-y, 0)) scale(var(--start-scale, 1));
+			transform: translateX(var(--pan-start-x, 0)) translateY(var(--pan-start-y, 0))
+				scale(var(--start-scale, 1));
 		}
 		to {
-			transform: translateX(var(--pan-end-x, 0)) translateY(var(--pan-end-y, 0)) scale(var(--end-scale, 1.3));
+			transform: translateX(var(--pan-end-x, 0)) translateY(var(--pan-end-y, 0))
+				scale(var(--end-scale, 1.3));
 		}
 	}
 </style>

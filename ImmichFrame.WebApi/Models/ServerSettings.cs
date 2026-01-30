@@ -83,6 +83,7 @@ public class ServerAccountSettings : IAccountSettings, IConfigSettable
     public bool ShowMemories { get; set; } = false;
     public bool ShowFavorites { get; set; } = false;
     public bool ShowArchived { get; set; } = false;
+    public bool ShowVideos { get; set; } = false;
 
     public int? ImagesFromDays { get; set; }
     public DateTime? ImagesFromDate { get; set; }

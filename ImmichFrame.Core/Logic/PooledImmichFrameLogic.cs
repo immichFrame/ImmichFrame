@@ -80,9 +80,33 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
 
     public Task<long> GetTotalAssets() => _pool.GetAssetCount();
 
-    public async Task<(string fileName, string ContentType, Stream fileStream)> GetImage(Guid id)
+    public async Task<(string fileName, string ContentType, Stream fileStream)> GetAsset(Guid id, AssetTypeEnum? assetType = null)
     {
-// Check if the image is already downloaded
+        AssetResponseDto? assetInfo = null;
+        var resolvedType = assetType;
+
+        if (!resolvedType.HasValue)
+        {
+            assetInfo = await _immichApi.GetAssetInfoAsync(id, null);
+            resolvedType = assetInfo.Type;
+        }
+
+        if (resolvedType == AssetTypeEnum.IMAGE)
+        {
+            return await GetImageAsset(id);
+        }
+
+        if (resolvedType == AssetTypeEnum.VIDEO)
+        {
+            assetInfo ??= await _immichApi.GetAssetInfoAsync(id, null);
+            return await GetVideoAsset(id, assetInfo);
+        }
+
+        throw new AssetNotFoundException($"Asset {id} is not a supported media type ({resolvedType}).");
+    }
+
+    private async Task<(string fileName, string ContentType, Stream fileStream)> GetImageAsset(Guid id)
+    {
         if (_generalSettings.DownloadImages)
         {
             if (!Directory.Exists(_downloadLocation))
@@ -136,6 +160,33 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
         }
 
         return (fileName, contentType, data.Stream);
+    }
+
+    private async Task<(string fileName, string ContentType, Stream fileStream)> GetVideoAsset(Guid id, AssetResponseDto assetInfo)
+    {
+        var videoResponse = await _immichApi.PlayAssetVideoAsync(id, string.Empty);
+
+        if (videoResponse == null)
+            throw new AssetNotFoundException($"Video asset {id} was not found!");
+
+        var contentType = "";
+        if (videoResponse.Headers.ContainsKey("Content-Type"))
+        {
+            contentType = videoResponse.Headers["Content-Type"].FirstOrDefault() ?? "";
+        }
+
+        if (string.IsNullOrWhiteSpace(contentType))
+        {
+            contentType = "video/mp4";
+        }
+
+        var fileName = assetInfo.OriginalFileName;
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            fileName = $"{id}.mp4";
+        }
+
+        return (fileName, contentType, videoResponse.Stream);
     }
 
     public Task SendWebhookNotification(IWebhookNotification notification) =>

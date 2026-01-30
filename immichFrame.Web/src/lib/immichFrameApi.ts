@@ -222,7 +222,7 @@ export type IWeather = {
     description?: string | null;
     iconId?: string | null;
 };
-export function getAsset({ clientIdentifier }: {
+export function getAssets({ clientIdentifier }: {
     clientIdentifier?: string;
 } = {}, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
@@ -266,6 +266,20 @@ export function getImage(id: string, { clientIdentifier }: {
         data: Blob;
     }>(`/api/Asset/${encodeURIComponent(id)}/Image${QS.query(QS.explode({
         clientIdentifier
+    }))}`, {
+        ...opts
+    });
+}
+export function getAsset(id: string, { clientIdentifier, assetType }: {
+    clientIdentifier?: string;
+    assetType?: AssetTypeEnum;
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchBlob<{
+        status: 200;
+        data: Blob;
+    }>(`/api/Asset/${encodeURIComponent(id)}/Asset${QS.query(QS.explode({
+        clientIdentifier,
+        assetType
     }))}`, {
         ...opts
     });
