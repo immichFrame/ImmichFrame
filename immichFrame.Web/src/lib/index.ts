@@ -28,6 +28,13 @@ export const sendAuthSecretToServiceWorker = () => {
 
 	// Also send when service worker becomes ready (for initial page load)
 	navigator.serviceWorker.ready.then(sendMessage);
+
+	// Listen for auth secret requests from service worker
+	navigator.serviceWorker.addEventListener('message', (event) => {
+		if (event.data && event.data.type === 'REQUEST_AUTH_SECRET') {
+			sendMessage();
+		}
+	});
 };
 
 export const getBaseUrl = () => defaults.baseUrl;
