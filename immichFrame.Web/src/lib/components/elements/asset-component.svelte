@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { AssetResponseDto } from '$lib/immichFrameApi';
-	import { createEventDispatcher } from 'svelte';
 	import * as api from '$lib/index';
 	import ErrorElement from './error-element.svelte';
 	import Asset from './asset.svelte';

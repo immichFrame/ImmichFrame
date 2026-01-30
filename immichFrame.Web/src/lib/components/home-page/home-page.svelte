@@ -292,24 +292,22 @@
 		if (!duration) {
 			return 0;
 		}
-		const parts = duration.split(':').map((value) => value.trim());
-		if (!parts.length) {
+		const parts = duration.split(':').map((value) => value.trim().replace(',', '.'));
+
+		if (parts.length === 0 || parts.length > 3) {
 			return 0;
 		}
+
+		const multipliers = [3600, 60, 1]; // hours, minutes, seconds
+		const offset = multipliers.length - parts.length;
+
 		let total = 0;
-		let multiplier = 1;
-		while (parts.length) {
-			const value = parts.pop();
-			if (!value) {
-				continue;
-			}
-			const normalized = value.replace(',', '.');
-			const numeric = parseFloat(normalized);
+		for (let i = 0; i < parts.length; i++) {
+			const numeric = parseFloat(parts[i]);
 			if (Number.isNaN(numeric)) {
 				return 0;
 			}
-			total += numeric * multiplier;
-			multiplier *= 60;
+			total += numeric * multipliers[offset + i];
 		}
 		return total;
 	}
