@@ -99,7 +99,7 @@ public class AlbumAssetsPoolTests
     {
         _mockAccountSettings.SetupGet(s => s.Albums).Returns((List<Guid>)null);
 
-        var result = (await _albumAssetsPool.TestLoadAssets()).ToList();
+        var result = (await _albumAssetsPool.GetAssets(25)).ToList();
         Assert.That(result, Is.Empty);
 
         // the absence of an error, whereas before a null pointer exception would be thrown, indicates success.
@@ -110,7 +110,7 @@ public class AlbumAssetsPoolTests
     {
         _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns((List<Guid>)null);
 
-        var result = (await _albumAssetsPool.TestLoadAssets()).ToList();
+        var result = (await _albumAssetsPool.GetAssets(25)).ToList();
         Assert.That(result, Is.Empty);
 
         // the absence of an error, whereas before a null pointer exception would be thrown, indicates success.

@@ -204,7 +204,7 @@ public class AllAssetsPoolTests
         _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns((List<Guid>)null);
 
         // Create a set of assets to verify that the code was actually exercised (minimize risk of false positives)
-        var allAssets = CreateSampleAssets(5, "asset");
+        var allAssets = CreateSampleImageAssets(5, "asset");
 
         _mockImmichApi.Setup(api => api.SearchRandomAsync(It.IsAny<RandomSearchDto>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(allAssets);

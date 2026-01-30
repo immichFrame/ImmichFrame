@@ -7,18 +7,6 @@ public class AlbumAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSe
 {
     protected override async Task<IEnumerable<AssetResponseDto>> LoadAssets(CancellationToken ct = default)
     {
-        var excludedAlbumAssets = new List<AssetResponseDto>();
-
-        var excludedAlbums = accountSettings.ExcludedAlbums;
-        if (excludedAlbums != null)
-        {
-            foreach (var albumId in excludedAlbums)
-            {
-                var albumInfo = await immichApi.GetAlbumInfoAsync(albumId, null, null, ct);
-                excludedAlbumAssets.AddRange(albumInfo.Assets);
-            }
-        }
-
         var albumAssets = new List<AssetResponseDto>();
 
         var albums = accountSettings.Albums;
