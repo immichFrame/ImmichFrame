@@ -30,6 +30,7 @@
 		imageZoom?: boolean;
 		imagePan?: boolean;
 		showInfo: boolean;
+		playAudio?: boolean;
 	}
 
 	let {
@@ -48,7 +49,8 @@
 		imageFill = false,
 		imageZoom = false,
 		imagePan = false,
-		showInfo = $bindable(false)
+		showInfo = $bindable(false),
+		playAudio = false
 	}: Props = $props();
 	let instantTransition = slideshowStore.instantTransition;
 	let transitionDuration = $derived(
@@ -57,8 +59,8 @@
 	let transitionDelay = $derived($instantTransition ? 0 : transitionDuration / 2 + 25);
 	const dispatch = createEventDispatcher<{ ended: void }>();
 
-	let primaryImageComponent: ImageComponent;
-	let secondaryImageComponent: ImageComponent | undefined;
+	let primaryImageComponent = $state<ImageComponent | undefined>(undefined);
+	let secondaryImageComponent = $state<ImageComponent | undefined>(undefined);
 
 	function handleMediaEnded() {
 		dispatch('ended');
@@ -116,6 +118,7 @@
 							{imageZoom}
 							{imagePan}
 							{split}
+							{playAudio}
 							bind:this={primaryImageComponent}
 							on:ended={handleMediaEnded}
 							bind:showInfo
@@ -135,6 +138,7 @@
 							{imageZoom}
 							{imagePan}
 							{split}
+							{playAudio}
 							bind:this={secondaryImageComponent}
 							on:ended={handleMediaEnded}
 							bind:showInfo
@@ -156,6 +160,7 @@
 						{imageZoom}
 						{imagePan}
 						{split}
+						{playAudio}
 						bind:this={primaryImageComponent}
 						on:ended={handleMediaEnded}
 						bind:showInfo

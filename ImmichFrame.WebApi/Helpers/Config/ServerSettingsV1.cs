@@ -54,6 +54,7 @@ public class ServerSettingsV1 : IConfigSettable
     public bool ImageZoom { get; set; } = true;
     public bool ImagePan { get; set; } = false;
     public bool ImageFill { get; set; } = false;
+    public bool PlayAudio { get; set; } = false;
     public string Layout { get; set; } = "splitview";
 }
 
@@ -84,6 +85,7 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
         public bool ShowFavorites => _delegate.ShowFavorites;
         public bool ShowArchived => _delegate.ShowArchived;
         public bool ShowVideos => _delegate.ShowVideos;
+        public bool PlayAudio => _delegate.PlayAudio;
         public int? ImagesFromDays => _delegate.ImagesFromDays;
         public DateTime? ImagesFromDate => _delegate.ImagesFromDate;
         public DateTime? ImagesUntilDate => _delegate.ImagesUntilDate;
@@ -130,6 +132,7 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
         public bool ImageZoom => _delegate.ImageZoom;
         public bool ImagePan => _delegate.ImagePan;
         public bool ImageFill => _delegate.ImageFill;
+        public bool PlayAudio => _delegate.PlayAudio;
         public string Layout => _delegate.Layout;
         public string Language => _delegate.Language;
 

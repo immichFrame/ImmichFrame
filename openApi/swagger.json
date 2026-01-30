@@ -932,6 +932,9 @@
           "imageFill": {
             "type": "boolean"
           },
+          "playAudio": {
+            "type": "boolean"
+          },
           "layout": {
             "type": "string",
             "nullable": true

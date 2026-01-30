@@ -429,6 +429,7 @@
 				bind:this={imageComponent}
 				on:ended={() => handleDone(false, false)}
 				bind:showInfo={infoVisible}
+				playAudio={$configStore.playAudio}
 			/>
 		</div>
 
