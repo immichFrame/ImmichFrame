@@ -5,23 +5,24 @@ import { get } from 'svelte/store';
 
 export * from './immichFrameApi.js';
 
+let isAuthListenerRegistered = false;
 
 export const init = () => {
 	setBearer();
 	sendAuthSecretToServiceWorker();
 };
 
+const sendMessage = () => {
+	if (navigator.serviceWorker.controller) {
+		navigator.serviceWorker.controller.postMessage({
+			type: 'SET_AUTH_SECRET',
+			authSecret: get(authSecretStore)
+		});
+	}
+};
+
 export const sendAuthSecretToServiceWorker = () => {
 	if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return;
-
-	const sendMessage = () => {
-		if (navigator.serviceWorker.controller) {
-			navigator.serviceWorker.controller.postMessage({
-				type: 'SET_AUTH_SECRET',
-				authSecret: get(authSecretStore)
-			});
-		}
-	};
 
 	// Send immediately if controller is ready
 	sendMessage();
@@ -29,12 +30,15 @@ export const sendAuthSecretToServiceWorker = () => {
 	// Also send when service worker becomes ready (for initial page load)
 	navigator.serviceWorker.ready.then(sendMessage);
 
-	// Listen for auth secret requests from service worker
-	navigator.serviceWorker.addEventListener('message', (event) => {
-		if (event.data && event.data.type === 'REQUEST_AUTH_SECRET') {
-			sendMessage();
-		}
-	});
+	// Listen for auth secret requests from service worker (register only once)
+	if (!isAuthListenerRegistered) {
+		isAuthListenerRegistered = true;
+		navigator.serviceWorker.addEventListener('message', (event) => {
+			if (event.data && event.data.type === 'REQUEST_AUTH_SECRET') {
+				sendMessage();
+			}
+		});
+	}
 };
 
 export const getBaseUrl = () => defaults.baseUrl;
