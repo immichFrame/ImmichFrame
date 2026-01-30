@@ -5,6 +5,10 @@ sidebar_position: 1
 
 # Video Playback
 
+:::warning[Experimental]
+Video playback is an experimental feature and may not work as expected in all environments. Functionality and configuration options are subject to change.
+:::
+
 ImmichFrame supports playing video assets from your Immich library alongside photos in your slideshow.
 
 ## Enabling Video Playback

@@ -21,7 +21,7 @@ No. ImmichFrame pulls media directly from Immich. Images can be cached via Immic
 
 ### Does ImmichFrame support videos?
 
-Yes! ImmichFrame can display videos from your Immich library. Video playback is disabled by default - enable it by setting `ShowVideos: true` in your account configuration. See the [Video Playback](/docs/features/video-playback) documentation for more details.
+Yes! ImmichFrame can display videos from your Immich library. Video playback is currently an **experimental** feature and is disabled by default - enable it by setting `ShowVideos: true` in your account configuration. See the [Video Playback](/docs/features/video-playback) documentation for more details.
 
 ---
 
