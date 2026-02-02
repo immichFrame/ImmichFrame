@@ -163,26 +163,49 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
     private async Task<(string fileName, string ContentType, Stream fileStream)> GetVideoAsset(Guid id)
     {
         var videoResponse = await _immichApi.PlayAssetVideoAsync(id, string.Empty);
-
         if (videoResponse == null)
             throw new AssetNotFoundException($"Video asset {id} was not found!");
 
-        var contentType = "";
-        if (videoResponse.Headers.ContainsKey("Content-Type"))
-        {
-            contentType = videoResponse.Headers["Content-Type"].FirstOrDefault() ?? "";
-        }
-
-        if (string.IsNullOrWhiteSpace(contentType))
-        {
-            contentType = "video/mp4";
-        }
+        var contentType = videoResponse.Headers.ContainsKey("Content-Type")
+            ? videoResponse.Headers["Content-Type"].FirstOrDefault() ?? "video/mp4"
+            : "video/mp4";
 
         var fileName = $"{id}.mp4";
 
-        return (fileName, contentType, videoResponse.Stream);
-    }
+        if (_generalSettings.DownloadImages)
+        {
+            if (!Directory.Exists(_downloadLocation))
+            {
+                Directory.CreateDirectory(_downloadLocation);
+            }
 
+            var filePath = Path.Combine(_downloadLocation, fileName);
+
+            if (File.Exists(filePath))
+            {
+                if (_generalSettings.RenewImagesDuration > (DateTime.UtcNow - File.GetCreationTimeUtc(filePath)).Days)
+                {
+                    return (fileName, contentType, File.OpenRead(filePath));
+                }
+                File.Delete(filePath);
+            }
+
+            using (var fileStream = File.Create(filePath))
+            {
+                await videoResponse.Stream.CopyToAsync(fileStream);
+            }
+
+            return (fileName, contentType, File.OpenRead(filePath));
+        }
+        else
+        {
+            var memoryStream = new MemoryStream();
+            await videoResponse.Stream.CopyToAsync(memoryStream);
+            memoryStream.Position = 0;
+
+            return (fileName, contentType, memoryStream);
+        }
+    }
     public Task SendWebhookNotification(IWebhookNotification notification) =>
         WebhookHelper.SendWebhookNotification(notification, _generalSettings.Webhook);
 
