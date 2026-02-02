@@ -162,14 +162,6 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
 
     private async Task<(string fileName, string ContentType, Stream fileStream)> GetVideoAsset(Guid id)
     {
-        var videoResponse = await _immichApi.PlayAssetVideoAsync(id, string.Empty);
-        if (videoResponse == null)
-            throw new AssetNotFoundException($"Video asset {id} was not found!");
-
-        var contentType = videoResponse.Headers.ContainsKey("Content-Type")
-            ? videoResponse.Headers["Content-Type"].FirstOrDefault() ?? "video/mp4"
-            : "video/mp4";
-
         var fileName = $"{id}.mp4";
 
         if (_generalSettings.DownloadImages)
@@ -185,10 +177,19 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
             {
                 if (_generalSettings.RenewImagesDuration > (DateTime.UtcNow - File.GetCreationTimeUtc(filePath)).Days)
                 {
-                    return (fileName, contentType, File.OpenRead(filePath));
+                    return (fileName, "video/mp4", File.OpenRead(filePath));
                 }
                 File.Delete(filePath);
             }
+
+            using var videoResponse = await _immichApi.PlayAssetVideoAsync(id, string.Empty);
+
+            if (videoResponse == null)
+                throw new AssetNotFoundException($"Video asset {id} was not found!");
+
+            var contentType = videoResponse.Headers.ContainsKey("Content-Type")
+                ? videoResponse.Headers["Content-Type"].FirstOrDefault() ?? "video/mp4"
+                : "video/mp4";
 
             using (var fileStream = File.Create(filePath))
             {
@@ -199,6 +200,15 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
         }
         else
         {
+            using var videoResponse = await _immichApi.PlayAssetVideoAsync(id, string.Empty);
+
+            if (videoResponse == null)
+                throw new AssetNotFoundException($"Video asset {id} was not found!");
+
+            var contentType = videoResponse.Headers.ContainsKey("Content-Type")
+                ? videoResponse.Headers["Content-Type"].FirstOrDefault() ?? "video/mp4"
+                : "video/mp4";
+
             var memoryStream = new MemoryStream();
             await videoResponse.Stream.CopyToAsync(memoryStream);
             memoryStream.Position = 0;
