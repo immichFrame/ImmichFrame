@@ -25,7 +25,7 @@ public abstract class CachingApiAssetsPool(IApiCache apiCache, ImmichApi immichA
 
         var assetsToReturn = allAssets.Skip(requestContext.AssetOffset).Take(requested);
 
-        requestContext.AssetOffset += requested;
+        requestContext.AssetOffset += assetsToReturn.Count();
         if (requestContext.AssetOffset >= totalCount)
         {
             requestContext.AssetOffset = 0;

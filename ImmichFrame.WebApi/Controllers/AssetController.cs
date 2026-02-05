@@ -37,7 +37,7 @@ namespace ImmichFrame.WebApi.Controllers
         }
 
         [HttpGet(Name = "GetAssets")]
-        public async Task<AssetListResponseDto> GetAssets(string clientIdentifier = "", int assetOffset = 0)
+        public async Task<AssetListResponseDto> GetAssets(string clientIdentifier = "")
         {
             var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
             _logger.LogDebug("Assets requested by '{sanitizedClientIdentifier}'", sanitizedClientIdentifier);

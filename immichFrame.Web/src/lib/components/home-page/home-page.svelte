@@ -131,7 +131,7 @@
 	async function loadAssets() {
 		try {
 			let assetRequest = await api.getAssets({
-				clientIdentifier: undefined,
+				clientIdentifier: $clientIdentifierStore,
 				assetOffset: assetOffset
 			});
 

@@ -16,9 +16,23 @@ namespace ImmichFrame.WebApi.Helpers
             if (context.Request.Query.TryGetValue("assetOffset", out var assetOffset))
             {
                 string value = assetOffset.ToString();
+
                 if (value != null && value.Length > 0)
                 {
-                    requestContext.AssetOffset = int.Parse(value);
+                    int number;
+                    bool success = int.TryParse(value, out number);
+                    if (success)
+                    {
+                        requestContext.AssetOffset = number;
+                    }
+                    else
+                    {
+                        requestContext.AssetOffset = 0;
+                    }
+                }
+                else
+                {
+                    requestContext.AssetOffset = 0;
                 }
             }
 
