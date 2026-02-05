@@ -13,9 +13,25 @@ public abstract class CachingApiAssetsPool(IApiCache apiCache, ImmichApi immichA
         return (await AllAssets(ct)).Count();
     }
 
-    public async Task<IEnumerable<AssetResponseDto>> GetAssets(int requested, CancellationToken ct = default)
+    public async Task<IEnumerable<AssetResponseDto>> GetAssets(int requested, IRequestContext requestContext, CancellationToken ct = default)
     {
-        return (await AllAssets(ct)).OrderBy(_ => _random.Next()).Take(requested);
+        var allAssets = await AllAssets(ct);
+        var totalCount = allAssets.Count();
+
+        if (requestContext.AssetOffset >= totalCount)
+        {
+            requestContext.AssetOffset = 0;
+        }
+
+        var assetsToReturn = allAssets.Skip(requestContext.AssetOffset).Take(requested);
+
+        requestContext.AssetOffset += requested;
+        if (requestContext.AssetOffset >= totalCount)
+        {
+            requestContext.AssetOffset = 0;
+        }
+
+        return assetsToReturn;
     }
 
     private async Task<IEnumerable<AssetResponseDto>> AllAssets(CancellationToken ct = default)

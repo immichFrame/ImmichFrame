@@ -1,15 +1,17 @@
 using ImmichFrame.Core.Api;
+using ImmichFrame.Core.Interfaces;
 
 namespace ImmichFrame.Core.Logic.Pool;
 
 public interface IAssetPool
 {
     Task<long> GetAssetCount(CancellationToken ct = default);
-    Task<IEnumerable<AssetResponseDto>> GetAssets(int requested, CancellationToken ct = default);
+    Task<IEnumerable<AssetResponseDto>> GetAssets(int requested, IRequestContext requestContext, CancellationToken ct = default);
 
     protected static async Task<IEnumerable<AssetResponseDto>> WaitAssets(
         int requested,
-        Func<CancellationToken, Task<AssetResponseDto?>> supplier,
+        Func<IRequestContext, CancellationToken, Task<AssetResponseDto?>> supplier,
+        IRequestContext requestContext,
         CancellationToken? cancellationToken = null)
     {
         //allow up to one minute
@@ -19,7 +21,7 @@ public interface IAssetPool
 
         for (var i = 0; i < requested; i++)
         {
-            var asset = await supplier(ct);
+            var asset = await supplier(requestContext, ct);
 
             if (asset != null)
             {

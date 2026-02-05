@@ -24,14 +24,15 @@ public class MultiImmichFrameLogicDelegate : IImmichFrameLogic
             keySelector: a => a,
             elementSelector: logicFactory
         );
+
         _accountSelectionStrategy.Initialize(_accountToDelegate.Values);
     }
 
-    public async Task<AssetResponseDto?> GetNextAsset() => (await _accountSelectionStrategy.GetNextAsset())?.ToAsset();
+    public async Task<AssetResponseDto?> GetNextAsset(IRequestContext requestContext) => (await _accountSelectionStrategy.GetNextAsset(requestContext))?.ToAsset();
 
 
-    public async Task<IEnumerable<AssetResponseDto>> GetAssets()
-        => (await _accountSelectionStrategy.GetAssets()).Shuffle().Select(it => it.ToAsset());
+    public async Task<IEnumerable<AssetResponseDto>> GetAssets(IRequestContext requestContext)
+        => (await _accountSelectionStrategy.GetAssets(requestContext)).Shuffle().Select(it => it.ToAsset());
 
 
     public Task<AssetResponseDto> GetAssetInfoById(Guid assetId)

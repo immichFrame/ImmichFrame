@@ -5,8 +5,8 @@ namespace ImmichFrame.Core.Interfaces
 {
     public interface IImmichFrameLogic
     {
-        public Task<AssetResponseDto?> GetNextAsset();
-        public Task<IEnumerable<AssetResponseDto>> GetAssets();
+        public Task<AssetResponseDto?> GetNextAsset(IRequestContext requestContext);
+        public Task<IEnumerable<AssetResponseDto>> GetAssets(IRequestContext requestContext);
         public Task<AssetResponseDto> GetAssetInfoById(Guid assetId);
         public Task<IEnumerable<AlbumResponseDto>> GetAlbumInfoById(Guid assetId);
         public Task<(string fileName, string ContentType, Stream fileStream)> GetAsset(Guid id, AssetTypeEnum? assetType = null);
@@ -23,8 +23,8 @@ namespace ImmichFrame.Core.Interfaces
     public interface IAccountSelectionStrategy
     {
         void Initialize(IList<IAccountImmichFrameLogic> accounts);
-        Task<(IAccountImmichFrameLogic, AssetResponseDto)?> GetNextAsset();
-        Task<IEnumerable<(IAccountImmichFrameLogic, AssetResponseDto)>> GetAssets();
+        Task<(IAccountImmichFrameLogic, AssetResponseDto)?> GetNextAsset(IRequestContext requestContext);
+        Task<IEnumerable<(IAccountImmichFrameLogic, AssetResponseDto)>> GetAssets(IRequestContext requestContext);
         T ForAsset<T>(Guid assetId, Func<IAccountImmichFrameLogic, T> f);
     }
 }

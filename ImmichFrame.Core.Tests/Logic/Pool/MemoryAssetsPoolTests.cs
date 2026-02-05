@@ -17,14 +17,19 @@ public class MemoryAssetsPoolTests
     private Mock<ImmichApi> _mockImmichApi;
     private Mock<IAccountSettings> _mockAccountSettings;
     private MemoryAssetsPool _memoryAssetsPool;
+    private Mock<IRequestContext> _mockRequestContext;
 
     [SetUp]
     public void Setup()
     {
         _mockImmichApi = new Mock<ImmichApi>(null, null); // Base constructor requires ILogger, IHttpClientFactory, IOptions, pass null
         _mockAccountSettings = new Mock<IAccountSettings>();
+        _mockRequestContext = new Mock<IRequestContext>();
 
         _memoryAssetsPool = new MemoryAssetsPool(_mockImmichApi.Object, _mockAccountSettings.Object);
+
+        // Default RequestContext
+        _mockRequestContext.Setup(x => x.AssetOffset).Returns(0);
     }
 
     private List<AssetResponseDto> CreateSampleAssets(int count, bool withExif, int yearCreated, AssetTypeEnum assetType)
@@ -84,7 +89,7 @@ public class MemoryAssetsPoolTests
         // Let's simulate this by calling a method that would trigger LoadAssets if cache is empty.
         // Since LoadAssets is protected, we'll test its effects via GetAsset.
         // We need to ensure the cache is empty or expired for LoadAssets to be called.
-        await _memoryAssetsPool.GetAssets(1, CancellationToken.None); // This should trigger LoadAssets
+        await _memoryAssetsPool.GetAssets(1, _mockRequestContext.Object, CancellationToken.None); // This should trigger LoadAssets
 
         // Assert
         _mockImmichApi.Verify(x => x.SearchMemoriesAsync(It.IsAny<DateTimeOffset>(), null, null, null, It.IsAny<CancellationToken>()), Times.Once);
@@ -104,7 +109,7 @@ public class MemoryAssetsPoolTests
             .ReturnsAsync(new AssetResponseDto { Id = assetId, ExifInfo = new ExifResponseDto { DateTimeOriginal = new DateTime(memoryYear, 1, 1) }, People = new List<PersonWithFacesResponseDto>() });
 
         // Act
-        var resultAsset = (await _memoryAssetsPool.GetAssets(1, CancellationToken.None)).First(); // Triggers LoadAssets
+        var resultAsset = (await _memoryAssetsPool.GetAssets(1, _mockRequestContext.Object, CancellationToken.None)).First(); // Triggers LoadAssets
 
         // Assert
         _mockImmichApi.Verify(x => x.GetAssetInfoAsync(new Guid(assetId), null, It.IsAny<CancellationToken>()), Times.Once);
@@ -124,7 +129,7 @@ public class MemoryAssetsPoolTests
             .ReturnsAsync(memories);
 
         // Act
-        var resultAsset = (await _memoryAssetsPool.GetAssets(1, CancellationToken.None)).First(); // Triggers LoadAssets
+        var resultAsset = (await _memoryAssetsPool.GetAssets(1, _mockRequestContext.Object, CancellationToken.None)).First(); // Triggers LoadAssets
 
         // Assert
         _mockImmichApi.Verify(x => x.GetAssetInfoAsync(It.IsAny<Guid>(), null, It.IsAny<CancellationToken>()), Times.Never);
@@ -156,7 +161,7 @@ public class MemoryAssetsPoolTests
 
 
             // Act
-            var resultAsset = (await _memoryAssetsPool.GetAssets(1, CancellationToken.None)).First(); // Triggers LoadAssets
+            var resultAsset = (await _memoryAssetsPool.GetAssets(1, _mockRequestContext.Object, CancellationToken.None)).First(); // Triggers LoadAssets
 
             // Assert
             Assert.That(resultAsset.ExifInfo, Is.Not.Null);
@@ -187,7 +192,7 @@ public class MemoryAssetsPoolTests
         // We need a way to inspect the result of LoadAssets directly.
         // We can make LoadAssets internal and use InternalsVisibleTo, or use reflection.
         // Or, we can rely on the setup of GetFromCacheAsync to capture the factory's result.
-        var loadedAssets = await _memoryAssetsPool.GetAssets(memories.Count * assetsPerMemory, CancellationToken.None); // Trigger load
+        var loadedAssets = await _memoryAssetsPool.GetAssets(memories.Count * assetsPerMemory, _mockRequestContext.Object, CancellationToken.None); // Trigger load
 
         // Assert
         Assert.That(loadedAssets, Is.Not.Null);
@@ -221,7 +226,7 @@ public class MemoryAssetsPoolTests
         // We need a way to inspect the result of LoadAssets directly.
         // We can make LoadAssets internal and use InternalsVisibleTo, or use reflection.
         // Or, we can rely on the setup of GetFromCacheAsync to capture the factory's result.
-        var loadedAssets = await _memoryAssetsPool.GetAssets(memories.Count * assetsPerMemory, CancellationToken.None); // Trigger load
+        var loadedAssets = await _memoryAssetsPool.GetAssets(memories.Count * assetsPerMemory, _mockRequestContext.Object, CancellationToken.None); // Trigger load
 
         // Assert
         Assert.That(loadedAssets, Is.Not.Null);

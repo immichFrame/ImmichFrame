@@ -102,6 +102,10 @@ export type TagResponseDto = {
 };
 export type AssetTypeEnum = 0 | 1 | 2 | 3;
 export type AssetVisibility = 0 | 1 | 2 | 3;
+export type AssetListResponseDto = {
+    assetOffset: number;
+    assets: AssetResponseDto[];
+};
 export type AssetResponseDto = {
     immichServerUrl?: string | null;
     checksum: string;
@@ -223,14 +227,16 @@ export type IWeather = {
     description?: string | null;
     iconId?: string | null;
 };
-export function getAssets({ clientIdentifier }: {
-    clientIdentifier?: string;
+export function getAssets({ clientIdentifier, assetOffset }: {
+   clientIdentifier?: string;
+   assetOffset?: number;
 } = {}, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
         status: 200;
-        data: AssetResponseDto[];
+        data: AssetListResponseDto;
     }>(`/api/Asset${QS.query(QS.explode({
-        clientIdentifier
+        clientIdentifier,
+        assetOffset
     }))}`, {
         ...opts
     });
