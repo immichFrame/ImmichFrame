@@ -8,24 +8,24 @@ public class PersonAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountS
 {
     protected override async Task<IEnumerable<AssetResponseDto>> LoadAssets(CancellationToken ct = default)
     {
+        var personAssets = new List<AssetResponseDto>();
+
+        var people = accountSettings.People;
+        if (people == null || people.Count == 0)
+        {
+            return personAssets;
+        }
+
+        foreach (var personId in people)
+        {
+            personAssets.AddRange(await LoadAssetsForPerson(personId, ct));
+        }
+
         var excludedPersonAssets = new List<AssetResponseDto>();
 
         foreach (var personId in accountSettings.ExcludedPeople)
         {
             excludedPersonAssets.AddRange(await LoadAssetsForPerson(personId, ct));
-        }
-
-        var personAssets = new List<AssetResponseDto>();
-
-        var people = accountSettings.People;
-        if (people == null)
-        {
-            return personAssets;
-        }
-        
-        foreach (var personId in people)
-        {
-            personAssets.AddRange(await LoadAssetsForPerson(personId, ct));
         }
 
         return personAssets.WhereExcludes(excludedPersonAssets, t => t.Id);

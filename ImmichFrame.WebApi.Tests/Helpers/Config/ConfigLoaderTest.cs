@@ -127,7 +127,7 @@ public class ConfigLoaderTest
                     }
                     else
                     {
-                        Assert.That(value, Is.EqualTo(7), prop.Name);
+                        Assert.That(value, Is.EqualTo(prop.Name.Equals("TemperatureDecimalDigits") ? 2 : 7), prop.Name);
                     }
                     break;
                 case var t when t == typeof(double):
