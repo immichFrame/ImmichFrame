@@ -13,7 +13,7 @@ namespace ImmichFrame.WebApi.Helpers
 
         public async Task InvokeAsync(HttpContext context, IRequestContext requestContext)
         {
-            // assetOffest
+            // assetOffset
             if (context.Request.Query.TryGetValue("assetOffset", out var assetOffset))
             {
                 string value = assetOffset.ToString();
