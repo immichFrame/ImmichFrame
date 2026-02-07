@@ -47,7 +47,7 @@
 	let authError: boolean = $state(false);
 	let errorMessage: string = $state('');
 	let assetOffset: number = 0;
-	let assestShuffleRandom: number = Math.floor(Math.random());
+	let assetShuffleRandom: number = Math.floor(Math.random() * 1000000);
 	let assetsState: AssetsState = $state({
 		assets: [],
 		error: false,
@@ -134,7 +134,7 @@
 			let assetRequest = await api.getAssets({
 				clientIdentifier: $clientIdentifierStore,
 				assetOffset: assetOffset,
-				assestShuffleRandom: assestShuffleRandom
+				assestShuffleRandom: assetShuffleRandom
 			});
 
 			if (assetRequest.status != 200) {

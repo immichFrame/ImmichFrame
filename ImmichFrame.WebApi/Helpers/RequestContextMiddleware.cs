@@ -36,26 +36,26 @@ namespace ImmichFrame.WebApi.Helpers
                 }
             }
 
-            // assestShuffleRandom
-            if (context.Request.Query.TryGetValue("assestShuffleRandom", out var assestShuffleRandom))
+            // assetShuffleRandom
+            if (context.Request.Query.TryGetValue("assestShuffleRandom", out var assetShuffleRandom))
             {
-                string value = assestShuffleRandom.ToString();
+                string value = assetShuffleRandom.ToString();
 
                 if (value != null && value.Length > 0)
                 {
                     bool success = int.TryParse(value, out int number);
                     if (success)
                     {
-                        requestContext.AssestShuffleRandom = number;
+                        requestContext.AssetShuffleRandom = number;
                     }
                     else
                     {
-                        requestContext.AssestShuffleRandom = 0;
+                        requestContext.AssetShuffleRandom = 0;
                     }
                 }
                 else
                 {
-                    requestContext.AssestShuffleRandom = 0;
+                    requestContext.AssetShuffleRandom = 0;
                 }
             }
 

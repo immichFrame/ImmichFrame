@@ -21,7 +21,8 @@ public abstract class CachingApiAssetsPool(IApiCache apiCache, ImmichApi immichA
             requestContext.AssetOffset = 0;
         }
 
-        var assetsToReturn = allAssets.OrderBy(_ => requestContext.AssestShuffleRandom).Skip(requestContext.AssetOffset).Take(requested);
+        var orderValue = new Random(requestContext.AssetShuffleRandom);
+        var assetsToReturn = allAssets.OrderBy(_ => orderValue.Next()).Skip(requestContext.AssetOffset).Take(requested);
 
         requestContext.AssetOffset += assetsToReturn.Count();
         if (requestContext.AssetOffset >= totalCount)
