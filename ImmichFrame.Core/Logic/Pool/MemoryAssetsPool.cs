@@ -9,13 +9,14 @@ public class MemoryAssetsPool(ImmichApi immichApi, IAccountSettings accountSetti
 {
     protected override async Task<IEnumerable<AssetResponseDto>> LoadAssets(CancellationToken ct = default)
     {
-        var memories = await immichApi.SearchMemoriesAsync(DateTime.Today.ToUniversalTime(), null, null, null, ct);
+        var searchDate = new DateTimeOffset(DateTime.SpecifyKind(DateTime.Today, DateTimeKind.Utc), TimeSpan.Zero);
+        var memories = await immichApi.SearchMemoriesAsync(searchDate, null, null, null, ct);
 
         var memoryAssets = new List<AssetResponseDto>();
         foreach (var memory in memories)
         {
             var assets = memory.Assets.ToList();
-            var yearsAgo = DateTime.Now.Year - memory.Data.Year;
+            var yearsAgo = searchDate.Year - memory.Data.Year;
 
             if (!accountSettings.ShowVideos)
             {
