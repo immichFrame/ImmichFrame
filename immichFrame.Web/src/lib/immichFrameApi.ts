@@ -227,16 +227,18 @@ export type IWeather = {
     description?: string | null;
     iconId?: string | null;
 };
-export function getAssets({ clientIdentifier, assetOffset }: {
+export function getAssets({ clientIdentifier, assetOffset, assestShuffleRandom }: {
    clientIdentifier?: string;
    assetOffset?: number;
+   assestShuffleRandom?: number;
 } = {}, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
         status: 200;
         data: AssetListResponseDto;
     }>(`/api/Asset${QS.query(QS.explode({
         clientIdentifier,
-        assetOffset
+        assetOffset,
+        assestShuffleRandom
     }))}`, {
         ...opts
     });

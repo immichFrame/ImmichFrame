@@ -5,5 +5,6 @@ namespace ImmichFrame.Core.Services
     public class RequestContext : IRequestContext
     {
         public int AssetOffset { get; set; }
+        public int AssestShuffleRandom { get; set; }
     }
 }

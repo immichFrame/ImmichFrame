@@ -13,14 +13,14 @@ namespace ImmichFrame.WebApi.Helpers
 
         public async Task InvokeAsync(HttpContext context, IRequestContext requestContext)
         {
+            // assetOffest
             if (context.Request.Query.TryGetValue("assetOffset", out var assetOffset))
             {
                 string value = assetOffset.ToString();
 
                 if (value != null && value.Length > 0)
                 {
-                    int number;
-                    bool success = int.TryParse(value, out number);
+                    bool success = int.TryParse(value, out int number);
                     if (success)
                     {
                         requestContext.AssetOffset = number;
@@ -33,6 +33,29 @@ namespace ImmichFrame.WebApi.Helpers
                 else
                 {
                     requestContext.AssetOffset = 0;
+                }
+            }
+
+            // assestShuffleRandom
+            if (context.Request.Query.TryGetValue("assestShuffleRandom", out var assestShuffleRandom))
+            {
+                string value = assestShuffleRandom.ToString();
+
+                if (value != null && value.Length > 0)
+                {
+                    bool success = int.TryParse(value, out int number);
+                    if (success)
+                    {
+                        requestContext.AssestShuffleRandom = number;
+                    }
+                    else
+                    {
+                        requestContext.AssestShuffleRandom = 0;
+                    }
+                }
+                else
+                {
+                    requestContext.AssestShuffleRandom = 0;
                 }
             }
 

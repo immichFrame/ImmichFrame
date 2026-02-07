@@ -6,8 +6,6 @@ namespace ImmichFrame.Core.Logic.Pool;
 
 public abstract class CachingApiAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings) : IAssetPool
 {
-    private readonly Random _random = new();
-
     public async Task<long> GetAssetCount(CancellationToken ct = default)
     {
         return (await AllAssets(ct)).Count();
@@ -23,7 +21,7 @@ public abstract class CachingApiAssetsPool(IApiCache apiCache, ImmichApi immichA
             requestContext.AssetOffset = 0;
         }
 
-        var assetsToReturn = allAssets.Skip(requestContext.AssetOffset).Take(requested);
+        var assetsToReturn = allAssets.OrderBy(_ => requestContext.AssestShuffleRandom).Skip(requestContext.AssetOffset).Take(requested);
 
         requestContext.AssetOffset += assetsToReturn.Count();
         if (requestContext.AssetOffset >= totalCount)
