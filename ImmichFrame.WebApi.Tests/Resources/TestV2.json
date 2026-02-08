@@ -35,6 +35,7 @@
     "ImagePan": true,
     "ImageFill": true,
     "PlayAudio": true,
+    "ExhaustiveAlbumShuffle": true,
     "Layout": "Layout_TEST"
   },
   "Accounts": [

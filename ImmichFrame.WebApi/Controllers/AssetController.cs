@@ -26,19 +26,28 @@ namespace ImmichFrame.WebApi.Controllers
         private readonly IImmichFrameLogic _logic;
         private readonly IGeneralSettings _settings;
 
-        public AssetController(ILogger<AssetController> logger, IImmichFrameLogic logic, IGeneralSettings settings)
+        private readonly IRequestContext _requestContext;
+
+        public AssetController(ILogger<AssetController> logger, IImmichFrameLogic logic, IGeneralSettings settings, IRequestContext requestContext)
         {
             _logger = logger;
             _logic = logic;
             _settings = settings;
+            _requestContext = requestContext;
         }
 
         [HttpGet(Name = "GetAssets")]
-        public async Task<List<AssetResponseDto>> GetAssets(string clientIdentifier = "")
+        public async Task<AssetListResponseDto> GetAssets(string clientIdentifier = "")
         {
             var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
             _logger.LogDebug("Assets requested by '{sanitizedClientIdentifier}'", sanitizedClientIdentifier);
-            return (await _logic.GetAssets()).ToList();
+
+            AssetListResponseDto response = new AssetListResponseDto();
+
+            response.Assets = (await _logic.GetAssets(_requestContext)).ToList();
+            response.AssetOffset = _requestContext.AssetOffset;
+
+            return response;
         }
 
         [HttpGet("{id}/AssetInfo", Name = "GetAssetInfo")]
@@ -94,7 +103,7 @@ namespace ImmichFrame.WebApi.Controllers
             const int maxAttempts = 10;
             for (int i = 0; i < maxAttempts; i++)
             {
-                var candidate = await _logic.GetNextAsset();
+                var candidate = await _logic.GetNextAsset(_requestContext);
                 if (candidate == null) break;
                 if (candidate.Type == AssetTypeEnum.IMAGE)
                 {

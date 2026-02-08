@@ -63,6 +63,7 @@ public class GeneralSettings : IGeneralSettings, IConfigSettable
     public bool ImagePan { get; set; } = false;
     public bool ImageFill { get; set; } = false;
     public bool PlayAudio { get; set; } = false;
+    public bool ExhaustiveAlbumShuffle { get; set; } = false;
     public string Layout { get; set; } = "splitview";
     public int RenewImagesDuration { get; set; } = 30;
     public List<string> Webcalendars { get; set; } = new();

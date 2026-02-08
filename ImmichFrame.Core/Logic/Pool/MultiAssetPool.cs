@@ -1,5 +1,6 @@
 using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Helpers;
+using ImmichFrame.Core.Interfaces;
 
 namespace ImmichFrame.Core.Logic.Pool;
 
@@ -11,12 +12,12 @@ public class MultiAssetPool(IEnumerable<IAssetPool> delegates) : AggregatingAsse
         return (await Task.WhenAll(counts)).Sum();
     }
 
-    protected override async Task<AssetResponseDto?> GetNextAsset(CancellationToken ct)
+    protected override async Task<AssetResponseDto?> GetNextAsset(IRequestContext requestContext, CancellationToken ct)
     {
-        var pool = await delegates.ChooseOne(async @delegate=> await @delegate.GetAssetCount(ct));
-        
+        var pool = await delegates.ChooseOne(async @delegate => await @delegate.GetAssetCount(ct));
+
         if (pool == null) return null;
-        
-        return (await pool.GetAssets(1, ct)).FirstOrDefault();
+
+        return (await pool.GetAssets(1, requestContext, ct)).FirstOrDefault();
     }
 }

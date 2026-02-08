@@ -64,14 +64,14 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
         return new MultiAssetPool(pools);
     }
 
-    public async Task<AssetResponseDto?> GetNextAsset()
+    public async Task<AssetResponseDto?> GetNextAsset(IRequestContext requestContext)
     {
-        return (await _pool.GetAssets(1)).FirstOrDefault();
+        return (await _pool.GetAssets(1, requestContext)).FirstOrDefault();
     }
 
-    public Task<IEnumerable<AssetResponseDto>> GetAssets()
+    public Task<IEnumerable<AssetResponseDto>> GetAssets(IRequestContext requestContext)
     {
-        return _pool.GetAssets(25);
+        return _pool.GetAssets(25, requestContext);
     }
 
     public Task<AssetResponseDto> GetAssetInfoById(Guid assetId) => _immichApi.GetAssetInfoAsync(assetId, null);
