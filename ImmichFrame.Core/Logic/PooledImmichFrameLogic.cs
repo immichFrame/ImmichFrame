@@ -193,11 +193,23 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
 
         if (_generalSettings.DownloadImages)
         {
-            using (var fileStream = File.Create(filePath!))
+            var tempFilePath = filePath + ".tmp";
+            try
             {
-                await videoResponse.Stream.CopyToAsync(fileStream);
+                using (var fileStream = File.Create(tempFilePath))
+                {
+                    await videoResponse.Stream.CopyToAsync(fileStream);
+                }
+
+                File.Move(tempFilePath, filePath!, overwrite: true);
+                return (fileName, contentType, File.OpenRead(filePath!));
             }
-            return (fileName, contentType, File.OpenRead(filePath!));
+            catch
+            {
+                if (File.Exists(tempFilePath))
+                    File.Delete(tempFilePath);
+                throw;
+            }
         }
 
         var tempPath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.mp4");
