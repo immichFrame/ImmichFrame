@@ -163,6 +163,7 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
     private async Task<(string fileName, string ContentType, Stream fileStream)> GetVideoAsset(Guid id)
     {
         var fileName = $"{id}.mp4";
+        string? filePath = null;
 
         if (_generalSettings.DownloadImages)
         {
@@ -171,8 +172,7 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
                 Directory.CreateDirectory(_downloadLocation);
             }
 
-            var filePath = Path.Combine(_downloadLocation, fileName);
-
+            filePath = Path.Combine(_downloadLocation, fileName);
             if (File.Exists(filePath))
             {
                 if (_generalSettings.RenewImagesDuration > (DateTime.UtcNow - File.GetCreationTimeUtc(filePath)).Days)
@@ -181,39 +181,45 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
                 }
                 File.Delete(filePath);
             }
+        }
 
-            using var videoResponse = await _immichApi.PlayAssetVideoAsync(id, string.Empty);
+        using var videoResponse = await _immichApi.PlayAssetVideoAsync(id, string.Empty);
+        if (videoResponse == null)
+            throw new AssetNotFoundException($"Video asset {id} was not found!");
 
-            if (videoResponse == null)
-                throw new AssetNotFoundException($"Video asset {id} was not found!");
+        var contentType = videoResponse.Headers.ContainsKey("Content-Type")
+            ? videoResponse.Headers["Content-Type"].FirstOrDefault() ?? "video/mp4"
+            : "video/mp4";
 
-            var contentType = videoResponse.Headers.ContainsKey("Content-Type")
-                ? videoResponse.Headers["Content-Type"].FirstOrDefault() ?? "video/mp4"
-                : "video/mp4";
-
-            using (var fileStream = File.Create(filePath))
+        if (_generalSettings.DownloadImages)
+        {
+            using (var fileStream = File.Create(filePath!))
             {
                 await videoResponse.Stream.CopyToAsync(fileStream);
             }
-
-            return (fileName, contentType, File.OpenRead(filePath));
+            return (fileName, contentType, File.OpenRead(filePath!));
         }
-        else
+
+        var tempPath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.mp4");
+        var tempFileStream = new FileStream(
+            tempPath,
+            FileMode.Create,
+            FileAccess.ReadWrite,
+            FileShare.None,
+            4096,
+            FileOptions.DeleteOnClose | FileOptions.Asynchronous
+        );
+
+        try
         {
-            using var videoResponse = await _immichApi.PlayAssetVideoAsync(id, string.Empty);
-
-            if (videoResponse == null)
-                throw new AssetNotFoundException($"Video asset {id} was not found!");
-
-            var contentType = videoResponse.Headers.ContainsKey("Content-Type")
-                ? videoResponse.Headers["Content-Type"].FirstOrDefault() ?? "video/mp4"
-                : "video/mp4";
-
-            var memoryStream = new MemoryStream();
-            await videoResponse.Stream.CopyToAsync(memoryStream);
-            memoryStream.Position = 0;
-
-            return (fileName, contentType, memoryStream);
+            await videoResponse.Stream.CopyToAsync(tempFileStream);
+            tempFileStream.Position = 0;
+            return (fileName, contentType, tempFileStream);
+        }
+        catch
+        {
+            tempFileStream.Dispose();
+            throw;
         }
     }
     public Task SendWebhookNotification(IWebhookNotification notification) =>
