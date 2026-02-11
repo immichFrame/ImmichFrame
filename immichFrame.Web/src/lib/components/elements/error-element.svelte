@@ -13,6 +13,11 @@
 	}
 
 	let { message = '', authError: authError = false }: Props = $props();
+	let retryMessage = $derived(
+		!authError
+			? 'The page will automatically refresh every 30 seconds until a connection is re-established.'
+			: ''
+	);
 </script>
 
 <div
@@ -52,8 +57,12 @@
 			</p>
 		{:else}
 			<p>
-				Looks like your immich-server is offline or you misconfigured immichFrame, check the
-				container logs
+				{message ||
+					'Looks like your immich-server is offline or you misconfigured immichFrame. Check the container logs.'}
+			</p>
+
+			<p class="text-lg mt-6 opacity-60 animate-pulse">
+				{retryMessage}
 			</p>
 		{/if}
 	</div>
