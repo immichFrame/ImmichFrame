@@ -76,16 +76,24 @@ ImmichFrame can be run on inexpensive Frameo digital photo frames with some addi
 
 Frameo digital photo frames are low powered and run a very old Android version, so they cannot run the full WebView version of the app (however most of the main features are still supported except SplitView). 
 
-> [!note]
-> We have found a method to update the WebView, but it is not without risks, see Frameo Webview Update below.  
+> [!NOTE]
+> We have found a method to update the WebView, but it is not without risks, see Frameo Webview Update below.
+> 
+> Webview provieds the following features that are not available without it: 
+> - SplitView
+> - Some image formats (HEIC)
+> - Video playback (experimenta)
+> - Better text rendering
+> - Show Tag, desc, and album info from Immich.
+> - Configurable layout, (size, background and overlay colors, and blur effects, etc). 
 
-  1. you will need to install ADB on your PC ([ADB instructions][ADB-link]).
+  1. You will need to install ADB on your PC ([ADB instructions][ADB-link]).
   
   2. Enable ADB on the Frameo device. ADB is often enabled on these devices by default, if it is not go to Frameo Settings-About-Enable Beta Program. Toggle ADB Access On-Off-On. 
   
   3. Connect via USB. Next to the power port on the Frameo device there is a USB port, connect this to your PC with a USB cable.
 
-  4. verify connection with `adb devices` command, you should see your device listed. If not, try unplugging and re-plugging the usb cable, or restarting the device while connected via usb.
+  4. Verify connection with `adb devices` command, you should see your device listed. If not, try unplugging and re-plugging the usb cable, or restarting the device while connected via usb.
   
   5. Download the latest ImmichFrame APK from the [GitHub Releases][github-android-releases] page to your PC. 
 
@@ -111,7 +119,7 @@ Frameo digital photo frames are low powered and run a very old Android version, 
      ```
   7. Start ImmichFrame:
      ```bash
-     adb shell am start com.immichframe.immichframe/.  MainActivity
+     adb shell am start com.immichframe.immichframe/.MainActivity
      ```
   8. Configure and disable WebView:  
      1. Swipe down to enter ImmichFrame Settings
@@ -121,18 +129,20 @@ Frameo digital photo frames are low powered and run a very old Android version, 
   9. Set as default HOME app:
   
      On first reboot after install you will be asked to select default Launcher, select `ImmichFrame` and select "Always"
-  
-  10. Then disable the Frameo app to to set ImmichFrame as only Home app:
+     
+     ![](Frameo_digital_photo_frames_default_app.png)
 
-      > [!NOTE]
-      > This is not possible with latest app version (< 1.29) so uninstalling updates (to 1.24) is required to get the overwriting of defualt home app to work. If you have already updated the Frameo app, you can uninstall updates by going to Android Settings-Apps-Frameo-Uninstall Updates.
+   10. Then disable the Frameo app to set ImmichFrame as only Home app:
 
-      ```bash
-      adb shell su
-      pm disable net.frameo.frame
-      exit
-      adb reboot
-      ```
+       > [!NOTE]
+       > This is not possible with latest app version (< 1.29) so uninstalling updates (to 1.24) is required to get the overwriting of default home app to work. If you have already updated the Frameo app, you can uninstall updates by going to Android Settings-Apps-Frameo-Uninstall Updates.
+
+       ```bash
+       adb shell su
+       pm disable net.frameo.frame
+       exit
+       adb reboot
+       ```
       If this doesn't stick on reboot, repeat the commands but power cycle after exit command
 
       
@@ -208,7 +218,9 @@ This has been tested and working on Android 6.01 10.1" Frameo devices.
     ```shell
     adb reboot
     ```
-    After reboot, you should se a "installing new app" notification, and then you can verify the new WebView version by going to Android `Settings-Apps`, top right corner tripel dot meny `show system`, Android System WebView.
+    After reboot, you should see a "installing new app" notification, and then you can verify the new WebView version by going to Android `Settings-Apps`, top right corner triple dot menu `show system`, Android System WebView.
+
+    ![](Frameo_digital_photo_frames_webview.png)
 
 > [!NOTE]
 > Depending on the device or Android version, the location to the webview apk may be different for you. You can locate it with:
