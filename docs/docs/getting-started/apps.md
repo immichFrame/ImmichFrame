@@ -126,16 +126,13 @@ Frameo digital photo frames are low powered and run a very old Android version, 
      2. Configure URL and Authorization Secret (optional)
      3. Disable WebView
 
-  9. Set as default HOME app:
+ 9. Set as default HOME app:
   
      On first reboot after install you will be asked to select default Launcher, select `ImmichFrame` and select "Always"
      
      ![](Frameo_digital_photo_frames_default_app.png)
 
-   10. Then disable the Frameo app to set ImmichFrame as only Home app:
-
-       > [!NOTE]
-       > This is not possible with latest app version (< 1.29) so uninstalling updates (to 1.24) is required to get the overwriting of default home app to work. If you have already updated the Frameo app, you can uninstall updates by going to Android Settings-Apps-Frameo-Uninstall Updates.
+ 10. Then disable the Frameo app to set ImmichFrame as only Home app:
 
        ```bash
        adb shell su
@@ -145,7 +142,10 @@ Frameo digital photo frames are low powered and run a very old Android version, 
        ```
       If this doesn't stick on reboot, repeat the commands but power cycle after exit command
 
-      
+> [!NOTE]
+> This is not possible with latest app version (< 1.29) so uninstalling updates (to 1.24) is required to get the overwriting of default home app to work. If you have already updated the Frameo app, you can uninstall updates by going to Android Settings-Apps-Frameo-Uninstall Updates.
+
+
 
 #### Some other useful ADB commands:
 
