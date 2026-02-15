@@ -72,94 +72,150 @@ curl "http://192.168.0.136:53287/brightness?value=0.5"
 ```
 
 ### Frameo
-ImmichFrame can be run on inexpensive Frameo digital photo frames with some additional effort. You can typically find these for ~$40 USD. These devices are low powered and run a very old Android version, so they cannot run the full WebView version of the app (however most of the main features are still supported except SplitView). We have found a method to update the WebView, but it is not without risks, see Frameo Webview Update below.  
- If you have not already, you will need to install ADB on your PC ([ADB instructions][ADB-link]).
-ADB is often enabled on these devices by default, if it is not go to Frameo Settings-About-Enable Beta Program. Toggle ADB Access On-Off-On. Use the ADB commands below to sideload [ImmichFrame APK][github-android-releases], configure it to your liking, then disable the Frameo app to to set ImmichFrame as default Home app:
-  - Sideload ImmichFrame:
-    ```bash
-    adb install /path/to/ImmichFrame_vXX.apk
-    ```
-  - Update existing ImmichFrame:
-    ```bash
-    adb install -r /path/to/ImmichFrame_vXX.apk
-    ```
-  - Start ImmichFrame:
-    ```bash
-    adb shell am start com.immichframe.immichframe/.MainActivity
-    ```
-    - Swipe down to enter ImmichFrame Settings
-    - Configure URL and Authorization Secret (optional)
-    - Disable WebView
-  - Set as default HOME app
-    - On first reboot after install you will be asked to select default Launcher, select ImmichFrame
-    - Alternatively you can disable Frameo
+ImmichFrame can be run on inexpensive Frameo digital photo frames with some additional effort. You can typically find these for ~$40 USD. 
+
+Frameo digital photo frames are low powered and run a very old Android version, so they cannot run the full WebView version of the app (however most of the main features are still supported except SplitView). 
+
+> [!note]
+> We have found a method to update the WebView, but it is not without risks, see Frameo Webview Update below.  
+
+  1. you will need to install ADB on your PC ([ADB instructions][ADB-link]).
+  
+  2. Enable ADB on the Frameo device. ADB is often enabled on these devices by default, if it is not go to Frameo Settings-About-Enable Beta Program. Toggle ADB Access On-Off-On. 
+  
+  3. Connect via USB. Next to the power port on the Frameo device there is a USB port, connect this to your PC with a USB cable.
+
+  4. verify connection with `adb devices` command, you should see your device listed. If not, try unplugging and re-plugging the usb cable, or restarting the device while connected via usb.
+  
+  5. Download the latest ImmichFrame APK from the [GitHub Releases][github-android-releases] page to your PC. 
+
+     For linux or mac you can run the following command to download the latest release directly to your current directory:
+
+     ```bash
+     curl -L -o ImmichFrame.apk $(curl -s https://api.github.com/repos/immichFrame/ImmichFrame_Android/releases/latest | grep "browser_download_url.*apk" | cut -d : -f 2,3 | tr -d \")
+      ```
+
+     For windows you can run the following command in powershell to download the latest release directly to your current directory:
+     ```powershell
+     Invoke-WebRequest -Uri (Invoke-RestMethod -Uri https://api.github.com/repos/immichFrame/ImmichFrame_Android/releases/latest).assets | Where-Object { $_.name -like "*.apk" } | Select-Object -First 1 -ExpandProperty browser_download_url | Invoke-WebRequest -OutFile ImmichFrame.apk
+     ```
+
+  6. Sideload ImmichFrame:
+     ```bash
+     adb install /path/to/ImmichFrame_vXX.apk
+     ```
+
+     **Update/reinstall existing ImmichFrame:**
+     ```bash
+     adb install -r /path/to/ImmichFrame_vXX.apk
+     ```
+  7. Start ImmichFrame:
+     ```bash
+     adb shell am start com.immichframe.immichframe/.  MainActivity
+     ```
+  8. Configure and disable WebView:  
+     1. Swipe down to enter ImmichFrame Settings
+     2. Configure URL and Authorization Secret (optional)
+     3. Disable WebView
+
+  9. Set as default HOME app:
+  
+     On first reboot after install you will be asked to select default Launcher, select `ImmichFrame` and select "Always"
+  
+  10. Then disable the Frameo app to to set ImmichFrame as only Home app:
+
+      > [!NOTE]
+      > This is not possible with latest app version (< 1.29) so uninstalling updates (to 1.24) is required to get the overwriting of defualt home app to work. If you have already updated the Frameo app, you can uninstall updates by going to Android Settings-Apps-Frameo-Uninstall Updates.
+
       ```bash
       adb shell su
       pm disable net.frameo.frame
       exit
+      adb reboot
       ```
       If this doesn't stick on reboot, repeat the commands but power cycle after exit command
-  - Some other useful ADB commands:
-    - Reboot:
-      ```bash
-      adb reboot
-      ``` 
-        - You can also reboot or shutdown by holding down power button
-    - Access Android Settings:
-      ```bash 
-      adb shell am start -a android.settings.SETTINGS
-      ```
-    - Re-enable Frameo: repeat disable commands above but replace "disable" with "enable"
-    - Start Frameo app:
-      ```bash 
-      adb shell am start net.frameo.frame
-      ```
-    - Uninstall ImmichFrame:
-      ```
-      adb uninstall com.immichframe.immichframe
-      ```
+
+      
+
+#### Some other useful ADB commands:
+
+**Reboot:**
+
+```bash
+adb reboot
+``` 
+
+> [!NOTE]
+> You can also reboot or shutdown by holding down power button
+
+**Access Android Settings:**
+
+```bash 
+adb shell am start -a android.settings.SETTINGS
+```
+
+#### Re-enable Frameo
+
+1. Enable Frameo again with ADB command:
+    ```bash
+    adb shell su
+    pm enable net.frameo.frame
+    exit
+    ```
+
+2. Start Frameo app:
+    ```bash 
+    adb shell am start net.frameo.frame
+    ```
+
+3. Uninstall ImmichFrame:
+    ```
+    adb uninstall com.immichframe.immichframe
+    ```
   
 ### Frameo WebView Update  
-Follow instructions below to update WebView to 106. This has been tested and working on Android 6.01 10.1" Frameo devices:  
-- Download WebView 106 to PC:
-  [Lineage OS WebView 106-0-5249-126-12][webview-update]
-- Push new apk to sdcard
-  ```shell
-  adb push /path/to/your/new/webview.apk /sdcard/
-  ```
-- Enter shell and switch to the root user
-  ```shell
-  adb shell
-  ```
-  then inside the shell
-  ```shell
-  su
-  ```
-- Backup original WebView APK
-  ```shell
-  mount -o rw,remount /system && cp /system/app/webview/webview.apk /system/app/webview/webview.apk.bak
-  ```
-- Delete the oat folder recursively
-  ```shell
-  mount -o rw,remount /system && rm -rf /system/app/webview/oat
-  ```
-- Copy new WebView to system    
-  ```shell
-  mount -o rw,remount /system && cp /sdcard/webview.apk /system/app/webview/webview.apk
-  ```
-- exit root
-  ```shell
-  exit
-  ```
-- Reboot device
-  ```shell
-  adb reboot
-  ```
+Follow instructions below to update WebView to 106. 
 
-Depending on the device or Android version, the location to the webview apk may be different for you. You can locate it with
-```shell
-adb shell pm path com.android.webview
-```
+This has been tested and working on Android 6.01 10.1" Frameo devices.
+
+1. Download WebView 106 to PC:
+  
+   [Lineage OS WebView 106-0-5249-126-12 (arm64-v8a + arm-v7a) (Android 6.0+)][webview-update]
+
+2. Push new apk to sdcard
+    > [!NOTE]
+    > Android does not have auto complete so you will save time if the new file is /sdcard/webview.apk, so you can just run `adb push /path/to/webview.apk /sdcard/webview.apk` and it will be named webview.apk on the device.
+    ```shell
+    adb push /path/to/your/new/webview.apk /sdcard/webview.apk
+    ```
+3. Enter shell and switch to the root user
+    ```shell
+    adb shell su
+    ```
+4. Backup original WebView APK
+    ```shell
+    mount -o rw,remount /system && cp /system/app/webview/webview.apk /system/app/webview/webview.apk.bak
+    ```
+5. Delete the oat folder recursively
+    ```shell
+    mount -o rw,remount /system && rm -rf /system/app/webview/oat
+    ```
+6. Copy new WebView to system    
+    ```shell
+    mount -o rw,remount /system && cp /sdcard/webview.apk /system/app/webview/webview.apk
+    ```
+7. Reboot device
+    ```shell
+    adb reboot
+    ```
+    After reboot, you should se a "installing new app" notification, and then you can verify the new WebView version by going to Android `Settings-Apps`, top right corner tripel dot meny `show system`, Android System WebView.
+
+> [!NOTE]
+> Depending on the device or Android version, the location to the webview apk may be different for you. You can locate it with:
+>  ```shell
+> adb shell pm path com.android.webview
+> ```
+
 #### Alternative WebView Method
 If the above method does not work, or you receive permissions issue, try this [Alternative Method][alternate-webview-method]
 
