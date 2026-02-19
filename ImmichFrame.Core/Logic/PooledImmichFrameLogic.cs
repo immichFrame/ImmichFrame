@@ -186,6 +186,7 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
         }
 
         var error = response.Content == null ? null : await response.Content.ReadAsStringAsync(cancellationToken);
+        response.Dispose();
         throw new ApiException($"Unexpected status code ({status}).", status, error, headers, null);
     }
 
