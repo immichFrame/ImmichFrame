@@ -80,8 +80,11 @@ namespace ImmichFrame.WebApi.Controllers
             var rangeHeader = Request.Headers["Range"].FirstOrDefault();
             var asset = await _logic.GetAsset(id, assetType, rangeHeader);
 
-            var notification = new AssetRequestedNotification(id, sanitizedClientIdentifier);
-            _ = _logic.SendWebhookNotification(notification);
+            if (string.IsNullOrEmpty(rangeHeader))
+            {
+                var notification = new AssetRequestedNotification(id, sanitizedClientIdentifier);
+                _ = _logic.SendWebhookNotification(notification);
+            }
 
             Response.Headers["Accept-Ranges"] = "bytes";
 
