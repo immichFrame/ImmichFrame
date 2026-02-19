@@ -90,11 +90,24 @@ namespace ImmichFrame.WebApi.Controllers
                 Response.Headers["Content-Range"] = asset.contentRange;
                 Response.StatusCode = 206;
                 Response.ContentType = asset.ContentType;
-                await asset.fileStream.CopyToAsync(Response.Body);
+
+                if (asset.fileStream is { CanSeek: true } && asset.fileStream.Length > 0)
+                    Response.ContentLength = asset.fileStream.Length;
+                else if (!string.IsNullOrEmpty(asset.contentLength) && long.TryParse(asset.contentLength, out var length))
+                    Response.ContentLength = length;
+
+                await using (asset.fileStream)
+                {
+                    await asset.fileStream.CopyToAsync(Response.Body);
+                }
+                asset.dispose?.Dispose();
                 return new EmptyResult();
             }
 
-            return File(asset.fileStream, asset.ContentType, asset.fileName, enableRangeProcessing: true);
+            using (asset.dispose)
+            {
+                return File(asset.fileStream, asset.ContentType, asset.fileName, enableRangeProcessing: true);
+            }
         }
 
         [HttpGet("RandomImageAndInfo", Name = "GetRandomImageAndInfo")]
