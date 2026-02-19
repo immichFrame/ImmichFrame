@@ -63,7 +63,7 @@ namespace ImmichFrame.WebApi.Controllers
         [HttpGet("{id}/Image", Name = "GetImage")]
         [Produces("image/jpeg", "image/webp")]
         [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status200OK)]
-        public async Task<FileResult> GetImage(Guid id, string clientIdentifier = "")
+        public async Task<IActionResult> GetImage(Guid id, string clientIdentifier = "")
         {
             return await GetAsset(id, clientIdentifier, AssetTypeEnum.IMAGE);
         }
@@ -71,14 +71,28 @@ namespace ImmichFrame.WebApi.Controllers
         [HttpGet("{id}/Asset", Name = "GetAsset")]
         [Produces("image/jpeg", "image/webp", "video/mp4", "video/quicktime")]
         [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status200OK)]
-        public async Task<FileResult> GetAsset(Guid id, string clientIdentifier = "", AssetTypeEnum? assetType = null)
+        [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status206PartialContent)]
+        public async Task<IActionResult> GetAsset(Guid id, string clientIdentifier = "", AssetTypeEnum? assetType = null)
         {
             var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
             _logger.LogDebug("Asset '{id}' requested by '{sanitizedClientIdentifier}' (type hint: {assetType})", id, sanitizedClientIdentifier, assetType);
-            var asset = await _logic.GetAsset(id, assetType);
+
+            var rangeHeader = Request.Headers["Range"].FirstOrDefault();
+            var asset = await _logic.GetAsset(id, assetType, rangeHeader);
 
             var notification = new AssetRequestedNotification(id, sanitizedClientIdentifier);
             _ = _logic.SendWebhookNotification(notification);
+
+            Response.Headers["Accept-Ranges"] = "bytes";
+
+            if (asset.isPartial && !string.IsNullOrEmpty(asset.contentRange))
+            {
+                Response.Headers["Content-Range"] = asset.contentRange;
+                Response.StatusCode = 206;
+                Response.ContentType = asset.ContentType;
+                await asset.fileStream.CopyToAsync(Response.Body);
+                return new EmptyResult();
+            }
 
             return File(asset.fileStream, asset.ContentType, asset.fileName, enableRangeProcessing: true);
         }

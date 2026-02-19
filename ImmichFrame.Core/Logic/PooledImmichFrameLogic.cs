@@ -3,6 +3,7 @@ using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.Core.Logic.Pool;
+using System.Net.Http.Headers;
 
 namespace ImmichFrame.Core.Logic;
 
@@ -12,6 +13,7 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
     private readonly IApiCache _apiCache;
     private readonly IAssetPool _pool;
     private readonly ImmichApi _immichApi;
+    private readonly HttpClient _httpClient;
     private readonly string _downloadLocation = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ImageCache");
 
     public PooledImmichFrameLogic(IAccountSettings accountSettings, IGeneralSettings generalSettings, IHttpClientFactory httpClientFactory)
@@ -22,6 +24,7 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
         AccountSettings = accountSettings;
 
         httpClient.UseApiKey(accountSettings.ApiKey);
+        _httpClient = httpClient;
         _immichApi = new ImmichApi(accountSettings.ImmichServerUrl, httpClient);
 
         _apiCache = new ApiCache(RefreshInterval(generalSettings.RefreshAlbumPeopleInterval));
@@ -80,7 +83,7 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
 
     public Task<long> GetTotalAssets() => _pool.GetAssetCount();
 
-    public async Task<(string fileName, string ContentType, Stream fileStream)> GetAsset(Guid id, AssetTypeEnum? assetType = null)
+    public async Task<(string fileName, string ContentType, Stream fileStream, string? contentRange, bool isPartial)> GetAsset(Guid id, AssetTypeEnum? assetType = null, string? rangeHeader = null)
     {
         if (!assetType.HasValue)
         {
@@ -92,12 +95,13 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
 
         if (assetType == AssetTypeEnum.IMAGE)
         {
-            return await GetImageAsset(id);
+            var (fileName, contentType, fileStream) = await GetImageAsset(id);
+            return (fileName, contentType, fileStream, null, false);
         }
 
         if (assetType == AssetTypeEnum.VIDEO)
         {
-            return await GetVideoAsset(id);
+            return await GetVideoAsset(id, rangeHeader);
         }
 
         throw new AssetNotFoundException($"Asset {id} is not a supported media type ({assetType}).");
@@ -160,79 +164,50 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
         return (fileName, contentType, data.Stream);
     }
 
-    private async Task<(string fileName, string ContentType, Stream fileStream)> GetVideoAsset(Guid id)
+    private async Task<FileResponse> PlayVideoWithRange(Guid id, string rangeHeader, CancellationToken cancellationToken = default)
     {
-        var fileName = $"{id}.mp4";
-        string? filePath = null;
+        var url = $"{_immichApi.BaseUrl.TrimEnd('/')}/assets/{id}/video/playback";
 
-        if (_generalSettings.DownloadImages)
+        using var request = new HttpRequestMessage(HttpMethod.Get, url);
+        request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/octet-stream"));
+        request.Headers.TryAddWithoutValidation("Range", rangeHeader);
+
+        var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+
+        var headers = response.Headers.ToDictionary(h => h.Key, h => h.Value);
+        if (response.Content?.Headers != null)
+            foreach (var item in response.Content.Headers)
+                headers[item.Key] = item.Value;
+
+        var status = (int)response.StatusCode;
+        if (status == 200 || status == 206)
         {
-            if (!Directory.Exists(_downloadLocation))
-            {
-                Directory.CreateDirectory(_downloadLocation);
-            }
-
-            filePath = Path.Combine(_downloadLocation, fileName);
-            if (File.Exists(filePath))
-            {
-                if (_generalSettings.RenewImagesDuration > (DateTime.UtcNow - File.GetCreationTimeUtc(filePath)).Days)
-                {
-                    return (fileName, "video/mp4", File.OpenRead(filePath));
-                }
-                File.Delete(filePath);
-            }
+            var stream = response.Content == null ? Stream.Null : await response.Content.ReadAsStreamAsync(cancellationToken);
+            return new FileResponse(status, headers, stream, null, response);
         }
 
-        using var videoResponse = await _immichApi.PlayAssetVideoAsync(id, string.Empty);
+        var error = response.Content == null ? null : await response.Content.ReadAsStringAsync(cancellationToken);
+        throw new ApiException($"Unexpected status code ({status}).", status, error, headers, null);
+    }
+
+    private async Task<(string fileName, string ContentType, Stream fileStream, string? contentRange, bool isPartial)> GetVideoAsset(Guid id, string? rangeHeader = null)
+    {
+        var videoResponse = string.IsNullOrEmpty(rangeHeader)
+            ? await _immichApi.PlayAssetVideoAsync(id, string.Empty)
+            : await PlayVideoWithRange(id, rangeHeader);
+
         if (videoResponse == null)
             throw new AssetNotFoundException($"Video asset {id} was not found!");
 
-        var contentType = videoResponse.Headers.ContainsKey("Content-Type")
-            ? videoResponse.Headers["Content-Type"].FirstOrDefault() ?? "video/mp4"
+        var contentType = videoResponse.Headers.TryGetValue("Content-Type", out var ct)
+            ? ct.FirstOrDefault() ?? "video/mp4"
             : "video/mp4";
 
-        if (_generalSettings.DownloadImages)
-        {
-            var tempFilePath = filePath + ".tmp";
-            try
-            {
-                using (var fileStream = File.Create(tempFilePath))
-                {
-                    await videoResponse.Stream.CopyToAsync(fileStream);
-                }
+        var contentRange = videoResponse.Headers.TryGetValue("Content-Range", out var cr)
+            ? cr.FirstOrDefault()
+            : null;
 
-                File.Move(tempFilePath, filePath!, overwrite: true);
-                return (fileName, contentType, File.OpenRead(filePath!));
-            }
-            catch
-            {
-                if (File.Exists(tempFilePath))
-                    File.Delete(tempFilePath);
-                throw;
-            }
-        }
-
-        var tempPath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.mp4");
-        var tempFileStream = new FileStream(
-            tempPath,
-            FileMode.Create,
-            FileAccess.ReadWrite,
-            FileShare.None,
-            4096,
-            FileOptions.DeleteOnClose | FileOptions.Asynchronous
-        );
-
-        try
-        {
-            await videoResponse.Stream.CopyToAsync(tempFileStream);
-            tempFileStream.Position = 0;
-            return (fileName, contentType, tempFileStream);
-        }
-        catch
-        {
-            tempFileStream.Dispose();
-            throw;
-        }
+        return ($"{id}.mp4", contentType, videoResponse.Stream, contentRange, videoResponse.StatusCode == 206);
     }
     public Task SendWebhookNotification(IWebhookNotification notification) =>
         WebhookHelper.SendWebhookNotification(notification, _generalSettings.Webhook);
