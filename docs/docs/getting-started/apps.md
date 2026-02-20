@@ -79,13 +79,13 @@ Frameo digital photo frames are low powered and run a very old Android version, 
 > [!NOTE]
 > We have found a method to update the WebView, but it is not without risks, see Frameo Webview Update below.
 > 
-> Webview provieds the following features that are not available without it: 
+> Webview provides the following features that are not available without it: 
 > - SplitView
 > - Some image formats (HEIC)
-> - Video playback (experimenta)
+> - Video playback (experimental)
 > - Better text rendering
 > - Show Tag, desc, and album info from Immich.
-> - Configurable layout, (size, background and overlay colors, and blur effects, etc). 
+> - Configurable layout, (size, background and overlay colors, and blur effects, etc.).
 
   1. You will need to install ADB on your PC ([ADB instructions][ADB-link]).
   
@@ -105,7 +105,7 @@ Frameo digital photo frames are low powered and run a very old Android version, 
 
      For windows you can run the following command in powershell to download the latest release directly to your current directory:
      ```powershell
-     Invoke-WebRequest -Uri (Invoke-RestMethod -Uri https://api.github.com/repos/immichFrame/ImmichFrame_Android/releases/latest).assets | Where-Object { $_.name -like "*.apk" } | Select-Object -First 1 -ExpandProperty browser_download_url | Invoke-WebRequest -OutFile ImmichFrame.apk
+     Invoke-WebRequest -Uri ((Invoke-RestMethod -Uri https://api.github.com/repos/immichFrame/ImmichFrame_Android/releases/latest).assets | Where-Object { $_.name -like "*.apk" } | Select-Object -First 1 -ExpandProperty browser_download_url) -OutFile ImmichFrame.apk
      ```
 
   6. Sideload ImmichFrame:
@@ -126,11 +126,11 @@ Frameo digital photo frames are low powered and run a very old Android version, 
      2. Configure URL and Authorization Secret (optional)
      3. Disable WebView
 
- 9. Set as default HOME app:
+  9. Set as default HOME app:
   
      On first reboot after install you will be asked to select default Launcher, select `ImmichFrame` and select "Always"
      
-     ![](Frameo_digital_photo_frames_default_app.png)
+     ![Frameo default launcher selection screen](Frameo_digital_photo_frames_default_app.png)
 
  10. Then disable the Frameo app to set ImmichFrame as only Home app:
 
@@ -143,8 +143,7 @@ Frameo digital photo frames are low powered and run a very old Android version, 
       If this doesn't stick on reboot, repeat the commands but power cycle after exit command
 
 > [!NOTE]
-> This is not possible with latest app version (< 1.29) so uninstalling updates (to 1.24) is required to get the overwriting of default home app to work. If you have already updated the Frameo app, you can uninstall updates by going to Android Settings-Apps-Frameo-Uninstall Updates.
-
+ > This is not possible with Frameo app versions >= 1.29, so uninstalling updates (to 1.24) is required to get the overwriting of default home app to work. If you have already updated the Frameo app, you can uninstall updates by going to Android Settings-Apps-Frameo-Uninstall Updates.
 
 
 #### Some other useful ADB commands:
@@ -194,7 +193,7 @@ This has been tested and working on Android 6.01 10.1" Frameo devices.
 
 2. Push new apk to sdcard
     > [!NOTE]
-    > Android does not have auto complete so you will save time if the new file is /sdcard/webview.apk, so you can just run `adb push /path/to/webview.apk /sdcard/webview.apk` and it will be named webview.apk on the device.
+    > Android does not have auto-complete so you will save time if the new file is /sdcard/webview.apk, so you can just run `adb push /path/to/webview.apk /sdcard/webview.apk` and it will be named webview.apk on the device.
     ```shell
     adb push /path/to/your/new/webview.apk /sdcard/webview.apk
     ```
@@ -220,11 +219,11 @@ This has been tested and working on Android 6.01 10.1" Frameo devices.
     ```
     After reboot, you should see a "installing new app" notification, and then you can verify the new WebView version by going to Android `Settings-Apps`, top right corner triple dot menu `show system`, Android System WebView.
 
-    ![](Frameo_digital_photo_frames_webview.png)
+    ![Android System WebView version 106 in system settings](Frameo_digital_photo_frames_webview.png)
 
 > [!NOTE]
 > Depending on the device or Android version, the location to the webview apk may be different for you. You can locate it with:
->  ```shell
+> ```shell
 > adb shell pm path com.android.webview
 > ```
 
