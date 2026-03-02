@@ -4,7 +4,6 @@ using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.Core.Logic.Pool;
 using ImmichFrame.Core.Models;
-using System.Net.Http.Headers;
 
 namespace ImmichFrame.Core.Logic;
 
@@ -14,7 +13,6 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
     private readonly IApiCache _apiCache;
     private readonly IAssetPool _pool;
     private readonly ImmichApi _immichApi;
-    private readonly HttpClient _httpClient;
     private readonly string _downloadLocation = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ImageCache");
 
     public PooledImmichFrameLogic(IAccountSettings accountSettings, IGeneralSettings generalSettings, IHttpClientFactory httpClientFactory)
@@ -25,7 +23,6 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
         AccountSettings = accountSettings;
 
         httpClient.UseApiKey(accountSettings.ApiKey);
-        _httpClient = httpClient;
         _immichApi = new ImmichApi(accountSettings.ImmichServerUrl, httpClient);
 
         _apiCache = new ApiCache(RefreshInterval(generalSettings.RefreshAlbumPeopleInterval));
@@ -173,41 +170,11 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
         return (fileName, contentType, data.Stream);
     }
 
-    private async Task<FileResponse> PlayVideoWithRange(Guid id, string rangeHeader, CancellationToken cancellationToken = default)
-    {
-        var url = $"{_immichApi.BaseUrl.TrimEnd('/')}/assets/{id}/video/playback";
-
-        using var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/octet-stream"));
-        request.Headers.TryAddWithoutValidation("Range", rangeHeader);
-
-        var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-
-        var headers = response.Headers.ToDictionary(h => h.Key, h => h.Value);
-        if (response.Content?.Headers != null)
-            foreach (var item in response.Content.Headers)
-                headers[item.Key] = item.Value;
-
-        var status = (int)response.StatusCode;
-        if (status == 200 || status == 206)
-        {
-            var stream = response.Content == null ? Stream.Null : await response.Content.ReadAsStreamAsync(cancellationToken);
-            return new FileResponse(status, headers, stream, null, response);
-        }
-
-        var error = response.Content == null ? null : await response.Content.ReadAsStringAsync(cancellationToken);
-        response.Dispose();
-        throw new ApiException($"Unexpected status code ({status}).", status, error, headers, null);
-    }
-
     private async Task<AssetResponse> GetVideoAsset(Guid id, string? rangeHeader = null)
     {
         var videoResponse = string.IsNullOrEmpty(rangeHeader)
             ? await _immichApi.PlayAssetVideoAsync(id, string.Empty)
-            : await PlayVideoWithRange(id, rangeHeader);
-
-        if (videoResponse == null)
-            throw new AssetNotFoundException($"Video asset {id} was not found!");
+            : await _immichApi.PlayAssetVideoWithRangeAsync(id, rangeHeader);
 
         var contentType = videoResponse.Headers.TryGetValue("Content-Type", out var ct)
             ? ct.FirstOrDefault() ?? "video/mp4"
