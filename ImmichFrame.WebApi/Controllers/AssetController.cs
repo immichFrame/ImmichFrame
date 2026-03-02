@@ -2,6 +2,7 @@ using System.Globalization;
 using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Core.Interfaces;
+using ImmichFrame.Core.Models;
 using ImmichFrame.WebApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -63,7 +64,7 @@ namespace ImmichFrame.WebApi.Controllers
         [HttpGet("{id}/Image", Name = "GetImage")]
         [Produces("image/jpeg", "image/webp")]
         [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status200OK)]
-        public async Task<FileResult> GetImage(Guid id, string clientIdentifier = "")
+        public async Task<IActionResult> GetImage(Guid id, string clientIdentifier = "")
         {
             return await GetAsset(id, clientIdentifier, AssetTypeEnum.IMAGE);
         }
@@ -71,16 +72,55 @@ namespace ImmichFrame.WebApi.Controllers
         [HttpGet("{id}/Asset", Name = "GetAsset")]
         [Produces("image/jpeg", "image/webp", "video/mp4", "video/quicktime")]
         [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status200OK)]
-        public async Task<FileResult> GetAsset(Guid id, string clientIdentifier = "", AssetTypeEnum? assetType = null)
+        [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status206PartialContent)]
+        [ProducesResponseType(StatusCodes.Status416RangeNotSatisfiable)]
+        public async Task<IActionResult> GetAsset(Guid id, string clientIdentifier = "", AssetTypeEnum? assetType = null)
         {
             var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
             _logger.LogDebug("Asset '{id}' requested by '{sanitizedClientIdentifier}' (type hint: {assetType})", id, sanitizedClientIdentifier, assetType);
-            var asset = await _logic.GetAsset(id, assetType);
 
-            var notification = new AssetRequestedNotification(id, sanitizedClientIdentifier);
-            _ = _logic.SendWebhookNotification(notification);
+            var rangeHeader = Request.Headers["Range"].FirstOrDefault();
 
-            return File(asset.fileStream, asset.ContentType, asset.fileName, enableRangeProcessing: true);
+            AssetResponse asset;
+            try
+            {
+                asset = await _logic.GetAsset(id, assetType, rangeHeader);
+            }
+            catch (ApiException ex) when (ex.StatusCode == 416)
+            {
+                return StatusCode(StatusCodes.Status416RangeNotSatisfiable);
+            }
+
+            if (string.IsNullOrEmpty(rangeHeader))
+            {
+                var notification = new AssetRequestedNotification(id, sanitizedClientIdentifier);
+                _ = _logic.SendWebhookNotification(notification);
+            }
+
+            Response.Headers["Accept-Ranges"] = "bytes";
+
+            if (asset.IsPartial && !string.IsNullOrEmpty(asset.ContentRange))
+            {
+                Response.Headers["Content-Range"] = asset.ContentRange;
+                Response.StatusCode = 206;
+                Response.ContentType = asset.ContentType;
+
+                if (asset.FileStream is { CanSeek: true } && asset.FileStream.Length > 0)
+                    Response.ContentLength = asset.FileStream.Length;
+                else if (asset.ContentLength.HasValue)
+                    Response.ContentLength = asset.ContentLength;
+
+                using (asset.Owner)
+                {
+                    await asset.FileStream.CopyToAsync(Response.Body);
+                }
+                return new EmptyResult();
+            }
+
+            if (asset.Owner != null)
+                HttpContext.Response.RegisterForDispose(asset.Owner);
+
+            return File(asset.FileStream, asset.ContentType, asset.FileName, enableRangeProcessing: true);
         }
 
         [HttpGet("RandomImageAndInfo", Name = "GetRandomImageAndInfo")]
@@ -113,7 +153,7 @@ namespace ImmichFrame.WebApi.Controllers
             string randomImageBase64;
             using (var memoryStream = new MemoryStream())
             {
-                await asset.fileStream.CopyToAsync(memoryStream);
+                await asset.FileStream.CopyToAsync(memoryStream);
                 randomImageBase64 = Convert.ToBase64String(memoryStream.ToArray());
             }
 
