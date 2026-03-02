@@ -13,7 +13,7 @@
         {
             var urlBuilder = new System.Text.StringBuilder();
             if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder.Append(_baseUrl);
-            urlBuilder.Append("/assets/");
+            urlBuilder.Append("assets/");
             urlBuilder.Append(Uri.EscapeDataString(id.ToString("D", System.Globalization.CultureInfo.InvariantCulture)));
             urlBuilder.Append("/video/playback");
 
