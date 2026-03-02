@@ -2,7 +2,6 @@ using System.Globalization;
 using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Core.Interfaces;
-using ImmichFrame.Core.Models;
 using ImmichFrame.WebApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -108,10 +107,10 @@ namespace ImmichFrame.WebApi.Controllers
                 return new EmptyResult();
             }
 
-            using (asset.Dispose)
-            {
-                return File(asset.FileStream, asset.ContentType, asset.FileName, enableRangeProcessing: true);
-            }
+            if (asset.Dispose != null)
+                HttpContext.Response.RegisterForDispose(asset.Dispose);
+
+            return File(asset.FileStream, asset.ContentType, asset.FileName, enableRangeProcessing: true);
         }
 
         [HttpGet("RandomImageAndInfo", Name = "GetRandomImageAndInfo")]
