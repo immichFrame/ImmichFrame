@@ -3,6 +3,7 @@ using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.Core.Logic.Pool;
+using ImmichFrame.Core.Models;
 using System.Net.Http.Headers;
 
 namespace ImmichFrame.Core.Logic;
@@ -83,7 +84,7 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
 
     public Task<long> GetTotalAssets() => _pool.GetAssetCount();
 
-    public async Task<(string fileName, string ContentType, Stream fileStream, string? contentRange, bool isPartial, IDisposable? dispose, string? contentLength)> GetAsset(Guid id, AssetTypeEnum? assetType = null, string? rangeHeader = null)
+    public async Task<AssetResponse> GetAsset(Guid id, AssetTypeEnum? assetType = null, string? rangeHeader = null)
     {
         if (!assetType.HasValue)
         {
@@ -96,7 +97,16 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
         if (assetType == AssetTypeEnum.IMAGE)
         {
             var (fileName, contentType, fileStream) = await GetImageAsset(id);
-            return (fileName, contentType, fileStream, null, false, null, null);
+            return new AssetResponse
+            {
+                FileName = fileName,
+                ContentType = contentType,
+                FileStream = fileStream,
+                ContentRange = null,
+                IsPartial = false,
+                Dispose = null,
+                ContentLength = null
+            };
         }
 
         if (assetType == AssetTypeEnum.VIDEO)
@@ -190,7 +200,7 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
         throw new ApiException($"Unexpected status code ({status}).", status, error, headers, null);
     }
 
-    private async Task<(string fileName, string ContentType, Stream fileStream, string? contentRange, bool isPartial, IDisposable? dispose, string? contentLength)> GetVideoAsset(Guid id, string? rangeHeader = null)
+    private async Task<AssetResponse> GetVideoAsset(Guid id, string? rangeHeader = null)
     {
         var videoResponse = string.IsNullOrEmpty(rangeHeader)
             ? await _immichApi.PlayAssetVideoAsync(id, string.Empty)
@@ -209,7 +219,16 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
 
         var contentLength = videoResponse.Headers.TryGetValue("Content-Length", out var cl) ? cl.FirstOrDefault() : null;
 
-        return ($"{id}.mp4", contentType, videoResponse.Stream, contentRange, videoResponse.StatusCode == 206, videoResponse, contentLength);
+        return new AssetResponse
+        {
+            FileName = $"{id}.mp4",
+            ContentType = contentType,
+            FileStream = videoResponse.Stream,
+            ContentRange = contentRange,
+            IsPartial = videoResponse.StatusCode == 206,
+            Dispose = videoResponse,
+            ContentLength = contentLength
+        };
     }
     public Task SendWebhookNotification(IWebhookNotification notification) =>
         WebhookHelper.SendWebhookNotification(notification, _generalSettings.Webhook);

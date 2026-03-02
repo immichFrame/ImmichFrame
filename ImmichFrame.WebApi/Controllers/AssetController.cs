@@ -2,6 +2,7 @@ using System.Globalization;
 using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Core.Interfaces;
+using ImmichFrame.Core.Models;
 using ImmichFrame.WebApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -88,28 +89,28 @@ namespace ImmichFrame.WebApi.Controllers
 
             Response.Headers["Accept-Ranges"] = "bytes";
 
-            if (asset.isPartial && !string.IsNullOrEmpty(asset.contentRange))
+            if (asset.IsPartial && !string.IsNullOrEmpty(asset.ContentRange))
             {
-                Response.Headers["Content-Range"] = asset.contentRange;
+                Response.Headers["Content-Range"] = asset.ContentRange;
                 Response.StatusCode = 206;
                 Response.ContentType = asset.ContentType;
 
-                if (asset.fileStream is { CanSeek: true } && asset.fileStream.Length > 0)
-                    Response.ContentLength = asset.fileStream.Length;
-                else if (!string.IsNullOrEmpty(asset.contentLength) && long.TryParse(asset.contentLength, out var length))
+                if (asset.FileStream is { CanSeek: true } && asset.FileStream.Length > 0)
+                    Response.ContentLength = asset.FileStream.Length;
+                else if (!string.IsNullOrEmpty(asset.ContentLength) && long.TryParse(asset.ContentLength, out var length))
                     Response.ContentLength = length;
 
-                await using (asset.fileStream)
+                await using (asset.FileStream)
                 {
-                    await asset.fileStream.CopyToAsync(Response.Body);
+                    await asset.FileStream.CopyToAsync(Response.Body);
                 }
-                asset.dispose?.Dispose();
+                asset.Dispose?.Dispose();
                 return new EmptyResult();
             }
 
-            using (asset.dispose)
+            using (asset.Dispose)
             {
-                return File(asset.fileStream, asset.ContentType, asset.fileName, enableRangeProcessing: true);
+                return File(asset.FileStream, asset.ContentType, asset.FileName, enableRangeProcessing: true);
             }
         }
 
@@ -143,7 +144,7 @@ namespace ImmichFrame.WebApi.Controllers
             string randomImageBase64;
             using (var memoryStream = new MemoryStream())
             {
-                await asset.fileStream.CopyToAsync(memoryStream);
+                await asset.FileStream.CopyToAsync(memoryStream);
                 randomImageBase64 = Convert.ToBase64String(memoryStream.ToArray());
             }
 
