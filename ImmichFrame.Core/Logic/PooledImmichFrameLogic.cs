@@ -101,7 +101,7 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
                 FileStream = fileStream,
                 ContentRange = null,
                 IsPartial = false,
-                Dispose = null,
+                Owner = null,
                 ContentLength = null
             };
         }
@@ -184,7 +184,8 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
             ? cr.FirstOrDefault()
             : null;
 
-        var contentLength = videoResponse.Headers.TryGetValue("Content-Length", out var cl) ? cl.FirstOrDefault() : null;
+        long? contentLength = videoResponse.Headers.TryGetValue("Content-Length", out var cl)
+            && long.TryParse(cl.FirstOrDefault(), out var clValue) ? clValue : null;
 
         return new AssetResponse
         {
@@ -193,7 +194,7 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
             FileStream = videoResponse.Stream,
             ContentRange = contentRange,
             IsPartial = videoResponse.StatusCode == 206,
-            Dispose = videoResponse,
+            Owner = videoResponse,
             ContentLength = contentLength
         };
     }

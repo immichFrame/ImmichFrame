@@ -2,6 +2,7 @@ using System.Globalization;
 using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Core.Interfaces;
+using ImmichFrame.Core.Models;
 using ImmichFrame.WebApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -72,13 +73,23 @@ namespace ImmichFrame.WebApi.Controllers
         [Produces("image/jpeg", "image/webp", "video/mp4", "video/quicktime")]
         [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status206PartialContent)]
+        [ProducesResponseType(StatusCodes.Status416RangeNotSatisfiable)]
         public async Task<IActionResult> GetAsset(Guid id, string clientIdentifier = "", AssetTypeEnum? assetType = null)
         {
             var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
             _logger.LogDebug("Asset '{id}' requested by '{sanitizedClientIdentifier}' (type hint: {assetType})", id, sanitizedClientIdentifier, assetType);
 
             var rangeHeader = Request.Headers["Range"].FirstOrDefault();
-            var asset = await _logic.GetAsset(id, assetType, rangeHeader);
+
+            AssetResponse asset;
+            try
+            {
+                asset = await _logic.GetAsset(id, assetType, rangeHeader);
+            }
+            catch (ApiException ex) when (ex.StatusCode == 416)
+            {
+                return StatusCode(StatusCodes.Status416RangeNotSatisfiable);
+            }
 
             if (string.IsNullOrEmpty(rangeHeader))
             {
@@ -96,19 +107,18 @@ namespace ImmichFrame.WebApi.Controllers
 
                 if (asset.FileStream is { CanSeek: true } && asset.FileStream.Length > 0)
                     Response.ContentLength = asset.FileStream.Length;
-                else if (!string.IsNullOrEmpty(asset.ContentLength) && long.TryParse(asset.ContentLength, out var length))
-                    Response.ContentLength = length;
+                else if (asset.ContentLength.HasValue)
+                    Response.ContentLength = asset.ContentLength;
 
-                await using (asset.FileStream)
+                using (asset.Owner)
                 {
                     await asset.FileStream.CopyToAsync(Response.Body);
                 }
-                asset.Dispose?.Dispose();
                 return new EmptyResult();
             }
 
-            if (asset.Dispose != null)
-                HttpContext.Response.RegisterForDispose(asset.Dispose);
+            if (asset.Owner != null)
+                HttpContext.Response.RegisterForDispose(asset.Owner);
 
             return File(asset.FileStream, asset.ContentType, asset.FileName, enableRangeProcessing: true);
         }

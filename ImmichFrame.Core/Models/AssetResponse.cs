@@ -7,6 +7,6 @@ public class AssetResponse
     public required Stream FileStream { get; init; }
     public string? ContentRange { get; init; }
     public bool IsPartial { get; init; }
-    public IDisposable? Dispose { get; init; }
-    public string? ContentLength { get; init; }
+    public IDisposable? Owner { get; init; }
+    public long? ContentLength { get; init; }
 }
