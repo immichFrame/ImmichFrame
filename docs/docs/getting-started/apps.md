@@ -143,7 +143,7 @@ Frameo digital photo frames are low powered and run a very old Android version, 
       If this doesn't stick on reboot, repeat the commands but power cycle after exit command
 
 > [!NOTE]
- > This is not possible with Frameo app versions >= 1.29, so uninstalling updates (to 1.24) is required to get the overwriting of default home app to work. If you have already updated the Frameo app, you can uninstall updates by going to Android Settings-Apps-Frameo-Uninstall Updates.
+> This is not possible with Frameo app versions >= 1.29, so uninstalling updates (to 1.24) is required to get the overwriting of default home app to work. If you have already updated the Frameo app, you can uninstall updates by going to Android Settings-Apps-Frameo-Uninstall Updates.
 
 
 #### Some other useful ADB commands:
