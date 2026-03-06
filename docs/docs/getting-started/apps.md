@@ -76,16 +76,17 @@ ImmichFrame can be run on inexpensive Frameo digital photo frames with some addi
 
 Frameo digital photo frames are low powered and run a very old Android version, so they cannot run the full WebView version of the app (however most of the main features are still supported except SplitView). 
 
-> [!NOTE]
-> We have found a method to update the WebView, but it is not without risks, see Frameo Webview Update below.
-> 
-> Webview provides the following features that are not available without it: 
-> - SplitView
-> - Some image formats (HEIC)
-> - Video playback (experimental)
-> - Better text rendering
-> - Show Tag, desc, and album info from Immich.
-> - Configurable layout, (size, background and overlay colors, and blur effects, etc.).
+:::note
+We have found a method to update the WebView, but it is not without risks, see Frameo Webview Update below.
+ 
+Webview provides the following features that are not available without it: 
+- SplitView
+- Some image formats (HEIC)
+- Video playback (experimental)
+- Better text rendering
+- Show Tag, desc, and album info from Immich.
+- Configurable layout, (size, background and overlay colors, and blur effects, etc.).
+:::
 
   1. You will need to install ADB on your PC ([ADB instructions][ADB-link]).
   
@@ -142,9 +143,9 @@ Frameo digital photo frames are low powered and run a very old Android version, 
        ```
       If this doesn't stick on reboot, repeat the commands but power cycle after exit command
 
-> [!NOTE]
-> This is not possible with Frameo app versions >= 1.29, so uninstalling updates (to 1.24) is required to get the overwriting of default home app to work. If you have already updated the Frameo app, you can uninstall updates by going to Android Settings-Apps-Frameo-Uninstall Updates.
-
+:::note
+This is not possible with Frameo app versions >= 1.29, so uninstalling updates (to 1.24) is required to get the overwriting of default home app to work. If you have already updated the Frameo app, you can uninstall updates by going to Android Settings-Apps-Frameo-Uninstall Updates.
+:::
 
 #### Some other useful ADB commands:
 
@@ -154,8 +155,9 @@ Frameo digital photo frames are low powered and run a very old Android version, 
 adb reboot
 ``` 
 
-> [!NOTE]
-> You can also reboot or shutdown by holding down power button
+:::note
+You can also reboot or shutdown by holding down power button
+:::
 
 **Access Android Settings:**
 
@@ -192,28 +194,29 @@ This has been tested and working on Android 6.01 10.1" Frameo devices.
    [Lineage OS WebView 106-0-5249-126-12 (arm64-v8a + arm-v7a) (Android 6.0+)][webview-update]
 
 2. Push new apk to sdcard
-    > [!NOTE]
-    > Android does not have auto-complete so you will save time if the new file is /sdcard/webview.apk, so you can just run `adb push /path/to/webview.apk /sdcard/webview.apk` and it will be named webview.apk on the device.
+    :::note
+    Android does not have auto-complete so you will save time if the new file is /sdcard/webview.apk, so you can just run `adb push /path/to/webview.apk /sdcard/webview.apk` and it will be named webview.apk on the device.
+    :::
     ```shell
     adb push /path/to/your/new/webview.apk /sdcard/webview.apk
     ```
-3. Enter shell and switch to the root user
+4. Enter shell and switch to the root user
     ```shell
     adb shell su
     ```
-4. Backup original WebView APK
+5. Backup original WebView APK
     ```shell
     mount -o rw,remount /system && cp /system/app/webview/webview.apk /system/app/webview/webview.apk.bak
     ```
-5. Delete the oat folder recursively
+6. Delete the oat folder recursively
     ```shell
     mount -o rw,remount /system && rm -rf /system/app/webview/oat
     ```
-6. Copy new WebView to system    
+7. Copy new WebView to system    
     ```shell
     mount -o rw,remount /system && cp /sdcard/webview.apk /system/app/webview/webview.apk
     ```
-7. Reboot device
+8. Reboot device
     ```shell
     adb reboot
     ```
@@ -221,11 +224,12 @@ This has been tested and working on Android 6.01 10.1" Frameo devices.
 
     ![Android System WebView version 106 in system settings](Frameo_digital_photo_frames_webview.png)
 
-> [!NOTE]
-> Depending on the device or Android version, the location to the webview apk may be different for you. You can locate it with:
-> ```shell
-> adb shell pm path com.android.webview
-> ```
+:::note
+Depending on the device or Android version, the location to the webview apk may be different for you. You can locate it with:
+```shell
+adb shell pm path com.android.webview
+```
+:::
 
 #### Alternative WebView Method
 If the above method does not work, or you receive permissions issue, try this [Alternative Method][alternate-webview-method]
