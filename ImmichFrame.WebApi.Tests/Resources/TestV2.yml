@@ -34,6 +34,7 @@ General:
   ImagePan: true
   ImageFill: true
   PlayAudio: true
+  ExhaustiveAlbumShuffle: true
   Layout: Layout_TEST
 Accounts:
 - ImmichServerUrl: Account1.ImmichServerUrl_TEST

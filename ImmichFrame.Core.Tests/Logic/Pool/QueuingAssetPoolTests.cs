@@ -2,6 +2,7 @@ using NUnit.Framework;
 using Moq;
 using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Logic.Pool;
+using ImmichFrame.Core.Interfaces;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ public class QueuingAssetPoolTests
 {
     private Mock<IAssetPool> _mockDelegatePool;
     private QueuingAssetPool _queuingAssetPool;
+    private Mock<IRequestContext> _mockRequestContext;
 
     private const int ReloadBatchSize = 50; // Matches const in QueuingAssetPool
     private const int ReloadThreshold = 10; // Matches const in QueuingAssetPool
@@ -27,11 +29,15 @@ public class QueuingAssetPoolTests
     {
         var logger = FixtureHelpers.TestLogger<QueuingAssetPool>();
         _mockDelegatePool = new Mock<IAssetPool>();
+        _mockRequestContext = new Mock<IRequestContext>();
 
         // QueuingAssetPool inherits from AggregatingAssetPool, which has a constructor
         // expecting IEnumerable<IAssetPool>. However, the QueuingAssetPool constructor
         // only takes a single IAssetPool delegate. We pass the delegate in an array.
         _queuingAssetPool = new QueuingAssetPool(logger, _mockDelegatePool.Object);
+
+        // Default RequestContext
+        _mockRequestContext.Setup(x => x.AssetOffset).Returns(0);
     }
 
     private List<AssetResponseDto> CreateSampleAssets(int count, string prefix = "asset")
@@ -65,17 +71,17 @@ public class QueuingAssetPoolTests
     {
         // Arrange
         var assetToReturn = CreateSampleAssets(1, "initial_load").First();
-        _mockDelegatePool.Setup(dp => dp.GetAssets(ReloadBatchSize, It.IsAny<CancellationToken>()))
+        _mockDelegatePool.Setup(dp => dp.GetAssets(ReloadBatchSize, _mockRequestContext.Object, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<AssetResponseDto> { assetToReturn })
             .Verifiable();
 
         // Act
-        var result = await _queuingAssetPool.GetNextAssetForTesting(CancellationToken.None);
+        var result = await _queuingAssetPool.GetNextAssetForTesting(CancellationToken.None, _mockRequestContext.Object);
 
         // Assert
         Assert.That(result, Is.Not.Null);
         Assert.That(result.Id, Is.EqualTo(assetToReturn.Id));
-        _mockDelegatePool.Verify(dp => dp.GetAssets(ReloadBatchSize, It.IsAny<CancellationToken>()), Times.Once, "ReloadAssetsAsync should have been called as queue was empty.");
+        _mockDelegatePool.Verify(dp => dp.GetAssets(ReloadBatchSize, _mockRequestContext.Object, It.IsAny<CancellationToken>()), Times.Once, "ReloadAssetsAsync should have been called as queue was empty.");
     }
 
     [Test]
@@ -89,16 +95,16 @@ public class QueuingAssetPoolTests
             await _queuingAssetPool.WriteToChannelForTesting(asset);
         }
 
-        _mockDelegatePool.Setup(dp => dp.GetAssets(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+        _mockDelegatePool.Setup(dp => dp.GetAssets(It.IsAny<int>(), _mockRequestContext.Object, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<AssetResponseDto>()); // Should not be called
 
         // Act
-        var result = await _queuingAssetPool.GetNextAssetForTesting(CancellationToken.None);
+        var result = await _queuingAssetPool.GetNextAssetForTesting(CancellationToken.None, _mockRequestContext.Object);
 
         // Assert
         Assert.That(result, Is.Not.Null);
         Assert.That(result.Id, Is.EqualTo(initialAssets.First().Id));
-        _mockDelegatePool.Verify(dp => dp.GetAssets(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never, "ReloadAssetsAsync should not be called when queue is above threshold.");
+        _mockDelegatePool.Verify(dp => dp.GetAssets(It.IsAny<int>(), _mockRequestContext.Object, It.IsAny<CancellationToken>()), Times.Never, "ReloadAssetsAsync should not be called when queue is above threshold.");
     }
 
     [Test]
@@ -114,25 +120,25 @@ public class QueuingAssetPoolTests
         }
 
         var newAssetsToLoad = CreateSampleAssets(5, "reloaded");
-        _mockDelegatePool.Setup(dp => dp.GetAssets(ReloadBatchSize, It.IsAny<CancellationToken>()))
+        _mockDelegatePool.Setup(dp => dp.GetAssets(ReloadBatchSize, _mockRequestContext.Object, It.IsAny<CancellationToken>()))
             .ReturnsAsync(newAssetsToLoad)
             .Verifiable(); // This should be called
 
         // Act & Assert
         // Read one asset, queue count becomes ReloadThreshold. No reload yet.
-        await _queuingAssetPool.GetNextAssetForTesting(CancellationToken.None);
-        _mockDelegatePool.Verify(dp => dp.GetAssets(ReloadBatchSize, It.IsAny<CancellationToken>()), Times.Never, "Reload should not happen when count is AT threshold.");
+        await _queuingAssetPool.GetNextAssetForTesting(CancellationToken.None, _mockRequestContext.Object);
+        _mockDelegatePool.Verify(dp => dp.GetAssets(ReloadBatchSize, _mockRequestContext.Object, It.IsAny<CancellationToken>()), Times.Never, "Reload should not happen when count is AT threshold.");
 
         // Read another asset, queue count becomes ReloadThreshold - 1. Reload should be triggered.
-        await _queuingAssetPool.GetNextAssetForTesting(CancellationToken.None);
-        _mockDelegatePool.Verify(dp => dp.GetAssets(ReloadBatchSize, It.IsAny<CancellationToken>()), Times.Once, "Reload should happen when count is BELOW threshold.");
+        await _queuingAssetPool.GetNextAssetForTesting(CancellationToken.None, _mockRequestContext.Object);
+        _mockDelegatePool.Verify(dp => dp.GetAssets(ReloadBatchSize, _mockRequestContext.Object, It.IsAny<CancellationToken>()), Times.Once, "Reload should happen when count is BELOW threshold.");
     }
 
     [Test]
     public async Task ReloadAssetsAsync_PreventsConcurrentReloads()
     {
         // Arrange
-        _mockDelegatePool.Setup(dp => dp.GetAssets(ReloadBatchSize, It.IsAny<CancellationToken>()))
+        _mockDelegatePool.Setup(dp => dp.GetAssets(ReloadBatchSize, _mockRequestContext.Object, It.IsAny<CancellationToken>()))
             .ReturnsAsync(() =>
             {
                 // Simulate delay in fetching assets
@@ -149,14 +155,14 @@ public class QueuingAssetPoolTests
 
         // Call GetNextAsset twice. The first will trigger reload.
         // The second, if called while the first is "running", should see the semaphore locked.
-        var task1 = _queuingAssetPool.GetAssets(1, CancellationToken.None);
-        var task2 = _queuingAssetPool.GetAssets(1, CancellationToken.None);
+        var task1 = _queuingAssetPool.GetAssets(1, _mockRequestContext.Object, CancellationToken.None);
+        var task2 = _queuingAssetPool.GetAssets(1, _mockRequestContext.Object, CancellationToken.None);
 
         await Task.WhenAll(task1, task2);
 
         // Assert
         // The delegate's GetAssets should only be called once due to semaphore.
-        _mockDelegatePool.Verify(dp => dp.GetAssets(ReloadBatchSize, It.IsAny<CancellationToken>()), Times.Once);
+        _mockDelegatePool.Verify(dp => dp.GetAssets(ReloadBatchSize, _mockRequestContext.Object, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Test]
@@ -167,7 +173,7 @@ public class QueuingAssetPoolTests
         // Ensure queue is empty so ReadAsync is awaited
 
         // Act: Call GetNextAsset with a token that will be cancelled
-        var getAssetTask = _queuingAssetPool.GetNextAssetForTesting(cts.Token);
+        var getAssetTask = _queuingAssetPool.GetNextAssetForTesting(cts.Token, _mockRequestContext.Object);
         cts.Cancel(); // Cancel the operation
         var result = await getAssetTask;
 
@@ -180,12 +186,12 @@ public class QueuingAssetPoolTests
     {
         // Arrange
         var assetsToLoad = CreateSampleAssets(5, "reloaded_assets");
-        _mockDelegatePool.Setup(dp => dp.GetAssets(ReloadBatchSize, It.IsAny<CancellationToken>()))
+        _mockDelegatePool.Setup(dp => dp.GetAssets(ReloadBatchSize, _mockRequestContext.Object, It.IsAny<CancellationToken>()))
             .ReturnsAsync(assetsToLoad);
 
         // Act
         // Trigger reload by reading from empty queue
-        await _queuingAssetPool.GetNextAssetForTesting(CancellationToken.None);
+        await _queuingAssetPool.GetNextAssetForTesting(CancellationToken.None, _mockRequestContext.Object);
 
         // Wait for the fire-and-forget ReloadAssetsAsync to potentially complete
         // This is tricky. A small delay might work for testing but isn't robust.
@@ -203,7 +209,7 @@ public class QueuingAssetPoolTests
             using var timeoutCts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
             try
             {
-                var asset = await _queuingAssetPool.GetNextAssetForTesting(timeoutCts.Token);
+                var asset = await _queuingAssetPool.GetNextAssetForTesting(timeoutCts.Token, _mockRequestContext.Object);
                 if (asset != null) retrievedAssets.Add(asset);
                 else break;
             }
@@ -225,11 +231,11 @@ public class QueuingAssetPoolTests
 public static class QueuingAssetPoolTestExtensions
 {
     // Expose GetNextAsset for testing (it's protected in AggregatingAssetPool)
-    public static Task<AssetResponseDto?> GetNextAssetForTesting(this QueuingAssetPool pool, CancellationToken ct)
+    public static Task<AssetResponseDto?> GetNextAssetForTesting(this QueuingAssetPool pool, CancellationToken ct, IRequestContext mockRequestContext)
     {
         // Using reflection to call protected GetNextAsset
         var methodInfo = typeof(AggregatingAssetPool).GetMethod("GetNextAsset", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        return (Task<AssetResponseDto?>)methodInfo.Invoke(pool, new object[] { ct });
+        return (Task<AssetResponseDto?>)methodInfo.Invoke(pool, new object[] { mockRequestContext, ct });
     }
 
     // Helper to write to channel for test setup

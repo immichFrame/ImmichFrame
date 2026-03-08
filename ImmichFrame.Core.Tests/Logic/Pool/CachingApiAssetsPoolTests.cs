@@ -12,6 +12,7 @@ public class CachingApiAssetsPoolTests
     private Mock<IApiCache> _mockApiCache;
     private Mock<ImmichApi> _mockImmichApi; // Dependency for constructor, may not be used directly in base class tests
     private Mock<IAccountSettings> _mockAccountSettings;
+    private Mock<IRequestContext> _mockRequestContext;
     private TestableCachingApiAssetsPool _testPool;
 
     // Concrete implementation for testing the abstract class
@@ -36,6 +37,7 @@ public class CachingApiAssetsPoolTests
         _mockApiCache = new Mock<IApiCache>(); // ILogger, IOptions<AppSettings>
         _mockImmichApi = new Mock<ImmichApi>(null, null); // ILogger, IHttpClientFactory, IOptions<AppSettings>
         _mockAccountSettings = new Mock<IAccountSettings>();
+        _mockRequestContext = new Mock<IRequestContext>();
 
         _testPool = new TestableCachingApiAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
 
@@ -52,6 +54,9 @@ public class CachingApiAssetsPoolTests
         _mockAccountSettings.SetupGet(s => s.ImagesUntilDate).Returns((DateTime?)null);
         _mockAccountSettings.SetupGet(s => s.ImagesFromDays).Returns((int?)null);
         _mockAccountSettings.SetupGet(s => s.Rating).Returns((int?)null);
+
+        // Default RequestContext
+        _mockRequestContext.Setup(x => x.AssetOffset).Returns(0);
     }
 
     private List<AssetResponseDto> CreateSampleAssets()
@@ -108,7 +113,7 @@ public class CachingApiAssetsPoolTests
         _mockAccountSettings.SetupGet(s => s.ShowArchived).Returns(true); // Asset "3" included
 
         // Act
-        var result = (await _testPool.GetAssets(2)).ToList();
+        var result = (await _testPool.GetAssets(2, _mockRequestContext.Object)).ToList();
 
         // Assert
         Assert.That(result.Count, Is.EqualTo(2));
@@ -125,7 +130,7 @@ public class CachingApiAssetsPoolTests
         _mockAccountSettings.SetupGet(s => s.ShowArchived).Returns(false);
 
         // Act
-        var result = (await _testPool.GetAssets(5)).ToList(); // Request 5, but only 3 available after filtering
+        var result = (await _testPool.GetAssets(5, _mockRequestContext.Object)).ToList(); // Request 5, but only 3 available after filtering
 
         // Assert
         Assert.That(result.Count, Is.EqualTo(3));
@@ -141,7 +146,7 @@ public class CachingApiAssetsPoolTests
         _mockAccountSettings.SetupGet(s => s.ShowVideos).Returns(true);
 
         // Act
-        var result = (await _testPool.GetAssets(5)).ToList(); // Request 5, but only 3 available after filtering
+        var result = (await _testPool.GetAssets(5, _mockRequestContext.Object)).ToList(); // Request 5, but only 3 available after filtering
 
         // Assert
         Assert.That(result.Count, Is.EqualTo(4));
@@ -179,7 +184,7 @@ public class CachingApiAssetsPoolTests
         // Act
         await _testPool.GetAssetCount(); // First call, should trigger LoadAssets
         await _testPool.GetAssetCount(); // Second call, should use cache
-        await _testPool.GetAssets(1); // Third call, should use cache
+        await _testPool.GetAssets(1, _mockRequestContext.Object); // Third call, should use cache
 
         // Assert
         Assert.That(loadAssetsCallCount, Is.EqualTo(1), "LoadAssets should only be called once.");
@@ -194,7 +199,7 @@ public class CachingApiAssetsPoolTests
         _mockAccountSettings.SetupGet(s => s.ShowArchived).Returns(false);
 
         // Act
-        var result = (await _testPool.GetAssets(5)).ToList(); // Request more than available to get all filtered
+        var result = (await _testPool.GetAssets(5, _mockRequestContext.Object)).ToList(); // Request more than available to get all filtered
 
         // Assert
         Assert.That(result.Any(a => a.Id == "2"), Is.False); // Video asset filtered out by default
@@ -212,7 +217,7 @@ public class CachingApiAssetsPoolTests
         _mockAccountSettings.SetupGet(s => s.ShowVideos).Returns(true);
 
         // Act
-        var result = (await _testPool.GetAssets(5)).ToList(); // Request more than available to get all filtered
+        var result = (await _testPool.GetAssets(5, _mockRequestContext.Object)).ToList(); // Request more than available to get all filtered
 
         // Assert
         Assert.That(result.Any(a => a.Id == "3"), Is.False);
@@ -230,7 +235,7 @@ public class CachingApiAssetsPoolTests
         _mockAccountSettings.SetupGet(s => s.ShowArchived).Returns(true); // Include asset "3" for date check if not filtered by archive
 
         // Act
-        var result = (await _testPool.GetAssets(5)).ToList();
+        var result = (await _testPool.GetAssets(5, _mockRequestContext.Object)).ToList();
 
         // Assert (all are images already by default)
         // Assets: 1 (10d), 3 (5d, archived), 4 (2d), 5 (1y)
@@ -254,7 +259,7 @@ public class CachingApiAssetsPoolTests
         _mockAccountSettings.SetupGet(s => s.ShowArchived).Returns(true);
 
         // Act
-        var result = (await _testPool.GetAssets(5)).ToList();
+        var result = (await _testPool.GetAssets(5, _mockRequestContext.Object)).ToList();
 
         // Assert
         // Assets: 1 (10d), 3 (5d, archived), 4 (2d), 5 (1y)
@@ -278,7 +283,7 @@ public class CachingApiAssetsPoolTests
 
 
         // Act
-        var result = (await _testPool.GetAssets(5)).ToList();
+        var result = (await _testPool.GetAssets(5, _mockRequestContext.Object)).ToList();
 
         // Assert
         // Assets: 1 (10d), 3 (5d, archived), 4 (2d), 5 (1y)
@@ -301,7 +306,7 @@ public class CachingApiAssetsPoolTests
 
 
         // Act
-        var result = (await _testPool.GetAssets(5)).ToList();
+        var result = (await _testPool.GetAssets(5, _mockRequestContext.Object)).ToList();
 
         // Assert
         // Expected: Asset "1", "4" (both rating 5)
@@ -324,7 +329,7 @@ public class CachingApiAssetsPoolTests
         _mockAccountSettings.SetupGet(s => s.Rating).Returns(5); // Asset "1" (rating 5), Asset "4" (rating 5)
 
         // Act
-        var result = (await _testPool.GetAssets(5)).ToList();
+        var result = (await _testPool.GetAssets(5, _mockRequestContext.Object)).ToList();
 
         // Assert
         // Expected: Assets "1", "4"
