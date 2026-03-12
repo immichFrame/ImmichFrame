@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>ImmichFrame - Stable</title>
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background: #000;
+            overflow: hidden;
+            font-family: sans-serif;
+        }
+
+        #main-container {
+            position: relative;
+            height: 100%;
+            width: 100%;
+            background-color: #000;
+        }
+
+        #bg-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+            opacity: 1;
+            -webkit-filter: blur(20px);
+            filter: blur(20px);
+            -webkit-transform: scale(1.1) translateZ(0);
+            transform: scale(1.1) translateZ(0);
+            transition: opacity 1s ease-in-out;
+            -webkit-transition: opacity 1s ease-in-out;
+        }
+
+        #img {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+            max-width: 100%;
+            max-height: 100%;
+            z-index: 5;
+            opacity: 1;
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+            transition: opacity 1s ease-in-out;
+            -webkit-transition: opacity 1s ease-in-out;
+        }
+
+        #info-stack {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            z-index: 20;
+            text-shadow: 2px 2px 15px rgba(0, 0, 0, 0.9);
+        }
+
+        #clock {
+            font-weight: 200;
+            line-height: 1;
+        }
+
+        #weather-info {
+            margin-top: 5px;
+            display: none;
+        }
+
+        .meta-bar {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            text-align: right;
+            z-index: 20;
+            text-shadow: 2px 2px 8px #000;
+        }
+
+        #photoDate {
+            display: block;
+        }
+
+        #location {
+            display: block;
+            margin-top: 8px;
+            opacity: 0.9;
+        }
+
+        #error-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            color: #ff4444;
+            display: none;
+            /* Hidden by default */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            text-align: center;
+        }
+
+        #error-overlay h1 {
+            margin-bottom: 10px;
+        }
+
+        #error-overlay p {
+            color: #bbb;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="main-container">
+        <img id="bg-img" src="" />
+        <div id="info-stack">
+            <div id="clock"></div>
+            <div id="weather-info"></div>
+        </div>
+        <img id="img" src="" />
+        <div class="meta-bar">
+            <span id="photoDate"></span>
+            <span id="location"></span>
+        </div>
+        <div id="error-overlay">
+            <h1>Connection Lost</h1>
+            <p id="error-message">Unable to reach ImmichFrame server.</p>
+        </div>
+    </div>
+
+    <script>
+        function getQueryParam(name) {
+            try {
+                var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+                if (results == null) return null;
+                return decodeURIComponent(results[1]) || null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        var urlSecret = getQueryParam('authsecret');
+        var authSecret = urlSecret || ""; // Defaults to empty if not in URL
+        var config = {};
+        var intervalId = null;
+        var weatherIntervalId = null;
+        var clockStarted = false;
+
+        function showError(visible, msg) {
+            var overlay = document.getElementById("error-overlay");
+            var errorMsgEl = document.getElementById("error-message");
+            if (msg) errorMsgEl.innerHTML = msg;
+            overlay.style.display = visible ? "flex" : "none";
+        }
+
+        function loadConfig() {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "/api/Config?t=" + new Date().getTime(), true);
+            if (authSecret) {
+                xhr.setRequestHeader('Authorization', 'Bearer ' + authSecret);
+            }
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        showError(false);
+                        try {
+                            config = JSON.parse(xhr.responseText);
+                            applyConfig();
+                        } catch (e) {
+                            showError(true, "Config Parse Error");
+                            setTimeout(loadConfig, 10000); // Retry on parse error
+                        }
+                    } else {
+                        showError(true, "Server Error: " + xhr.status + "<br>Check ");
+                        setTimeout(loadConfig, 10000); // Retry on server error
+                    }
+                }
+            };
+            xhr.onerror = function () {
+                showError(true, "Network Error: Cannot connect to server.");
+                setTimeout(loadConfig, 10000); // Retry on network error
+            };
+            xhr.send();
+        }
+
+        function applyConfig() {
+            var baseSize = config.baseFontSize ? parseFloat(config.baseFontSize) : 16;
+            var themeColor = config.primaryColor || "#FFFFFF";
+
+            var clockEl = document.getElementById("clock");
+            if (clockEl) {
+                clockEl.style.fontSize = (baseSize * 4) + "px";
+                clockEl.style.color = themeColor;
+                clockEl.style.display = config.showClock ? "block" : "none";
+            }
+
+            var weatherEl = document.getElementById("weather-info");
+            if (weatherEl) {
+                weatherEl.style.color = themeColor;
+                weatherEl.style.fontSize = (baseSize * 1.5) + "px";
+            }
+
+            var photoDateEl = document.getElementById("photoDate");
+            if (photoDateEl) {
+                photoDateEl.style.color = themeColor;
+                photoDateEl.style.fontSize = baseSize + "px";
+            }
+
+            var locationEl = document.getElementById("location");
+            if (locationEl) {
+                locationEl.style.color = themeColor;
+                locationEl.style.fontSize = baseSize + "px";
+            }
+
+            var infoStack = document.getElementById("info-stack");
+            if (infoStack) {
+                infoStack.style.color = themeColor;
+            }
+
+            var metaBar = document.querySelector(".meta-bar");
+            if (metaBar) {
+                metaBar.style.color = themeColor;
+            }
+
+            if (config.showClock && !clockStarted) {
+                updateClock();
+                clockStarted = true;
+            }
+
+            loadNext();
+            if (intervalId) clearInterval(intervalId);
+            intervalId = setInterval(loadNext, (config.interval || 20) * 1000);
+
+            loadWeather();
+            if (weatherIntervalId) clearInterval(weatherIntervalId);
+            weatherIntervalId = setInterval(loadWeather, 600000);
+        }
+
+        function updateClock() {
+            var now = new Date();
+            var h = now.getHours(), m = now.getMinutes();
+            document.getElementById("clock").innerHTML = (h % 12 || 12) + ":" + (m < 10 ? "0" + m : m);
+            setTimeout(updateClock, 1000);
+        }
+
+        function loadWeather() {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "/api/Weather?t=" + new Date().getTime(), true);
+            if (authSecret) {
+                xhr.setRequestHeader('Authorization', 'Bearer ' + authSecret);
+            }
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    try {
+                        var data = JSON.parse(xhr.responseText);
+                        var el = document.getElementById("weather-info");
+                        el.innerHTML = data.description + ", " + Math.round(data.temperature) + "°";
+                        el.style.display = "block";
+                    } catch (e) { }
+                }
+            };
+            xhr.send();
+        }
+
+        function loadNext() {
+            var xhr = new XMLHttpRequest();
+            var imgEl = document.getElementById("img");
+            var bgEl = document.getElementById("bg-img");
+
+            xhr.open("GET", "/api/Asset/RandomImageAndInfo?t=" + new Date().getTime(), true);
+            if (authSecret) {
+                xhr.setRequestHeader('Authorization', 'Bearer ' + authSecret);
+            }
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        showError(false);
+                        try {
+                            var data = JSON.parse(xhr.responseText);
+                            imgEl.style.opacity = 0;
+                            bgEl.style.opacity = 0;
+
+                            setTimeout(function () {
+                                imgEl.src = "";
+                                bgEl.src = "";
+                                if (data && data.randomImageBase64) {
+                                    var b64 = "data:image/jpeg;base64," + data.randomImageBase64;
+                                    imgEl.src = b64;
+                                    bgEl.src = data.thumbHashImageBase64 ? ("data:image/jpeg;base64," + data.thumbHashImageBase64) : b64;
+                                }
+                                document.getElementById("photoDate").innerHTML = data.photoDate || "";
+                                document.getElementById("location").innerHTML = data.imageLocation || "";
+                                imgEl.style.opacity = 1;
+                                bgEl.style.opacity = 1;
+                            }, 1050);
+                        } catch (e) {
+                            showError(true, "Data Error: Invalid Image Response.");
+                        }
+                    } else {
+                        showError(true, "Connection Lost: " + (xhr.status || "Check Network"));
+                    }
+                }
+            };
+
+            xhr.onerror = function () {
+                showError(true, "Network Error: Server Unreachable.");
+            };
+
+            xhr.send();
+        }
+
+        loadConfig();
+    </script>
+</body>
+
+</html>
