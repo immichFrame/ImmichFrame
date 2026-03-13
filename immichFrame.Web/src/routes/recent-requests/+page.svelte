@@ -252,7 +252,7 @@
 		inset: 50% auto auto 50%;
 		transform: translate(-50%, -50%);
 		width: min(92vw, 56rem);
-		max-height: 88vh;
+		max-height: calc(100vh - 2rem);
 		overflow: auto;
 		display: grid;
 		grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
@@ -264,14 +264,20 @@
 
 	.modal-image-wrap {
 		background: #050505;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 1rem 0;
+		overflow: hidden;
 	}
 
 	.modal-image {
 		display: block;
+		max-width: 100%;
 		width: 100%;
-		height: 100%;
-		min-height: 20rem;
-		object-fit: cover;
+		height: auto;
+		max-height: min(70vh, 40rem);
+		object-fit: contain;
 	}
 
 	.modal-content {
@@ -336,6 +342,8 @@
 
 		.modal-card {
 			grid-template-columns: 1fr;
+			width: min(92vw, 40rem);
+			max-height: calc(100vh - 2rem);
 		}
 	}
 
