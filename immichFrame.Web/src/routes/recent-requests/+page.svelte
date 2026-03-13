@@ -144,7 +144,7 @@
 <style>
 	.recent-requests-page {
 		min-height: 100vh;
-		padding: 2rem;
+		padding: calc(env(safe-area-inset-top, 0px) + 2.75rem) 2rem 2rem;
 		background:
 			radial-gradient(circle at top left, rgba(245, 222, 179, 0.28), transparent 35%),
 			linear-gradient(180deg, #18120a 0%, #090909 100%);
@@ -353,7 +353,7 @@
 
 	@media (max-width: 840px) {
 		.recent-requests-page {
-			padding: 1rem;
+			padding: calc(env(safe-area-inset-top, 0px) + 2rem) 1rem 1rem;
 		}
 
 		.request-grid {
