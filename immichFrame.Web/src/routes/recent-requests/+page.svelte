@@ -27,7 +27,7 @@
 		try {
 			isLoading = true;
 			errorMessage = '';
-			const response = await fetch('/api/AssetRequests/RecentAssetRequests?limit=10');
+			const response = await fetch('/api/AssetRequests/RecentAssetRequests?limit=12');
 			if (!response.ok) {
 				throw new Error(`Request failed with status ${response.status}`);
 			}
