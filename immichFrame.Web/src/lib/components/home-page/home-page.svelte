@@ -27,7 +27,7 @@
 
 	api.init();
 
-	let player: SendspinPlayer | undefined;
+	let player: SendspinPlayer | undefined = $state();
 
 	// TODO: make this configurable?
 	const PRELOAD_ASSETS = 5;
@@ -536,6 +536,8 @@
 			bind:status={progressBarStatus}
 			bind:infoVisible
 			overlayVisible={cursorVisible}
+			musicPrev={() => player?.sendCommand('previous', undefined!)}
+			musicNext={() => player?.sendCommand('next', undefined!)}
 		/>
 
 		<ProgressBar

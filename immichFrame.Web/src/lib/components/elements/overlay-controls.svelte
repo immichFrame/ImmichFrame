@@ -4,7 +4,9 @@
 		mdiPlay,
 		mdiPause,
 		mdiChevronLeft,
-		mdiInformationOutline
+		mdiInformationOutline,
+		mdiSkipNext,
+		mdiSkipPrevious
 	} from '@mdi/js';
 	import Icon from './icon.svelte';
 	import { ProgressBarStatus } from './progress-bar.types';
@@ -17,6 +19,8 @@
 		back: () => void;
 		pause: () => void;
 		showInfo: () => void;
+		musicNext?: () => void;
+		musicPrev?: () => void;
 	}
 
 	let {
@@ -26,7 +30,9 @@
 		next,
 		back,
 		pause,
-		showInfo
+		showInfo,
+		musicNext,
+		musicPrev
 	}: Props = $props();
 
 	function shortcuts(node: any, shortcutList: any[]) {
@@ -106,9 +112,32 @@
 				</button>
 			</div>
 
-			<div class="group grid place-items-center">
-				<!-- <button class="opacity-0 hover:opacity-100 text-primary"> </button> -->
-			</div>
+			{#if musicPrev || musicNext}
+				<div class="group grid place-items-center">
+					<div class="opacity-0 group-hover:opacity-100 flex gap-2 text-primary">
+						{#if musicPrev}
+							<button onclick={musicPrev}>
+								<Icon
+									title="Previous Track"
+									class="max-h-[min(10rem,33vh)] max-w-[min(10rem,33vh)] h-[33vh] w-[33vw]"
+									path={mdiSkipPrevious}
+									size=""
+								/>
+							</button>
+						{/if}
+						{#if musicNext}
+							<button onclick={musicNext}>
+								<Icon
+									title="Next Track"
+									class="max-h-[min(10rem,33vh)] max-w-[min(10rem,33vh)] h-[33vh] w-[33vw]"
+									path={mdiSkipNext}
+									size=""
+								/>
+							</button>
+						{/if}
+					</div>
+				</div>
+			{/if}
 		</div>
 
 		<div id="overlaynext" class="group grid place-items-center">
