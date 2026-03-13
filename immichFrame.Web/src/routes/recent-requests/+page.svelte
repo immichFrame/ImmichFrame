@@ -107,7 +107,7 @@
 		<div class="modal-content">
 			<div class="modal-header">
 				<div>
-					<p class="eyebrow">Asset Detail</p>
+					<p class="eyebrow modal-eyebrow">File Name
 					<h2 id="request-detail-title">{selectedRequest.originalFileName ?? selectedRequest.assetId}</h2>
 				</div>
 				<button class="close-button" type="button" on:click={closeModal}>Close</button>
@@ -121,14 +121,6 @@
 				<div>
 					<dt>Location</dt>
 					<dd>{selectedRequest.location || 'Unknown'}</dd>
-				</div>
-				<div>
-					<dt>Requested</dt>
-					<dd>{formatDateTime(selectedRequest.requestedAtUtc)}</dd>
-				</div>
-				<div>
-					<dt>Client</dt>
-					<dd>{selectedRequest.clientIdentifier}</dd>
 				</div>
 			</dl>
 		</div>
@@ -160,6 +152,11 @@
 		letter-spacing: 0.16em;
 		text-transform: uppercase;
 		color: #d4b784;
+	}
+
+	.modal-eyebrow {
+		font-size: 0.68rem;
+		margin-bottom: 0.2rem;
 	}
 
 	h1 {
@@ -252,7 +249,7 @@
 		inset: 50% auto auto 50%;
 		transform: translate(-50%, -50%);
 		width: min(92vw, 56rem);
-		max-height: calc(100vh - 2rem);
+		max-height: calc(100vh - 3rem);
 		overflow: auto;
 		display: grid;
 		grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
@@ -293,8 +290,12 @@
 
 	h2 {
 		margin: 0;
-		font-size: 1.35rem;
+		font-size: 1.05rem;
+		line-height: 1.3;
+		font-weight: 400;
 		color: #f4efe4;
+		overflow-wrap: anywhere;
+		word-break: break-word;
 	}
 
 	.close-button {
@@ -328,6 +329,8 @@
 		margin: 0.3rem 0 0;
 		font-size: 1rem;
 		color: rgba(244, 239, 228, 0.9);
+		overflow-wrap: anywhere;
+		word-break: break-word;
 	}
 
 	@media (max-width: 840px) {
@@ -343,11 +346,24 @@
 		.modal-card {
 			grid-template-columns: 1fr;
 			width: min(92vw, 40rem);
-			max-height: calc(100vh - 2rem);
+			max-height: calc(100vh - 3rem);
 		}
 	}
 
 	@media (max-width: 480px) {
+		.modal-card {
+			width: calc(100vw - 1.5rem);
+			max-height: calc(100vh - 4rem);
+		}
+
+		.modal-content {
+			padding: 1rem;
+		}
+
+		.modal-image-wrap {
+			padding: 0.75rem 0;
+		}
+
 		.page-header {
 			gap: 0.75rem;
 		}
