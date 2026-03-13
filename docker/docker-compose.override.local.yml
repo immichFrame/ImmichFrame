@@ -1,0 +1,13 @@
+name: immichframe-local
+
+services:
+  immichframe:
+    container_name: immichframe-local
+    image: immichframe:local
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./Config:/app/Config:ro
+    environment:
+      TZ: "Europe/London"

@@ -1,7 +1,7 @@
 {
     "name": "ImmichFrame",
     "short_name": "ImmichFrame",
-    "start_url": "/",
+    "start_url": "/recent-requests",
     "display": "fullscreen",
     "background_color": "#000000",
     "theme_color": "#000000",

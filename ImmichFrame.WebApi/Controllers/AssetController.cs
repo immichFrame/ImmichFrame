@@ -4,6 +4,7 @@ using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.Core.Models;
 using ImmichFrame.WebApi.Models;
+using ImmichFrame.WebApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -26,12 +27,14 @@ namespace ImmichFrame.WebApi.Controllers
         private readonly ILogger<AssetController> _logger;
         private readonly IImmichFrameLogic _logic;
         private readonly IGeneralSettings _settings;
+        private readonly IAssetRequestTracker _tracker;
 
-        public AssetController(ILogger<AssetController> logger, IImmichFrameLogic logic, IGeneralSettings settings)
+        public AssetController(ILogger<AssetController> logger, IImmichFrameLogic logic, IGeneralSettings settings, IAssetRequestTracker tracker)
         {
             _logger = logger;
             _logic = logic;
             _settings = settings;
+            _tracker = tracker;
         }
 
         [HttpGet(Name = "GetAssets")]
@@ -93,6 +96,7 @@ namespace ImmichFrame.WebApi.Controllers
 
             if (string.IsNullOrEmpty(rangeHeader))
             {
+                _tracker.RecordAssetRequest(sanitizedClientIdentifier, id, "GET /api/Asset/{id}/Asset", assetType?.ToString());
                 var notification = new AssetRequestedNotification(id, sanitizedClientIdentifier);
                 _ = _logic.SendWebhookNotification(notification);
             }
@@ -146,8 +150,10 @@ namespace ImmichFrame.WebApi.Controllers
             if (randomAsset == null)
                 throw new AssetNotFoundException("No image asset was found");
 
-            var asset = await _logic.GetAsset(new Guid(randomAsset.Id), AssetTypeEnum.IMAGE);
-            var notification = new AssetRequestedNotification(new Guid(randomAsset.Id), sanitizedClientIdentifier);
+            var requestedAssetId = new Guid(randomAsset.Id);
+            var asset = await _logic.GetAsset(requestedAssetId, AssetTypeEnum.IMAGE);
+            _tracker.RecordAssetRequest(sanitizedClientIdentifier, requestedAssetId, "GET /api/Asset/RandomImageAndInfo", AssetTypeEnum.IMAGE.ToString());
+            var notification = new AssetRequestedNotification(requestedAssetId, sanitizedClientIdentifier);
             _ = _logic.SendWebhookNotification(notification);
 
             string randomImageBase64;
