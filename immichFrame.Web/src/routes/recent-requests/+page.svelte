@@ -22,6 +22,7 @@
 	let errorMessage = '';
 	let recentRequests: RecentAssetRequest[] = [];
 	let selectedRequest: RecentAssetRequest | null = null;
+	let selectedImageIsPortrait = false;
 
 	const loadRecentRequests = async () => {
 		try {
@@ -44,6 +45,12 @@
 
 	const closeModal = () => {
 		selectedRequest = null;
+		selectedImageIsPortrait = false;
+	};
+
+	const handleModalImageLoad = (event: Event) => {
+		const image = event.currentTarget as HTMLImageElement;
+		selectedImageIsPortrait = image.naturalHeight > image.naturalWidth;
 	};
 
 	const formatDateTime = (value?: string | null) => {
@@ -99,9 +106,11 @@
 	<div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="request-detail-title">
 		<div class="modal-image-wrap">
 			<img
+				class:portrait-image={selectedImageIsPortrait}
 				class="modal-image"
 				src={getAssetStreamUrl(selectedRequest.assetId, selectedRequest.clientIdentifier, 0)}
 				alt={selectedRequest.originalFileName ?? selectedRequest.assetId}
+				on:load={handleModalImageLoad}
 			/>
 		</div>
 		<div class="modal-content">
@@ -277,6 +286,10 @@
 		object-fit: contain;
 	}
 
+	.portrait-image {
+		max-height: min(58vh, 32rem);
+	}
+
 	.modal-content {
 		padding: 1.4rem;
 	}
@@ -362,6 +375,10 @@
 
 		.modal-image-wrap {
 			padding: 0.75rem 0;
+		}
+
+		.portrait-image {
+			max-height: min(50vh, 24rem);
 		}
 
 		.page-header {
