@@ -6,6 +6,7 @@ using System.Reflection;
 using ImmichFrame.Core.Logic;
 using ImmichFrame.Core.Logic.AccountSelection;
 using ImmichFrame.WebApi.Helpers.Config;
+using ImmichFrame.WebApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 //log the version number
@@ -61,6 +62,7 @@ builder.Services.AddSingleton<IWeatherService, OpenWeatherMapService>();
 builder.Services.AddSingleton<ICalendarService, IcalCalendarService>();
 builder.Services.AddSingleton<IAssetAccountTracker, BloomFilterAssetAccountTracker>();
 builder.Services.AddSingleton<IAccountSelectionStrategy, TotalAccountImagesSelectionStrategy>();
+builder.Services.AddSingleton<IAssetRequestTracker, InMemoryAssetRequestTracker>();
 builder.Services.AddHttpClient(); // Ensures IHttpClientFactory is available
 
 builder.Services.AddTransient<Func<IAccountSettings, IAccountImmichFrameLogic>>(srv =>
