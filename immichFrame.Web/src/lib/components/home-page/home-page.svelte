@@ -15,6 +15,7 @@
 	import { page } from '$app/state';
 	import { ProgressBarLocation, ProgressBarStatus } from '../elements/progress-bar.types';
 	import { isImageAsset, isVideoAsset } from '$lib/constants/asset-type';
+	import { SendspinPlayer } from '@sendspin/sendspin-js';
 
 	interface AssetsState {
 		assets: [string, api.AssetResponseDto, api.AlbumResponseDto[]][];
@@ -25,6 +26,8 @@
 	}
 
 	api.init();
+
+	let player: SendspinPlayer | undefined;
 
 	// TODO: make this configurable?
 	const PRELOAD_ASSETS = 5;
@@ -398,6 +401,19 @@
 		if ($configStore.baseFontSize) {
 			document.documentElement.style.fontSize = $configStore.baseFontSize;
 		}
+		player = new SendspinPlayer({
+			playerId: 'sendspin_frame',
+			baseUrl: 'http://192.168.0.11:8927',
+			clientName: 'ImmichFrame',
+			correctionMode: 'sync',
+			onStateChange: (state) => {
+				if (state.serverState?.metadata) {
+					const meta = state.serverState.metadata;
+					console.log('Sendspin track:', meta.title, '-', meta.artist);
+				}
+			}
+		});
+		player.connect();
 
 		unsubscribeRestart = restartProgress.subscribe((value) => {
 			if (value) {
@@ -429,6 +445,9 @@
 		if (unsubscribeStop) {
 			unsubscribeStop();
 		}
+
+		console.log('Cleaning up resources...');
+		player?.disconnect();
 
 		const revokes = Object.values(assetPromisesDict).map(async (p) => {
 			try {
