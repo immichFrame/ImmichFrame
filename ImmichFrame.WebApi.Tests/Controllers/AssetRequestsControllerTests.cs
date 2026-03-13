@@ -106,7 +106,7 @@ public class AssetRequestsControllerTests
 
         Assert.That(recentRequests, Is.Not.Null);
         var recentRequest = recentRequests!.Single(item => item.AssetId == assetId);
-        Assert.That(recentRequest.OriginalFileName, Is.EqualTo("kitchen-photo.jpg"));
+        Assert.That(recentRequest.CameraDisplay, Is.EqualTo("Canon EOS R6"));
         Assert.That(recentRequest.Location, Is.EqualTo("Paris, Ile-de-France, France"));
         Assert.That(recentRequest.TakenAtUtc, Is.Not.Null);
     }
@@ -136,6 +136,8 @@ public class AssetRequestsControllerTests
             "thumbhash": "I0cMCQS94XmImZeXmYd3d3g=",
             "updatedAt": "2023-10-26T10:00:00Z",
             "exifInfo": {
+                "make": "Canon",
+                "model": "EOS R6",
                 "city": "Paris",
                 "state": "Ile-de-France",
                 "country": "France"

@@ -42,6 +42,8 @@ public class AssetRequestsController(IAssetRequestTracker tracker, IImmichFrameL
             var city = assetInfo.ExifInfo?.City;
             var state = assetInfo.ExifInfo?.State;
             var country = assetInfo.ExifInfo?.Country;
+            var cameraMake = assetInfo.ExifInfo?.Make;
+            var cameraModel = assetInfo.ExifInfo?.Model;
 
             return new RecentAssetRequestDetailsRecord
             {
@@ -51,6 +53,9 @@ public class AssetRequestsController(IAssetRequestTracker tracker, IImmichFrameL
                 Endpoint = request.Endpoint,
                 AssetType = request.AssetType,
                 OriginalFileName = assetInfo.OriginalFileName,
+                CameraMake = cameraMake,
+                CameraModel = cameraModel,
+                CameraDisplay = string.Join(" ", new[] { cameraMake, cameraModel }.Where(part => !string.IsNullOrWhiteSpace(part))),
                 TakenAtUtc = assetInfo.LocalDateTime,
                 Location = string.Join(", ", new[] { city, state, country }.Where(part => !string.IsNullOrWhiteSpace(part))),
                 City = city,
@@ -70,6 +75,9 @@ public class AssetRequestsController(IAssetRequestTracker tracker, IImmichFrameL
                 Endpoint = request.Endpoint,
                 AssetType = request.AssetType,
                 OriginalFileName = null,
+                CameraMake = null,
+                CameraModel = null,
+                CameraDisplay = null,
                 TakenAtUtc = null,
                 Location = null,
                 City = null,

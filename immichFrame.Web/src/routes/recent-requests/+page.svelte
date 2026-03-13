@@ -9,6 +9,9 @@
 		endpoint?: string | null;
 		assetType?: string | null;
 		originalFileName?: string | null;
+		cameraMake?: string | null;
+		cameraModel?: string | null;
+		cameraDisplay?: string | null;
 		takenAtUtc?: string | null;
 		location?: string | null;
 		city?: string | null;
@@ -116,8 +119,10 @@
 		<div class="modal-content">
 			<div class="modal-header">
 				<div>
-					<p class="eyebrow modal-eyebrow">File Name
-					<h2 id="request-detail-title">{selectedRequest.originalFileName ?? selectedRequest.assetId}</h2>
+					<p class="eyebrow modal-eyebrow">Camera</p>
+					<h2 id="request-detail-title">
+						{selectedRequest.cameraDisplay || selectedRequest.cameraModel || selectedRequest.cameraMake || 'Unknown'}
+					</h2>
 				</div>
 				<button class="close-button" type="button" on:click={closeModal}>Close</button>
 			</div>

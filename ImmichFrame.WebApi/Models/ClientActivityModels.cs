@@ -17,6 +17,9 @@ public sealed class RecentAssetRequestDetailsRecord
     public string? Endpoint { get; init; }
     public string? AssetType { get; init; }
     public string? OriginalFileName { get; init; }
+    public string? CameraMake { get; init; }
+    public string? CameraModel { get; init; }
+    public string? CameraDisplay { get; init; }
     public DateTimeOffset? TakenAtUtc { get; init; }
     public string? Location { get; init; }
     public string? City { get; init; }
