@@ -61,7 +61,7 @@
 		<div>
 			<p class="eyebrow">Asset Requests</p>
 			<h1>Recent Asset Requests</h1>
-			<p class="subtitle">The 10 most recently requested images, shown as clickable previews.</p>
+			<p class="subtitle">Recently requested images, shown as clickable previews.</p>
 		</div>
 	</header>
 
