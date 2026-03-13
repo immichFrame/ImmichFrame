@@ -23,8 +23,10 @@
 	let recentRequests: RecentAssetRequest[] = [];
 	let selectedRequest: RecentAssetRequest | null = null;
 
-	onMount(async () => {
+	const loadRecentRequests = async () => {
 		try {
+			isLoading = true;
+			errorMessage = '';
 			const response = await fetch('/api/AssetRequests/RecentAssetRequests?limit=10');
 			if (!response.ok) {
 				throw new Error(`Request failed with status ${response.status}`);
@@ -36,7 +38,9 @@
 		} finally {
 			isLoading = false;
 		}
-	});
+	};
+
+	onMount(loadRecentRequests);
 
 	const closeModal = () => {
 		selectedRequest = null;
@@ -61,8 +65,11 @@
 		<div>
 			<p class="eyebrow">Asset Requests</p>
 			<h1>Recent Asset Requests</h1>
-			<p class="subtitle">Recently requested images, shown as clickable previews.</p>
+			<p class="subtitle">Press previews to view info.</p>
 		</div>
+		<button class="refresh-button" type="button" on:click={loadRecentRequests} disabled={isLoading}>
+			{isLoading ? 'Refreshing...' : 'Refresh'}
+		</button>
 	</header>
 
 	{#if isLoading}
@@ -81,10 +88,6 @@
 						alt={request.originalFileName ?? request.assetId}
 						loading="lazy"
 					/>
-					<div class="request-meta">
-						<p class="file-name">{request.originalFileName ?? request.assetId}</p>
-						<p>{formatDateTime(request.requestedAtUtc)}</p>
-					</div>
 				</button>
 			{/each}
 		</div>
@@ -145,6 +148,10 @@
 	.page-header {
 		margin: 0 auto 2rem;
 		max-width: 72rem;
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		gap: 1rem;
 	}
 
 	.eyebrow {
@@ -165,6 +172,24 @@
 		margin-top: 0.75rem;
 		max-width: 40rem;
 		color: rgba(244, 239, 228, 0.72);
+	}
+
+	.refresh-button {
+		border: 1px solid rgba(212, 183, 132, 0.45);
+		background: rgba(212, 183, 132, 0.08);
+		color: #d4b784;
+		padding: 0.7rem 1rem;
+		border-radius: 999px;
+		cursor: pointer;
+		font-weight: 700;
+		white-space: nowrap;
+		align-self: flex-start;
+		margin-left: auto;
+	}
+
+	.refresh-button:disabled {
+		opacity: 0.6;
+		cursor: default;
 	}
 
 	.status-panel {
@@ -213,22 +238,6 @@
 		aspect-ratio: 1 / 1;
 		object-fit: cover;
 		background: rgba(255, 255, 255, 0.04);
-	}
-
-	.request-meta {
-		padding: 0.9rem 1rem 1rem;
-	}
-
-	.file-name {
-		margin: 0 0 0.35rem;
-		font-weight: 700;
-		word-break: break-word;
-	}
-
-	.request-meta p:last-child {
-		margin: 0;
-		color: rgba(244, 239, 228, 0.72);
-		font-size: 0.88rem;
 	}
 
 	.modal-backdrop {
@@ -320,8 +329,27 @@
 			padding: 1rem;
 		}
 
+		.request-grid {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+			gap: 0.75rem;
+		}
+
 		.modal-card {
 			grid-template-columns: 1fr;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.page-header {
+			gap: 0.75rem;
+		}
+
+		.refresh-button {
+			padding: 0.6rem 0.85rem;
+		}
+
+		.request-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
 		}
 	}
 </style>
