@@ -16,6 +16,10 @@
             font-family: sans-serif;
         }
 
+        .nocursor {
+            cursor: none !important;
+        }
+
         #main-container {
             position: relative;
             height: 100%;
@@ -47,14 +51,58 @@
             left: 0;
             right: 0;
             margin: auto;
-            max-width: 100%;
-            max-height: 100%;
             z-index: 5;
             opacity: 1;
+            max-width: 100%;
+            max-height: 100%;
             -webkit-transform: translateZ(0);
             transform: translateZ(0);
             transition: opacity 1s ease-in-out;
             -webkit-transition: opacity 1s ease-in-out;
+            object-fit: contain;
+        }
+
+        #controls {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            z-index: 50;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 30px;
+            box-sizing: border-box;
+            opacity: 0;
+            -webkit-transition: opacity 0.5s ease-in-out;
+            transition: opacity 0.5s ease-in-out;
+            pointer-events: none;
+            -webkit-transform: translateY(-50%);
+            transform: translateY(-50%);
+        }
+
+        .show-controls #controls {
+            opacity: 1;
+        }
+
+        .btn {
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            width: 70px;
+            height: 70px;
+            font-size: 28px;
+            cursor: pointer;
+            border-radius: 50%;
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px);
+        }
+
+        .btn:active {
+            background: rgba(255, 255, 255, 0.3);
         }
 
         #info-stack {
@@ -79,19 +127,18 @@
             position: absolute;
             bottom: 30px;
             right: 30px;
-            text-align: right;
             z-index: 20;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            text-align: right;
             text-shadow: 2px 2px 8px #000;
         }
 
-        #photoDate {
-            display: block;
-        }
-
         #location {
-            display: block;
-            margin-top: 8px;
-            opacity: 0.9;
+            font-size: 0.9em;
+            opacity: 0.85;
+            margin-top: 5px;
         }
 
         #error-overlay {
@@ -103,20 +150,11 @@
             background: rgba(0, 0, 0, 0.85);
             color: #ff4444;
             display: none;
-            /* Hidden by default */
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 100;
             text-align: center;
-        }
-
-        #error-overlay h1 {
-            margin-bottom: 10px;
-        }
-
-        #error-overlay p {
-            color: #bbb;
         }
     </style>
 </head>
@@ -124,15 +162,25 @@
 <body>
     <div id="main-container">
         <img id="bg-img" src="" />
+
+        <div id="controls">
+            <button class="btn" onclick="showPrevious()">&#9664;</button>
+            <button class="btn" id="pauseBtn" onclick="togglePause()">&#10074;&#10074;</button>
+            <button class="btn" onclick="loadNext()">&#9654;</button>
+        </div>
+
         <div id="info-stack">
             <div id="clock"></div>
             <div id="weather-info"></div>
         </div>
+
         <img id="img" src="" />
+
         <div class="meta-bar">
             <span id="photoDate"></span>
             <span id="location"></span>
         </div>
+
         <div id="error-overlay">
             <h1>Connection Lost</h1>
             <p id="error-message">Unable to reach ImmichFrame server.</p>
@@ -143,53 +191,57 @@
         function getQueryParam(name) {
             try {
                 var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
-                if (results == null) return null;
-                return decodeURIComponent(results[1]) || null;
-            } catch (e) {
-                return null;
-            }
+                return results ? decodeURIComponent(results[1]) : null;
+            } catch (e) { return null; }
         }
 
-        var urlSecret = getQueryParam('authsecret');
-        var authSecret = urlSecret || ""; // Defaults to empty if not in URL
+        var authSecret = getQueryParam('authsecret') || "";
         var config = {};
         var intervalId = null;
         var weatherIntervalId = null;
         var clockStarted = false;
 
+        var isPaused = false;
+        var historyStack = [];
+        var historyIndex = -1;
+        var historyLimit = 10;
+        var idleTimer = null;
+        var idleWait = 3000;
+
+        function showUI() {
+            document.body.classList.remove("nocursor");
+            document.getElementById("main-container").classList.add("show-controls");
+            if (idleTimer) clearTimeout(idleTimer);
+            idleTimer = setTimeout(hideUI, idleWait);
+        }
+
+        function hideUI() {
+            document.body.classList.add("nocursor");
+            document.getElementById("main-container").classList.remove("show-controls");
+        }
+
+        window.addEventListener('mousemove', showUI);
+        window.addEventListener('touchstart', showUI);
+
         function showError(visible, msg) {
             var overlay = document.getElementById("error-overlay");
-            var errorMsgEl = document.getElementById("error-message");
-            if (msg) errorMsgEl.innerHTML = msg;
+            if (msg) document.getElementById("error-message").innerHTML = msg;
             overlay.style.display = visible ? "flex" : "none";
         }
 
         function loadConfig() {
             var xhr = new XMLHttpRequest();
             xhr.open("GET", "/api/Config?t=" + new Date().getTime(), true);
-            if (authSecret) {
-                xhr.setRequestHeader('Authorization', 'Bearer ' + authSecret);
-            }
+            if (authSecret) xhr.setRequestHeader('Authorization', 'Bearer ' + authSecret);
             xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4) {
-                    if (xhr.status === 200) {
-                        showError(false);
-                        try {
-                            config = JSON.parse(xhr.responseText);
-                            applyConfig();
-                        } catch (e) {
-                            showError(true, "Config Parse Error");
-                            setTimeout(loadConfig, 10000); // Retry on parse error
-                        }
-                    } else {
-                        showError(true, "Server Error: " + xhr.status + "<br>Check ");
-                        setTimeout(loadConfig, 10000); // Retry on server error
-                    }
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    showError(false);
+                    config = JSON.parse(xhr.responseText);
+                    applyConfig();
+                } else if (xhr.readyState === 4) {
+                    showError(true, "Server Error: " + xhr.status);
+                    setTimeout(loadConfig, 10000);
                 }
-            };
-            xhr.onerror = function () {
-                showError(true, "Network Error: Cannot connect to server.");
-                setTimeout(loadConfig, 10000); // Retry on network error
             };
             xhr.send();
         }
@@ -197,54 +249,115 @@
         function applyConfig() {
             var baseSize = config.baseFontSize ? parseFloat(config.baseFontSize) : 16;
             var themeColor = config.primaryColor || "#FFFFFF";
+            var imgEl = document.getElementById("img");
+            var bgImgEl = document.getElementById("bg-img");
 
-            var clockEl = document.getElementById("clock");
-            if (clockEl) {
-                clockEl.style.fontSize = (baseSize * 4) + "px";
-                clockEl.style.color = themeColor;
-                clockEl.style.display = config.showClock ? "block" : "none";
+            if (config.imageFill) {
+                imgEl.style.objectFit = "cover";
+                imgEl.style.width = "100%";
+                imgEl.style.height = "100%";
+                bgImgEl.style.display = "none";
+            } else {
+                imgEl.style.objectFit = "contain";
+                imgEl.style.width = "auto";
+                imgEl.style.height = "auto";
+                bgImgEl.style.display = "block";
             }
 
-            var weatherEl = document.getElementById("weather-info");
-            if (weatherEl) {
-                weatherEl.style.color = themeColor;
-                weatherEl.style.fontSize = (baseSize * 1.5) + "px";
-            }
+            document.getElementById("clock").style.fontSize = (baseSize * 4) + "px";
+            document.getElementById("clock").style.color = themeColor;
+            document.getElementById("clock").style.display = config.showClock ? "block" : "none";
+            document.getElementById("weather-info").style.color = themeColor;
+            document.getElementById("photoDate").style.color = themeColor;
+            document.getElementById("location").style.color = themeColor;
 
-            var photoDateEl = document.getElementById("photoDate");
-            if (photoDateEl) {
-                photoDateEl.style.color = themeColor;
-                photoDateEl.style.fontSize = baseSize + "px";
-            }
-
-            var locationEl = document.getElementById("location");
-            if (locationEl) {
-                locationEl.style.color = themeColor;
-                locationEl.style.fontSize = baseSize + "px";
-            }
-
-            var infoStack = document.getElementById("info-stack");
-            if (infoStack) {
-                infoStack.style.color = themeColor;
-            }
-
-            var metaBar = document.querySelector(".meta-bar");
-            if (metaBar) {
-                metaBar.style.color = themeColor;
-            }
-
-            if (config.showClock && !clockStarted) {
-                updateClock();
-                clockStarted = true;
-            }
+            if (config.showClock && !clockStarted) { updateClock(); clockStarted = true; }
 
             loadNext();
-            if (intervalId) clearInterval(intervalId);
-            intervalId = setInterval(loadNext, (config.interval || 20) * 1000);
+            resetInterval();
 
             loadWeather();
             if (weatherIntervalId) clearInterval(weatherIntervalId);
             weatherIntervalId = setInterval(loadWeather, 600000);
+
+            var buttons = document.getElementsByClassName('btn');
+            for (var i = 0; i < buttons.length; i++) {
+                buttons[i].addEventListener('mouseenter', function () {
+                    if (idleTimer) clearTimeout(idleTimer);
+                });
+                buttons[i].addEventListener('mouseleave', showUI);
+            }
+        }
+
+        function resetInterval() {
+            if (intervalId) clearInterval(intervalId);
+            if (!isPaused) {
+                intervalId = setInterval(loadNext, (config.interval || 20) * 1000);
+            }
+        }
+
+        function togglePause() {
+            isPaused = !isPaused;
+            // ▶ for Resume, ❚❚ for Pause
+            document.getElementById("pauseBtn").innerHTML = isPaused ? "&#9654;" : "&#10074;&#10074;";
+            resetInterval();
+        }
+
+        function displayImageData(data) {
+            if (!data) return;
+            var imgEl = document.getElementById("img");
+            var bgEl = document.getElementById("bg-img");
+
+            imgEl.style.opacity = 0;
+            bgEl.style.opacity = 0;
+
+            setTimeout(function () {
+                var b64 = "data:image/jpeg;base64," + data.randomImageBase64;
+                imgEl.src = b64;
+                if (!config.imageFill) {
+                    bgEl.src = data.thumbHashImageBase64 ? ("data:image/jpeg;base64," + data.thumbHashImageBase64) : b64;
+                    bgEl.style.opacity = 1;
+                }
+
+                document.getElementById("photoDate").innerHTML = data.photoDate || "";
+                document.getElementById("location").innerHTML = data.imageLocation || "";
+                imgEl.style.opacity = 1;
+            }, 1050);
+        }
+
+        function showPrevious() {
+            if (historyIndex > 0) {
+                historyIndex--;
+                displayImageData(historyStack[historyIndex]);
+                resetInterval();
+            }
+        }
+
+        function loadNext() {
+            if (historyIndex < historyStack.length - 1) {
+                historyIndex++;
+                displayImageData(historyStack[historyIndex]);
+                resetInterval();
+                return;
+            }
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "/api/Asset/RandomImageAndInfo?t=" + new Date().getTime(), true);
+            if (authSecret) xhr.setRequestHeader('Authorization', 'Bearer ' + authSecret);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    showError(false);
+                    var data = JSON.parse(xhr.responseText);
+                    if (data && data.randomImageBase64) {
+                        historyStack.push(data);
+                        if (historyStack.length > historyLimit) historyStack.shift();
+                        historyIndex = historyStack.length - 1;
+                        displayImageData(data);
+                        resetInterval();
+                    }
+                }
+            };
+            xhr.send();
         }
 
         function updateClock() {
@@ -257,67 +370,15 @@
         function loadWeather() {
             var xhr = new XMLHttpRequest();
             xhr.open("GET", "/api/Weather?t=" + new Date().getTime(), true);
-            if (authSecret) {
-                xhr.setRequestHeader('Authorization', 'Bearer ' + authSecret);
-            }
+            if (authSecret) xhr.setRequestHeader('Authorization', 'Bearer ' + authSecret);
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4 && xhr.status === 200) {
-                    try {
-                        var data = JSON.parse(xhr.responseText);
-                        var el = document.getElementById("weather-info");
-                        el.innerHTML = data.description + ", " + Math.round(data.temperature) + "°";
-                        el.style.display = "block";
-                    } catch (e) { }
+                    var data = JSON.parse(xhr.responseText);
+                    var el = document.getElementById("weather-info");
+                    el.innerHTML = data.description + ", " + Math.round(data.temperature) + "°";
+                    el.style.display = "block";
                 }
             };
-            xhr.send();
-        }
-
-        function loadNext() {
-            var xhr = new XMLHttpRequest();
-            var imgEl = document.getElementById("img");
-            var bgEl = document.getElementById("bg-img");
-
-            xhr.open("GET", "/api/Asset/RandomImageAndInfo?t=" + new Date().getTime(), true);
-            if (authSecret) {
-                xhr.setRequestHeader('Authorization', 'Bearer ' + authSecret);
-            }
-
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4) {
-                    if (xhr.status === 200) {
-                        showError(false);
-                        try {
-                            var data = JSON.parse(xhr.responseText);
-                            imgEl.style.opacity = 0;
-                            bgEl.style.opacity = 0;
-
-                            setTimeout(function () {
-                                imgEl.src = "";
-                                bgEl.src = "";
-                                if (data && data.randomImageBase64) {
-                                    var b64 = "data:image/jpeg;base64," + data.randomImageBase64;
-                                    imgEl.src = b64;
-                                    bgEl.src = data.thumbHashImageBase64 ? ("data:image/jpeg;base64," + data.thumbHashImageBase64) : b64;
-                                }
-                                document.getElementById("photoDate").innerHTML = data.photoDate || "";
-                                document.getElementById("location").innerHTML = data.imageLocation || "";
-                                imgEl.style.opacity = 1;
-                                bgEl.style.opacity = 1;
-                            }, 1050);
-                        } catch (e) {
-                            showError(true, "Data Error: Invalid Image Response.");
-                        }
-                    } else {
-                        showError(true, "Connection Lost: " + (xhr.status || "Check Network"));
-                    }
-                }
-            };
-
-            xhr.onerror = function () {
-                showError(true, "Network Error: Server Unreachable.");
-            };
-
             xhr.send();
         }
 
