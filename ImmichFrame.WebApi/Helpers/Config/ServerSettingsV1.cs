@@ -63,6 +63,7 @@ public class ServerSettingsV1 : IConfigSettable
 /// <param name="_delegate">the V1 settings object to wrap</param>
 public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettings
 {
+    public ServerSettingsV1 Settings { get; } = _delegate;
     public IEnumerable<IAccountSettings> Accounts => new List<AccountSettingsV1Adapter> { new(_delegate) };
     public IGeneralSettings GeneralSettings => new GeneralSettingsV1Adapter(_delegate);
 
