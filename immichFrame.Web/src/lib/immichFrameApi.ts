@@ -198,6 +198,7 @@ export type ClientSettingsDto = {
     photoDateFormat?: string | null;
     showImageDesc?: boolean;
     showPeopleDesc?: boolean;
+    showTagsDesc?: boolean;
     showAlbumName?: boolean;
     showImageLocation?: boolean;
     imageLocationFormat?: string | null;
