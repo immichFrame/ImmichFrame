@@ -1,4 +1,5 @@
 using ImmichFrame.Core.Api;
+using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
 
 namespace ImmichFrame.Core.Logic.Pool;
@@ -7,20 +8,31 @@ public class AllAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSett
 {
     public async Task<long> GetAssetCount(CancellationToken ct = default)
     {
-        //Retrieve total images count (unfiltered); will update to query filtered stats from Immich
-        return (await apiCache.GetOrAddAsync(nameof(AllAssetsPool),
-            () => immichApi.GetAssetStatisticsAsync(null, false, null, ct))).Images;
+        // Retrieve total media count (images + videos); will update to query filtered stats from Immich
+        var stats = await apiCache.GetOrAddAsync(nameof(AllAssetsPool),
+            () => immichApi.GetAssetStatisticsAsync(null, false, null, ct));
+
+        if (accountSettings.ShowVideos)
+        {
+            return stats.Images + stats.Videos;
+        }
+
+        return stats.Images;
     }
-    
+
     public async Task<IEnumerable<AssetResponseDto>> GetAssets(int requested, CancellationToken ct = default)
     {
         var searchDto = new RandomSearchDto
         {
             Size = requested,
-            Type = AssetTypeEnum.IMAGE,
             WithExif = true,
             WithPeople = true
         };
+
+        if (!accountSettings.ShowVideos)
+        {
+            searchDto.Type = AssetTypeEnum.IMAGE;
+        }
 
         if (accountSettings.ShowArchived)
         {
@@ -49,30 +61,11 @@ public class AllAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSett
         }
 
         var assets = await immichApi.SearchRandomAsync(searchDto, ct);
+        var excludedAlbumAssets = await apiCache.GetOrAddAsync(
+            $"{nameof(AllAssetsPool)}_ExcludedAlbums",
+            () => AssetHelper.GetExcludedAlbumAssets(immichApi, accountSettings, ct));
 
-        if (accountSettings.ExcludedAlbums?.Any() ?? false)
-        {
-            var excludedAssetList = await GetExcludedAlbumAssets(ct);
-            var excludedAssetSet = excludedAssetList.Select(x => x.Id).ToHashSet();
-            assets = assets.Where(x => !excludedAssetSet.Contains(x.Id)).ToList();
-        }
-
-        return assets;
+        return assets.ApplyAccountFilters(accountSettings, excludedAlbumAssets);
     }
 
-
-    private async Task<IEnumerable<AssetResponseDto>> GetExcludedAlbumAssets(CancellationToken ct = default)
-    {
-        var excludedAlbumAssets = new List<AssetResponseDto>();
-
-        foreach (var albumId in accountSettings.ExcludedAlbums)
-        {
-            var albumInfo = await immichApi.GetAlbumInfoAsync(albumId, null, null, ct);
-
-            excludedAlbumAssets.AddRange(albumInfo.Assets);
-        }
-        
-        return excludedAlbumAssets;
-    }
-    
 }

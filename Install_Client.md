@@ -73,7 +73,7 @@ You can "install" ImmichFrame as a PWA by opening in a browser and going to Shar
 ImmichFrame is available on the [Apple TV App Store][app-store-link].
 
 ### Android
-The Android-Version of ImmichFrame is available on the [Google Play Store][play-store-link]. Download it via the store for automatic updates. You can also sideload via APK available in Releases.
+The Android-Version of ImmichFrame is available on the [Google Play Store][play-store-link]. Download it via the store for automatic updates. You can also sideload via APK available in [ImmichFrame_Android Releases](https://github.com/immichFrame/ImmichFrame_Android/releases).
 
 
 #### Android Screensaver
@@ -86,7 +86,7 @@ The Android-Version of ImmichFrame is available on the [Google Play Store][play-
 
 #### Frameo
 ImmichFrame can be run on inexpensive Frameo digital photo frames with some additional effort. You can typically find these for ~$40 USD. These devices are low powered and run a very old Android version, so they cannot run the full WebView version of the app (however most of the main features are still supported except SplitView). If you have not already, you will need to install ADB on your PC ([ADB instructions][ADB-link]).
-ADB is often enabled on these devices by default, if it is not go to Frameo Settings-About-Enable Beta Program. Toggle ADB Access On-Off-On. Use the ADB commands below to sideload ImmichFrame APK, configure it to your liking, then disable the Frameo app to to set ImmichFrame as default Home app:
+ADB is often enabled on these devices by default, if it is not go to Frameo Settings-About-Enable Beta Program. Toggle ADB Access On-Off-On. Transfer from computer also must be enabled ( Frame → Settings → Manage photos → Transfer from computer → toggle “Enable transfer from computer” ON ). Use the ADB commands below to sideload ImmichFrame APK, configure it to your liking, then disable the Frameo app to to set ImmichFrame as default Home app:
   - Sideload ImmichFrame: adb install /path/to/ImmichFrame_vXX.apk
   - Update existing ImmichFrame: adb install -r /path/to/ImmichFrame_vXX.apk
   - Start ImmichFrame: adb shell am start com.immichframe.immichframe/.MainActivity

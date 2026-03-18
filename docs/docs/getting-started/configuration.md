@@ -38,7 +38,9 @@ General:
   DownloadImages: false  # boolean
   # if images are downloaded, re-download if age (in days) is more than this
   RenewImagesDuration: 30  # int
-  # A list of webcalendar URIs in the .ics format. e.g. https://calendar.google.com/calendar/ical/XXXXXX/public/basic.ics
+  # A list of webcalendar URIs in the .ics format. Supports basic auth via standard URL format.
+  # e.g. https://calendar.google.com/calendar/ical/XXXXXX/public/basic.ics
+  # e.g. https://user:pass@calendar.immichframe.dev/dav/calendars/basic.ics
   Webcalendars:  # string[]
     - UUID
   # Interval in hours. Determines how often images are pulled from a person in immich.
@@ -98,6 +100,8 @@ General:
   ImagePan: false  # boolean
   # Whether image should fill available space. Aspect ratio maintained but may be cropped.
   ImageFill: false  # boolean
+  # Whether to play audio for videos that have audio tracks.
+  PlayAudio: false  # boolean
   # Allow two portrait images to be displayed next to each other
   Layout: 'splitview'  # single | splitview
   # The base URL the app is hosted on. Useful when using a reverse proxy.
@@ -120,6 +124,8 @@ Accounts:
     ShowFavorites: false  # boolean
     # If this is set, assets marked archived are displayed.
     ShowArchived: false  # boolean
+    # If this is set, video assets are included in the slideshow.
+    ShowVideos: false  # boolean
     # Show images from the last X days, e.g., 365 -> show images from the last year
     ImagesFromDays: null  # int
     # Show images before date.
@@ -162,6 +168,11 @@ Weather is enabled by entering an API key. Get yours free from [OpenWeatherMap][
 ### Calendar
 If you are using Google Calendar, more information can be found [here](https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Cget-your-calendar-view-only).
 
+Calendar supports basic authentication using the standard URL userinfo format:
+Example:
+No Auth: `https://calendar.google.com/calendar/ical/XXXXXX/public/basic.ics`
+With Auth: `https://username:password@calendar.immichframe.dev/dav/calendars/basic.ics`
+
 ### Misc
 #### Webhook
 A webhook to notify an external service is available. This is only enabled when the `Webhook`-Setting is set in your configuration. Your configured Webhook will be notified via `HTTP POST`-request.
@@ -173,7 +184,7 @@ Events will always contain a `Name`, `ClientIdentifier` and a `DateTime` to diff
 
 | **Event**                  | **Description**                      | **Payload**                                                                                                                                             |
 | -------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ImageRequestedNotification | Notifies when an image is requested. | `{"Name":"ImageRequestedNotification", "ClientIdentifier": "Frame_Kitchen", "DateTime":"2024-11-16T21:37:19.4933981+01:00", "RequestedImageId":"UUID"}` |
+| AssetRequestedNotification | Notifies when an asset is requested. | `{"Name":"AssetRequestedNotification", "ClientIdentifier": "Frame_Kitchen", "DateTime":"2024-11-16T21:37:19.4933981+01:00", "RequestedAssetId":"UUID"}` |
 
 ### Multiple Immich Accounts
 ImmichFrame can be configured to access multiple Immich accounts, on the same or different servers.

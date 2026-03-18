@@ -27,10 +27,14 @@ public class PersonAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountS
                     Page = page,
                     Size = batchSize,
                     PersonIds = [personId],
-                    Type = AssetTypeEnum.IMAGE,
                     WithExif = true,
                     WithPeople = true
                 };
+
+                if (!accountSettings.ShowVideos)
+                {
+                    metadataBody.Type = AssetTypeEnum.IMAGE;
+                }
 
                 var personInfo = await immichApi.SearchAssetsAsync(metadataBody, ct);
 

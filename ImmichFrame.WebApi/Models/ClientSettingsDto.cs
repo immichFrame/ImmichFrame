@@ -29,6 +29,7 @@ public class ClientSettingsDto
     public bool ImageZoom { get; set; }
     public bool ImagePan { get; set; }
     public bool ImageFill { get; set; }
+    public bool PlayAudio { get; set; }
     public string Layout { get; set; }
     public string Language { get; set; } = string.Empty;
     public string? BaseUrl { get; set; }
@@ -61,6 +62,7 @@ public class ClientSettingsDto
         dto.ImageZoom = generalSettings.ImageZoom;
         dto.ImagePan = generalSettings.ImagePan;
         dto.ImageFill = generalSettings.ImageFill;
+        dto.PlayAudio = generalSettings.PlayAudio;
         dto.Layout = generalSettings.Layout;
         dto.Language = generalSettings.Language;
         dto.BaseUrl = generalSettings.BaseUrl;

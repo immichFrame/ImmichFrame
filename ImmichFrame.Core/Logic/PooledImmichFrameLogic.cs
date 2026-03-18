@@ -3,6 +3,7 @@ using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.Core.Logic.Pool;
+using ImmichFrame.Core.Models;
 
 namespace ImmichFrame.Core.Logic;
 
@@ -80,9 +81,40 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
 
     public Task<long> GetTotalAssets() => _pool.GetAssetCount();
 
-    public async Task<(string fileName, string ContentType, Stream fileStream)> GetImage(Guid id)
+    public async Task<AssetResponse> GetAsset(Guid id, AssetTypeEnum? assetType = null, string? rangeHeader = null)
     {
-// Check if the image is already downloaded
+        if (!assetType.HasValue)
+        {
+            var assetInfo = await _immichApi.GetAssetInfoAsync(id, null);
+            if (assetInfo == null)
+                throw new AssetNotFoundException($"Assetinfo for asset '{id}' was not found!");
+            assetType = assetInfo.Type;
+        }
+
+        if (assetType == AssetTypeEnum.IMAGE)
+        {
+            var (fileName, contentType, fileStream) = await GetImageAsset(id);
+            return new AssetResponse
+            {
+                FileName = fileName,
+                ContentType = contentType,
+                FileStream = fileStream,
+                ContentRange = null,
+                IsPartial = false,
+                Owner = null,
+                ContentLength = null
+            };
+        }
+
+        if (assetType == AssetTypeEnum.VIDEO)
+        {
+            return await GetVideoAsset(id, rangeHeader);
+        }
+
+        throw new AssetNotFoundException($"Asset {id} is not a supported media type ({assetType}).");
+    }
+    private async Task<(string fileName, string ContentType, Stream fileStream)> GetImageAsset(Guid id)
+    {
         if (_generalSettings.DownloadImages)
         {
             if (!Directory.Exists(_downloadLocation))
@@ -99,7 +131,7 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
                 {
                     var fs = File.OpenRead(file);
 
-                    var ex = Path.GetExtension(file);
+                    var ex = Path.GetExtension(file).TrimStart('.');
 
                     return (Path.GetFileName(file), $"image/{ex}", fs);
                 }
@@ -138,6 +170,34 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
         return (fileName, contentType, data.Stream);
     }
 
+    private async Task<AssetResponse> GetVideoAsset(Guid id, string? rangeHeader = null)
+    {
+        var videoResponse = string.IsNullOrEmpty(rangeHeader)
+            ? await _immichApi.PlayAssetVideoAsync(id, string.Empty)
+            : await _immichApi.PlayAssetVideoWithRangeAsync(id, rangeHeader);
+
+        var contentType = videoResponse.Headers.TryGetValue("Content-Type", out var ct)
+            ? ct.FirstOrDefault() ?? "video/mp4"
+            : "video/mp4";
+
+        var contentRange = videoResponse.Headers.TryGetValue("Content-Range", out var cr)
+            ? cr.FirstOrDefault()
+            : null;
+
+        long? contentLength = videoResponse.Headers.TryGetValue("Content-Length", out var cl)
+            && long.TryParse(cl.FirstOrDefault(), out var clValue) ? clValue : null;
+
+        return new AssetResponse
+        {
+            FileName = $"{id}.mp4",
+            ContentType = contentType,
+            FileStream = videoResponse.Stream,
+            ContentRange = contentRange,
+            IsPartial = videoResponse.StatusCode == 206,
+            Owner = videoResponse,
+            ContentLength = contentLength
+        };
+    }
     public Task SendWebhookNotification(IWebhookNotification notification) =>
         WebhookHelper.SendWebhookNotification(notification, _generalSettings.Webhook);
 

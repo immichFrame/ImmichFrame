@@ -1,4 +1,5 @@
 ﻿using ImmichFrame.Core.Api;
+using ImmichFrame.Core.Models;
 
 
 namespace ImmichFrame.Core.Interfaces
@@ -9,7 +10,7 @@ namespace ImmichFrame.Core.Interfaces
         public Task<IEnumerable<AssetResponseDto>> GetAssets();
         public Task<AssetResponseDto> GetAssetInfoById(Guid assetId);
         public Task<IEnumerable<AlbumResponseDto>> GetAlbumInfoById(Guid assetId);
-        public Task<(string fileName, string ContentType, Stream fileStream)> GetImage(Guid id);
+        public Task<AssetResponse> GetAsset(Guid id, AssetTypeEnum? assetType = null, string? rangeHeader = null);
         public Task<long> GetTotalAssets();
         public Task SendWebhookNotification(IWebhookNotification notification);
     }
@@ -19,7 +20,7 @@ namespace ImmichFrame.Core.Interfaces
         public IAccountSettings AccountSettings { get; }
 
     }
-    
+
     public interface IAccountSelectionStrategy
     {
         void Initialize(IList<IAccountImmichFrameLogic> accounts);

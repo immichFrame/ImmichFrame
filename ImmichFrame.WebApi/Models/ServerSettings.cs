@@ -62,6 +62,7 @@ public class GeneralSettings : IGeneralSettings, IConfigSettable
     public bool ImageZoom { get; set; } = true;
     public bool ImagePan { get; set; } = false;
     public bool ImageFill { get; set; } = false;
+    public bool PlayAudio { get; set; } = false;
     public string Layout { get; set; } = "splitview";
     public string? BaseUrl { get; set; } = "/";
     public int RenewImagesDuration { get; set; } = 30;
@@ -96,6 +97,7 @@ public class ServerAccountSettings : IAccountSettings, IConfigSettable
     public bool ShowMemories { get; set; } = false;
     public bool ShowFavorites { get; set; } = false;
     public bool ShowArchived { get; set; } = false;
+    public bool ShowVideos { get; set; } = false;
 
     public int? ImagesFromDays { get; set; }
     public DateTime? ImagesFromDate { get; set; }

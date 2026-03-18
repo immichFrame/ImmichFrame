@@ -41,10 +41,14 @@ public class TagAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSett
                     Page = page,
                     Size = batchSize,
                     TagIds = [new Guid(tag.Id)],
-                    Type = AssetTypeEnum.IMAGE,
                     WithExif = true,
                     WithPeople = true
                 };
+
+                if (!accountSettings.ShowVideos)
+                {
+                    metadataBody.Type = AssetTypeEnum.IMAGE;
+                }
 
                 var tagInfo = await immichApi.SearchAssetsAsync(metadataBody, ct);
 
