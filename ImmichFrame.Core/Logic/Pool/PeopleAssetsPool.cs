@@ -14,8 +14,15 @@ public class PersonAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountS
         {
             return personAssets;
         }
-        
-        foreach (var personId in people)
+
+        // AND mode: pass all person IDs in a single query so the API returns only
+        // assets that feature every person in the list.
+        // OR mode (default): query each person separately and combine results.
+        var personIdGroups = accountSettings.RequireAllPeople
+            ? [people]
+            : people.Select(id => (IList<Guid>)[id]);
+
+        foreach (var personIds in personIdGroups)
         {
             int page = 1;
             int batchSize = 1000;
@@ -26,7 +33,7 @@ public class PersonAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountS
                 {
                     Page = page,
                     Size = batchSize,
-                    PersonIds = [personId],
+                    PersonIds = personIds,
                     WithExif = true,
                     WithPeople = true
                 };
