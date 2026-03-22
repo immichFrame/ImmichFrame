@@ -123,4 +123,84 @@ public class PersonAssetsPoolTests // Renamed from PeopleAssetsPoolTests to matc
         Assert.That(result.Count, Is.EqualTo(10));
         Assert.That(result.All(a => a.Id.StartsWith("p1_")));
     }
+
+    [Test]
+    public async Task LoadAssets_RequireAllPeople_IssuesSingleQueryWithAllPersonIds()
+    {
+        // Arrange
+        var person1Id = Guid.NewGuid();
+        var person2Id = Guid.NewGuid();
+        _mockAccountSettings.SetupGet(s => s.People).Returns(new List<Guid> { person1Id, person2Id });
+        _mockAccountSettings.SetupGet(s => s.RequireAllPeople).Returns(true);
+
+        var assets = Enumerable.Range(0, 5).Select(i => CreateAsset($"combined_{i}")).ToList();
+
+        _mockImmichApi.Setup(api => api.SearchAssetsAsync(
+                It.Is<MetadataSearchDto>(d =>
+                    d.PersonIds.Contains(person1Id) &&
+                    d.PersonIds.Contains(person2Id) &&
+                    d.PersonIds.Count == 2),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(CreateSearchResult(assets, 5));
+
+        // Act
+        var result = (await _personAssetsPool.TestLoadAssets()).ToList();
+
+        // Assert
+        Assert.That(result.Count, Is.EqualTo(5));
+        // Only one call was made (AND mode), not one per person
+        _mockImmichApi.Verify(api => api.SearchAssetsAsync(It.IsAny<MetadataSearchDto>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Test]
+    public async Task LoadAssets_RequireAllPeople_Paginates()
+    {
+        // Arrange
+        var person1Id = Guid.NewGuid();
+        var person2Id = Guid.NewGuid();
+        _mockAccountSettings.SetupGet(s => s.People).Returns(new List<Guid> { person1Id, person2Id });
+        _mockAccountSettings.SetupGet(s => s.RequireAllPeople).Returns(true);
+
+        int batchSize = 1000;
+        var page1Assets = Enumerable.Range(0, batchSize).Select(i => CreateAsset($"a_{i}")).ToList();
+        var page2Assets = Enumerable.Range(0, 15).Select(i => CreateAsset($"b_{i}")).ToList();
+
+        _mockImmichApi.Setup(api => api.SearchAssetsAsync(
+                It.Is<MetadataSearchDto>(d => d.PersonIds.Contains(person1Id) && d.PersonIds.Contains(person2Id) && d.Page == 1),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(CreateSearchResult(page1Assets, batchSize));
+        _mockImmichApi.Setup(api => api.SearchAssetsAsync(
+                It.Is<MetadataSearchDto>(d => d.PersonIds.Contains(person1Id) && d.PersonIds.Contains(person2Id) && d.Page == 2),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(CreateSearchResult(page2Assets, 15));
+
+        // Act
+        var result = (await _personAssetsPool.TestLoadAssets()).ToList();
+
+        // Assert
+        Assert.That(result.Count, Is.EqualTo(batchSize + 15));
+        _mockImmichApi.Verify(api => api.SearchAssetsAsync(It.IsAny<MetadataSearchDto>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
+    }
+
+    [Test]
+    public async Task LoadAssets_RequireAllPeople_NoSharedAssets_ReturnsEmpty()
+    {
+        // Arrange: two people configured, but no asset features both of them
+        var person1Id = Guid.NewGuid();
+        var person2Id = Guid.NewGuid();
+        _mockAccountSettings.SetupGet(s => s.People).Returns(new List<Guid> { person1Id, person2Id });
+        _mockAccountSettings.SetupGet(s => s.RequireAllPeople).Returns(true);
+
+        _mockImmichApi.Setup(api => api.SearchAssetsAsync(
+                It.Is<MetadataSearchDto>(d => d.PersonIds.Contains(person1Id) && d.PersonIds.Contains(person2Id)),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(CreateSearchResult(new List<AssetResponseDto>(), 0));
+
+        // Act
+        var result = (await _personAssetsPool.TestLoadAssets()).ToList();
+
+        // Assert
+        Assert.That(result, Is.Empty);
+        _mockImmichApi.Verify(api => api.SearchAssetsAsync(It.IsAny<MetadataSearchDto>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
 }

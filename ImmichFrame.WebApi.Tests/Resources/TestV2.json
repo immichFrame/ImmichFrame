@@ -59,6 +59,7 @@
       "People": [
         "00000000-0000-0000-0000-000000000001"
       ],
+      "RequireAllPeople": true,
       "Tags": [
         "Account1.Tags_TEST"
       ]
@@ -84,6 +85,7 @@
       "People": [
         "00000000-0000-0000-0000-000000000001"
       ],
+      "RequireAllPeople": true,
       "Tags": [
         "Account2.Tags_TEST"
       ]
