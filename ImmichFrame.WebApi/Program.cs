@@ -59,6 +59,7 @@ builder.Services.AddSingleton<IGeneralSettings>(srv => srv.GetRequiredService<IS
 // Register services
 builder.Services.AddSingleton<IWeatherService, OpenWeatherMapService>();
 builder.Services.AddSingleton<ICalendarService, IcalCalendarService>();
+builder.Services.AddSingleton<ICustomWidgetService, CustomWidgetService>();
 builder.Services.AddSingleton<IAssetAccountTracker, BloomFilterAssetAccountTracker>();
 builder.Services.AddSingleton<IAccountSelectionStrategy, TotalAccountImagesSelectionStrategy>();
 builder.Services.AddHttpClient(); // Ensures IHttpClientFactory is available
