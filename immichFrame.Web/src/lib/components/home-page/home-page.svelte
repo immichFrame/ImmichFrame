@@ -200,13 +200,7 @@
 	}
 
 	function removeDuplicateFromNextAssets(next: api.AssetResponseDto[]): api.AssetResponseDto[]{
-		// while(isDuplicate(next) && assetBacklog.length > 0){
-		// 	const duplicatePicture = next[0];
-		// 	next = assetBacklog.splice(0,1)
-		// 	next.push(duplicatePicture);
-		// }
 		if(isDuplicate(next)){
-			console.log("Duplicate detected!")
 			return next.slice(0,1);
 		}
 		return next;
