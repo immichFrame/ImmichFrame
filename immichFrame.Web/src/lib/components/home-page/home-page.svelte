@@ -180,7 +180,10 @@
 		}
 
 		const useSplit = shouldUseSplitView(assetBacklog);
-		const next = assetBacklog.splice(0, useSplit ? 2 : 1);
+		let next = assetBacklog.splice(0, useSplit ? 2 : 1);
+
+		next = removeDuplicateFromNextAssets(next);
+
 		assetBacklog = [...assetBacklog];
 
 		if (displayingAssets.length) {
@@ -194,6 +197,31 @@
 		displayingAssets = next;
 		await updateAssetPromises();
 		assetsState = await pickAssets(next);
+	}
+
+	function removeDuplicateFromNextAssets(next: api.AssetResponseDto[]): api.AssetResponseDto[]{
+		// while(isDuplicate(next) && assetBacklog.length > 0){
+		// 	const duplicatePicture = next[0];
+		// 	next = assetBacklog.splice(0,1)
+		// 	next.push(duplicatePicture);
+		// }
+		if(isDuplicate(next)){
+			console.log("Duplicate detected!")
+			return next.slice(0,1);
+		}
+		return next;
+	}
+
+	function isDuplicate(next: api.AssetResponseDto[]): boolean{
+		const seen = new Set<string>();
+
+		for(const item of next){
+			if(seen.has(item.id)){
+				return true;
+			}
+			seen.add(item.id);
+		}
+		return false;
 	}
 
 	async function getPreviousAssets() {
