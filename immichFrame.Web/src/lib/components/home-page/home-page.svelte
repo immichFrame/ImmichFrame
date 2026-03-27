@@ -201,7 +201,12 @@
 
 	function removeDuplicateFromNextAssets(next: api.AssetResponseDto[]): api.AssetResponseDto[]{
 		if(isDuplicate(next)){
-			return next.slice(0,1);
+			const nextPortrait = tryPopNextNonDuplicatePortraitInBacklog([next[0]]);
+			let result = next.splice(0,1);
+			if(nextPortrait !== undefined) {
+				result.push(nextPortrait);
+			} 
+			return result;
 		}
 		return next;
 	}
@@ -216,6 +221,16 @@
 			seen.add(item.id);
 		}
 		return false;
+	}
+
+	function tryPopNextNonDuplicatePortraitInBacklog(next: api.AssetResponseDto[]): api.AssetResponseDto | undefined{
+		for(let i = 0; i < assetBacklog.length; i++){
+			const backlogAsset = assetBacklog[i];
+			if(!isPortrait(backlogAsset)) continue;
+			if(isDuplicate([...next, backlogAsset])) continue;
+			return assetBacklog.splice(i, 1)[0];
+		}
+		return undefined;
 	}
 
 	async function getPreviousAssets() {
