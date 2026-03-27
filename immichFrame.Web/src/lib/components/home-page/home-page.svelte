@@ -202,7 +202,7 @@
 	function removeDuplicateFromNextAssets(next: api.AssetResponseDto[]): api.AssetResponseDto[]{
 		if(isDuplicate(next)){
 			const nextPortrait = tryPopNextNonDuplicatePortraitInBacklog([next[0]]);
-			let result = next.splice(0,1);
+			let result = [next[0]];
 			if(nextPortrait !== undefined) {
 				result.push(nextPortrait);
 			} 
