@@ -5,12 +5,17 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace ImmichFrame.Core.Logic.Pool;
 
-public class MemoryAssetsPool(ImmichApi immichApi, IAccountSettings accountSettings) : CachingApiAssetsPool(new DailyApiCache(), immichApi, accountSettings)
+public class MemoryAssetsPool : CachingApiAssetsPool
 {
+    public MemoryAssetsPool(ImmichApi immichApi, IAccountSettings accountSettings)
+        : base(new DailyApiCache(), immichApi, accountSettings)
+    {
+    }
+
     protected override async Task<IEnumerable<AssetResponseDto>> LoadAssets(CancellationToken ct = default)
     {
         var searchDate = new DateTimeOffset(DateTime.SpecifyKind(DateTime.Today, DateTimeKind.Utc), TimeSpan.Zero);
-        var memories = await immichApi.SearchMemoriesAsync(searchDate, null, null, null, ct);
+        var memories = await ImmichApi.SearchMemoriesAsync(searchDate, null, null, null, ct);
 
         var memoryAssets = new List<AssetResponseDto>();
         foreach (var memory in memories)
@@ -18,7 +23,7 @@ public class MemoryAssetsPool(ImmichApi immichApi, IAccountSettings accountSetti
             var assets = memory.Assets.ToList();
             var yearsAgo = searchDate.Year - memory.Data.Year;
 
-            if (!accountSettings.ShowVideos)
+            if (!AccountSettings.ShowVideos)
             {
                 assets = assets.Where(a => a.Type == AssetTypeEnum.IMAGE).ToList();
             }
@@ -27,7 +32,7 @@ public class MemoryAssetsPool(ImmichApi immichApi, IAccountSettings accountSetti
             {
                 if (asset.ExifInfo == null)
                 {
-                    var assetInfo = await immichApi.GetAssetInfoAsync(new Guid(asset.Id), null, ct);
+                    var assetInfo = await ImmichApi.GetAssetInfoAsync(new Guid(asset.Id), null, ct);
                     asset.ExifInfo = assetInfo.ExifInfo;
                     asset.People = assetInfo.People;
                 }

@@ -3,13 +3,18 @@ using ImmichFrame.Core.Interfaces;
 
 namespace ImmichFrame.Core.Logic.Pool;
 
-public class PersonAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings) : CachingApiAssetsPool(apiCache, immichApi, accountSettings)
+public class PersonAssetsPool : CachingApiAssetsPool
 {
+    public PersonAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings)
+        : base(apiCache, immichApi, accountSettings)
+    {
+    }
+
     protected override async Task<IEnumerable<AssetResponseDto>> LoadAssets(CancellationToken ct = default)
     {
         var personAssets = new List<AssetResponseDto>();
 
-        var people = accountSettings.People;
+        var people = AccountSettings.People;
         if (people == null)
         {
             return personAssets;
@@ -31,12 +36,12 @@ public class PersonAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountS
                     WithPeople = true
                 };
 
-                if (!accountSettings.ShowVideos)
+                if (!AccountSettings.ShowVideos)
                 {
                     metadataBody.Type = AssetTypeEnum.IMAGE;
                 }
 
-                var personInfo = await immichApi.SearchAssetsAsync(metadataBody, ct);
+                var personInfo = await ImmichApi.SearchAssetsAsync(metadataBody, ct);
 
                 total = personInfo.Assets.Total;
 

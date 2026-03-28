@@ -22,7 +22,7 @@ public class ClientSettingsDto
     public string? ImageLocationFormat { get; set; }
     public string? PrimaryColor { get; set; }
     public string? SecondaryColor { get; set; }
-    public string Style { get; set; }
+    public string Style { get; set; } = "none";
     public string? BaseFontSize { get; set; }
     public bool ShowWeatherDescription { get; set; }
     public string? WeatherIconUrl { get; set; }
@@ -30,8 +30,8 @@ public class ClientSettingsDto
     public bool ImagePan { get; set; }
     public bool ImageFill { get; set; }
     public bool PlayAudio { get; set; }
-    public string Layout { get; set; }
-    public string Language { get; set; }
+    public string Layout { get; set; } = "splitview";
+    public string Language { get; set; } = "en";
 
     public static ClientSettingsDto FromGeneralSettings(IGeneralSettings generalSettings)
     {

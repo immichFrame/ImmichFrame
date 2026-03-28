@@ -23,4 +23,5 @@ function generateGUID() {
 }
 
 export const clientIdentifierStore = persistStore('clientIdentifier', generateGUID());
+export const clientNameStore = persistStore('clientName', null);
 export const authSecretStore = persistStore('authSecret', null);

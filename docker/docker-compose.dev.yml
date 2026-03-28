@@ -9,3 +9,4 @@ services:
       - .env
     # volumes:
       # - PATH/TO/CONFIG:/app/Config
+      # - PATH/TO/APPDATA:/app/App_Data

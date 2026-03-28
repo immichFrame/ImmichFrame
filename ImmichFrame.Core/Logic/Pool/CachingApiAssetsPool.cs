@@ -4,9 +4,20 @@ using ImmichFrame.Core.Interfaces;
 
 namespace ImmichFrame.Core.Logic.Pool;
 
-public abstract class CachingApiAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings) : IAssetPool
+public abstract class CachingApiAssetsPool : IAssetPool
 {
     private readonly Random _random = new();
+
+    protected CachingApiAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings)
+    {
+        ApiCache = apiCache;
+        ImmichApi = immichApi;
+        AccountSettings = accountSettings;
+    }
+
+    protected IApiCache ApiCache { get; }
+    protected ImmichApi ImmichApi { get; }
+    protected IAccountSettings AccountSettings { get; }
 
     public async Task<long> GetAssetCount(CancellationToken ct = default)
     {
@@ -20,9 +31,13 @@ public abstract class CachingApiAssetsPool(IApiCache apiCache, ImmichApi immichA
 
     private async Task<IEnumerable<AssetResponseDto>> AllAssets(CancellationToken ct = default)
     {
-        var excludedAlbumAssets = await apiCache.GetOrAddAsync($"{GetType().FullName}_ExcludedAlbums", () => AssetHelper.GetExcludedAlbumAssets(immichApi, accountSettings));
+        var excludedAlbumAssets = await ApiCache.GetOrAddAsync(
+            $"{GetType().FullName}_ExcludedAlbums",
+            () => AssetHelper.GetExcludedAlbumAssets(ImmichApi, AccountSettings));
 
-        return await apiCache.GetOrAddAsync(GetType().FullName!, () => LoadAssets().ApplyAccountFilters(accountSettings, excludedAlbumAssets));
+        return await ApiCache.GetOrAddAsync(
+            GetType().FullName!,
+            () => LoadAssets().ApplyAccountFilters(AccountSettings, excludedAlbumAssets));
     }
 
     protected abstract Task<IEnumerable<AssetResponseDto>> LoadAssets(CancellationToken ct = default);

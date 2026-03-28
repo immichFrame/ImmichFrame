@@ -13,7 +13,7 @@ public class ServerSettings : IServerSettings, IConfigSettable
 
     [YamlMember(Alias = "Accounts")]
     [JsonPropertyName("Accounts")]
-    public IEnumerable<ServerAccountSettings> AccountsImpl { get; set; }
+    public IEnumerable<ServerAccountSettings> AccountsImpl { get; set; } = Array.Empty<ServerAccountSettings>();
 
     //Covariance not allowed on interface impls
     [JsonIgnore]

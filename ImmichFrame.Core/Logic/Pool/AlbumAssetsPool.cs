@@ -3,18 +3,23 @@ using ImmichFrame.Core.Interfaces;
 
 namespace ImmichFrame.Core.Logic.Pool;
 
-public class AlbumAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings) : CachingApiAssetsPool(apiCache, immichApi, accountSettings)
+public class AlbumAssetsPool : CachingApiAssetsPool
 {
+    public AlbumAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings)
+        : base(apiCache, immichApi, accountSettings)
+    {
+    }
+
     protected override async Task<IEnumerable<AssetResponseDto>> LoadAssets(CancellationToken ct = default)
     {
         var albumAssets = new List<AssetResponseDto>();
 
-        var albums = accountSettings.Albums;
+        var albums = AccountSettings.Albums;
         if (albums != null)
         {
             foreach (var albumId in albums)
             {
-                var albumInfo = await immichApi.GetAlbumInfoAsync(albumId, null, null, ct);
+                var albumInfo = await ImmichApi.GetAlbumInfoAsync(albumId, null, null, ct);
                 albumAssets.AddRange(albumInfo.Assets);
             }
         }

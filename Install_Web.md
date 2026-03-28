@@ -128,6 +128,10 @@ services:
 
 For more information, read [here](/README.md#configuration).
 
+The frame UI and the admin dashboard are both available on `http://HOST:8080`, with the admin dashboard at `http://HOST:8080/admin`.
+
+To enable the admin login page, add at least one matching `IMMICHFRAME_AUTH_BASIC_*_USER` and `IMMICHFRAME_AUTH_BASIC_*_HASH` pair to your environment or `.env` file. These env values remain the source of truth for admin users, and the `/admin` page signs in against them with a normal session cookie.
+
 ## 🆘 Help
 
 [Discord Channel][support-url]

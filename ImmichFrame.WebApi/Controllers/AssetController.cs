@@ -4,6 +4,7 @@ using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.Core.Models;
 using ImmichFrame.WebApi.Models;
+using ImmichFrame.WebApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,7 +21,7 @@ namespace ImmichFrame.WebApi.Controllers
 
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = AuthSchemes.Frame)]
     public class AssetController : ControllerBase
     {
         private readonly ILogger<AssetController> _logger;

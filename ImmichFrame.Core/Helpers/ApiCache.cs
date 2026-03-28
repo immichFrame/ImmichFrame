@@ -19,8 +19,12 @@ public class ApiCache : IApiCache, IDisposable
         _cacheOptions = entryOptions;
     }
 
-    public virtual Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> factory)
-        => _cache.GetOrCreateAsync<T>(key, _ => factory(), _cacheOptions());
+    public virtual async Task<T> GetOrAddAsync<T>(string key, Func<Task<T>> factory) where T : notnull
+    {
+        var value = await _cache.GetOrCreateAsync<T>(key, _ => factory(), _cacheOptions());
+        ArgumentNullException.ThrowIfNull(value);
+        return value;
+    }
 
     public void Dispose()
         => _cache.Dispose();

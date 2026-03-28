@@ -2,7 +2,11 @@
 	import * as api from '$lib/index';
 	import ProgressBar from '$lib/components/elements/progress-bar.svelte';
 	import { slideshowStore } from '$lib/stores/slideshow.store';
-	import { clientIdentifierStore, authSecretStore } from '$lib/stores/persist.store';
+	import {
+		clientIdentifierStore,
+		clientNameStore,
+		authSecretStore
+	} from '$lib/stores/persist.store';
 	import { onDestroy, onMount, setContext, tick } from 'svelte';
 	import OverlayControls from '../elements/overlay-controls.svelte';
 	import AssetComponent from '../elements/asset-component.svelte';
@@ -15,6 +19,12 @@
 	import { page } from '$app/state';
 	import { ProgressBarLocation, ProgressBarStatus } from '../elements/progress-bar.types';
 	import { isImageAsset, isVideoAsset } from '$lib/constants/asset-type';
+	import {
+		acknowledgeFrameSessionCommand,
+		disconnectFrameSession,
+		getFrameSessionCommands,
+		putFrameSessionSnapshot
+	} from '$lib/frameSessionApi';
 
 	interface AssetsState {
 		assets: [string, api.AssetResponseDto, api.AlbumResponseDto[]][];
@@ -24,15 +34,28 @@
 		hasBday: boolean;
 	}
 
+	interface SessionDisplayEvent {
+		displayedAtUtc: string;
+		durationSeconds: number;
+		assets: api.AssetResponseDto[];
+	}
+
 	api.init();
 
-	// TODO: make this configurable?
 	const PRELOAD_ASSETS = 5;
+	const HEARTBEAT_INTERVAL_MS = 10_000;
+	const COMMAND_POLL_INTERVAL_MS = 2_000;
+	const MAX_DISPLAY_HISTORY = 50;
 
 	let assetHistory: api.AssetResponseDto[] = [];
 	let assetBacklog: api.AssetResponseDto[] = [];
+	let displayEventHistory: SessionDisplayEvent[] = [];
 
 	let displayingAssets: api.AssetResponseDto[] = $state([]);
+	let currentDisplayStartedAt: string | null = $state(null);
+	let currentDisplayDurationSeconds: number = $state($configStore.interval ?? 20);
+	let currentDisplayPausedAtMs: number | null = $state(null);
+	let adminStopped: boolean = $state(false);
 
 	const { restartProgress, stopProgress, instantTransition } = slideshowStore;
 
@@ -63,12 +86,21 @@
 
 	let cursorVisible = $state(true);
 	let timeoutId: number;
+	let heartbeatIntervalId: number | undefined;
+	let commandPollIntervalId: number | undefined;
+	let isPollingCommands = false;
+	let isHandlingRemoteCommand = false;
 
 	const clientIdentifier = page.url.searchParams.get('client');
+	const clientName = page.url.searchParams.get('name');
 	const authsecret = page.url.searchParams.get('authsecret');
 
 	if (clientIdentifier && clientIdentifier != $clientIdentifierStore) {
 		clientIdentifierStore.set(clientIdentifier);
+	}
+
+	if (clientName && clientName != $clientNameStore) {
+		clientNameStore.set(clientName);
 	}
 
 	if (authsecret && authsecret != $authSecretStore) {
@@ -83,10 +115,7 @@
 	setContext('close', provideClose);
 
 	async function provideClose() {
-		infoVisible = false;
-		userPaused = false;
-		await assetComponent?.play?.();
-		await progressBar.play();
+		await resumePlayback();
 	}
 
 	const showCursor = () => {
@@ -94,6 +123,128 @@
 		clearTimeout(timeoutId);
 		timeoutId = setTimeout(hideCursor, 2000);
 	};
+
+	function toSessionDisplayEvent(
+		assets: api.AssetResponseDto[],
+		displayedAtUtc: string,
+		durationSeconds: number
+	): SessionDisplayEvent {
+		return {
+			displayedAtUtc,
+			durationSeconds,
+			assets: [...assets]
+		};
+	}
+
+	function archiveCurrentDisplay() {
+		if (!displayingAssets.length || !currentDisplayStartedAt) {
+			return;
+		}
+
+		displayEventHistory = [
+			toSessionDisplayEvent(displayingAssets, currentDisplayStartedAt, currentDisplayDurationSeconds),
+			...displayEventHistory
+		].slice(0, MAX_DISPLAY_HISTORY);
+	}
+
+	function setCurrentDisplay(assets: api.AssetResponseDto[]) {
+		currentDisplayStartedAt = assets.length ? new Date().toISOString() : null;
+		currentDisplayPausedAtMs = null;
+	}
+
+	function pauseCurrentDisplayClock() {
+		if (currentDisplayPausedAtMs == null) {
+			currentDisplayPausedAtMs = Date.now();
+		}
+	}
+
+	function resumeCurrentDisplayClock() {
+		if (currentDisplayPausedAtMs == null || !currentDisplayStartedAt) {
+			currentDisplayPausedAtMs = null;
+			return;
+		}
+
+		const pausedDurationMs = Date.now() - currentDisplayPausedAtMs;
+		currentDisplayStartedAt = new Date(
+			new Date(currentDisplayStartedAt).getTime() + pausedDurationMs
+		).toISOString();
+		currentDisplayPausedAtMs = null;
+	}
+
+	function toDisplayedAssetDto(asset: api.AssetResponseDto) {
+		return {
+			id: asset.id,
+			originalFileName: asset.originalFileName,
+			type: asset.type,
+			immichServerUrl: asset.immichServerUrl ?? null,
+			localDateTime: asset.localDateTime,
+			description: asset.exifInfo?.description ?? null,
+			thumbhash: asset.thumbhash ?? null
+		};
+	}
+
+	function buildCurrentDisplay() {
+		if (!displayingAssets.length || !currentDisplayStartedAt) {
+			return null;
+		}
+
+		return {
+			displayedAtUtc: currentDisplayStartedAt,
+			durationSeconds: currentDisplayDurationSeconds,
+			assets: displayingAssets.map(toDisplayedAssetDto)
+		};
+	}
+
+	function buildHistory() {
+		return displayEventHistory.map((displayEvent) => ({
+			displayedAtUtc: displayEvent.displayedAtUtc,
+			durationSeconds: displayEvent.durationSeconds,
+			assets: displayEvent.assets.map(toDisplayedAssetDto)
+		}));
+	}
+
+	async function syncFrameSession(status: 'Active' | 'Stopped' = adminStopped ? 'Stopped' : 'Active') {
+		if (!$clientIdentifierStore) {
+			return;
+		}
+
+		try {
+			await putFrameSessionSnapshot($clientIdentifierStore, {
+				playbackState:
+					adminStopped || progressBarStatus === ProgressBarStatus.Paused ? 'Paused' : 'Playing',
+				status,
+				displayName: $clientNameStore,
+				currentDisplay: buildCurrentDisplay(),
+				history: buildHistory()
+			});
+		} catch (err) {
+			console.warn('Failed to sync frame session:', err);
+		}
+	}
+
+	function startSessionLoops() {
+		stopSessionLoops();
+
+		heartbeatIntervalId = window.setInterval(() => {
+			void syncFrameSession();
+		}, HEARTBEAT_INTERVAL_MS);
+
+		commandPollIntervalId = window.setInterval(() => {
+			void processPendingCommands();
+		}, COMMAND_POLL_INTERVAL_MS);
+	}
+
+	function stopSessionLoops() {
+		if (heartbeatIntervalId) {
+			clearInterval(heartbeatIntervalId);
+			heartbeatIntervalId = undefined;
+		}
+
+		if (commandPollIntervalId) {
+			clearInterval(commandPollIntervalId);
+			commandPollIntervalId = undefined;
+		}
+	}
 
 	async function updateAssetPromises() {
 		for (let asset of displayingAssets) {
@@ -109,7 +260,6 @@
 				assetPromisesDict[assetBacklog[i].id] = loadAsset(assetBacklog[i]);
 			}
 		}
-		// Collect keys to remove first to avoid modifying dict during async iteration
 		const keysToRemove = Object.keys(assetPromisesDict).filter(
 			(key) =>
 				!displayingAssets.find((item) => item.id === key) &&
@@ -128,6 +278,10 @@
 	}
 
 	async function loadAssets() {
+		if (adminStopped) {
+			return;
+		}
+
 		try {
 			let assetRequest = await api.getAssets();
 
@@ -150,7 +304,7 @@
 
 	let isHandlingAssetTransition = false;
 	const handleDone = async (previous: boolean = false, instant: boolean = false) => {
-		if (isHandlingAssetTransition) {
+		if (isHandlingAssetTransition || adminStopped) {
 			return;
 		}
 		isHandlingAssetTransition = true;
@@ -162,7 +316,8 @@
 			else await getNextAssets();
 			await tick();
 			await assetComponent?.play?.();
-			progressBar.play();
+			void progressBar.play();
+			await syncFrameSession();
 		} finally {
 			isHandlingAssetTransition = false;
 		}
@@ -185,6 +340,7 @@
 
 		if (displayingAssets.length) {
 			assetHistory.push(...displayingAssets);
+			archiveCurrentDisplay();
 		}
 
 		if (assetHistory.length > 250) {
@@ -192,8 +348,10 @@
 		}
 
 		displayingAssets = next;
+		setCurrentDisplay(next);
 		await updateAssetPromises();
 		assetsState = await pickAssets(next);
+		currentDisplayDurationSeconds = currentDuration;
 	}
 
 	async function getPreviousAssets() {
@@ -207,11 +365,14 @@
 
 		if (displayingAssets.length) {
 			assetBacklog.unshift(...displayingAssets);
+			archiveCurrentDisplay();
 		}
 
 		displayingAssets = next;
+		setCurrentDisplay(next);
 		await updateAssetPromises();
 		assetsState = await pickAssets(next);
+		currentDisplayDurationSeconds = currentDuration;
 	}
 
 	function isPortrait(asset: api.AssetResponseDto) {
@@ -284,7 +445,7 @@
 			return 0;
 		}
 
-		const multipliers = [3600, 60, 1]; // hours, minutes, seconds
+		const multipliers = [3600, 60, 1];
 		const offset = multipliers.length - parts.length;
 
 		let total = 0;
@@ -329,14 +490,12 @@
 		let assetUrl: string;
 
 		if (isVideoAsset(assetResponse)) {
-			// Stream videos directly instead of preloading
 			assetUrl = api.getAssetStreamUrl(
 				assetResponse.id,
 				$clientIdentifierStore,
 				assetResponse.type
 			);
 		} else {
-			// Preload images as blobs
 			const req = await api.getAsset(assetResponse.id, {
 				clientIdentifier: $clientIdentifierStore,
 				assetType: assetResponse.type
@@ -355,7 +514,6 @@
 			album = albumReq.data ?? [];
 		}
 
-		// if the people array is already populated, there is no need to call the API again
 		if ($configStore.showPeopleDesc && (assetResponse.people ?? []).length == 0) {
 			const assetInfoRequest = await api.getAssetInfo(assetResponse.id, {
 				clientIdentifier: $clientIdentifierStore
@@ -375,7 +533,6 @@
 	}
 
 	function revokeObjectUrl(url: string) {
-		// Only revoke blob URLs, not streaming URLs
 		if (!url.startsWith('blob:')) return;
 		try {
 			URL.revokeObjectURL(url);
@@ -384,9 +541,128 @@
 		}
 	}
 
+	async function resumePlayback() {
+		if (adminStopped) {
+			return;
+		}
+
+		infoVisible = false;
+		userPaused = false;
+		resumeCurrentDisplayClock();
+		await assetComponent?.play?.();
+		void progressBar.play();
+		await syncFrameSession();
+	}
+
+	async function pausePlayback() {
+		if (adminStopped) {
+			return;
+		}
+
+		infoVisible = false;
+		userPaused = true;
+		pauseCurrentDisplayClock();
+		await assetComponent?.pause?.();
+		await progressBar.pause();
+		await syncFrameSession();
+	}
+
+	async function togglePlayback() {
+		if (progressBarStatus == ProgressBarStatus.Paused) {
+			await resumePlayback();
+		} else {
+			await pausePlayback();
+		}
+	}
+
+	async function toggleInfo() {
+		if (adminStopped) {
+			return;
+		}
+
+		if (infoVisible) {
+			await resumePlayback();
+		} else {
+			infoVisible = true;
+			userPaused = true;
+			pauseCurrentDisplayClock();
+			await assetComponent?.pause?.();
+			await progressBar.pause();
+			await syncFrameSession();
+		}
+	}
+
+	async function shutdownFromAdmin() {
+		if (adminStopped) {
+			return;
+		}
+
+		adminStopped = true;
+		infoVisible = false;
+		userPaused = true;
+		stopSessionLoops();
+		progressBar.restart(false);
+		await assetComponent?.pause?.();
+		await progressBar.pause();
+		await syncFrameSession('Stopped');
+	}
+
+	async function processPendingCommands() {
+		if (adminStopped || isPollingCommands || isHandlingRemoteCommand || !$clientIdentifierStore) {
+			return;
+		}
+
+		isPollingCommands = true;
+		try {
+			const commands = await getFrameSessionCommands($clientIdentifierStore);
+			for (const command of commands) {
+				isHandlingRemoteCommand = true;
+				try {
+					switch (command.commandType) {
+						case 'Previous':
+							await handleDone(true, true);
+							infoVisible = false;
+							break;
+						case 'Play':
+							if (progressBarStatus === ProgressBarStatus.Paused || infoVisible || userPaused) {
+								await resumePlayback();
+							}
+							break;
+						case 'Pause':
+							if (progressBarStatus !== ProgressBarStatus.Paused) {
+								await pausePlayback();
+							}
+							break;
+						case 'Next':
+							await handleDone(false, true);
+							infoVisible = false;
+							break;
+						case 'Refresh':
+							await acknowledgeFrameSessionCommand($clientIdentifierStore, command.commandId);
+							window.location.reload();
+							return;
+						case 'Shutdown':
+							await shutdownFromAdmin();
+							break;
+					}
+
+					await acknowledgeFrameSessionCommand($clientIdentifierStore, command.commandId);
+				} catch (err) {
+					console.warn('Failed to handle remote command:', err);
+				} finally {
+					isHandlingRemoteCommand = false;
+				}
+			}
+		} finally {
+			isPollingCommands = false;
+		}
+	}
+
 	onMount(() => {
 		window.addEventListener('mousemove', showCursor);
 		window.addEventListener('click', showCursor);
+		window.addEventListener('beforeunload', handleBeforeUnload);
+
 		if ($configStore.primaryColor) {
 			document.documentElement.style.setProperty('--primary-color', $configStore.primaryColor);
 		}
@@ -403,6 +679,7 @@
 			if (value) {
 				progressBar.restart(value);
 				assetComponent?.play?.();
+				void syncFrameSession();
 			}
 		});
 
@@ -410,18 +687,36 @@
 			if (value) {
 				progressBar.restart(false);
 				assetComponent?.pause?.();
+				void syncFrameSession();
 			}
 		});
 
-		getNextAssets();
+		startSessionLoops();
+		void syncFrameSession();
+		void getNextAssets().then(() => syncFrameSession());
 
 		return () => {
 			window.removeEventListener('mousemove', showCursor);
 			window.removeEventListener('click', showCursor);
+			window.removeEventListener('beforeunload', handleBeforeUnload);
 		};
 	});
 
+	async function handleBeforeUnload() {
+		if (!$clientIdentifierStore) {
+			return;
+		}
+
+		try {
+			await disconnectFrameSession($clientIdentifierStore, true);
+		} catch (err) {
+			console.warn('Failed to disconnect frame session during unload:', err);
+		}
+	}
+
 	onDestroy(async () => {
+		stopSessionLoops();
+
 		if (unsubscribeRestart) {
 			unsubscribeRestart();
 		}
@@ -444,7 +739,22 @@
 </script>
 
 <section class="fixed grid h-dvh-safe w-screen bg-black" class:cursor-none={!cursorVisible}>
-	{#if error}
+	{#if adminStopped}
+		<div class="place-self-center w-full max-w-2xl px-8">
+			<div
+				class="rounded-[2rem] border border-white/10 bg-white/10 p-10 text-center text-white shadow-2xl backdrop-blur"
+			>
+				<p class="text-xs uppercase tracking-[0.45em] text-white/60">Remote Control</p>
+				<h1 class="mt-4 text-4xl font-semibold">Frame Stopped</h1>
+				<p class="mt-4 text-lg text-white/70">
+					This frame session was stopped from the admin dashboard. Refresh the page to reconnect.
+				</p>
+				{#if $clientIdentifierStore}
+					<p class="mt-6 font-mono text-sm text-white/50">Session: {$clientIdentifierStore}</p>
+				{/if}
+			</div>
+		</div>
+	{:else if error}
 		<ErrorElement {authError} message={errorMessage} />
 	{:else if displayingAssets}
 		<div class="absolute h-screen w-screen">
@@ -464,11 +774,15 @@
 				bind:showInfo={infoVisible}
 				playAudio={$configStore.playAudio}
 				onVideoWaiting={async () => {
+					pauseCurrentDisplayClock();
 					await progressBar.pause();
+					await syncFrameSession();
 				}}
 				onVideoPlaying={async () => {
 					if (!userPaused) {
+						resumeCurrentDisplayClock();
 						await progressBar.play();
+						await syncFrameSession();
 					}
 				}}
 			/>
@@ -489,31 +803,8 @@
 				await handleDone(true, true);
 				infoVisible = false;
 			}}
-			pause={async () => {
-				infoVisible = false;
-				if (progressBarStatus == ProgressBarStatus.Paused) {
-					userPaused = false;
-					await assetComponent?.play?.();
-					await progressBar.play();
-				} else {
-					userPaused = true;
-					await assetComponent?.pause?.();
-					await progressBar.pause();
-				}
-			}}
-			showInfo={async () => {
-				if (infoVisible) {
-					infoVisible = false;
-					userPaused = false;
-					await assetComponent?.play?.();
-					await progressBar.play();
-				} else {
-					infoVisible = true;
-					userPaused = true;
-					await assetComponent?.pause?.();
-					await progressBar.pause();
-				}
-			}}
+			pause={togglePlayback}
+			showInfo={toggleInfo}
 			bind:status={progressBarStatus}
 			bind:infoVisible
 			overlayVisible={cursorVisible}

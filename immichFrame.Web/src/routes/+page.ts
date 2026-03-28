@@ -1,9 +1,9 @@
 import * as api from '$lib/immichFrameApi';
 import { configStore } from '$lib/stores/config.store.js'
 
-export const load = async () => {
+export const load = async ({ fetch }) => {
 
-  const configRequest = await api.getConfig({ clientIdentifier: "" });
+  const configRequest = await api.getConfig({ clientIdentifier: "" }, { fetch });
 
   const config = configRequest.data;
 

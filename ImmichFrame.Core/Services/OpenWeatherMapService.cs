@@ -3,6 +3,8 @@ using ImmichFrame.Core.Interfaces;
 
 public class OpenWeatherMapService : IWeatherService
 {
+    private sealed record CachedWeather(IWeather? Weather);
+
     private readonly IGeneralSettings _settings;
     private readonly IApiCache _weatherCache = new ApiCache(TimeSpan.FromMinutes(5));
     public OpenWeatherMapService(IGeneralSettings settings)
@@ -12,7 +14,7 @@ public class OpenWeatherMapService : IWeatherService
 
     public async Task<IWeather?> GetWeather()
     {
-        return await _weatherCache.GetOrAddAsync("weather", async () =>
+        var cachedWeather = await _weatherCache.GetOrAddAsync("weather", async () =>
         {
             var weatherLatLong = _settings.WeatherLatLong;
 
@@ -21,8 +23,10 @@ public class OpenWeatherMapService : IWeatherService
 
             var weather = await GetWeather(weatherLat, weatherLong);
 
-            return weather;
+            return new CachedWeather(weather);
         });
+
+        return cachedWeather.Weather;
     }
 
     public async Task<IWeather?> GetWeather(double latitude, double longitude)

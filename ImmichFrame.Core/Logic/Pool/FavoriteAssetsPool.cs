@@ -3,8 +3,13 @@ using ImmichFrame.Core.Interfaces;
 
 namespace ImmichFrame.Core.Logic.Pool;
 
-public class FavoriteAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings) : CachingApiAssetsPool(apiCache, immichApi, accountSettings)
+public class FavoriteAssetsPool : CachingApiAssetsPool
 {
+    public FavoriteAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSettings accountSettings)
+        : base(apiCache, immichApi, accountSettings)
+    {
+    }
+
     protected override async Task<IEnumerable<AssetResponseDto>> LoadAssets(CancellationToken ct = default)
     {
         var favoriteAssets = new List<AssetResponseDto>();
@@ -23,12 +28,12 @@ public class FavoriteAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccoun
                 WithPeople = true
             };
 
-            if (!accountSettings.ShowVideos)
+            if (!AccountSettings.ShowVideos)
             {
                 metadataBody.Type = AssetTypeEnum.IMAGE;
             }
 
-            var favoriteInfo = await immichApi.SearchAssetsAsync(metadataBody, ct);
+            var favoriteInfo = await ImmichApi.SearchAssetsAsync(metadataBody, ct);
 
             total = favoriteInfo.Assets.Total;
 

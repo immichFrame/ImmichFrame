@@ -1,12 +1,13 @@
 using ImmichFrame.Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ImmichFrame.WebApi.Services;
 
 namespace ImmichFrame.WebApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = AuthSchemes.Frame)]
     public class CalendarController : ControllerBase
     {
         private readonly ILogger<AssetController> _logger;

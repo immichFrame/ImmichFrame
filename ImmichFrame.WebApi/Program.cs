@@ -5,9 +5,28 @@ using Microsoft.AspNetCore.Authentication;
 using System.Reflection;
 using ImmichFrame.Core.Logic;
 using ImmichFrame.Core.Logic.AccountSelection;
+using ImmichFrame.WebApi.Helpers;
 using ImmichFrame.WebApi.Helpers.Config;
+using ImmichFrame.WebApi.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
+
+if (builder.Environment.IsDevelopment())
+{
+    var root = Directory.GetCurrentDirectory();
+    var dotenv = Path.Combine(root, "..", "docker", ".env");
+
+    dotenv = Path.GetFullPath(dotenv);
+    DotEnv.Load(dotenv);
+}
+
+if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("ASPNETCORE_URLS")))
+{
+    builder.WebHost.UseUrls("http://+:8080");
+}
+
 //log the version number
 var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
 Console.WriteLine($@"
@@ -67,16 +86,67 @@ builder.Services.AddTransient<Func<IAccountSettings, IAccountImmichFrameLogic>>(
     account => ActivatorUtilities.CreateInstance<PooledImmichFrameLogic>(srv, account));
 
 builder.Services.AddSingleton<IImmichFrameLogic, MultiImmichFrameLogicDelegate>();
+var appDataPath = Environment.GetEnvironmentVariable("IMMICHFRAME_APP_DATA_PATH") ??
+    Path.Combine(builder.Environment.ContentRootPath, "App_Data");
+builder.Services.AddSingleton(new FrameSessionRegistryOptions
+{
+    DisplayNameStorePath = Path.Combine(appDataPath, "frame-session-display-names.json")
+});
+builder.Services.AddSingleton<IFrameSessionRegistry>(srv =>
+    new FrameSessionRegistry(srv.GetRequiredService<FrameSessionRegistryOptions>(), null));
+builder.Services.AddSingleton<IAdminBasicAuthService, AdminBasicAuthService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddAuthorization(options => { options.AddPolicy("AllowAnonymous", policy => policy.RequireAssertion(context => true)); });
+builder.Services.AddAuthorization();
 
-builder.Services.AddAuthentication("ImmichFrameScheme")
-    .AddScheme<AuthenticationSchemeOptions, ImmichFrameAuthenticationHandler>("ImmichFrameScheme", options => { });
+builder.Services.AddAuthentication()
+    .AddScheme<AuthenticationSchemeOptions, ImmichFrameAuthenticationHandler>(AuthSchemes.Frame, options => { })
+    .AddCookie(AuthSchemes.Admin, options =>
+    {
+        options.Cookie.Name = "ImmichFrame.Admin";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+        options.ExpireTimeSpan = TimeSpan.FromHours(12);
+        options.SlidingExpiration = true;
+        options.Events = new CookieAuthenticationEvents
+        {
+            OnValidatePrincipal = context =>
+            {
+                var adminBasicAuthService = context.HttpContext.RequestServices.GetRequiredService<IAdminBasicAuthService>();
+                var username = context.Principal?.FindFirstValue(ClaimTypes.Name);
+                var credentialVersion = context.Principal?.FindFirst("immichframe_admin_credential_version")?.Value;
+                var currentVersion = string.IsNullOrWhiteSpace(username)
+                    ? null
+                    : adminBasicAuthService.GetCredentialVersion(username);
+
+                if (string.IsNullOrWhiteSpace(username) ||
+                    string.IsNullOrWhiteSpace(credentialVersion) ||
+                    string.IsNullOrWhiteSpace(currentVersion) ||
+                    !string.Equals(credentialVersion, currentVersion, StringComparison.Ordinal))
+                {
+                    context.RejectPrincipal();
+                    return context.HttpContext.SignOutAsync(AuthSchemes.Admin);
+                }
+
+                return Task.CompletedTask;
+            },
+            OnRedirectToLogin = context =>
+            {
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                return Task.CompletedTask;
+            },
+            OnRedirectToAccessDenied = context =>
+            {
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                return Task.CompletedTask;
+            }
+        };
+    });
 
 var app = builder.Build();
 
@@ -87,23 +157,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// app.UseHttpsRedirection();
+
 app.UseStaticFiles();
 if (app.Environment.IsProduction())
 {
     app.UseDefaultFiles();
 }
-
-if (app.Environment.IsDevelopment())
-{
-    var root = Directory.GetCurrentDirectory();
-    var dotenv = Path.Combine(root, "..", "docker", ".env");
-
-    dotenv = Path.GetFullPath(dotenv);
-    DotEnv.Load(dotenv);
-}
-
-// app.UseHttpsRedirection();
-app.UseMiddleware<CustomAuthenticationMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();

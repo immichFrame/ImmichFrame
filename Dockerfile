@@ -43,10 +43,13 @@ WORKDIR /app
 # Optional: für Diagnostik bei Laufzeit
 ARG VERSION
 ENV APP_VERSION=$VERSION
+ENV ASPNETCORE_URLS=http://+:8080
 
 # Copy .NET API and frontend assets
 COPY --from=publish-api /app ./
 COPY --from=build-node /app/build ./wwwroot
+
+EXPOSE 8080
 
 # Set non-privileged user
 ARG APP_UID=1000

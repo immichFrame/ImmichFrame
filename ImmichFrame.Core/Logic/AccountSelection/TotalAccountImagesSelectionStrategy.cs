@@ -7,7 +7,7 @@ namespace ImmichFrame.Core.Logic.AccountSelection;
 
 public class TotalAccountImagesSelectionStrategy(ILogger<TotalAccountImagesSelectionStrategy> _logger, IAssetAccountTracker _tracker) : IAccountSelectionStrategy
 {
-    private IList<IAccountImmichFrameLogic> _accounts;
+    private IList<IAccountImmichFrameLogic> _accounts = [];
 
     public void Initialize(IList<IAccountImmichFrameLogic> accounts)
     {
@@ -16,7 +16,18 @@ public class TotalAccountImagesSelectionStrategy(ILogger<TotalAccountImagesSelec
 
     public async Task<(IAccountImmichFrameLogic, AssetResponseDto)?> GetNextAsset()
     {
+        if (_accounts.Count == 0)
+        {
+            _logger.LogDebug("No accounts are available for selection");
+            return null;
+        }
+
         var chosen = await _accounts.ChooseOne(logic => logic.GetTotalAssets());
+        if (chosen == null)
+        {
+            _logger.LogDebug("No account could be selected");
+            return null;
+        }
         
         var asset = await chosen.GetNextAsset();
         if (asset != null)
@@ -48,6 +59,12 @@ public class TotalAccountImagesSelectionStrategy(ILogger<TotalAccountImagesSelec
 
     public async Task<IEnumerable<(IAccountImmichFrameLogic, AssetResponseDto)>> GetAssets()
     {
+        if (_accounts.Count == 0)
+        {
+            _logger.LogDebug("No accounts are available for bulk asset selection");
+            return [];
+        }
+
         var proportions = await GetProportions(_accounts);
         var maxAccount = proportions.Max();
         var adjustedProportions = proportions.Select(x => x / maxAccount).ToList();
