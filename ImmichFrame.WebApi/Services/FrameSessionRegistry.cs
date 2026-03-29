@@ -1,5 +1,6 @@
 using System.Text.Json;
 using ImmichFrame.WebApi.Models;
+using Microsoft.Extensions.Logging;
 
 namespace ImmichFrame.WebApi.Services;
 
@@ -18,17 +19,19 @@ public class FrameSessionRegistry : IFrameSessionRegistry
     private readonly object _sync = new();
     private readonly Func<DateTimeOffset> _utcNow;
     private readonly FrameSessionRegistryOptions _options;
+    private readonly ILogger<FrameSessionRegistry>? _logger;
     private long _nextCommandId;
 
     public FrameSessionRegistry()
-        : this(new FrameSessionRegistryOptions(), null)
+        : this(new FrameSessionRegistryOptions(), null, null)
     {
     }
 
-    internal FrameSessionRegistry(FrameSessionRegistryOptions options, Func<DateTimeOffset>? utcNow)
+    internal FrameSessionRegistry(FrameSessionRegistryOptions options, Func<DateTimeOffset>? utcNow, ILogger<FrameSessionRegistry>? logger = null)
     {
         _options = options;
         _utcNow = utcNow ?? (() => DateTimeOffset.UtcNow);
+        _logger = logger;
         LoadPersistedDisplayNames();
     }
 
@@ -132,7 +135,7 @@ public class FrameSessionRegistry : IFrameSessionRegistry
         }
     }
 
-    public AdminCommandDto? EnqueueCommand(string clientIdentifier, FrameAdminCommandType commandType)
+    public FrameSessionCommandEnqueueResult EnqueueCommand(string clientIdentifier, FrameAdminCommandType commandType)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(clientIdentifier);
 
@@ -143,23 +146,33 @@ public class FrameSessionRegistry : IFrameSessionRegistry
 
             if (!_sessions.TryGetValue(clientIdentifier, out var session))
             {
-                return null;
+                return new FrameSessionCommandEnqueueResult
+                {
+                    Status = FrameSessionCommandEnqueueStatus.NotFound
+                };
             }
 
             if (session.Status != FrameSessionStatus.Active || now - session.LastSeenAtUtc > _options.HeartbeatTtl)
             {
-                return null;
+                return new FrameSessionCommandEnqueueResult
+                {
+                    Status = FrameSessionCommandEnqueueStatus.Stale
+                };
             }
 
             var command = new AdminCommandDto
             {
-                CommandId = Interlocked.Increment(ref _nextCommandId),
+                CommandId = ++_nextCommandId,
                 CommandType = commandType,
                 IssuedAtUtc = now
             };
 
             session.PendingCommands.Add(command);
-            return CloneCommand(command);
+            return new FrameSessionCommandEnqueueResult
+            {
+                Status = FrameSessionCommandEnqueueStatus.Enqueued,
+                Command = CloneCommand(command)
+            };
         }
     }
 
@@ -246,7 +259,9 @@ public class FrameSessionRegistry : IFrameSessionRegistry
         {
             DisplayedAtUtc = displayEvent.DisplayedAtUtc,
             DurationSeconds = displayEvent.DurationSeconds,
-            Assets = displayEvent.Assets.Select(CloneDisplayedAsset).ToList()
+            Assets = (displayEvent.Assets ?? Enumerable.Empty<DisplayedAssetDto>())
+                .Select(CloneDisplayedAsset)
+                .ToList()
         };
     }
 
@@ -324,9 +339,9 @@ public class FrameSessionRegistry : IFrameSessionRegistry
                 }
             }
         }
-        catch
+        catch (Exception ex)
         {
-            // Ignore a corrupted name-store file and continue with an empty in-memory cache.
+            _logger?.LogWarning(ex, "Failed to load name-store file, continuing with empty in-memory cache.");
         }
     }
 

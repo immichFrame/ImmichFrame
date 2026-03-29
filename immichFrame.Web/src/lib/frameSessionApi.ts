@@ -37,7 +37,6 @@ export interface FrameSessionSnapshotDto {
 
 export interface FrameSessionStateDto extends FrameSessionSnapshotDto {
 	clientIdentifier: string;
-	displayName?: string | null;
 	connectedAtUtc: string;
 	lastSeenAtUtc: string;
 	userAgent?: string | null;
@@ -102,14 +101,27 @@ export async function putFrameSessionSnapshot(
 }
 
 export async function getFrameSessionCommands(clientIdentifier: string) {
-	const response = await fetch(
-		`/api/frame-sessions/${encodeURIComponent(clientIdentifier)}/commands`,
-		{
-			headers: getHeaders()
-		}
-	);
+	try {
+		const response = await fetch(
+			`/api/frame-sessions/${encodeURIComponent(clientIdentifier)}/commands`,
+			{
+				headers: getHeaders()
+			}
+		);
 
-	return response.ok ? readJson<AdminCommandDto[]>(response) : [];
+		if (!response.ok) {
+			const responseText = await response.text();
+			console.error(
+				`Failed to fetch frame session commands for ${clientIdentifier}: ${response.status} ${responseText}`
+			);
+			return [];
+		}
+
+		return await readJson<AdminCommandDto[]>(response);
+	} catch (error) {
+		console.error(`Failed to fetch frame session commands for ${clientIdentifier}:`, error);
+		return [];
+	}
 }
 
 export async function acknowledgeFrameSessionCommand(clientIdentifier: string, commandId: number) {
@@ -119,12 +131,35 @@ export async function acknowledgeFrameSessionCommand(clientIdentifier: string, c
 	});
 }
 
-export async function disconnectFrameSession(clientIdentifier: string, keepalive = false) {
+export async function disconnectFrameSession(
+	clientIdentifier: string,
+	keepalive = false,
+	authSecret?: string | null
+) {
 	return fetch(`/api/frame-sessions/${encodeURIComponent(clientIdentifier)}/disconnect`, {
 		method: 'POST',
-		headers: getHeaders(),
+		headers: authSecret ? getHeaders(true) : getHeaders(),
+		body: authSecret ? JSON.stringify({ authSecret }) : undefined,
 		keepalive
 	});
+}
+
+export function sendBeaconFrameSessionDisconnect(
+	clientIdentifier: string,
+	authSecret?: string | null
+) {
+	if (typeof navigator === 'undefined' || typeof navigator.sendBeacon !== 'function') {
+		return false;
+	}
+
+	const payload = JSON.stringify({
+		authSecret: authSecret ?? null
+	});
+	const body = new Blob([payload], { type: 'application/json' });
+	return navigator.sendBeacon(
+		`/api/frame-sessions/${encodeURIComponent(clientIdentifier)}/disconnect`,
+		body
+	);
 }
 
 export async function getAdminFrameSessions() {

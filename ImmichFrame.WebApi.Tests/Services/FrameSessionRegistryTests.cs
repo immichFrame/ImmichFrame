@@ -79,12 +79,13 @@ public class FrameSessionRegistryTests
 
         registry.UpsertSnapshot("frame-office", new FrameSessionSnapshotDto(), "NUnit-Agent");
 
-        var command = registry.EnqueueCommand("frame-office", FrameAdminCommandType.Next);
+        var result = registry.EnqueueCommand("frame-office", FrameAdminCommandType.Next);
         var pending = registry.GetPendingCommands("frame-office");
 
-        Assert.That(command, Is.Not.Null);
+        Assert.That(result.Status, Is.EqualTo(FrameSessionCommandEnqueueStatus.Enqueued));
+        Assert.That(result.Command, Is.Not.Null);
         Assert.That(pending, Has.Count.EqualTo(1));
-        Assert.That(registry.AcknowledgeCommand("frame-office", command!.CommandId), Is.True);
+        Assert.That(registry.AcknowledgeCommand("frame-office", result.Command!.CommandId), Is.True);
         Assert.That(registry.GetPendingCommands("frame-office"), Is.Empty);
     }
 
@@ -103,7 +104,9 @@ public class FrameSessionRegistryTests
         now = now.AddMinutes(6);
 
         Assert.That(registry.GetActiveSessions(), Is.Empty);
-        Assert.That(registry.EnqueueCommand("frame-den", FrameAdminCommandType.Refresh), Is.Null);
+        Assert.That(
+            registry.EnqueueCommand("frame-den", FrameAdminCommandType.Refresh).Status,
+            Is.EqualTo(FrameSessionCommandEnqueueStatus.NotFound));
     }
 
     [Test]
@@ -136,5 +139,38 @@ public class FrameSessionRegistryTests
                 File.Delete(tempFile);
             }
         }
+    }
+
+    [Test]
+    public void UpsertSnapshot_WithNullDisplayEventAssets_ClonesAsEmptyList()
+    {
+        var now = new DateTimeOffset(2026, 03, 25, 12, 00, 00, TimeSpan.Zero);
+        var registry = new FrameSessionRegistry(new FrameSessionRegistryOptions(), () => now);
+
+        registry.UpsertSnapshot("frame-porch", new FrameSessionSnapshotDto
+        {
+            CurrentDisplay = new DisplayEventDto
+            {
+                DisplayedAtUtc = now,
+                Assets = null!
+            },
+            History =
+            [
+                new DisplayEventDto
+                {
+                    DisplayedAtUtc = now.AddMinutes(-1),
+                    Assets = null!
+                }
+            ]
+        }, "NUnit-Agent");
+
+        var session = registry.GetActiveSessions().Single();
+
+        Assert.That(session.CurrentDisplay, Is.Not.Null);
+        Assert.That(session.CurrentDisplay!.Assets, Is.Not.Null);
+        Assert.That(session.CurrentDisplay.Assets, Is.Empty);
+        Assert.That(session.History, Has.Count.EqualTo(1));
+        Assert.That(session.History[0].Assets, Is.Not.Null);
+        Assert.That(session.History[0].Assets, Is.Empty);
     }
 }

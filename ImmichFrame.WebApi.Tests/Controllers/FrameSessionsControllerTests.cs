@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Collections;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.WebApi.Models;
 using ImmichFrame.WebApi.Services;
@@ -14,23 +15,13 @@ namespace ImmichFrame.WebApi.Tests.Controllers;
 public class FrameSessionsControllerTests
 {
     private WebApplicationFactory<Program> _factory = null!;
-    private string? _originalBasicUser;
-    private string? _originalBasicHash;
-    private string? _originalAppDataPath;
     private string _tempAppDataPath = null!;
 
     [SetUp]
     public void Setup()
     {
-        _originalBasicUser = Environment.GetEnvironmentVariable("IMMICHFRAME_AUTH_BASIC_ADMIN_USER");
-        _originalBasicHash = Environment.GetEnvironmentVariable("IMMICHFRAME_AUTH_BASIC_ADMIN_HASH");
-        _originalAppDataPath = Environment.GetEnvironmentVariable("IMMICHFRAME_APP_DATA_PATH");
-
         _tempAppDataPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(_tempAppDataPath);
-        Environment.SetEnvironmentVariable("IMMICHFRAME_AUTH_BASIC_ADMIN_USER", "admin");
-        Environment.SetEnvironmentVariable("IMMICHFRAME_AUTH_BASIC_ADMIN_HASH", "{SHA}" + Convert.ToBase64String(System.Security.Cryptography.SHA1.HashData(System.Text.Encoding.UTF8.GetBytes("secret"))));
-        Environment.SetEnvironmentVariable("IMMICHFRAME_APP_DATA_PATH", _tempAppDataPath);
 
         _factory = new WebApplicationFactory<Program>()
             .WithWebHostBuilder(builder =>
@@ -59,7 +50,21 @@ public class FrameSessionsControllerTests
 
                     services.AddSingleton<IServerSettings>(serverSettings);
                     services.AddSingleton<IGeneralSettings>(generalSettings);
-                    services.AddSingleton<IFrameSessionRegistry, FrameSessionRegistry>();
+                    services.AddSingleton<IAdminBasicAuthService>(_ =>
+                        new AdminBasicAuthService(new Hashtable
+                        {
+                            ["IMMICHFRAME_AUTH_BASIC_ADMIN_USER"] = "admin",
+                            ["IMMICHFRAME_AUTH_BASIC_ADMIN_HASH"] =
+                                "{SHA}" + Convert.ToBase64String(System.Security.Cryptography.SHA1.HashData(System.Text.Encoding.UTF8.GetBytes("secret")))
+                        }));
+                    services.AddSingleton<IFrameSessionRegistry>(_ =>
+                        new FrameSessionRegistry(
+                            new FrameSessionRegistryOptions
+                            {
+                                DisplayNameStorePath = Path.Combine(_tempAppDataPath, "frame-session-display-names.json")
+                            },
+                            null,
+                            null));
                 });
             });
     }
@@ -68,10 +73,6 @@ public class FrameSessionsControllerTests
     public void TearDown()
     {
         _factory.Dispose();
-        Environment.SetEnvironmentVariable("IMMICHFRAME_AUTH_BASIC_ADMIN_USER", _originalBasicUser);
-        Environment.SetEnvironmentVariable("IMMICHFRAME_AUTH_BASIC_ADMIN_HASH", _originalBasicHash);
-        Environment.SetEnvironmentVariable("IMMICHFRAME_APP_DATA_PATH", _originalAppDataPath);
-
         if (Directory.Exists(_tempAppDataPath))
         {
             Directory.Delete(_tempAppDataPath, true);
@@ -174,6 +175,29 @@ public class FrameSessionsControllerTests
 
         var commandsAfterAck = await frameClient.GetFromJsonAsync<List<AdminCommandDto>>("/api/frame-sessions/frame-1/commands");
         Assert.That(commandsAfterAck, Is.Empty);
+    }
+
+    [Test]
+    public async Task EnqueueCommand_ReturnsGoneForStaleSession()
+    {
+        var registry = _factory.Services.GetRequiredService<IFrameSessionRegistry>();
+        registry.UpsertSnapshot("framestale", new FrameSessionSnapshotDto(), "NUnit-Agent");
+        registry.MarkStopped("framestale", "NUnit-Agent");
+
+        var adminClient = _factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            HandleCookies = true
+        });
+        await LoginAdminAsync(adminClient);
+
+        var response = await adminClient.PostAsJsonAsync(
+            "/api/admin/frame-sessions/framestale/commands",
+            new EnqueueAdminCommandRequest
+            {
+                CommandType = FrameAdminCommandType.Refresh
+            });
+
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Gone));
     }
 
     private static async Task LoginAdminAsync(HttpClient adminClient)

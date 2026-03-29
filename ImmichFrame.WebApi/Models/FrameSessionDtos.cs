@@ -63,6 +63,11 @@ public class FrameSessionStateDto : FrameSessionSnapshotDto
     public string? UserAgent { get; set; }
 }
 
+public class FrameSessionDisconnectRequest
+{
+    public string? AuthSecret { get; set; }
+}
+
 public class AdminCommandDto
 {
     public long CommandId { get; set; }

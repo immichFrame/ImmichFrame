@@ -1,5 +1,6 @@
 using ImmichFrame.WebApi.Models;
 using ImmichFrame.WebApi.Services;
+using ImmichFrame.Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,11 +13,16 @@ public class FrameSessionsController : ControllerBase
 {
     private readonly ILogger<FrameSessionsController> _logger;
     private readonly IFrameSessionRegistry _registry;
+    private readonly string? _authenticationSecret;
 
-    public FrameSessionsController(ILogger<FrameSessionsController> logger, IFrameSessionRegistry registry)
+    public FrameSessionsController(
+        ILogger<FrameSessionsController> logger,
+        IFrameSessionRegistry registry,
+        IGeneralSettings generalSettings)
     {
         _logger = logger;
         _registry = registry;
+        _authenticationSecret = generalSettings.AuthenticationSecret;
     }
 
     [HttpPut("{clientIdentifier}")]
@@ -60,8 +66,9 @@ public class FrameSessionsController : ControllerBase
             : NotFound();
     }
 
+    [AllowAnonymous]
     [HttpPost("{clientIdentifier}/disconnect")]
-    public IActionResult Disconnect(string clientIdentifier)
+    public IActionResult Disconnect(string clientIdentifier, [FromBody] FrameSessionDisconnectRequest? request)
     {
         var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
         if (string.IsNullOrWhiteSpace(sanitizedClientIdentifier))
@@ -69,8 +76,30 @@ public class FrameSessionsController : ControllerBase
             return BadRequest("A valid client identifier is required.");
         }
 
+        if (!IsDisconnectAuthorized(request?.AuthSecret))
+        {
+            return Unauthorized();
+        }
+
         _logger.LogDebug("Frame session disconnect received for '{clientIdentifier}'", sanitizedClientIdentifier);
         _registry.MarkStopped(sanitizedClientIdentifier, Request.Headers.UserAgent.ToString());
         return NoContent();
+    }
+
+    private bool IsDisconnectAuthorized(string? requestAuthSecret)
+    {
+        if (string.IsNullOrWhiteSpace(_authenticationSecret))
+        {
+            return true;
+        }
+
+        var authorizationHeader = Request.Headers.Authorization.ToString();
+        if (authorizationHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+        {
+            var token = authorizationHeader["Bearer ".Length..].Trim();
+            return string.Equals(token, _authenticationSecret, StringComparison.Ordinal);
+        }
+
+        return string.Equals(requestAuthSecret, _authenticationSecret, StringComparison.Ordinal);
     }
 }

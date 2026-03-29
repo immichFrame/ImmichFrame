@@ -34,12 +34,21 @@ public class AdminFrameSessionsController : ControllerBase
             return BadRequest("A valid client identifier is required.");
         }
 
-        var command = _registry.EnqueueCommand(sanitizedClientIdentifier, request.CommandType);
-        if (command == null)
+        var result = _registry.EnqueueCommand(sanitizedClientIdentifier, request.CommandType);
+        if (result.Status == FrameSessionCommandEnqueueStatus.NotFound)
         {
             return NotFound();
         }
 
+        if (result.Status == FrameSessionCommandEnqueueStatus.Stale)
+        {
+            return Problem(
+                statusCode: StatusCodes.Status410Gone,
+                title: "Frame session is stale.",
+                detail: "The frame session is no longer active and cannot receive commands.");
+        }
+
+        var command = result.Command!;
         _logger.LogInformation("Queued {commandType} command for frame session '{clientIdentifier}'", request.CommandType, sanitizedClientIdentifier);
         return Ok(command);
     }

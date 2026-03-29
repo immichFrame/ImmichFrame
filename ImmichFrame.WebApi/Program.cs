@@ -9,7 +9,9 @@ using ImmichFrame.WebApi.Helpers;
 using ImmichFrame.WebApi.Helpers.Config;
 using ImmichFrame.WebApi.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.RateLimiting;
 using System.Security.Claims;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -93,13 +95,29 @@ builder.Services.AddSingleton(new FrameSessionRegistryOptions
     DisplayNameStorePath = Path.Combine(appDataPath, "frame-session-display-names.json")
 });
 builder.Services.AddSingleton<IFrameSessionRegistry>(srv =>
-    new FrameSessionRegistry(srv.GetRequiredService<FrameSessionRegistryOptions>(), null));
+    new FrameSessionRegistry(
+        srv.GetRequiredService<FrameSessionRegistryOptions>(),
+        null,
+        srv.GetService<ILogger<FrameSessionRegistry>>()));
 builder.Services.AddSingleton<IAdminBasicAuthService, AdminBasicAuthService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("AdminLogin", context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 10,
+                Window = TimeSpan.FromMinutes(5),
+                QueueLimit = 0
+            }));
+});
 
 builder.Services.AddAuthorization();
 
@@ -157,14 +175,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// app.UseHttpsRedirection();
-
 app.UseStaticFiles();
 if (app.Environment.IsProduction())
 {
     app.UseDefaultFiles();
 }
 
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 

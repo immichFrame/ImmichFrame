@@ -22,43 +22,52 @@ public class ImmichFrameAuthenticationHandler : AuthenticationHandler<Authentica
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        var endpoint = Context.GetEndpoint();
-        var authorizeAttribute = endpoint?.Metadata?.GetMetadata<IAuthorizeData>();
-
-        if (_authenticationSecret == null || authorizeAttribute == null)
+        if (!RequiresAuthentication())
         {
-            // No auth is required
-            var claims = new[] { new Claim(ClaimTypes.NameIdentifier, "anonymous") };
-            var identity = new ClaimsIdentity(claims, Scheme.Name);
-            var principal = new ClaimsPrincipal(identity);
-            var ticket = new AuthenticationTicket(principal, Scheme.Name);
-
-            return Task.FromResult(AuthenticateResult.Success(ticket));
+            return Task.FromResult(CreateSuccessResult("anonymous"));
         }
 
-        if (!Request.Headers.ContainsKey("Authorization"))
+        if (TryGetBearerToken(Request.Headers.Authorization.ToString(), out var token) &&
+            string.Equals(token, _authenticationSecret, StringComparison.Ordinal))
+        {
+            return Task.FromResult(CreateSuccessResult("authenticatedUser"));
+        }
+
+        if (string.IsNullOrWhiteSpace(Request.Headers.Authorization))
         {
             return Task.FromResult(AuthenticateResult.Fail("Missing Authorization Header"));
         }
 
-        var authHeader = Request.Headers["Authorization"].ToString();
-        if (authHeader.StartsWith("Bearer ", System.StringComparison.OrdinalIgnoreCase))
+        return Task.FromResult(AuthenticateResult.Fail("The AuthenticationSecret was not correct!"));
+    }
+
+    private bool RequiresAuthentication()
+    {
+        var endpoint = Context.GetEndpoint();
+        var authorizeAttribute = endpoint?.Metadata?.GetMetadata<IAuthorizeData>();
+        return _authenticationSecret != null && authorizeAttribute != null;
+    }
+
+    private static bool TryGetBearerToken(string? authorizationHeader, out string token)
+    {
+        token = string.Empty;
+        if (string.IsNullOrWhiteSpace(authorizationHeader) ||
+            !authorizationHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
         {
-            var token = authHeader.Substring("Bearer ".Length).Trim();
-
-            if (token == _authenticationSecret)
-            {
-                var claims = new[] { new Claim(ClaimTypes.NameIdentifier, "authenticatedUser") };
-                var identity = new ClaimsIdentity(claims, Scheme.Name);
-                var principal = new ClaimsPrincipal(identity);
-                var ticket = new AuthenticationTicket(principal, Scheme.Name);
-
-                return Task.FromResult(AuthenticateResult.Success(ticket));
-            }
-
-            return Task.FromResult(AuthenticateResult.Fail("The AuthenticationSecret was not correct!"));
+            return false;
         }
 
-        return Task.FromResult(AuthenticateResult.Fail("Invalid Authorization Header"));
+        token = authorizationHeader["Bearer ".Length..].Trim();
+        return !string.IsNullOrWhiteSpace(token);
+    }
+
+    private AuthenticateResult CreateSuccessResult(string nameIdentifier)
+    {
+        var claims = new[] { new Claim(ClaimTypes.NameIdentifier, nameIdentifier) };
+        var identity = new ClaimsIdentity(claims, Scheme.Name);
+        var principal = new ClaimsPrincipal(identity);
+        var ticket = new AuthenticationTicket(principal, Scheme.Name);
+
+        return AuthenticateResult.Success(ticket);
     }
 }

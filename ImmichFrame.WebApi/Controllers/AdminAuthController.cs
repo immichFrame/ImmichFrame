@@ -4,6 +4,7 @@ using ImmichFrame.WebApi.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace ImmichFrame.WebApi.Controllers;
 
@@ -35,11 +36,17 @@ public class AdminAuthController : ControllerBase
 
     [HttpPost("login")]
     [AllowAnonymous]
+    [EnableRateLimiting("AdminLogin")]
     public async Task<ActionResult<AdminAuthSessionDto>> Login([FromBody] AdminLoginRequest request)
     {
         if (!_adminBasicAuthService.HasUsers)
         {
             return StatusCode(StatusCodes.Status503ServiceUnavailable, "Admin login is not configured.");
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
+        {
+            return BadRequest("A username and password are required.");
         }
 
         if (!_adminBasicAuthService.ValidateCredentials(request.Username, request.Password))

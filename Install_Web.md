@@ -132,6 +132,8 @@ The frame UI and the admin dashboard are both available on `http://HOST:8080`, w
 
 To enable the admin login page, add at least one matching `IMMICHFRAME_AUTH_BASIC_*_USER` and `IMMICHFRAME_AUTH_BASIC_*_HASH` pair to your environment or `.env` file. These env values remain the source of truth for admin users, and the `/admin` page signs in against them with a normal session cookie.
 
+If `/admin` is reachable outside a trusted local network, only expose it over HTTPS or behind a TLS-terminating reverse proxy such as Nginx or Traefik. The admin login uses environment-backed credentials and session cookies, and both can be intercepted if the endpoint is exposed over plain HTTP.
+
 ## 🆘 Help
 
 [Discord Channel][support-url]

@@ -21,8 +21,13 @@ public class AdminBasicAuthService : IAdminBasicAuthService
     private readonly List<AdminBasicAuthUser> _users;
 
     public AdminBasicAuthService()
+        : this(Environment.GetEnvironmentVariables())
     {
-        _users = LoadUsers(Environment.GetEnvironmentVariables());
+    }
+
+    internal AdminBasicAuthService(IDictionary environmentVariables)
+    {
+        _users = LoadUsers(environmentVariables);
     }
 
     public bool HasUsers => _users.Count > 0;
@@ -106,6 +111,8 @@ public class AdminBasicAuthService : IAdminBasicAuthService
 
         if (hash.StartsWith("{SHA}", StringComparison.Ordinal))
         {
+            // "{SHA}" is the legacy htpasswd SHA1 format. Keep it only for compatibility and
+            // prefer stronger hashes such as bcrypt ("$2") or Apache MD5 ("$apr1$") in new configs.
             using var sha1 = SHA1.Create();
             var digest = sha1.ComputeHash(Encoding.UTF8.GetBytes(password));
             var computed = "{SHA}" + Convert.ToBase64String(digest);

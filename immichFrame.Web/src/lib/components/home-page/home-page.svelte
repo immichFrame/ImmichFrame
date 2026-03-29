@@ -23,7 +23,8 @@
 		acknowledgeFrameSessionCommand,
 		disconnectFrameSession,
 		getFrameSessionCommands,
-		putFrameSessionSnapshot
+		putFrameSessionSnapshot,
+		sendBeaconFrameSessionDisconnect
 	} from '$lib/frameSessionApi';
 
 	interface AssetsState {
@@ -707,8 +708,12 @@
 			return;
 		}
 
+		if (sendBeaconFrameSessionDisconnect($clientIdentifierStore, $authSecretStore)) {
+			return;
+		}
+
 		try {
-			await disconnectFrameSession($clientIdentifierStore, true);
+			await disconnectFrameSession($clientIdentifierStore, true, $authSecretStore);
 		} catch (err) {
 			console.warn('Failed to disconnect frame session during unload:', err);
 		}

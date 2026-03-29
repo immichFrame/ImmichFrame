@@ -29,29 +29,23 @@ public class AdminBasicAuthServiceTests
     public void ValidateCredentials_SupportsApacheMd5AndSha1()
     {
         var aprHash = ApacheMd5Crypt.Hash("secret", "$apr1$xyw6b7Rb$");
-        Environment.SetEnvironmentVariable("IMMICHFRAME_AUTH_BASIC_SHA_USER", "sha-user");
-        Environment.SetEnvironmentVariable("IMMICHFRAME_AUTH_BASIC_SHA_HASH", "{SHA}" + Convert.ToBase64String(SHA1.HashData(Encoding.UTF8.GetBytes("sha-password"))));
-        Environment.SetEnvironmentVariable("IMMICHFRAME_AUTH_BASIC_APR_USER", "apr-user");
-        Environment.SetEnvironmentVariable("IMMICHFRAME_AUTH_BASIC_APR_HASH", aprHash);
-
-        try
+        IDictionary environment = new Hashtable
         {
-            var service = new AdminBasicAuthService();
+            ["IMMICHFRAME_AUTH_BASIC_SHA_USER"] = "sha-user",
+            ["IMMICHFRAME_AUTH_BASIC_SHA_HASH"] =
+                "{SHA}" + Convert.ToBase64String(SHA1.HashData(Encoding.UTF8.GetBytes("sha-password"))),
+            ["IMMICHFRAME_AUTH_BASIC_APR_USER"] = "apr-user",
+            ["IMMICHFRAME_AUTH_BASIC_APR_HASH"] = aprHash
+        };
 
-            Assert.Multiple(() =>
-            {
-                Assert.That(service.HasUsers, Is.True);
-                Assert.That(service.ValidateCredentials("sha-user", "sha-password"), Is.True);
-                Assert.That(service.ValidateCredentials("apr-user", "secret"), Is.True);
-                Assert.That(service.ValidateCredentials("apr-user", "wrong"), Is.False);
-            });
-        }
-        finally
+        var service = new AdminBasicAuthService(environment);
+
+        Assert.Multiple(() =>
         {
-            Environment.SetEnvironmentVariable("IMMICHFRAME_AUTH_BASIC_SHA_USER", null);
-            Environment.SetEnvironmentVariable("IMMICHFRAME_AUTH_BASIC_SHA_HASH", null);
-            Environment.SetEnvironmentVariable("IMMICHFRAME_AUTH_BASIC_APR_USER", null);
-            Environment.SetEnvironmentVariable("IMMICHFRAME_AUTH_BASIC_APR_HASH", null);
-        }
+            Assert.That(service.HasUsers, Is.True);
+            Assert.That(service.ValidateCredentials("sha-user", "sha-password"), Is.True);
+            Assert.That(service.ValidateCredentials("apr-user", "secret"), Is.True);
+            Assert.That(service.ValidateCredentials("apr-user", "wrong"), Is.False);
+        });
     }
 }
