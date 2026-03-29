@@ -669,7 +669,6 @@
 							await acknowledgeFrameSessionCommand($clientIdentifierStore, command.commandId);
 							await shutdownFromAdmin();
 							continue;
-							break;
 					}
 
 					await acknowledgeFrameSessionCommand($clientIdentifierStore, command.commandId);
