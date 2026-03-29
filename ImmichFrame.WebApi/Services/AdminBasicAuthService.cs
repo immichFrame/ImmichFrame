@@ -90,17 +90,44 @@ public class AdminBasicAuthService : IAdminBasicAuthService
             }
         }
 
-        return partialUsers.Values
-            .Where(x => !string.IsNullOrWhiteSpace(x.Username) && !string.IsNullOrWhiteSpace(x.Hash))
-            .Select(x => new AdminBasicAuthUser(x.Username!.Trim(), x.Hash!.Trim()))
-            .ToList();
+        var users = new List<AdminBasicAuthUser>();
+        var usernamesToSource = new Dictionary<string, string>(StringComparer.Ordinal);
+
+        foreach (var (sourceName, partialUser) in partialUsers)
+        {
+            if (string.IsNullOrWhiteSpace(partialUser.Username) || string.IsNullOrWhiteSpace(partialUser.Hash))
+            {
+                continue;
+            }
+
+            var username = partialUser.Username.Trim();
+            var hash = partialUser.Hash.Trim();
+
+            if (usernamesToSource.TryGetValue(username, out var existingSource))
+            {
+                throw new InvalidOperationException(
+                    $"Duplicate admin username '{username}' found in IMMICHFRAME_AUTH_BASIC_{existingSource}_USER and IMMICHFRAME_AUTH_BASIC_{sourceName}_USER.");
+            }
+
+            usernamesToSource[username] = sourceName;
+            users.Add(new AdminBasicAuthUser(username, hash));
+        }
+
+        return users;
     }
 
     private static bool VerifyPassword(string password, string hash)
     {
         if (hash.StartsWith("$2", StringComparison.Ordinal))
         {
-            return BCrypt.Net.BCrypt.Verify(password, hash);
+            try
+            {
+                return BCrypt.Net.BCrypt.Verify(password, hash);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
         if (hash.StartsWith("$apr1$", StringComparison.Ordinal))

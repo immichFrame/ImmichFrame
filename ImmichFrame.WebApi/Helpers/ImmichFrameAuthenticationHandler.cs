@@ -45,7 +45,7 @@ public class ImmichFrameAuthenticationHandler : AuthenticationHandler<Authentica
     {
         var endpoint = Context.GetEndpoint();
         var authorizeAttribute = endpoint?.Metadata?.GetMetadata<IAuthorizeData>();
-        return _authenticationSecret != null && authorizeAttribute != null;
+        return !string.IsNullOrWhiteSpace(_authenticationSecret) && authorizeAttribute != null;
     }
 
     private static bool TryGetBearerToken(string? authorizationHeader, out string token)

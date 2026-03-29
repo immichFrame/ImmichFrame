@@ -48,4 +48,36 @@ public class AdminBasicAuthServiceTests
             Assert.That(service.ValidateCredentials("apr-user", "wrong"), Is.False);
         });
     }
+
+    [Test]
+    public void LoadUsers_ThrowsForDuplicateTrimmedUsernames()
+    {
+        IDictionary environment = new Hashtable
+        {
+            ["IMMICHFRAME_AUTH_BASIC_ONE_USER"] = " michel ",
+            ["IMMICHFRAME_AUTH_BASIC_ONE_HASH"] = "{SHA}" + Convert.ToBase64String(SHA1.HashData(Encoding.UTF8.GetBytes("secret-1"))),
+            ["IMMICHFRAME_AUTH_BASIC_TWO_USER"] = "michel",
+            ["IMMICHFRAME_AUTH_BASIC_TWO_HASH"] = "{SHA}" + Convert.ToBase64String(SHA1.HashData(Encoding.UTF8.GetBytes("secret-2")))
+        };
+
+        var exception = Assert.Throws<InvalidOperationException>(() => AdminBasicAuthService.LoadUsers(environment));
+
+        Assert.That(exception!.Message, Does.Contain("Duplicate admin username 'michel'"));
+        Assert.That(exception.Message, Does.Contain("IMMICHFRAME_AUTH_BASIC_ONE_USER"));
+        Assert.That(exception.Message, Does.Contain("IMMICHFRAME_AUTH_BASIC_TWO_USER"));
+    }
+
+    [Test]
+    public void ValidateCredentials_ReturnsFalseForMalformedBcryptHash()
+    {
+        IDictionary environment = new Hashtable
+        {
+            ["IMMICHFRAME_AUTH_BASIC_BAD_USER"] = "bad-user",
+            ["IMMICHFRAME_AUTH_BASIC_BAD_HASH"] = "$2bad-hash"
+        };
+
+        var service = new AdminBasicAuthService(environment);
+
+        Assert.That(service.ValidateCredentials("bad-user", "secret"), Is.False);
+    }
 }

@@ -173,4 +173,35 @@ public class FrameSessionRegistryTests
         Assert.That(session.History[0].Assets, Is.Not.Null);
         Assert.That(session.History[0].Assets, Is.Empty);
     }
+
+    [Test]
+    public void UpsertSnapshot_WithNullHistory_StoresEmptyHistory()
+    {
+        var now = new DateTimeOffset(2026, 03, 25, 12, 00, 00, TimeSpan.Zero);
+        var registry = new FrameSessionRegistry(new FrameSessionRegistryOptions(), () => now);
+
+        registry.UpsertSnapshot("frame-patio", new FrameSessionSnapshotDto
+        {
+            CurrentDisplay = new DisplayEventDto
+            {
+                DisplayedAtUtc = now,
+                Assets =
+                [
+                    new DisplayedAssetDto
+                    {
+                        Id = "asset-7",
+                        OriginalFileName = "garden.jpg",
+                        Type = AssetTypeEnum.IMAGE
+                    }
+                ]
+            },
+            History = null!
+        }, "NUnit-Agent");
+
+        var session = registry.GetActiveSessions().Single();
+
+        Assert.That(session.CurrentDisplay, Is.Not.Null);
+        Assert.That(session.History, Is.Not.Null);
+        Assert.That(session.History, Is.Empty);
+    }
 }

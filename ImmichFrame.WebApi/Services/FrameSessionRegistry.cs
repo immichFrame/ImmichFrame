@@ -65,7 +65,7 @@ public class FrameSessionRegistry : IFrameSessionRegistry
                 ApplyDisplayNameUnsafe(session, NormalizeDisplayName(snapshot.DisplayName), persistWhenProvided: true);
             }
             session.CurrentDisplay = CloneDisplayEvent(snapshot.CurrentDisplay);
-            session.History = snapshot.History
+            session.History = (snapshot.History ?? Enumerable.Empty<DisplayEventDto>())
                 .Take(_options.MaxHistoryItems)
                 .Select(CloneDisplayEvent)
                 .Where(x => x != null)

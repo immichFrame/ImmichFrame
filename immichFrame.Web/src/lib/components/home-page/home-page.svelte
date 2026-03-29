@@ -91,23 +91,38 @@
 	let commandPollIntervalId: number | undefined;
 	let isPollingCommands = false;
 	let isHandlingRemoteCommand = false;
+	let pendingDisplayNameSync = $state(false);
+	let lastAppliedClientIdentifierFromUrl: string | null | undefined = $state(undefined);
+	let lastAppliedClientNameFromUrl: string | null | undefined = $state(undefined);
+	let lastAppliedAuthSecretFromUrl: string | null | undefined = $state(undefined);
 
-	const clientIdentifier = page.url.searchParams.get('client');
-	const clientName = page.url.searchParams.get('name');
-	const authsecret = page.url.searchParams.get('authsecret');
+	$effect(() => {
+		const clientIdentifierFromUrl = page.url.searchParams.get('client');
+		if (clientIdentifierFromUrl !== lastAppliedClientIdentifierFromUrl) {
+			lastAppliedClientIdentifierFromUrl = clientIdentifierFromUrl;
+			if (clientIdentifierFromUrl && clientIdentifierFromUrl !== $clientIdentifierStore) {
+				clientIdentifierStore.set(clientIdentifierFromUrl);
+			}
+		}
 
-	if (clientIdentifier && clientIdentifier != $clientIdentifierStore) {
-		clientIdentifierStore.set(clientIdentifier);
-	}
+		const clientNameFromUrl = page.url.searchParams.get('name');
+		if (clientNameFromUrl !== lastAppliedClientNameFromUrl) {
+			lastAppliedClientNameFromUrl = clientNameFromUrl;
+			if (clientNameFromUrl && clientNameFromUrl !== $clientNameStore) {
+				clientNameStore.set(clientNameFromUrl);
+				pendingDisplayNameSync = true;
+			}
+		}
 
-	if (clientName && clientName != $clientNameStore) {
-		clientNameStore.set(clientName);
-	}
-
-	if (authsecret && authsecret != $authSecretStore) {
-		authSecretStore.set(authsecret);
-		api.init();
-	}
+		const authSecretFromUrl = page.url.searchParams.get('authsecret');
+		if (authSecretFromUrl !== lastAppliedAuthSecretFromUrl) {
+			lastAppliedAuthSecretFromUrl = authSecretFromUrl;
+			if (authSecretFromUrl && authSecretFromUrl !== $authSecretStore) {
+				authSecretStore.set(authSecretFromUrl);
+				api.init();
+			}
+		}
+	});
 
 	const hideCursor = () => {
 		cursorVisible = false;
@@ -209,15 +224,19 @@
 			return;
 		}
 
+		const shouldSyncDisplayName = pendingDisplayNameSync;
 		try {
 			await putFrameSessionSnapshot($clientIdentifierStore, {
 				playbackState:
 					adminStopped || progressBarStatus === ProgressBarStatus.Paused ? 'Paused' : 'Playing',
 				status,
-				displayName: $clientNameStore,
+				displayName: shouldSyncDisplayName ? ($clientNameStore ?? null) : undefined,
 				currentDisplay: buildCurrentDisplay(),
 				history: buildHistory()
 			});
+			if (shouldSyncDisplayName) {
+				pendingDisplayNameSync = false;
+			}
 		} catch (err) {
 			console.warn('Failed to sync frame session:', err);
 		}
@@ -357,6 +376,10 @@
 
 	async function getPreviousAssets() {
 		if (!assetHistory.length) {
+			if (displayingAssets.length) {
+				setCurrentDisplay(displayingAssets);
+				currentDisplayDurationSeconds = currentDuration;
+			}
 			return;
 		}
 
@@ -643,7 +666,9 @@
 							window.location.reload();
 							return;
 						case 'Shutdown':
+							await acknowledgeFrameSessionCommand($clientIdentifierStore, command.commandId);
 							await shutdownFromAdmin();
+							continue;
 							break;
 					}
 

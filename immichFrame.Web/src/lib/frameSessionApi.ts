@@ -93,11 +93,15 @@ export async function putFrameSessionSnapshot(
 	clientIdentifier: string,
 	snapshot: FrameSessionSnapshotDto
 ) {
-	return fetch(`/api/frame-sessions/${encodeURIComponent(clientIdentifier)}`, {
+	const response = await fetch(`/api/frame-sessions/${encodeURIComponent(clientIdentifier)}`, {
 		method: 'PUT',
 		headers: getHeaders(true),
 		body: JSON.stringify(snapshot)
 	});
+
+	throwIfNotOk(response, `Failed to sync frame session: ${response.status}`);
+
+	return response;
 }
 
 export async function getFrameSessionCommands(clientIdentifier: string) {
@@ -125,10 +129,17 @@ export async function getFrameSessionCommands(clientIdentifier: string) {
 }
 
 export async function acknowledgeFrameSessionCommand(clientIdentifier: string, commandId: number) {
-	return fetch(`/api/frame-sessions/${encodeURIComponent(clientIdentifier)}/commands/${commandId}/ack`, {
+	const response = await fetch(
+		`/api/frame-sessions/${encodeURIComponent(clientIdentifier)}/commands/${commandId}/ack`,
+		{
 		method: 'POST',
 		headers: getHeaders()
-	});
+		}
+	);
+
+	throwIfNotOk(response, `Failed to acknowledge frame session command: ${response.status}`);
+
+	return response;
 }
 
 export async function disconnectFrameSession(
