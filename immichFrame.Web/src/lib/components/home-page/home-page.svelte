@@ -91,10 +91,15 @@
 	let commandPollIntervalId: number | undefined;
 	let isPollingCommands = false;
 	let isHandlingRemoteCommand = false;
+	let isSyncInFlight = false;
+	let pendingSync = false;
+	let pendingSyncStatus: 'Active' | 'Stopped' | null = null;
 	let pendingDisplayNameSync = $state(false);
+	let overlayPausedPlayback = $state(false);
 	let lastAppliedClientIdentifierFromUrl: string | null | undefined = $state(undefined);
 	let lastAppliedClientNameFromUrl: string | null | undefined = $state(undefined);
 	let lastAppliedAuthSecretFromUrl: string | null | undefined = $state(undefined);
+	let handledCommandIds = new Set<number>();
 
 	$effect(() => {
 		const clientIdentifierFromUrl = page.url.searchParams.get('client');
@@ -131,7 +136,13 @@
 	setContext('close', provideClose);
 
 	async function provideClose() {
-		await resumePlayback();
+		if (overlayPausedPlayback) {
+			overlayPausedPlayback = false;
+			await resumePlayback();
+			return;
+		}
+
+		infoVisible = false;
 	}
 
 	const showCursor = () => {
@@ -224,7 +235,15 @@
 			return;
 		}
 
+		if (isSyncInFlight) {
+			pendingSync = true;
+			pendingSyncStatus =
+				status === 'Stopped' || pendingSyncStatus == null ? status : pendingSyncStatus;
+			return;
+		}
+
 		const shouldSyncDisplayName = pendingDisplayNameSync;
+		isSyncInFlight = true;
 		try {
 			await putFrameSessionSnapshot($clientIdentifierStore, {
 				playbackState:
@@ -239,6 +258,14 @@
 			}
 		} catch (err) {
 			console.warn('Failed to sync frame session:', err);
+		} finally {
+			isSyncInFlight = false;
+			if (pendingSync) {
+				const retryStatus = pendingSyncStatus ?? (adminStopped ? 'Stopped' : 'Active');
+				pendingSync = false;
+				pendingSyncStatus = null;
+				await syncFrameSession(retryStatus);
+			}
 		}
 	}
 
@@ -570,6 +597,7 @@
 			return;
 		}
 
+		overlayPausedPlayback = false;
 		infoVisible = false;
 		userPaused = false;
 		resumeCurrentDisplayClock();
@@ -605,14 +633,22 @@
 		}
 
 		if (infoVisible) {
-			await resumePlayback();
+			if (overlayPausedPlayback) {
+				overlayPausedPlayback = false;
+				await resumePlayback();
+			} else {
+				infoVisible = false;
+			}
 		} else {
 			infoVisible = true;
-			userPaused = true;
-			pauseCurrentDisplayClock();
-			await assetComponent?.pause?.();
-			await progressBar.pause();
-			await syncFrameSession();
+			overlayPausedPlayback = progressBarStatus !== ProgressBarStatus.Paused;
+			if (overlayPausedPlayback) {
+				userPaused = true;
+				pauseCurrentDisplayClock();
+				await assetComponent?.pause?.();
+				await progressBar.pause();
+				await syncFrameSession();
+			}
 		}
 	}
 
@@ -622,6 +658,7 @@
 		}
 
 		adminStopped = true;
+		overlayPausedPlayback = false;
 		infoVisible = false;
 		userPaused = true;
 		stopSessionLoops();
@@ -640,6 +677,11 @@
 		try {
 			const commands = await getFrameSessionCommands($clientIdentifierStore);
 			for (const command of commands) {
+				if (handledCommandIds.has(command.commandId)) {
+					continue;
+				}
+
+				handledCommandIds.add(command.commandId);
 				isHandlingRemoteCommand = true;
 				try {
 					switch (command.commandType) {
@@ -663,15 +705,18 @@
 							break;
 						case 'Refresh':
 							await acknowledgeFrameSessionCommand($clientIdentifierStore, command.commandId);
+							handledCommandIds.delete(command.commandId);
 							window.location.reload();
 							return;
 						case 'Shutdown':
 							await acknowledgeFrameSessionCommand($clientIdentifierStore, command.commandId);
+							handledCommandIds.delete(command.commandId);
 							await shutdownFromAdmin();
-							continue;
+							return;
 					}
 
 					await acknowledgeFrameSessionCommand($clientIdentifierStore, command.commandId);
+					handledCommandIds.delete(command.commandId);
 				} catch (err) {
 					console.warn('Failed to handle remote command:', err);
 				} finally {
