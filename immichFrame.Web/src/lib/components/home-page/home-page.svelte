@@ -761,9 +761,11 @@
 			}
 		});
 
-		startSessionLoops();
-		void syncFrameSession();
-		void getNextAssets().then(() => syncFrameSession());
+		void (async () => {
+			await getNextAssets();
+			await syncFrameSession();
+			startSessionLoops();
+		})();
 
 		return () => {
 			window.removeEventListener('mousemove', showCursor);
