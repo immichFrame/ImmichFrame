@@ -60,7 +60,7 @@ public class DuplicateAvoidingQueueMutatorTests
     }
     
     [Test]
-    public void Mutate_AdjacentDuplicates_ShouldSeperate()
+    public void Mutate_AdjacentDuplicates_ShouldSeparate()
     {
         List<AssetResponseDto> original = [
             new(){Id = "aap"},

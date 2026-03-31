@@ -18,9 +18,9 @@ namespace ImmichFrame.Core.Helpers
         public static double GetAspectRatioFloat(double width, double height)
         {
             if (width <= 0 || height <= 0)
-                throw new ArgumentException("Width and height must be positive integers.");
+                throw new ArgumentException("Width and height must be positive.");
         
-            return (double)width / height;
+            return width / height;
         }
 
         public static bool IsLandscape(double exifWidth, double exifHeight, string exifOrientation)
