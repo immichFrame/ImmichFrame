@@ -38,7 +38,7 @@ public class DuplicateAvoidingQueueMutatorTests
         IEnumerable<AssetResponseDto> input = new List<AssetResponseDto>(original);
         
         Assert.DoesNotThrow(() => result = _queueMutator.Mutate(input));
-        Assert.That(result, Is.EquivalentTo(original));
+        Assert.That(result, Is.EqualTo(original));
     }
     
     [Test]
@@ -56,7 +56,7 @@ public class DuplicateAvoidingQueueMutatorTests
         IEnumerable<AssetResponseDto> input = new List<AssetResponseDto>(original);
         
         Assert.DoesNotThrow(() => result = _queueMutator.Mutate(input));
-        Assert.That(result, Is.EquivalentTo(original));
+        Assert.That(result, Is.EqualTo(original));
     }
     
     [Test]
@@ -73,7 +73,11 @@ public class DuplicateAvoidingQueueMutatorTests
         IEnumerable<AssetResponseDto> input = new List<AssetResponseDto>(original);
         
         Assert.DoesNotThrow(() => result = _queueMutator.Mutate(input));
-        Assert.That(result, Is.Not.EqualTo(original));
+        var assetResponseDtos = result as AssetResponseDto[] ?? result.ToArray();
+        for(int i = 0; i < assetResponseDtos.Length - 1; i++)
+        {
+            Assert.That(assetResponseDtos.ElementAt(i).Id, Is.Not.EqualTo(assetResponseDtos.ElementAt(i + 1).Id));
+        }
     }
     [Test]
     public void Mutate_AdjacentDuplicates_differentBatch_NoChange()
