@@ -6,6 +6,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>ImmichFrame - Stable</title>
     <style>
+        /* FONT DECLARATIONS */
+        @font-face {
+            font-family: 'Overpass';
+            src: url('/fonts/overpass/Overpass.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Overpass';
+            src: url('/fonts/overpass/Overpass-Italic.ttf') format('truetype');
+            font-weight: normal;
+            font-style: italic;
+        }
+
+        @font-face {
+            font-family: 'Overpass Mono';
+            src: url('/fonts/overpass/OverpassMono.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
         html,
         body {
             height: 100%;
@@ -13,7 +35,11 @@
             padding: 0;
             background: #000;
             overflow: hidden;
-            font-family: sans-serif;
+            /* Updated font stack for Overpass with safe fallbacks */
+            font-family: 'Overpass', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 17px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         .nocursor {
@@ -114,6 +140,8 @@
         }
 
         #clock {
+            /* Ensuring clock specifically uses the new font */
+            font-family: 'Overpass', sans-serif;
             font-weight: 200;
             line-height: 1;
         }
@@ -121,6 +149,8 @@
         #weather-info {
             margin-top: 5px;
             display: none;
+            /* Using Mono for weather info for a clean, data-driven look */
+            font-family: 'Overpass Mono', monospace;
         }
 
         .meta-bar {
@@ -298,7 +328,6 @@
 
         function togglePause() {
             isPaused = !isPaused;
-            // ▶ for Resume, ❚❚ for Pause
             document.getElementById("pauseBtn").innerHTML = isPaused ? "&#9654;" : "&#10074;&#10074;";
             resetInterval();
         }
