@@ -3,9 +3,12 @@ using ImmichFrame.Core.Interfaces;
 using ImmichFrame.WebApi.Models;
 using Microsoft.AspNetCore.Authentication;
 using System.Reflection;
+using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Logic;
 using ImmichFrame.Core.Logic.AccountSelection;
+using ImmichFrame.Core.Logic.QueueMutator;
 using ImmichFrame.WebApi.Helpers.Config;
+using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 var builder = WebApplication.CreateBuilder(args);
 //log the version number
@@ -72,6 +75,13 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddTransient<IQueueMutator<AssetResponseDto>>(x =>
+{
+    var mutator = new RandomQueueMutator<AssetResponseDto>();
+    mutator.SetNext(new DuplicateAvoidingQueueMutator(2, x.GetService<ILogger<DuplicateAvoidingQueueMutator>>()!));
+    return mutator;
+});
 
 builder.Services.AddAuthorization(options => { options.AddPolicy("AllowAnonymous", policy => policy.RequireAssertion(context => true)); });
 
