@@ -14,17 +14,17 @@ public class TotalAccountImagesSelectionStrategy(ILogger<TotalAccountImagesSelec
         _accounts = accounts;
     }
 
-    public async Task<(IAccountImmichFrameLogic, AssetResponseDto)?> GetNextAsset()
+    public async Task<(IAccountImmichFrameLogic, AssetResponseDto)?> GetNextAsset(IRequestContext requestContext)
     {
         var chosen = await _accounts.ChooseOne(logic => logic.GetTotalAssets());
-        
-        var asset = await chosen.GetNextAsset();
+
+        var asset = await chosen.GetNextAsset(requestContext);
         if (asset != null)
         {
             await _tracker.RecordAssetLocation(chosen, asset.Id);
             return (chosen, asset);
         }
-        
+
         _logger.LogDebug("No next asset found");
         return null;
     }
@@ -46,12 +46,12 @@ public class TotalAccountImagesSelectionStrategy(ILogger<TotalAccountImagesSelec
         return account.GetTotalAssets();
     }
 
-    public async Task<IEnumerable<(IAccountImmichFrameLogic, AssetResponseDto)>> GetAssets()
+    public async Task<IEnumerable<(IAccountImmichFrameLogic, AssetResponseDto)>> GetAssets(IRequestContext requestContext)
     {
         var proportions = await GetProportions(_accounts);
         var maxAccount = proportions.Max();
         var adjustedProportions = proportions.Select(x => x / maxAccount).ToList();
-        var assetLists = _accounts.Select(account => account.GetAssets()).ToList();
+        var assetLists = _accounts.Select(account => account.GetAssets(requestContext)).ToList();
 
         var taskList = assetLists
             .Zip(_accounts, adjustedProportions)
@@ -59,7 +59,7 @@ public class TotalAccountImagesSelectionStrategy(ILogger<TotalAccountImagesSelec
             {
                 var (task, account, proportion) = tuple;
                 var assets = (await task).ToList();
-                _logger.LogDebug("Retrieved {total} asset(s) for account [{account}], will take {proportion}%", assets.Count(), account, proportion * 100);
+                _logger.LogDebug("Retrieved {total} asset(s) for account [{account}], will take {proportion}%", assets.Count, account, proportion * 100);
                 return (account, assets.Shuffle().TakeProportional(proportion));
             });
 

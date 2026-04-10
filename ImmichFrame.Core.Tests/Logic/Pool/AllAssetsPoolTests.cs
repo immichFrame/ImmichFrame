@@ -12,6 +12,7 @@ public class AllAssetsPoolTests
     private Mock<IApiCache> _mockApiCache;
     private Mock<ImmichApi> _mockImmichApi;
     private Mock<IAccountSettings> _mockAccountSettings;
+    private Mock<IRequestContext> _mockRequestContext;
     private AllAssetsPool _allAssetsPool;
 
     [SetUp]
@@ -20,6 +21,7 @@ public class AllAssetsPoolTests
         _mockApiCache = new Mock<IApiCache>();
         _mockImmichApi = new Mock<ImmichApi>(null, null);
         _mockAccountSettings = new Mock<IAccountSettings>();
+        _mockRequestContext = new Mock<IRequestContext>();
         _allAssetsPool = new AllAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
 
         // Default account settings
@@ -43,6 +45,9 @@ public class AllAssetsPoolTests
             It.IsAny<Func<Task<IEnumerable<AssetResponseDto>>>>()
         ))
         .Returns<string, Func<Task<IEnumerable<AssetResponseDto>>>>(async (key, factory) => await factory());
+
+        // Default RequestContext
+        _mockRequestContext.Setup(x => x.AssetOffset).Returns(0);
     }
 
     private List<AssetResponseDto> CreateSampleAssets(int count, string idPrefix, AssetTypeEnum type, int? rating = null)
@@ -111,7 +116,7 @@ public class AllAssetsPoolTests
             .ReturnsAsync(returnedAssets.Where(a => a.Type == AssetTypeEnum.IMAGE).ToList());
 
         // Act
-        var assets = await _allAssetsPool.GetAssets(requestedImageCount);
+        var assets = await _allAssetsPool.GetAssets(requestedImageCount, _mockRequestContext.Object);
 
         // Assert
         Assert.That(assets.Count(), Is.EqualTo(requestedImageCount));
@@ -142,7 +147,7 @@ public class AllAssetsPoolTests
             .ReturnsAsync(returnedAssets.ToList());
 
         // Act
-        var assets = await _allAssetsPool.GetAssets(requestedImageCount + requestedVideoCount);
+        var assets = await _allAssetsPool.GetAssets(requestedImageCount + requestedVideoCount, _mockRequestContext.Object);
 
         // Assert
         Assert.That(assets.Count(), Is.EqualTo(requestedImageCount + requestedVideoCount));
@@ -165,7 +170,7 @@ public class AllAssetsPoolTests
         _mockImmichApi.Setup(api => api.SearchRandomAsync(It.IsAny<RandomSearchDto>(), It.IsAny<CancellationToken>()))
            .ReturnsAsync(new List<AssetResponseDto>());
 
-        await _allAssetsPool.GetAssets(5);
+        await _allAssetsPool.GetAssets(5, _mockRequestContext.Object);
 
         _mockImmichApi.Verify(api => api.SearchRandomAsync(
             It.Is<RandomSearchDto>(dto => dto.TakenAfter.HasValue && dto.TakenAfter.Value.Date == expectedFromDate.Date),
@@ -189,7 +194,7 @@ public class AllAssetsPoolTests
             .ReturnsAsync(new AlbumResponseDto { Assets = new List<AssetResponseDto> { excludedAsset }, AssetCount = 1 });
 
         // Act
-        var result = (await _allAssetsPool.GetAssets(4)).ToList();
+        var result = (await _allAssetsPool.GetAssets(4, _mockRequestContext.Object)).ToList();
 
         // Assert
         Assert.That(result.Count, Is.EqualTo(3));
@@ -210,7 +215,7 @@ public class AllAssetsPoolTests
             .ReturnsAsync(allAssets);
 
         // Act
-        var result = (await _allAssetsPool.GetAssets(5)).ToList();
+        var result = (await _allAssetsPool.GetAssets(5, _mockRequestContext.Object)).ToList();
 
         // Assert
         Assert.That(result.Count, Is.EqualTo(5));

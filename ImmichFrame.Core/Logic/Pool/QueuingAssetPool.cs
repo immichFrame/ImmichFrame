@@ -1,5 +1,6 @@
 using System.Threading.Channels;
 using ImmichFrame.Core.Api;
+using ImmichFrame.Core.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace ImmichFrame.Core.Logic.Pool;
@@ -14,15 +15,14 @@ public class QueuingAssetPool(ILogger<QueuingAssetPool> _logger, IAssetPool @del
 
     public override Task<long> GetAssetCount(CancellationToken ct = default) => @delegate.GetAssetCount(ct);
 
-
-    protected override async Task<AssetResponseDto?> GetNextAsset(CancellationToken ct)
+    protected override async Task<AssetResponseDto?> GetNextAsset(IRequestContext requestContext, CancellationToken ct)
     {
         try
         {
             if (_assetQueue.Reader.Count <= RELOAD_THRESHOLD)
             {
                 // Fire-and-forget, reloading assets in the background
-                _ = ReloadAssetsAsync();
+                _ = ReloadAssetsAsync(requestContext);
             }
 
             return await _assetQueue.Reader.ReadAsync(ct);
@@ -40,7 +40,7 @@ public class QueuingAssetPool(ILogger<QueuingAssetPool> _logger, IAssetPool @del
         }
     }
 
-    private async Task ReloadAssetsAsync()
+    private async Task ReloadAssetsAsync(IRequestContext requestContext)
     {
         if (await _isReloadingAssets.WaitAsync(0))
         {
@@ -49,7 +49,7 @@ public class QueuingAssetPool(ILogger<QueuingAssetPool> _logger, IAssetPool @del
                 _logger.LogDebug("Reloading assets");
 
                 // TODO: apply account filters - QueuingAssetPool is currently not used anywhere
-                foreach (var asset in await @delegate.GetAssets(RELOAD_BATCH_SIZE))
+                foreach (var asset in await @delegate.GetAssets(RELOAD_BATCH_SIZE, requestContext))
                 {
                     await _assetQueue.Writer.WriteAsync(asset);
                 }

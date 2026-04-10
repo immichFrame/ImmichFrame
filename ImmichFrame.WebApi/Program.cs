@@ -1,10 +1,12 @@
 using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
+using ImmichFrame.Core.Services;
 using ImmichFrame.WebApi.Models;
 using Microsoft.AspNetCore.Authentication;
 using System.Reflection;
 using ImmichFrame.Core.Logic;
 using ImmichFrame.Core.Logic.AccountSelection;
+using ImmichFrame.WebApi.Helpers;
 using ImmichFrame.WebApi.Helpers.Config;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -68,6 +70,9 @@ builder.Services.AddTransient<Func<IAccountSettings, IAccountImmichFrameLogic>>(
 
 builder.Services.AddSingleton<IImmichFrameLogic, MultiImmichFrameLogicDelegate>();
 
+// Register Context Service
+builder.Services.AddScoped<IRequestContext, RequestContext>();
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -104,6 +109,7 @@ if (app.Environment.IsDevelopment())
 
 // app.UseHttpsRedirection();
 app.UseMiddleware<CustomAuthenticationMiddleware>();
+app.UseMiddleware<RequestContextMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();
