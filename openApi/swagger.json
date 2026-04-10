@@ -303,6 +303,55 @@
         }
       }
     },
+    "/api/CustomWidget": {
+      "get": {
+        "tags": [
+          "CustomWidget"
+        ],
+        "operationId": "GetCustomWidgetData",
+        "parameters": [
+          {
+            "name": "clientIdentifier",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CustomWidgetData"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CustomWidgetData"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CustomWidgetData"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Calendar": {
       "get": {
         "tags": [
@@ -940,6 +989,48 @@
             "nullable": true
           },
           "language": {
+            "type": "string",
+            "nullable": true
+          },
+          "showCustomWidget": {
+            "type": "boolean"
+          },
+          "customWidgetPosition": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CustomWidgetData": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomWidgetItem"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CustomWidgetItem": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "nullable": true
+          },
+          "value": {
+            "type": "string",
+            "nullable": true
+          },
+          "secondary": {
             "type": "string",
             "nullable": true
           }

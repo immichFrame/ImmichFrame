@@ -32,6 +32,8 @@ public class ClientSettingsDto
     public bool PlayAudio { get; set; }
     public string Layout { get; set; }
     public string Language { get; set; }
+    public bool ShowCustomWidget { get; set; }
+    public string CustomWidgetPosition { get; set; }
 
     public static ClientSettingsDto FromGeneralSettings(IGeneralSettings generalSettings)
     {
@@ -64,6 +66,8 @@ public class ClientSettingsDto
         dto.PlayAudio = generalSettings.PlayAudio;
         dto.Layout = generalSettings.Layout;
         dto.Language = generalSettings.Language;
+        dto.ShowCustomWidget = generalSettings.ShowCustomWidget;
+        dto.CustomWidgetPosition = generalSettings.CustomWidgetPosition;
         return dto;
     }
 }

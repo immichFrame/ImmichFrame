@@ -11,6 +11,7 @@
 	import ErrorElement from '../elements/error-element.svelte';
 	import Clock from '../elements/clock.svelte';
 	import Appointments from '../elements/appointments.svelte';
+	import CustomWidget from '../elements/custom-widget.svelte';
 	import LoadingElement from '../elements/LoadingElement.svelte';
 	import { page } from '$app/state';
 	import { ProgressBarLocation, ProgressBarStatus } from '../elements/progress-bar.types';
@@ -487,6 +488,10 @@
 		{/if}
 
 		<Appointments />
+
+		{#if $configStore.showCustomWidget}
+			<CustomWidget />
+		{/if}
 
 		<OverlayControls
 			next={async () => {
