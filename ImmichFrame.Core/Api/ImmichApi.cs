@@ -45,11 +45,24 @@
         {
             var url = urlBuilder.ToString();
 
-            // ensure every call to the albums endpoint includes shared content
-            if (url.Contains("/albums/") && !url.Contains("shared=true"))
+            var parts = url.Split('?', 2);
+            var path = parts[0];
+            var query = parts.Length > 1 ? parts[1] : string.Empty;
+
+            var isAlbumsEndpoint = path.EndsWith("/albums", StringComparison.OrdinalIgnoreCase) || path.Contains("/albums/", StringComparison.OrdinalIgnoreCase);
+
+            if (isAlbumsEndpoint)
             {
-                string separator = url.Contains("?") ? "&" : "?";
-                urlBuilder.Append($"{separator}shared=true");
+                var hasSharedKey = query
+                    .Split('&', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(p => p.Split('=', 2)[0])
+                    .Any(k => string.Equals(k, "shared", StringComparison.OrdinalIgnoreCase));
+
+                if (!hasSharedKey)
+                {
+                    string separator = query.Length > 0 ? "&" : "?";
+                    urlBuilder.Append($"{separator}shared=true");
+                }
             }
         }
     }
