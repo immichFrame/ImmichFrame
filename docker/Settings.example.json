@@ -34,6 +34,8 @@
     "ImageZoom": true,
     "ImagePan": false,
     "ImageFill": false,
+    "Layout": "splitview",
+    "BaseUrl": "/"
     "PlayAudio": false,
     "Layout": "splitview"
   },

@@ -50,6 +50,13 @@ COPY --from=build-node /app/build ./wwwroot
 
 # Set non-privileged user
 ARG APP_UID=1000
+
+# Ensure the app user owns the files they need to modify
+RUN chown -R $APP_UID:$APP_UID /app/wwwroot
+
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
 USER $APP_UID
 
-ENTRYPOINT ["dotnet", "ImmichFrame.WebApi.dll"]
+ENTRYPOINT ["/app/entrypoint.sh"]

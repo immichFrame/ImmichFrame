@@ -31,7 +31,8 @@ public class ClientSettingsDto
     public bool ImageFill { get; set; }
     public bool PlayAudio { get; set; }
     public string Layout { get; set; }
-    public string Language { get; set; }
+    public string Language { get; set; } = string.Empty;
+    public string? BaseUrl { get; set; }
 
     public static ClientSettingsDto FromGeneralSettings(IGeneralSettings generalSettings)
     {
@@ -64,6 +65,7 @@ public class ClientSettingsDto
         dto.PlayAudio = generalSettings.PlayAudio;
         dto.Layout = generalSettings.Layout;
         dto.Language = generalSettings.Language;
+        dto.BaseUrl = generalSettings.BaseUrl;
         return dto;
     }
 }
