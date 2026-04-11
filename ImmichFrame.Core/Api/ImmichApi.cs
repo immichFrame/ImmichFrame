@@ -7,6 +7,7 @@
             BaseUrl = url + "/api";
             _httpClient = httpClient;
             _settings = new Lazy<Newtonsoft.Json.JsonSerializerSettings>(CreateSerializerSettings);
+            
         }
 
         public async Task<FileResponse> PlayAssetVideoWithRangeAsync(Guid id, string rangeHeader, CancellationToken cancellationToken = default)
@@ -40,6 +41,17 @@
             var error = response.Content == null ? null : await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
             response.Dispose();
             throw new ApiException($"Unexpected status code ({status}).", status, error, headers, null);
+        }
+        partial void PrepareRequest(System.Net.Http.HttpClient client, System.Net.Http.HttpRequestMessage request, System.Text.StringBuilder urlBuilder)
+        {
+            var url = urlBuilder.ToString();
+
+            // ensure every call to the albums endpoint includes shared content
+            if (url.Contains("/albums/") && !url.Contains("shared=true"))
+            {
+                string separator = url.Contains("?") ? "&" : "?";
+                urlBuilder.Append($"{separator}shared=true");
+            }
         }
     }
 }
