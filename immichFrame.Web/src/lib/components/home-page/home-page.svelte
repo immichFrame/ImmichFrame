@@ -149,24 +149,24 @@
 		}
 	}
 
-	let isHandlingAssetTransition = false;
+	let transitionLock: Promise<void> = Promise.resolve();
+
 	const handleDone = async (previous: boolean = false, instant: boolean = false) => {
-		if (isHandlingAssetTransition) {
-			return;
-		}
-		isHandlingAssetTransition = true;
-		try {
-			userPaused = false;
-			progressBar.restart(false);
-			$instantTransition = instant;
-			if (previous) await getPreviousAssets();
-			else await getNextAssets();
-			await tick();
-			await assetComponent?.play?.();
-			progressBar.play();
-		} finally {
-			isHandlingAssetTransition = false;
-		}
+		transitionLock = transitionLock
+			.then(async () => {
+				userPaused = false;
+				progressBar.restart(false);
+				$instantTransition = instant;
+				if (previous) await getPreviousAssets();
+				else await getNextAssets();
+				await tick();
+				await assetComponent?.play?.();
+				progressBar.play();
+			})
+			.catch((err) => {
+				console.error('handleDone transition failed:', err);
+			});
+		await transitionLock;
 	};
 
 	async function getNextAssets() {
