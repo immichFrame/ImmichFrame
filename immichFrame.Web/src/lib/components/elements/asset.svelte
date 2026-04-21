@@ -9,6 +9,7 @@
 	import { thumbHashToDataURL } from 'thumbhash';
 	import AssetInfo from '$lib/components/elements/asset-info.svelte';
 	import ImageOverlay from '$lib/components/elements/imageoverlay/image-overlay.svelte';
+	import { onDestroy } from 'svelte';
 
 	interface Props {
 		asset: [url: string, asset: AssetResponseDto, albums: AlbumResponseDto[]];
@@ -184,6 +185,18 @@
 			}
 		}
 	};
+
+	let isDestroyed = false;
+
+	onDestroy(() => {
+		isDestroyed = true;
+		if (videoElement) {
+			videoElement.pause();
+			videoElement.src = '';
+			videoElement.removeAttribute('src');
+			videoElement.load();
+		}
+	});
 </script>
 
 {#if showInfo}
@@ -246,9 +259,12 @@
 						}
 					}
 				}}
-				onerror={() => console.error('Video failed to load:', asset[0])}
-				onwaiting={onVideoWaiting}
-				onplaying={onVideoPlaying}
+				onwaiting={() => {
+					if (!isDestroyed) onVideoWaiting();
+				}}
+				onplaying={() => {
+					if (!isDestroyed) onVideoPlaying();
+				}}
 			></video>
 		{:else}
 			<img

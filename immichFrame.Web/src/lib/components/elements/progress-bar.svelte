@@ -28,9 +28,7 @@
 
 	const onChange = async (progressDuration: number) => {
 		progress = setDuration(progressDuration);
-		if (status === ProgressBarStatus.Playing) {
-			await play();
-		}
+		await play();
 	};
 
 	let progress = setDuration(duration);
