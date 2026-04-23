@@ -54,8 +54,6 @@
 	let debug = false;
 	const isVideo = $derived(isVideoAsset(asset[1]));
 
-	// Snapshot the interval when the asset ID changes to prevent "jumps" 
-	// when the global currentDuration changes for the next asset.
 	const animationDuration = $derived.by(() => {
 		asset[1].id;
 		return untrack(() => interval);
@@ -64,7 +62,6 @@
 	let videoElement = $state<HTMLVideoElement | null>(null);
 
 	$effect(() => {
-		// Track asset URL to cleanup when it changes
 		asset[0];
 		return () => {
 			if (videoElement) {

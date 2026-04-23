@@ -26,6 +26,7 @@
 
 	api.init();
 
+	// TODO: make this configurable?
 	const PRELOAD_ASSETS = 5;
 	const TRANSITION_WATCHDOG_MS = 10000;
 	const VIDEO_STALL_MS = 15000;
@@ -164,7 +165,7 @@
 		
 		clearTimeout(watchdogTimer);
 		// Watchdog: If the transition (fetching/loading assets) takes longer than 
-		// the current interval plus a 10s buffer, force-release the lock.
+		// the current interval plus a buffer, force-release the lock.
 		watchdogTimer = window.setTimeout(() => {
 			if (isHandlingAssetTransition) {
 				console.error('Transition watchdog triggered: Force-resetting lock due to hang');
