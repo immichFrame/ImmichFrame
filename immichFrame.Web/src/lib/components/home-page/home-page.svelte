@@ -26,11 +26,14 @@
 
 	api.init();
 
-	// TODO: make this configurable?
 	const PRELOAD_ASSETS = 5;
+	const TRANSITION_WATCHDOG_MS = 10000;
+	const VIDEO_STALL_MS = 15000;
+	const CURSOR_HIDE_MS = 2000;
+	const RELOAD_ON_ERROR_MS = 30000;
 
-	let assetHistory: api.AssetResponseDto[] = [];
-	let assetBacklog: api.AssetResponseDto[] = [];
+	let assetHistory: api.AssetResponseDto[] = $state([]);
+	let assetBacklog: api.AssetResponseDto[] = $state([]);
 
 	let displayingAssets: api.AssetResponseDto[] = $state([]);
 
@@ -40,6 +43,11 @@
 	let progressBar: ProgressBar = $state() as ProgressBar;
 	let assetComponent: AssetComponentInstance = $state() as AssetComponentInstance;
 	let currentDuration: number = $state($configStore.interval ?? 20);
+	
+	let watchdogTimer: number | undefined = $state();
+	let videoStallTimeout: number | undefined = $state();
+	let timeoutId: number | undefined = $state();
+	
 	let userPaused: boolean = $state(false);
 
 	let error: boolean = $state(false);
@@ -63,7 +71,6 @@
 	let refreshInterval: number;
 
 	let cursorVisible = $state(true);
-	let timeoutId: number;
 
 	const clientIdentifier = page.url.searchParams.get('client');
 	const authsecret = page.url.searchParams.get('authsecret');
@@ -93,7 +100,7 @@
 	const showCursor = () => {
 		cursorVisible = true;
 		clearTimeout(timeoutId);
-		timeoutId = setTimeout(hideCursor, 2000);
+		timeoutId = window.setTimeout(hideCursor, CURSOR_HIDE_MS);
 	};
 
 	async function updateAssetPromises() {
@@ -116,16 +123,14 @@
 				!displayingAssets.find((item) => item.id === key) &&
 				!assetBacklog.find((item) => item.id === key)
 		);
-		for (const key of keysToRemove) {
-			try {
-				const [url] = await assetPromisesDict[key];
-				revokeObjectUrl(url);
-			} catch (err) {
-				console.warn('Failed to resolve asset during cleanup:', err);
-			} finally {
-				delete assetPromisesDict[key];
-			}
-		}
+
+		keysToRemove.forEach((key) => {
+			const promise = assetPromisesDict[key];
+			delete assetPromisesDict[key];
+			promise
+				.then(([url]) => revokeObjectUrl(url))
+				.catch((err) => console.warn('Failed to resolve asset during cleanup:', err));
+		});
 	}
 
 	async function loadAssets() {
@@ -149,23 +154,36 @@
 		}
 	}
 
-	let isHandlingAssetTransition = false;
+	let isHandlingAssetTransition = $state(false);
 	const handleDone = async (previous: boolean = false, instant: boolean = false) => {
 		if (isHandlingAssetTransition) {
+			console.warn('Transition already in progress, ignoring request');
 			return;
 		}
 		isHandlingAssetTransition = true;
+		
+		clearTimeout(watchdogTimer);
+		// Watchdog: If the transition (fetching/loading assets) takes longer than 
+		// the current interval plus a 10s buffer, force-release the lock.
+		watchdogTimer = window.setTimeout(() => {
+			if (isHandlingAssetTransition) {
+				console.error('Transition watchdog triggered: Force-resetting lock due to hang');
+				isHandlingAssetTransition = false;
+			}
+		}, (currentDuration * 1000) + TRANSITION_WATCHDOG_MS);
+
 		try {
 			userPaused = false;
 			progressBar.restart(false);
 			$instantTransition = instant;
 			if (previous) await getPreviousAssets();
 			else await getNextAssets();
-			await tick();
+			await tick(); 
 			await assetComponent?.play?.();
 			progressBar.play();
 		} finally {
 			isHandlingAssetTransition = false;
+			clearTimeout(watchdogTimer);
 		}
 	};
 
@@ -182,7 +200,6 @@
 
 		const useSplit = shouldUseSplitView(assetBacklog);
 		const next = assetBacklog.splice(0, useSplit ? 2 : 1);
-		assetBacklog = [...assetBacklog];
 
 		if (displayingAssets.length) {
 			assetHistory.push(...displayingAssets);
@@ -204,7 +221,6 @@
 
 		const useSplit = shouldUseSplitView(assetHistory.slice(-2));
 		const next = assetHistory.splice(useSplit ? -2 : -1);
-		assetHistory = [...assetHistory];
 
 		if (displayingAssets.length) {
 			assetBacklog.unshift(...displayingAssets);
@@ -392,7 +408,7 @@
 		// 30 second reload on error
 		refreshInterval = window.setInterval(() => {
 			if (error) window.location.reload();
-		}, 30000);
+		}, RELOAD_ON_ERROR_MS);
 
 		if ($configStore.primaryColor) {
 			document.documentElement.style.setProperty('--primary-color', $configStore.primaryColor);
@@ -426,6 +442,9 @@
 			window.removeEventListener('mousemove', showCursor);
 			window.removeEventListener('click', showCursor);
 			window.clearInterval(refreshInterval);
+			window.clearTimeout(timeoutId);
+			window.clearTimeout(videoStallTimeout);
+			window.clearTimeout(watchdogTimer);
 		};
 	});
 
@@ -473,11 +492,20 @@
 				playAudio={$configStore.playAudio}
 				onVideoWaiting={async () => {
 					await progressBar.pause();
+					clearTimeout(videoStallTimeout);
+					videoStallTimeout = window.setTimeout(() => {
+						console.warn('Video stalled, skipping...');
+						handleDone(false, true);
+					}, Math.min(VIDEO_STALL_MS, currentDuration * 1000));
 				}}
 				onVideoPlaying={async () => {
 					if (!userPaused) {
 						await progressBar.play();
+						clearTimeout(videoStallTimeout);
 					}
+				}}
+				onAssetError={async () => {
+					await handleDone(false, true);
 				}}
 			/>
 		</div>
