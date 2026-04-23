@@ -26,7 +26,6 @@
 
 	api.init();
 
-	// TODO: make this configurable?
 	const PRELOAD_ASSETS = 5;
 	const TRANSITION_WATCHDOG_MS = 10000;
 	const VIDEO_STALL_MS = 15000;
@@ -156,14 +155,9 @@
 	}
 
 	let isHandlingAssetTransition = $state(false);
-	let pendingAssetError = $state(false);
 	const handleDone = async (previous: boolean = false, instant: boolean = false) => {
 		if (isHandlingAssetTransition) {
 			console.warn('Transition already in progress, ignoring request');
-			// If an error skip or manual skip is requested while busy, queue it
-			if (instant && !previous) {
-				pendingAssetError = true;
-			}
 			return;
 		}
 		isHandlingAssetTransition = true;
@@ -171,13 +165,13 @@
 		clearTimeout(watchdogTimer);
 		clearTimeout(videoStallTimeout);
 		// Watchdog: If the transition (fetching/loading assets) takes longer than 
-		// the current interval plus a buffer, force-release the lock.
+		// the current interval plus a 10s buffer, force-release the lock.
 		watchdogTimer = window.setTimeout(() => {
 			if (isHandlingAssetTransition) {
 				console.error('Transition watchdog triggered: Force-resetting lock due to hang');
 				isHandlingAssetTransition = false;
 			}
-		}, TRANSITION_WATCHDOG_MS);
+		}, (currentDuration * 1000) + TRANSITION_WATCHDOG_MS);
 
 		try {
 			userPaused = false;
@@ -191,12 +185,6 @@
 		} finally {
 			isHandlingAssetTransition = false;
 			clearTimeout(watchdogTimer);
-
-			// If an asset error occurred during the transition, trigger the next skip now
-			if (pendingAssetError) {
-				pendingAssetError = false;
-				handleDone(false, true);
-			}
 		}
 	};
 
@@ -507,16 +495,14 @@
 					await progressBar.pause();
 					clearTimeout(videoStallTimeout);
 					videoStallTimeout = window.setTimeout(() => {
-						if (!userPaused) {
-							console.warn('Video stalled, skipping...');
-							handleDone(false, true);
-						}
-					}, Math.min(VIDEO_STALL_MS, Math.max(currentDuration * 1000, 5000)));
+						console.warn('Video stalled, skipping...');
+						handleDone(false, true);
+					}, Math.min(VIDEO_STALL_MS, currentDuration * 1000));
 				}}
 				onVideoPlaying={async () => {
-					clearTimeout(videoStallTimeout);
 					if (!userPaused) {
 						await progressBar.play();
+						clearTimeout(videoStallTimeout);
 					}
 				}}
 				onAssetError={async () => {
