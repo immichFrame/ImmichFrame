@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { handlePromiseError } from '$lib/utils';
 	import { onMount, untrack } from 'svelte';
-	import { tweened } from 'svelte/motion';
+	import { Tween } from 'svelte/motion';
 	import { ProgressBarLocation, ProgressBarStatus } from './progress-bar.types';
 
 	interface Props {
@@ -26,20 +25,20 @@
 		onPaused = () => {}
 	}: Props = $props();
 
-	const onChange = async (progressDuration: number) => {
-		progress = setDuration(progressDuration);
-		await play();
-	};
-
-	let progress = setDuration(duration);
-
-	$effect(() => {
-		handlePromiseError(onChange(duration));
+	const progress = new Tween(0, {
+		duration: (from: number, to: number) => {
+			if (to === 0) return 0;
+			return duration * 1000 * (to - from);
+		}
 	});
 
+	let completed = false;
 	$effect(() => {
-		if ($progress === 1) {
+		if (progress.current >= 1 && !completed) {
+			completed = true;
 			untrack(() => onDone());
+		} else if (progress.current < 1) {
+			completed = false;
 		}
 	});
 
@@ -58,7 +57,7 @@
 	export const pause = async () => {
 		status = ProgressBarStatus.Paused;
 		onPaused();
-		await progress.set($progress);
+		await progress.set(progress.current);
 	};
 
 	export const restart = async (autoplay: boolean) => {
@@ -73,12 +72,6 @@
 		status = ProgressBarStatus.Paused;
 		await progress.set(0);
 	};
-
-	function setDuration(newDuration: number) {
-		return tweened<number>(0, {
-			duration: (from: number, to: number) => (to ? newDuration * 1000 * (to - from) : 0)
-		});
-	}
 </script>
 
 {#if !hidden}
@@ -86,6 +79,6 @@
 		id="progressbar"
 		class="fixed left-0 h-[3px] bg-primary z-[1000]
 		{location == ProgressBarLocation.Top ? 'top-0' : 'bottom-0'}"
-		style:width={`${$progress * 100}%`}
+		style:width={`${progress.current * 100}%`}
 	></span>
 {/if}
