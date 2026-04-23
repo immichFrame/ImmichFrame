@@ -156,9 +156,14 @@
 	}
 
 	let isHandlingAssetTransition = $state(false);
+	let pendingAssetError = $state(false);
 	const handleDone = async (previous: boolean = false, instant: boolean = false) => {
 		if (isHandlingAssetTransition) {
 			console.warn('Transition already in progress, ignoring request');
+			// If an error skip or manual skip is requested while busy, queue it
+			if (instant && !previous) {
+				pendingAssetError = true;
+			}
 			return;
 		}
 		isHandlingAssetTransition = true;
@@ -172,7 +177,7 @@
 				console.error('Transition watchdog triggered: Force-resetting lock due to hang');
 				isHandlingAssetTransition = false;
 			}
-		}, (currentDuration * 1000) + TRANSITION_WATCHDOG_MS);
+		}, TRANSITION_WATCHDOG_MS);
 
 		try {
 			userPaused = false;
@@ -186,6 +191,12 @@
 		} finally {
 			isHandlingAssetTransition = false;
 			clearTimeout(watchdogTimer);
+
+			// If an asset error occurred during the transition, trigger the next skip now
+			if (pendingAssetError) {
+				pendingAssetError = false;
+				handleDone(false, true);
+			}
 		}
 	};
 
