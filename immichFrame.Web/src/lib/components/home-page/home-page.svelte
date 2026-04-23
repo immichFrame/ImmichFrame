@@ -164,6 +164,7 @@
 		isHandlingAssetTransition = true;
 		
 		clearTimeout(watchdogTimer);
+		clearTimeout(videoStallTimeout);
 		// Watchdog: If the transition (fetching/loading assets) takes longer than 
 		// the current interval plus a buffer, force-release the lock.
 		watchdogTimer = window.setTimeout(() => {
@@ -495,14 +496,16 @@
 					await progressBar.pause();
 					clearTimeout(videoStallTimeout);
 					videoStallTimeout = window.setTimeout(() => {
-						console.warn('Video stalled, skipping...');
-						handleDone(false, true);
-					}, Math.min(VIDEO_STALL_MS, currentDuration * 1000));
+						if (!userPaused) {
+							console.warn('Video stalled, skipping...');
+							handleDone(false, true);
+						}
+					}, Math.min(VIDEO_STALL_MS, Math.max(currentDuration * 1000, 5000)));
 				}}
 				onVideoPlaying={async () => {
+					clearTimeout(videoStallTimeout);
 					if (!userPaused) {
 						await progressBar.play();
-						clearTimeout(videoStallTimeout);
 					}
 				}}
 				onAssetError={async () => {
