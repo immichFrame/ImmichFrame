@@ -172,6 +172,12 @@
 			if (isHandlingAssetTransition) {
 				console.error('Transition watchdog triggered: Force-resetting lock due to hang');
 				isHandlingAssetTransition = false;
+
+				if (pendingTransition) {
+					const next = pendingTransition;
+					pendingTransition = null;
+					handleDone(next.previous, next.instant);
+				}
 			}
 		}, (currentDuration * 1000) + TRANSITION_WATCHDOG_MS);
 
