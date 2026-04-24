@@ -515,15 +515,19 @@
 				onVideoWaiting={async () => {
 					await progressBar.pause();
 					clearTimeout(videoStallTimeout);
+					if (userPaused) return;
+
 					videoStallTimeout = window.setTimeout(() => {
-						console.warn('Video stalled, skipping...');
-						handleDone(false, true);
-					}, Math.min(VIDEO_STALL_MS, currentDuration * 1000));
+						if (!userPaused) {
+							console.warn('Video stalled, skipping...');
+							handleDone(false, true);
+						}
+					}, Math.max(5000, Math.min(VIDEO_STALL_MS, currentDuration * 1000)));
 				}}
 				onVideoPlaying={async () => {
+					clearTimeout(videoStallTimeout);
 					if (!userPaused) {
 						await progressBar.play();
-						clearTimeout(videoStallTimeout);
 					}
 				}}
 				onAssetError={async () => {
