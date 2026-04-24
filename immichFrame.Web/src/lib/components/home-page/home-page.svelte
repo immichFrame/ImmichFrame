@@ -44,9 +44,9 @@
 	let assetComponent: AssetComponentInstance = $state() as AssetComponentInstance;
 	let currentDuration: number = $state($configStore.interval ?? 20);
 	
-	let watchdogTimer: number | undefined = $state();
-	let videoStallTimeout: number | undefined = $state();
-	let timeoutId: number | undefined = $state();
+	let watchdogTimer: number | undefined;
+	let videoStallTimeout: number | undefined;
+	let timeoutId: number | undefined;
 	
 	let userPaused: boolean = $state(false);
 
@@ -199,7 +199,6 @@
 			if (currentEpoch === transitionEpoch) {
 				isHandlingAssetTransition = false;
 				clearTimeout(watchdogTimer);
-				clearTimeout(videoStallTimeout);
 
 				if (pendingTransition) {
 					const next = pendingTransition;
