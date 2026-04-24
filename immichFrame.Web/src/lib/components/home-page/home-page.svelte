@@ -43,11 +43,11 @@
 	let progressBar: ProgressBar = $state() as ProgressBar;
 	let assetComponent: AssetComponentInstance = $state() as AssetComponentInstance;
 	let currentDuration: number = $state($configStore.interval ?? 20);
-	
+
 	let watchdogTimer: number | undefined;
 	let videoStallTimeout: number | undefined;
 	let timeoutId: number | undefined;
-	
+
 	let userPaused: boolean = $state(false);
 
 	let error: boolean = $state(false);
@@ -166,7 +166,7 @@
 
 		const currentEpoch = ++transitionEpoch;
 		isHandlingAssetTransition = true;
-		
+
 		clearTimeout(watchdogTimer);
 		clearTimeout(videoStallTimeout);
 		// Watchdog: If the transition (fetching/loading assets) hangs, force-release the lock.
@@ -175,11 +175,12 @@
 				console.error('Transition watchdog triggered: Force-resetting lock due to hang');
 				isHandlingAssetTransition = false;
 
-				if (pendingTransition) {
-					const next = pendingTransition;
-					pendingTransition = null;
-					handleDone(next.previous, next.instant);
-				}
+				// Bump the epoch so the original (still-awaiting) transition becomes a no-op
+				// when/if it eventually resolves, and force a fresh advance.
+				transitionEpoch++;
+				const next = pendingTransition ?? { previous: false, instant: true };
+				pendingTransition = null;
+				handleDone(next.previous, next.instant);
 			}
 		}, TRANSITION_WATCHDOG_MS);
 
@@ -189,7 +190,7 @@
 			$instantTransition = instant;
 			if (previous) await getPreviousAssets();
 			else await getNextAssets();
-			await tick(); 
+			await tick();
 
 			if (currentEpoch !== transitionEpoch) return;
 
@@ -517,12 +518,15 @@
 					clearTimeout(videoStallTimeout);
 					if (userPaused) return;
 
-					videoStallTimeout = window.setTimeout(() => {
-						if (!userPaused) {
-							console.warn('Video stalled, skipping...');
-							handleDone(false, true);
-						}
-					}, Math.max(5000, Math.min(VIDEO_STALL_MS, currentDuration * 1000)));
+					videoStallTimeout = window.setTimeout(
+						() => {
+							if (!userPaused) {
+								console.warn('Video stalled, skipping...');
+								handleDone(false, true);
+							}
+						},
+						Math.max(5000, Math.min(VIDEO_STALL_MS, currentDuration * 1000))
+					);
 				}}
 				onVideoPlaying={async () => {
 					clearTimeout(videoStallTimeout);

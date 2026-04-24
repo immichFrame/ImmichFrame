@@ -57,6 +57,7 @@
 	export const pause = async () => {
 		status = ProgressBarStatus.Paused;
 		onPaused();
+		// Freeze in place: targeting the current value with duration(to-from≈0) ≈ 0 halts motion.
 		await progress.set(progress.current);
 	};
 
