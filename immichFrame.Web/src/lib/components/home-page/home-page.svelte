@@ -155,9 +155,11 @@
 	}
 
 	let isHandlingAssetTransition = $state(false);
+	let pendingTransition: { previous: boolean; instant: boolean } | null = $state(null);
+
 	const handleDone = async (previous: boolean = false, instant: boolean = false) => {
 		if (isHandlingAssetTransition) {
-			console.warn('Transition already in progress, ignoring request');
+			pendingTransition = { previous, instant };
 			return;
 		}
 		isHandlingAssetTransition = true;
@@ -185,6 +187,12 @@
 		} finally {
 			isHandlingAssetTransition = false;
 			clearTimeout(watchdogTimer);
+
+			if (pendingTransition) {
+				const next = pendingTransition;
+				pendingTransition = null;
+				handleDone(next.previous, next.instant);
+			}
 		}
 	};
 
