@@ -155,6 +155,7 @@
 	}
 
 	let isHandlingAssetTransition = $state(false);
+	let transitionEpoch = 0;
 	let pendingTransition: { previous: boolean; instant: boolean } | null = $state(null);
 
 	const handleDone = async (previous: boolean = false, instant: boolean = false) => {
@@ -162,14 +163,15 @@
 			pendingTransition = { previous, instant };
 			return;
 		}
+
+		const currentEpoch = ++transitionEpoch;
 		isHandlingAssetTransition = true;
 		
 		clearTimeout(watchdogTimer);
 		clearTimeout(videoStallTimeout);
-		// Watchdog: If the transition (fetching/loading assets) takes longer than 
-		// the current interval plus a 10s buffer, force-release the lock.
+		// Watchdog: If the transition (fetching/loading assets) hangs, force-release the lock.
 		watchdogTimer = window.setTimeout(() => {
-			if (isHandlingAssetTransition) {
+			if (currentEpoch === transitionEpoch && isHandlingAssetTransition) {
 				console.error('Transition watchdog triggered: Force-resetting lock due to hang');
 				isHandlingAssetTransition = false;
 
@@ -179,7 +181,7 @@
 					handleDone(next.previous, next.instant);
 				}
 			}
-		}, (currentDuration * 1000) + TRANSITION_WATCHDOG_MS);
+		}, TRANSITION_WATCHDOG_MS);
 
 		try {
 			userPaused = false;
@@ -188,17 +190,22 @@
 			if (previous) await getPreviousAssets();
 			else await getNextAssets();
 			await tick(); 
+
+			if (currentEpoch !== transitionEpoch) return;
+
 			await assetComponent?.play?.();
 			progressBar.play();
 		} finally {
-			isHandlingAssetTransition = false;
-			clearTimeout(watchdogTimer);
-			clearTimeout(videoStallTimeout); 
+			if (currentEpoch === transitionEpoch) {
+				isHandlingAssetTransition = false;
+				clearTimeout(watchdogTimer);
+				clearTimeout(videoStallTimeout);
 
-			if (pendingTransition) {
-				const next = pendingTransition;
-				pendingTransition = null;
-				handleDone(next.previous, next.instant);
+				if (pendingTransition) {
+					const next = pendingTransition;
+					pendingTransition = null;
+					handleDone(next.previous, next.instant);
+				}
 			}
 		}
 	};
