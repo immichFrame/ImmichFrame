@@ -54,8 +54,10 @@
 	let debug = false;
 	const isVideo = $derived(isVideoAsset(asset[1]));
 
+	// Re-evaluate only when the asset changes; keep the interval stable for the
+	// lifetime of the current asset so zoom/pan animations don't restart.
 	const animationDuration = $derived.by(() => {
-		asset[1].id;
+		void asset[1].id;
 		return untrack(() => interval);
 	});
 
