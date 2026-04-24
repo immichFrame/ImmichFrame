@@ -193,6 +193,7 @@
 		} finally {
 			isHandlingAssetTransition = false;
 			clearTimeout(watchdogTimer);
+			clearTimeout(videoStallTimeout); 
 
 			if (pendingTransition) {
 				const next = pendingTransition;
