@@ -44,6 +44,8 @@
 	let assetComponent: AssetComponentInstance = $state() as AssetComponentInstance;
 	let currentDuration: number = $state($configStore.interval ?? 20);
 
+	let consecutiveErrorSkips = 0;
+	let errorSkipScheduled = false;
 	let watchdogTimer: number | undefined;
 	let videoStallTimeout: number | undefined;
 	let timeoutId: number | undefined;
@@ -180,7 +182,10 @@
 				transitionEpoch++;
 				const next = pendingTransition ?? { previous: false, instant: true };
 				pendingTransition = null;
-				handleDone(next.previous, next.instant);
+				handleDone(next.previous, next.instant).catch((err) => {
+					console.error('handleDone failed:', err);
+					isHandlingAssetTransition = false;
+				});
 			}
 		}, TRANSITION_WATCHDOG_MS);
 
@@ -196,6 +201,7 @@
 
 			await assetComponent?.play?.();
 			progressBar.play();
+			consecutiveErrorSkips = 0;
 		} finally {
 			if (currentEpoch === transitionEpoch) {
 				isHandlingAssetTransition = false;
@@ -204,7 +210,10 @@
 				if (pendingTransition) {
 					const next = pendingTransition;
 					pendingTransition = null;
-					handleDone(next.previous, next.instant);
+					handleDone(next.previous, next.instant).catch((err) => {
+						console.error('handleDone failed:', err);
+						isHandlingAssetTransition = false;
+					});
 				}
 			}
 		}
@@ -529,13 +538,26 @@
 					);
 				}}
 				onVideoPlaying={async () => {
+					consecutiveErrorSkips = 0;
 					clearTimeout(videoStallTimeout);
 					if (!userPaused) {
 						await progressBar.play();
 					}
 				}}
 				onAssetError={async () => {
+					if (errorSkipScheduled) return;
+					errorSkipScheduled = true;
+
+					consecutiveErrorSkips++;
+					if (consecutiveErrorSkips > 10) {
+						error = true;
+						errorMessage = 'Too many consecutive asset load failures. Please check your network or server connection.';
+						errorSkipScheduled = false;
+						return;
+					}
+
 					await handleDone(false, true);
+					errorSkipScheduled = false;
 				}}
 			/>
 		</div>
