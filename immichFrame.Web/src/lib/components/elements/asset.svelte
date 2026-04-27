@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import {
 		type AlbumResponseDto,
 		type AssetResponseDto,
@@ -27,6 +28,7 @@
 		playAudio: boolean;
 		onVideoWaiting?: () => void;
 		onVideoPlaying?: () => void;
+		onAssetError?: () => void;
 	}
 
 	let {
@@ -45,16 +47,23 @@
 		showInfo = $bindable(false),
 		playAudio,
 		onVideoWaiting = () => {},
-		onVideoPlaying = () => {}
+		onVideoPlaying = () => {},
+		onAssetError = () => {}
 	}: Props = $props();
 
 	let debug = false;
 	const isVideo = $derived(isVideoAsset(asset[1]));
 
+	// Re-evaluate only when the asset changes; keep the interval stable for the
+	// lifetime of the current asset so zoom/pan animations don't restart.
+	const animationDuration = $derived.by(() => {
+		void asset[1].id;
+		return untrack(() => interval);
+	});
+
 	let videoElement = $state<HTMLVideoElement | null>(null);
 
 	$effect(() => {
-		// Track asset URL to cleanup when it changes
 		asset[0];
 		return () => {
 			if (videoElement) {
@@ -195,7 +204,7 @@
 	<div
 		class="relative w-full h-full {enableZoom ? 'zoom' : ''} {enablePan ? 'pan' : ''}"
 		style="
-			--interval: {interval + 2}s;
+			--interval: {animationDuration + 2}s;
 			--originX: {hasPerson && !isVideo ? getFaceMetric(0, 'centerX') + '%' : 'center'};
 			--originY: {hasPerson && !isVideo ? getFaceMetric(0, 'centerY') + '%' : 'center'};
 			--start-scale: {scaleValues.startScale};
@@ -246,7 +255,10 @@
 						}
 					}
 				}}
-				onerror={() => console.error('Video failed to load:', asset[0])}
+				onerror={() => {
+					console.error('Video failed to load:', asset[0]);
+					onAssetError();
+				}}
 				onwaiting={onVideoWaiting}
 				onplaying={onVideoPlaying}
 			></video>
@@ -257,6 +269,10 @@
 					: 'max-h-screen h-dvh-safe max-w-full object-contain'} w-full h-full"
 				src={asset[0]}
 				alt="data"
+				onerror={() => {
+					console.error('Image failed to load:', asset[0]);
+					onAssetError();
+				}}
 			/>
 		{/if}
 	</div>
