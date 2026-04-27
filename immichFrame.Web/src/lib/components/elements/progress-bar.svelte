@@ -25,7 +25,7 @@
 		onPaused = () => {}
 	}: Props = $props();
 
-	const progress = new Tween(0, {
+	const progress = new Tween<number>(0, {
 		duration: (from: number, to: number) => {
 			if (to === 0) return 0;
 			return duration * 1000 * (to - from);
