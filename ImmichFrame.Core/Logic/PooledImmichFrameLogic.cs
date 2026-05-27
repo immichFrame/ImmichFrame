@@ -140,7 +140,11 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
             }
         }
 
-        var data = await _immichApi.ViewAssetAsync(id, string.Empty, AssetMediaSize.Preview);
+        var mediaSize = _generalSettings.UseFullResolutionImages
+            ? AssetMediaSize.Fullsize
+            : AssetMediaSize.Preview;
+
+        var data = await _immichApi.ViewAssetAsync(id, string.Empty, mediaSize);
 
         if (data == null)
             throw new AssetNotFoundException($"Asset {id} was not found!");

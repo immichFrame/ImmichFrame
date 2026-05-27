@@ -38,6 +38,7 @@ public class ServerSettings : IServerSettings, IConfigSettable
 public class GeneralSettings : IGeneralSettings, IConfigSettable
 {
     public bool DownloadImages { get; set; } = false;
+    public bool UseFullResolutionImages { get; set; } = false;
     public string Language { get; set; } = "en";
     public string? ImageLocationFormat { get; set; } = "City,State,Country";
     public string? PhotoDateFormat { get; set; } = "MM/dd/yyyy";

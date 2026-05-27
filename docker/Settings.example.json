@@ -2,6 +2,7 @@
   "General": {
     "AuthenticationSecret": null,
     "DownloadImages": false,
+    "UseFullResolutionImages": false,
     "RenewImagesDuration": 30,
     "Webcalendars": [
       "calendarurl"

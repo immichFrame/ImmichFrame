@@ -2,6 +2,7 @@
   "General": {
     "AuthenticationSecret": "AuthenticationSecret_TEST",
     "DownloadImages": true,
+    "UseFullResolutionImages": true,
     "RenewImagesDuration": 7,
     "Webcalendars": [
       "Webcalendars_TEST"

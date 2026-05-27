@@ -10,6 +10,7 @@
     "PlayAudio": true,
     "Layout": "Layout_TEST",
     "DownloadImages": true,
+    "UseFullResolutionImages": true,
     "ShowMemories": true,
     "ShowFavorites": true,
     "ShowArchived": true,

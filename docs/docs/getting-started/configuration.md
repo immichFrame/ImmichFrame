@@ -36,6 +36,8 @@ General:
   AuthenticationSecret: null  # string, no default
   # whether to download images to the server
   DownloadImages: false  # boolean
+  # load image assets in full resolution instead of preview size
+  UseFullResolutionImages: false  # boolean
   # if images are downloaded, re-download if age (in days) is more than this
   RenewImagesDuration: 30  # int
   # A list of webcalendar URIs in the .ics format. Supports basic auth via standard URL format.
