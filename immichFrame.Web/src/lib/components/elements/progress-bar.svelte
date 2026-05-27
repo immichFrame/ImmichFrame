@@ -9,7 +9,7 @@
 		location?: ProgressBarLocation;
 		hidden?: boolean;
 		duration?: number;
-		onDone: () => void;
+		onDone: () => void | Promise<void>;
 		onPlaying?: () => void;
 		onPaused?: () => void;
 	}
@@ -36,7 +36,10 @@
 	$effect(() => {
 		if (progress.current >= 1 && !completed) {
 			completed = true;
-			untrack(() => onDone());
+			const result = untrack(() => onDone());
+			void Promise.resolve(result).catch((err) => {
+				console.error('ProgressBar onDone failed:', err);
+			});
 		} else if (progress.current < 1) {
 			completed = false;
 		}
