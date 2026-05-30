@@ -23,6 +23,7 @@ public class ServerSettingsV1 : IConfigSettable
     public List<Guid> People { get; set; } = new List<Guid>();
     public List<string> Tags { get; set; } = new List<string>();
     public int? Rating { get; set; }
+    public bool ExhaustiveShuffle { get; set; } = false;
     public List<string> Webcalendars { get; set; } = new List<string>();
     public int RefreshAlbumPeopleInterval { get; set; } = 12;
     public string? WeatherApiKey { get; set; } = string.Empty;
@@ -94,6 +95,7 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
         public List<Guid> People => _delegate.People;
         public List<string> Tags => _delegate.Tags;
         public int? Rating => _delegate.Rating;
+        public bool ExhaustiveShuffle => _delegate.ExhaustiveShuffle;
 
         public void ValidateAndInitialize() { }
     }
