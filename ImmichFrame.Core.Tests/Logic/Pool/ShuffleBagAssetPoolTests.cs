@@ -22,6 +22,17 @@ public class ShuffleBagAssetPoolTests
         return mock.Object;
     }
 
+    // Like InnerReturning, but honors the requested page size the way Immich's random
+    // search does (returns at most `n` assets) — needed to exercise the MaxBagSize cap.
+    private static IAssetPool InnerHonoringSize(IReadOnlyList<AssetResponseDto> assets)
+    {
+        var mock = new Mock<IAssetPool>();
+        mock.Setup(p => p.GetAssetCount(It.IsAny<CancellationToken>())).ReturnsAsync(assets.Count);
+        mock.Setup(p => p.GetAssets(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((int n, CancellationToken _) => assets.Take(n).ToList());
+        return mock.Object;
+    }
+
     [Test]
     public async Task ShowsEachAssetOnceBeforeRepeating()
     {
@@ -73,6 +84,22 @@ public class ShuffleBagAssetPoolTests
         var result = await pool.GetAssets(5);
 
         Assert.That(result, Is.Empty);
+    }
+
+    [Test]
+    public async Task CapsBagAtMaxBagSizeForLargeLibraries()
+    {
+        // Mirrors ShuffleBagAssetPool.MaxBagSize (Immich's random-search page cap).
+        // Above this size each cycle is a rolling no-repeat window, not the whole library.
+        const int maxBagSize = 1000;
+        var assets = Sample(maxBagSize + 10);
+        var pool = new ShuffleBagAssetPool(InnerHonoringSize(assets));
+
+        var cycle = (await pool.GetAssets(maxBagSize)).Select(a => a.Id).ToList();
+
+        Assert.That(cycle, Has.Count.EqualTo(maxBagSize), "bag is capped at MaxBagSize");
+        Assert.That(cycle.Distinct().Count(), Is.EqualTo(maxBagSize), "no repeats within the capped window");
+        Assert.That(cycle, Is.SubsetOf(assets.Select(a => a.Id)), "all drawn from the inner set");
     }
 
     [Test]
