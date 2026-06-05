@@ -14,6 +14,7 @@ public class ServerSettingsV1 : IConfigSettable
     public bool ShowArchived { get; set; } = false;
     public bool ShowVideos { get; set; } = false;
     public bool DownloadImages { get; set; } = false;
+    public bool UseFullResolutionImages { get; set; } = false;
     public int RenewImagesDuration { get; set; } = 30;
     public int? ImagesFromDays { get; set; }
     public DateTime? ImagesFromDate { get; set; }
@@ -110,6 +111,7 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
         public int Interval => _delegate.Interval;
         public double TransitionDuration => _delegate.TransitionDuration;
         public bool DownloadImages => _delegate.DownloadImages;
+        public bool UseFullResolutionImages => _delegate.UseFullResolutionImages;
         public int RenewImagesDuration => _delegate.RenewImagesDuration;
         public bool ShowClock => _delegate.ShowClock;
         public string? ClockFormat => _delegate.ClockFormat;

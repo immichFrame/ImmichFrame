@@ -46,6 +46,7 @@ services:
       # ImageFill: "false"
       # Layout: "splitview"         
       # DownloadImages: "false"
+      # UseFullResolutionImages: "false"
       # ShowMemories: "false"
       # ShowFavorites: "false"
       # ShowArchived: "false"

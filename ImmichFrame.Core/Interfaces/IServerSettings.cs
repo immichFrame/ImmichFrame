@@ -42,6 +42,7 @@
         public double TransitionDuration { get; }
         public bool DownloadImages { get; }
         public int RenewImagesDuration { get; }
+        public bool UseFullResolutionImages { get; }
         public bool ShowClock { get; }
         public string? ClockFormat { get; }
         public string? ClockDateFormat { get; }
