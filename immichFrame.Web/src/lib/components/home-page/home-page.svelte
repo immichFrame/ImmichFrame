@@ -56,6 +56,8 @@
 	let infoVisible: boolean = $state(false);
 	let authError: boolean = $state(false);
 	let errorMessage: string = $state('');
+	let assetOffset: number = 0;
+	let assetShuffleRandom: number = Math.floor(Math.random() * 1000000);
 	let assetsState: AssetsState = $state({
 		assets: [],
 		error: false,
@@ -137,7 +139,11 @@
 
 	async function loadAssets() {
 		try {
-			let assetRequest = await api.getAssets();
+			let assetRequest = await api.getAssets({
+				clientIdentifier: $clientIdentifierStore,
+				assetOffset: assetOffset,
+				assestShuffleRandom: assetShuffleRandom
+			});
 
 			if (assetRequest.status != 200) {
 				if (assetRequest.status == 401) {
@@ -148,9 +154,11 @@
 			}
 
 			error = false;
-			assetBacklog = assetRequest.data.filter(
+			assetBacklog = assetRequest.data.assets.filter(
 				(asset) => isImageAsset(asset) || isVideoAsset(asset)
 			);
+
+			assetOffset = assetRequest.data.assetOffset;
 		} catch {
 			error = true;
 		}

@@ -13,6 +13,7 @@ public class AlbumAssetsPoolTests
     private Mock<ImmichApi> _mockImmichApi;
     private Mock<IAccountSettings> _mockAccountSettings;
     private AlbumAssetsPool _albumAssetsPool;
+    private Mock<IRequestContext> _mockRequestContext;
 
     [SetUp]
     public void Setup()
@@ -28,6 +29,10 @@ public class AlbumAssetsPoolTests
         _mockImmichApi = new Mock<ImmichApi>("", null);
         _mockAccountSettings = new Mock<IAccountSettings>();
         _albumAssetsPool = new AlbumAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
+
+        _mockRequestContext = new Mock<IRequestContext>();
+        // Default RequestContext
+        _mockRequestContext.Setup(x => x.AssetOffset).Returns(0);
 
         _mockAccountSettings.SetupGet(s => s.Albums).Returns(new List<Guid>());
         _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns(new List<Guid>());
@@ -56,7 +61,7 @@ public class AlbumAssetsPoolTests
             .ReturnsAsync(new AlbumResponseDto { Assets = new List<AssetResponseDto> { assetB, assetC } });
 
         // Act
-        var result = (await _albumAssetsPool.GetAssets(25)).ToList();
+        var result = (await _albumAssetsPool.GetAssets(25, _mockRequestContext.Object)).ToList();
 
         // Assert
         Assert.That(result.Count, Is.EqualTo(2));
@@ -75,7 +80,7 @@ public class AlbumAssetsPoolTests
             .ReturnsAsync(new AlbumResponseDto { Assets = new List<AssetResponseDto> { CreateAsset("excluded_only") } });
 
 
-        var result = (await _albumAssetsPool.GetAssets(25)).ToList();
+        var result = (await _albumAssetsPool.GetAssets(25, _mockRequestContext.Object)).ToList();
         Assert.That(result, Is.Empty);
     }
 
@@ -89,7 +94,7 @@ public class AlbumAssetsPoolTests
         _mockImmichApi.Setup(api => api.GetAlbumInfoAsync(album1Id, null, null, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new AlbumResponseDto { Assets = new List<AssetResponseDto> { CreateAsset("A") } });
 
-        var result = (await _albumAssetsPool.GetAssets(25)).ToList();
+        var result = (await _albumAssetsPool.GetAssets(25, _mockRequestContext.Object)).ToList();
         Assert.That(result.Count, Is.EqualTo(1));
         Assert.That(result.Any(a => a.Id == "A"));
     }
@@ -99,7 +104,7 @@ public class AlbumAssetsPoolTests
     {
         _mockAccountSettings.SetupGet(s => s.Albums).Returns((List<Guid>)null);
 
-        var result = (await _albumAssetsPool.GetAssets(25)).ToList();
+        var result = (await _albumAssetsPool.GetAssets(25, _mockRequestContext.Object)).ToList();
         Assert.That(result, Is.Empty);
 
         // the absence of an error, whereas before a null pointer exception would be thrown, indicates success.
@@ -110,7 +115,7 @@ public class AlbumAssetsPoolTests
     {
         _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns((List<Guid>)null);
 
-        var result = (await _albumAssetsPool.GetAssets(25)).ToList();
+        var result = (await _albumAssetsPool.GetAssets(25, _mockRequestContext.Object)).ToList();
         Assert.That(result, Is.Empty);
 
         // the absence of an error, whereas before a null pointer exception would be thrown, indicates success.
