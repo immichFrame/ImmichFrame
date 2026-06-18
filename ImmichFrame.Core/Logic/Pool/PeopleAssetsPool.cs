@@ -14,12 +14,12 @@ public class PersonAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountS
         {
             return personAssets;
         }
-        
+
         foreach (var personId in people)
         {
             int page = 1;
             int batchSize = 1000;
-            int total;
+            long total;
             do
             {
                 var metadataBody = new MetadataSearchDto

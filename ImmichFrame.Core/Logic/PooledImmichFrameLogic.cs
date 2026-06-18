@@ -75,9 +75,9 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
         return _pool.GetAssets(25);
     }
 
-    public Task<AssetResponseDto> GetAssetInfoById(Guid assetId) => _immichApi.GetAssetInfoAsync(assetId, null);
+    public Task<AssetResponseDto> GetAssetInfoById(Guid assetId) => _immichApi.GetAssetInfoAsync(assetId, null, null);
 
-    public async Task<IEnumerable<AlbumResponseDto>> GetAlbumInfoById(Guid assetId) => await _immichApi.GetAllAlbumsAsync(assetId, null);
+    public async Task<IEnumerable<AlbumResponseDto>> GetAlbumInfoById(Guid assetId) => await _immichApi.GetAllAlbumsAsync(assetId, null, null, null, null);
 
     public Task<long> GetTotalAssets() => _pool.GetAssetCount();
 
@@ -85,7 +85,7 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
     {
         if (!assetType.HasValue)
         {
-            var assetInfo = await _immichApi.GetAssetInfoAsync(id, null);
+            var assetInfo = await _immichApi.GetAssetInfoAsync(id, null, null);
             if (assetInfo == null)
                 throw new AssetNotFoundException($"Assetinfo for asset '{id}' was not found!");
             assetType = assetInfo.Type;
@@ -140,7 +140,7 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
             }
         }
 
-        var data = await _immichApi.ViewAssetAsync(id, string.Empty, AssetMediaSize.Preview);
+        var data = await _immichApi.ViewAssetAsync(null, id, string.Empty, AssetMediaSize.Preview, null);
 
         if (data == null)
             throw new AssetNotFoundException($"Asset {id} was not found!");
@@ -173,7 +173,7 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
     private async Task<AssetResponse> GetVideoAsset(Guid id, string? rangeHeader = null)
     {
         var videoResponse = string.IsNullOrEmpty(rangeHeader)
-            ? await _immichApi.PlayAssetVideoAsync(id, string.Empty)
+            ? await _immichApi.PlayAssetVideoAsync(id, null, null)
             : await _immichApi.PlayAssetVideoWithRangeAsync(id, rangeHeader);
 
         var contentType = videoResponse.Headers.TryGetValue("Content-Type", out var ct)

@@ -12,10 +12,11 @@ public static class AssetHelper
 
         foreach (var albumId in accountSettings?.ExcludedAlbums ?? new())
         {
-            var albumInfo = await immichApi.GetAlbumInfoAsync(albumId, null, null, ct);
-            if (albumInfo.Assets != null)
+            var metadataBody = new MetadataSearchDto { AlbumIds = [albumId] };
+            var searchResponse = await immichApi.SearchAssetsAsync(metadataBody, ct);
+            if (searchResponse.Assets != null)
             {
-                excludedAlbumAssets.AddRange(albumInfo.Assets);
+                excludedAlbumAssets.AddRange(searchResponse.Assets.Items);
             }
         }
 

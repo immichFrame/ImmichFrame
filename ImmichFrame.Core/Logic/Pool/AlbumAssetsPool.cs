@@ -14,8 +14,9 @@ public class AlbumAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSe
         {
             foreach (var albumId in albums)
             {
-                var albumInfo = await immichApi.GetAlbumInfoAsync(albumId, null, null, ct);
-                albumAssets.AddRange(albumInfo.Assets);
+                var metadataBody = new MetadataSearchDto { AlbumIds = [albumId] };
+                var searchResponse = await immichApi.SearchAssetsAsync(metadataBody, ct);
+                albumAssets.AddRange(searchResponse.Assets.Items);
             }
         }
 

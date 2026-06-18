@@ -11,7 +11,7 @@ public class FavoriteAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccoun
 
         int page = 1;
         int batchSize = 1000;
-        int total;
+        long total;
         do
         {
             var metadataBody = new MetadataSearchDto
