@@ -41,7 +41,7 @@ public class PersonAssetsPoolTests // Renamed from PeopleAssetsPoolTests to matc
         _mockAccountSettings.SetupGet(s => s.People).Returns(new List<Guid>());
     }
 
-    private AssetResponseDto CreateAsset(string id, AssetTypeEnum type = AssetTypeEnum.IMAGE) => new AssetResponseDto { Id = id, Type = type };
+    private AssetResponseDto CreateAsset(string id, AssetTypeEnum type = AssetTypeEnum.IMAGE) => new AssetResponseDto { Id = FixtureHelpers.GuidFor(id), Type = type };
     private SearchResponseDto CreateSearchResult(List<AssetResponseDto> assets, int total) =>
         new SearchResponseDto { Assets = new SearchAssetResponseDto { Items = assets, Total = total } };
 
@@ -75,9 +75,9 @@ public class PersonAssetsPoolTests // Renamed from PeopleAssetsPoolTests to matc
 
         // Assert
         Assert.That(result.Count, Is.EqualTo(batchSize + 30 + 20));
-        Assert.That(result.Any(a => a.Id == "p1_p1_0"));
-        Assert.That(result.Any(a => a.Id == "p1_p2_29"));
-        Assert.That(result.Any(a => a.Id == "p2_p1_19"));
+        Assert.That(result.Any(a => a.Id == FixtureHelpers.GuidFor("p1_p1_0")));
+        Assert.That(result.Any(a => a.Id == FixtureHelpers.GuidFor("p1_p2_29")));
+        Assert.That(result.Any(a => a.Id == FixtureHelpers.GuidFor("p2_p1_19")));
 
         _mockImmichApi.Verify(api => api.SearchAssetsAsync(It.Is<MetadataSearchDto>(d => d.PersonIds.Contains(person1Id) && d.Page == 1 && d.Type == type), It.IsAny<CancellationToken>()), Times.Once);
         _mockImmichApi.Verify(api => api.SearchAssetsAsync(It.Is<MetadataSearchDto>(d => d.PersonIds.Contains(person1Id) && d.Page == 2 && d.Type == type), It.IsAny<CancellationToken>()), Times.Once);
@@ -121,6 +121,7 @@ public class PersonAssetsPoolTests // Renamed from PeopleAssetsPoolTests to matc
 
         var result = (await _personAssetsPool.TestLoadAssets()).ToList();
         Assert.That(result.Count, Is.EqualTo(10));
-        Assert.That(result.All(a => a.Id.StartsWith("p1_")));
+        var expectedIds = p1Assets.Select(a => a.Id);
+        Assert.That(result.All(a => expectedIds.Contains(a.Id)));
     }
 }

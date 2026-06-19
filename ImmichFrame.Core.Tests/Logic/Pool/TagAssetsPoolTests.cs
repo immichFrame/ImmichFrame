@@ -31,7 +31,7 @@ public class TagAssetsPoolTests
         _pool = new TestableTagAssetsPool(_cache.Object, _api.Object, _settings.Object);
     }
 
-    private static AssetResponseDto Asset(string id) => new() { Id = id, Type = AssetTypeEnum.IMAGE };
+    private static AssetResponseDto Asset(string id) => new() { Id = FixtureHelpers.GuidFor(id), Type = AssetTypeEnum.IMAGE };
 
     private static SearchResponseDto SearchResult(List<AssetResponseDto> assets) =>
         new() { Assets = new SearchAssetResponseDto { Items = assets, Total = assets.Count } };
@@ -45,8 +45,8 @@ public class TagAssetsPoolTests
 
         _api.Setup(a => a.GetAllTagsAsync(default))
             .ReturnsAsync([
-                new TagResponseDto { Id = tag1.ToString(), Name = "Tag1", Value = "Tag1" },
-                new TagResponseDto { Id = tag2.ToString(), Name = "Tag2", Value = "Tag2" }
+                new TagResponseDto { Id = tag1, Name = "Tag1", Value = "Tag1" },
+                new TagResponseDto { Id = tag2, Name = "Tag2", Value = "Tag2" }
             ]);
 
         var page1 = Enumerable.Range(0, 1000).Select(i => Asset($"t1_p1_{i}")).ToList();
@@ -65,9 +65,9 @@ public class TagAssetsPoolTests
         Assert.That(result, Has.Count.EqualTo(1050));
         Assert.Multiple(() =>
         {
-            Assert.That(result.Any(a => a.Id == "t1_p1_0"));
-            Assert.That(result.Any(a => a.Id == "t1_p2_29"));
-            Assert.That(result.Any(a => a.Id == "t2_19"));
+            Assert.That(result.Any(a => a.Id == FixtureHelpers.GuidFor("t1_p1_0")));
+            Assert.That(result.Any(a => a.Id == FixtureHelpers.GuidFor("t1_p2_29")));
+            Assert.That(result.Any(a => a.Id == FixtureHelpers.GuidFor("t2_19")));
         });
     }
 
@@ -104,8 +104,8 @@ public class TagAssetsPoolTests
 
         _api.Setup(a => a.GetAllTagsAsync(default))
             .ReturnsAsync([
-                new TagResponseDto { Id = tag1.ToString(), Value = "HasAssets" },
-                new TagResponseDto { Id = tag2.ToString(), Value = "Empty" }
+                new TagResponseDto { Id = tag1, Value = "HasAssets" },
+                new TagResponseDto { Id = tag2, Value = "Empty" }
             ]);
 
         var assets = Enumerable.Range(0, 10).Select(i => Asset($"asset_{i}")).ToList();
@@ -117,7 +117,8 @@ public class TagAssetsPoolTests
         var result = (await _pool.LoadAssetsPublic()).ToList();
 
         Assert.That(result, Has.Count.EqualTo(10));
-        Assert.That(result.All(a => a.Id.StartsWith("asset_")));
+        var expectedIds = assets.Select(a => a.Id);
+        Assert.That(result.All(a => expectedIds.Contains(a.Id)));
     }
 
     [Test]
@@ -127,7 +128,7 @@ public class TagAssetsPoolTests
         _settings.SetupGet(s => s.Tags).Returns(new List<string> { "Tag" });
 
         _api.Setup(a => a.GetAllTagsAsync(default))
-            .ReturnsAsync([new TagResponseDto { Id = tagId.ToString(), Value = "Tag" }]);
+            .ReturnsAsync([new TagResponseDto { Id = tagId, Value = "Tag" }]);
         _api.Setup(a => a.SearchAssetsAsync(It.IsAny<MetadataSearchDto>(), default))
             .ReturnsAsync(SearchResult([Asset("1")]));
 
@@ -151,15 +152,15 @@ public class TagAssetsPoolTests
         _settings.SetupGet(s => s.Tags).Returns(new List<string> { "Tag" });
 
         _api.Setup(a => a.GetAllTagsAsync(default))
-            .ReturnsAsync([new TagResponseDto { Id = tagId.ToString(), Value = "Tag" }]);
+            .ReturnsAsync([new TagResponseDto { Id = tagId, Value = "Tag" }]);
 
         var assetWithoutTags = new AssetResponseDto
         {
-            Id = "asset-1",
+            Id = FixtureHelpers.GuidFor("asset-1"),
             Type = AssetTypeEnum.IMAGE,
             Tags = null,
             ExifInfo = new ExifResponseDto { Make = "Camera" },
-            People = [new PersonWithFacesResponseDto { Name = "Person" }]
+            People = [new PersonResponseDto { Name = "Person" }]
         };
 
         _api.Setup(a => a.SearchAssetsAsync(It.IsAny<MetadataSearchDto>(), default))
@@ -171,7 +172,7 @@ public class TagAssetsPoolTests
         Assert.Multiple(() =>
         {
             Assert.That(asset.Tags, Has.Count.EqualTo(1));
-            Assert.That(asset.Tags!.First().Id, Is.EqualTo(tagId.ToString()));
+            Assert.That(asset.Tags!.First().Id, Is.EqualTo(tagId));
             Assert.That(asset.ExifInfo, Is.Not.Null);
             Assert.That(asset.People, Is.Not.Null);
         });
@@ -189,9 +190,9 @@ public class TagAssetsPoolTests
 
         _api.Setup(a => a.GetAllTagsAsync(default))
             .ReturnsAsync([
-                new TagResponseDto { Id = match.ToString(), Value = "Parent1/Child" },
-                new TagResponseDto { Id = noMatch1.ToString(), Value = "Parent2/Child" },
-                new TagResponseDto { Id = noMatch2.ToString(), Value = "Child" }
+                new TagResponseDto { Id = match, Value = "Parent1/Child" },
+                new TagResponseDto { Id = noMatch1, Value = "Parent2/Child" },
+                new TagResponseDto { Id = noMatch2, Value = "Child" }
             ]);
 
         var assets = Enumerable.Range(0, 5).Select(i => Asset($"asset_{i}")).ToList();
@@ -215,8 +216,8 @@ public class TagAssetsPoolTests
 
         _api.Setup(a => a.GetAllTagsAsync(default))
             .ReturnsAsync([
-                new TagResponseDto { Id = lower.ToString(), Value = "people" },
-                new TagResponseDto { Id = upper.ToString(), Value = "People" }
+                new TagResponseDto { Id = lower, Value = "people" },
+                new TagResponseDto { Id = upper, Value = "People" }
             ]);
 
         var assets = Enumerable.Range(0, 5).Select(i => Asset($"asset_{i}")).ToList();
@@ -239,8 +240,8 @@ public class TagAssetsPoolTests
 
         _api.Setup(a => a.GetAllTagsAsync(default))
             .ReturnsAsync([
-                new TagResponseDto { Id = tag1.ToString(), Name = "Tag1", Value = "Tag1" },
-                new TagResponseDto { Id = tag2.ToString(), Name = "Tag2", Value = "Tag2" }
+                new TagResponseDto { Id = tag1, Name = "Tag1", Value = "Tag1" },
+                new TagResponseDto { Id = tag2, Name = "Tag2", Value = "Tag2" }
             ]);
 
         var shared = Asset("shared");
@@ -252,16 +253,16 @@ public class TagAssetsPoolTests
         var result = (await _pool.LoadAssetsPublic()).ToList();
 
         Assert.That(result, Has.Count.EqualTo(3));
-        Assert.That(result.Count(a => a.Id == "shared"), Is.EqualTo(1));
+        Assert.That(result.Count(a => a.Id == FixtureHelpers.GuidFor("shared")), Is.EqualTo(1));
 
         // Verify that when an asset is displayed, all tags are shown (even though settings
         // only configured which tags to search, not which to display on assets)
-        var sharedAsset = result.First(a => a.Id == "shared");
+        var sharedAsset = result.First(a => a.Id == FixtureHelpers.GuidFor("shared"));
         Assert.Multiple(() =>
         {
             Assert.That(sharedAsset.Tags, Has.Count.EqualTo(2), "Asset should display both tags it was found in");
-            Assert.That(sharedAsset.Tags!.Any(t => t.Id == tag1.ToString()), "Asset should show Tag1");
-            Assert.That(sharedAsset.Tags!.Any(t => t.Id == tag2.ToString()), "Asset should show Tag2");
+            Assert.That(sharedAsset.Tags!.Any(t => t.Id == tag1), "Asset should show Tag1");
+            Assert.That(sharedAsset.Tags!.Any(t => t.Id == tag2), "Asset should show Tag2");
         });
     }
 
