@@ -75,6 +75,11 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
         return _pool.GetAssets(25);
     }
 
+    public Task<IEnumerable<IEnumerable<AssetResponseDto>>> GetMemoryAssets()
+    {
+        return new MemoryAssetsPool(_immichApi, AccountSettings).GetAssetGroups();
+    }
+
     public Task<AssetResponseDto> GetAssetInfoById(Guid assetId) => _immichApi.GetAssetInfoAsync(assetId, null);
 
     public async Task<IEnumerable<AlbumResponseDto>> GetAlbumInfoById(Guid assetId) => await _immichApi.GetAllAlbumsAsync(assetId, null);

@@ -64,7 +64,8 @@ namespace ImmichFrame.WebApi.Tests.Controllers
                             BaseFontSize = "16px",
                             WeatherApiKey = "",
                             UnitSystem = "imperial",
-                            WeatherLatLong = "0,0"
+                            WeatherLatLong = "0,0",
+                            AuthenticationSecret = "AuthenticationSecret_TEST"
                         };
 
                         var accountSettings = new ServerAccountSettings
@@ -72,8 +73,9 @@ namespace ImmichFrame.WebApi.Tests.Controllers
                             ImmichServerUrl = "http://mock-immich-server.com",
                             ApiKey = "test-api-key",
                             ShowMemories = false,
-                            ShowFavorites = true,
+                            ShowFavorites = false,
                             ShowArchived = false,
+                            ShowVideos = true,
                             Albums = new List<Guid>(),
                             ExcludedAlbums = new List<Guid>(),
                             People = new List<Guid>()
@@ -177,7 +179,7 @@ namespace ImmichFrame.WebApi.Tests.Controllers
                     Content = new ByteArrayContent(mockImageData)
                 });
 
-            var client = _factory.CreateClient();
+            var client = CreateAuthorizedClient();
 
             // Act
             var response = await client.GetAsync("/api/Asset/RandomImageAndInfo");
@@ -188,6 +190,74 @@ namespace ImmichFrame.WebApi.Tests.Controllers
             // For now, we'll just check if the response is not empty.
             // A more robust check would be to deserialize the response and check the asset ID.
             Assert.That(content, Is.Not.Empty);
+        }
+
+        [Test]
+        public async Task GetAssets_ReturnsVideoDurationFromImmichMetadata()
+        {
+            var videoAssetId = Guid.NewGuid();
+            var assetDtoJson = $@"
+            {{
+                ""id"": ""{videoAssetId}"",
+                ""originalPath"": ""/path/to/video.mp4"",
+                ""type"": ""VIDEO"",
+                ""fileCreatedAt"": ""2023-10-26T10:00:00Z"",
+                ""fileModifiedAt"": ""2023-10-26T10:00:00Z"",
+                ""isFavorite"": false,
+                ""duration"": ""0:02:03"",
+                ""checksum"": ""testchecksum"",
+                ""deviceAssetId"": ""testDeviceAssetId"",
+                ""deviceId"": ""testDeviceId"",
+                ""ownerId"": ""testOwnerId"",
+                ""originalFileName"": ""video.mp4"",
+                ""localDateTime"": ""2023-10-26T10:00:00Z"",
+                ""visibility"": ""timeline"",
+                ""hasMetadata"": true,
+                ""isArchived"": false,
+                ""isOffline"": false,
+                ""isTrashed"": false,
+                ""updatedAt"": ""2023-10-26T10:00:00Z""
+            }}";
+
+            var jsonResponse = $@"
+            {{
+                ""albums"": {{
+                    ""count"": 0,
+                    ""items"": [],
+                    ""total"": 0,
+                    ""facets"": []
+                }},
+                ""assets"": {{
+                    ""count"": 1,
+                    ""items"": [
+                        {assetDtoJson}
+                    ],
+                    ""total"": 1,
+                    ""facets"": [],
+                    ""nextPage"": null
+                }}
+            }}";
+
+            _mockHttpMessageHandler.Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.Is<HttpRequestMessage>(req => req.RequestUri!.ToString().Contains("/search/metadata")),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ReturnsAsync(() => new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent(jsonResponse, Encoding.UTF8, "application/json")
+                });
+
+            var client = CreateAuthorizedClient();
+
+            var response = await client.GetAsync("/api/Asset");
+
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            Assert.That(content, Does.Contain(@"""duration"":""0:02:03"""));
+            Assert.That(content, Does.Contain(@"""type"":""VIDEO"""));
         }
 
         // TODO: Fix Test
@@ -262,5 +332,12 @@ namespace ImmichFrame.WebApi.Tests.Controllers
         //     var resultBytes = await response.Content.ReadAsByteArrayAsync();
         //     Assert.That(resultBytes, Is.EqualTo(videoBytes));
         // }
+
+        private HttpClient CreateAuthorizedClient()
+        {
+            var client = _factory.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "AuthenticationSecret_TEST");
+            return client;
+        }
     }
 }
