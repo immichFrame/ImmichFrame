@@ -13,7 +13,7 @@
 	api.init();
 
 	interface Props {
-		assets: [string, AssetResponseDto, api.AlbumResponseDto[]][];
+		assets: [string, AssetResponseDto, api.AssetFaceResponseDto[], api.AlbumResponseDto[]][];
 		interval?: number;
 		error?: boolean;
 		loaded?: boolean;

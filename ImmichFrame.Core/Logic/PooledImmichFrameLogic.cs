@@ -70,16 +70,18 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
         return (await _pool.GetAssets(1)).FirstOrDefault();
     }
 
-    public Task<IEnumerable<AssetResponseDto>> GetAssets()
+    public async Task<IEnumerable<AssetResponseDto>> GetAssets()
     {
-        return _pool.GetAssets(25);
+        return await _pool.GetAssets(25);
     }
 
-    public Task<AssetResponseDto> GetAssetInfoById(Guid assetId) => _immichApi.GetAssetInfoAsync(assetId, null, null);
+    public async Task<AssetResponseDto> GetAssetInfoById(Guid assetId) => await _immichApi.GetAssetInfoAsync(assetId, null, null);
+
+    public async Task<IEnumerable<AssetFaceResponseDto>> GetAssetFacesById(Guid assetId) => await _immichApi.GetFacesAsync(assetId);
 
     public async Task<IEnumerable<AlbumResponseDto>> GetAlbumInfoById(Guid assetId) => await _immichApi.GetAllAlbumsAsync(assetId, null, null, null, null);
 
-    public Task<long> GetTotalAssets() => _pool.GetAssetCount();
+    public async Task<long> GetTotalAssets() => await _pool.GetAssetCount();
 
     public async Task<AssetResponse> GetAsset(Guid id, AssetTypeEnum? assetType = null, string? rangeHeader = null)
     {
@@ -198,8 +200,8 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
             ContentLength = contentLength
         };
     }
-    public Task SendWebhookNotification(IWebhookNotification notification) =>
-        WebhookHelper.SendWebhookNotification(notification, _generalSettings.Webhook);
+    public async Task SendWebhookNotification(IWebhookNotification notification) =>
+        await WebhookHelper.SendWebhookNotification(notification, _generalSettings.Webhook);
 
     public override string ToString() => $"Account Pool [{_immichApi.BaseUrl}]";
 }

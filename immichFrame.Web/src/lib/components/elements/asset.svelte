@@ -3,7 +3,7 @@
 	import {
 		type AlbumResponseDto,
 		type AssetResponseDto,
-		type PersonWithFacesResponseDto
+		type AssetFaceResponseDto
 	} from '$lib/immichFrameApi';
 	import { isVideoAsset } from '$lib/constants/asset-type';
 	import { decodeBase64 } from '$lib/utils';
@@ -12,7 +12,12 @@
 	import ImageOverlay from '$lib/components/elements/imageoverlay/image-overlay.svelte';
 
 	interface Props {
-		asset: [url: string, asset: AssetResponseDto, albums: AlbumResponseDto[]];
+		asset: [
+			url: string,
+			asset: AssetResponseDto,
+			faces: AssetFaceResponseDto[],
+			albums: AlbumResponseDto[]
+		];
 		showLocation: boolean;
 		showPhotoDate: boolean;
 		showImageDesc: boolean;
@@ -51,7 +56,7 @@
 		onAssetError = () => {}
 	}: Props = $props();
 
-	let debug = false;
+	let debug = true;
 	const isVideo = $derived(isVideoAsset(asset[1]));
 
 	// Re-evaluate only when the asset changes; keep the interval stable for the
@@ -95,9 +100,9 @@
 	}
 
 	function GetFace(i: number) {
-		const people = asset[1].people as PersonWithFacesResponseDto[];
-		const namedPeople = people.filter((x) => x.name);
-		return namedPeople[i]?.faces[0] ?? null;
+		const faces = asset[2] as AssetFaceResponseDto[];
+		const namedFaces = faces.filter((x) => x.person?.name);
+		return namedFaces[i] ?? null;
 	}
 
 	function getFaceMetric(
@@ -196,7 +201,7 @@
 </script>
 
 {#if showInfo}
-	<ImageOverlay asset={asset[1]} albums={asset[2]} />
+	<ImageOverlay asset={asset[1]} albums={asset[3]} />
 {/if}
 
 <div class="immichframe_image relative place-self-center overflow-hidden">
@@ -279,7 +284,7 @@
 </div>
 <AssetInfo
 	asset={asset[1]}
-	albums={asset[2]}
+	albums={asset[3]}
 	{showLocation}
 	{showPhotoDate}
 	{showImageDesc}

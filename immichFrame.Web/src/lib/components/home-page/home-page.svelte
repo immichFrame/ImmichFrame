@@ -17,7 +17,7 @@
 	import { isImageAsset, isVideoAsset } from '$lib/constants/asset-type';
 
 	interface AssetsState {
-		assets: [string, api.AssetResponseDto, api.AlbumResponseDto[]][];
+		assets: [string, api.AssetResponseDto, api.AssetFaceResponseDto[], api.AlbumResponseDto[]][];
 		error: boolean;
 		loaded: boolean;
 		split: boolean;
@@ -65,7 +65,7 @@
 	});
 	let assetPromisesDict: Record<
 		string,
-		Promise<[string, api.AssetResponseDto, api.AlbumResponseDto[]]>
+		Promise<[string, api.AssetResponseDto, api.AssetFaceResponseDto[], api.AlbumResponseDto[]]>
 	> = {};
 
 	let unsubscribeRestart: () => void;
@@ -323,28 +323,11 @@
 		return $configStore.interval ?? 20;
 	}
 
-	function parseAssetDuration(duration?: string | null) {
-		if (!duration) {
+	function parseAssetDuration(duration?: number | null) {
+		if (!duration || duration <= 0) {
 			return 0;
 		}
-		const parts = duration.split(':').map((value) => value.trim().replace(',', '.'));
-
-		if (parts.length === 0 || parts.length > 3) {
-			return 0;
-		}
-
-		const multipliers = [3600, 60, 1]; // hours, minutes, seconds
-		const offset = multipliers.length - parts.length;
-
-		let total = 0;
-		for (let i = 0; i < parts.length; i++) {
-			const numeric = parseFloat(parts[i]);
-			if (Number.isNaN(numeric)) {
-				return 0;
-			}
-			total += numeric * multipliers[offset + i];
-		}
-		return total;
+		return duration / 1000; // milliseconds → seconds
 	}
 
 	async function pickAssets(assets: api.AssetResponseDto[]) {
@@ -412,9 +395,21 @@
 			assetResponse.people = assetInfoRequest.data.people;
 		}
 
-		return [assetUrl, assetResponse, album] as [
+		let faces: api.AssetFaceResponseDto[] = [];
+		if (
+			(assetResponse.people?.length ?? 0) > 0 &&
+			($configStore.imageZoom || $configStore.imagePan)
+		) {
+			const facesRequest = await api.getAssetFaces(assetResponse.id, {
+				clientIdentifier: $clientIdentifierStore
+			});
+			faces = facesRequest.data;
+		}
+
+		return [assetUrl, assetResponse, faces, album] as [
 			string,
 			api.AssetResponseDto,
+			api.AssetFaceResponseDto[],
 			api.AlbumResponseDto[]
 		];
 	}
@@ -551,7 +546,8 @@
 					consecutiveErrorSkips++;
 					if (consecutiveErrorSkips > 10) {
 						error = true;
-						errorMessage = 'Too many consecutive asset load failures. Please check your network or server connection.';
+						errorMessage =
+							'Too many consecutive asset load failures. Please check your network or server connection.';
 						errorSkipScheduled = false;
 						return;
 					}

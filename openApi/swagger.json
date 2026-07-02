@@ -103,6 +103,64 @@
         }
       }
     },
+    "/api/Asset/{id}/AssetFaces": {
+      "get": {
+        "tags": [
+          "Asset"
+        ],
+        "operationId": "GetAssetFaces",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "clientIdentifier",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AssetFaceResponseDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AssetFaceResponseDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AssetFaceResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Asset/{id}/AlbumInfo": {
       "get": {
         "tags": [
@@ -643,6 +701,69 @@
         ],
         "type": "integer",
         "format": "int32"
+      },
+      "AssetFaceResponseDto": {
+        "required": [
+          "id"
+        ],
+        "type": "object",
+        "properties": {
+          "boundingBoxX1": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer",
+            "format": "int64"
+          },
+          "boundingBoxX2": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer",
+            "format": "int64"
+          },
+          "boundingBoxY1": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer",
+            "format": "int64"
+          },
+          "boundingBoxY2": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer",
+            "format": "int64"
+          },
+          "id": {
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$",
+            "type": "string",
+            "format": "uuid"
+          },
+          "imageHeight": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int64"
+          },
+          "imageWidth": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int64"
+          },
+          "person": {
+            "$ref": "#/components/schemas/PersonResponseDto"
+          },
+          "sourceType": {
+            "$ref": "#/components/schemas/SourceType"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "nullable": true
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "AssetOrder": {
         "enum": [
@@ -1288,6 +1409,15 @@
           }
         },
         "additionalProperties": { }
+      },
+      "SourceType": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
       },
       "TagResponseDto": {
         "required": [

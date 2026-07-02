@@ -51,6 +51,15 @@ namespace ImmichFrame.WebApi.Controllers
             return await _logic.GetAssetInfoById(id);
         }
 
+        [HttpGet("{id}/AssetFaces", Name = "GetAssetFaces")]
+        public async Task<IEnumerable<AssetFaceResponseDto>> GetAssetFaces(Guid id, string clientIdentifier = "")
+        {
+            var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
+            _logger.LogDebug("AssetFaces '{id}' requested by '{sanitizedClientIdentifier}'", id, sanitizedClientIdentifier);
+
+            return await _logic.GetAssetFacesById(id);
+        }
+
         [HttpGet("{id}/AlbumInfo", Name = "GetAlbumInfo")]
         public async Task<List<AlbumResponseDto>> GetAlbumInfo(Guid id, string clientIdentifier = "")
         {
