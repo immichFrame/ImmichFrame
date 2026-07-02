@@ -11,10 +11,10 @@ public class BloomFilterAssetAccountTracker(ILogger<BloomFilterAssetAccountTrack
 {
     private IDictionary<IAccountImmichFrameLogic, IBloomFilter> logicToFilter = new Dictionary<IAccountImmichFrameLogic, IBloomFilter>();
 
-    public async ValueTask<bool> RecordAssetLocation(IAccountImmichFrameLogic account, string assetId)
+    public async ValueTask<bool> RecordAssetLocation(IAccountImmichFrameLogic account, Guid assetId)
     {
         var filter = await logicToFilter.GetOrCreateAsync(account, NewFilter);
-        return await filter.AddAsync(assetId);
+        return await filter.AddAsync(assetId.ToString());
     }
 
     private async Task<IBloomFilter> NewFilter(IImmichFrameLogic account)
@@ -22,11 +22,11 @@ public class BloomFilterAssetAccountTracker(ILogger<BloomFilterAssetAccountTrack
         return FilterBuilder.Build(await account.GetTotalAssets());
     }
 
-    public T ForAsset<T>(string assetId, Func<IAccountImmichFrameLogic, T> f)
+    public T ForAsset<T>(Guid assetId, Func<IAccountImmichFrameLogic, T> f)
     {
         foreach (var entry in logicToFilter)
         {
-            if (entry.Value.Contains(assetId))
+            if (entry.Value.Contains(assetId.ToString()))
             {
                 try
                 {
@@ -34,11 +34,11 @@ public class BloomFilterAssetAccountTracker(ILogger<BloomFilterAssetAccountTrack
                 }
                 catch (Exception e)
                 {
-                    _logger.LogWarning(e, "Failed to locate asset {assetId} in {entry.Key}. Must be false positive, trying next account.", assetId, entry.Key);   
+                    _logger.LogWarning(e, "Failed to locate asset {assetId} in {entry.Key}. Must be false positive, trying next account.", assetId, entry.Key);
                 }
             }
         }
-        
+
         _logger.LogError("Failed to locate account for asset {assetId}", assetId);
         throw new AssetNotFoundException();
     }

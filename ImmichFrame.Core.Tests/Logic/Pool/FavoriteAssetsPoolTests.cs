@@ -39,7 +39,7 @@ public class FavoriteAssetsPoolTests
         _favoriteAssetsPool = new TestableFavoriteAssetsPool(_mockApiCache.Object, _mockImmichApi.Object, _mockAccountSettings.Object);
     }
 
-    private AssetResponseDto CreateAsset(string id, AssetTypeEnum type = AssetTypeEnum.IMAGE) => new AssetResponseDto { Id = id, Type = type };
+    private AssetResponseDto CreateAsset(string id, AssetTypeEnum type = AssetTypeEnum.IMAGE) => new AssetResponseDto { Id = FixtureHelpers.GuidFor(id), Type = type };
     private SearchResponseDto CreateSearchResult(List<AssetResponseDto> assets, int total) =>
         new SearchResponseDto { Assets = new SearchAssetResponseDto { Items = assets, Total = total } };
 
@@ -60,8 +60,8 @@ public class FavoriteAssetsPoolTests
 
         // Assert
         Assert.That(result.Count, Is.EqualTo(batchSize + 50));
-        Assert.That(result.Any(a => a.Id == "fav_p1_0"));
-        Assert.That(result.Any(a => a.Id == "fav_p2_49"));
+        Assert.That(result.Any(a => a.Id == FixtureHelpers.GuidFor("fav_p1_0")));
+        Assert.That(result.Any(a => a.Id == FixtureHelpers.GuidFor("fav_p2_49")));
 
         _mockImmichApi.Verify(api => api.SearchAssetsAsync(
             It.Is<MetadataSearchDto>(dto =>

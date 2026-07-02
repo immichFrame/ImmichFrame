@@ -9,6 +9,7 @@ namespace ImmichFrame.Core.Interfaces
         public Task<AssetResponseDto?> GetNextAsset();
         public Task<IEnumerable<AssetResponseDto>> GetAssets();
         public Task<AssetResponseDto> GetAssetInfoById(Guid assetId);
+        public Task<IEnumerable<AssetFaceResponseDto>> GetAssetFacesById(Guid assetId);
         public Task<IEnumerable<AlbumResponseDto>> GetAlbumInfoById(Guid assetId);
         public Task<AssetResponse> GetAsset(Guid id, AssetTypeEnum? assetType = null, string? rangeHeader = null);
         public Task<long> GetTotalAssets();

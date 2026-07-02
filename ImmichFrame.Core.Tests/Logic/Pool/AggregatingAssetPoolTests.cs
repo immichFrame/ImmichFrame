@@ -22,7 +22,7 @@ namespace ImmichFrame.Core.Tests.Logic.Pool
             // AggregatingAssetPool takes IEnumerable<IAssetPool> in constructor
         }
 
-        private AssetResponseDto CreateAsset(string id) => new AssetResponseDto { Id = id, OriginalPath = $"/path/{id}.jpg", Type = AssetTypeEnum.IMAGE, ExifInfo = new ExifResponseDto() };
+        private AssetResponseDto CreateAsset(string id) => new AssetResponseDto { Id = FixtureHelpers.GuidFor(id), OriginalPath = $"/path/{id}.jpg", Type = AssetTypeEnum.IMAGE, ExifInfo = new ExifResponseDto() };
 
         [Test]
         public async Task GetAssetCount_NoPools_ReturnsZero()

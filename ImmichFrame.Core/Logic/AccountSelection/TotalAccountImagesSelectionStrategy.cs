@@ -17,14 +17,14 @@ public class TotalAccountImagesSelectionStrategy(ILogger<TotalAccountImagesSelec
     public async Task<(IAccountImmichFrameLogic, AssetResponseDto)?> GetNextAsset()
     {
         var chosen = await _accounts.ChooseOne(logic => logic.GetTotalAssets());
-        
+
         var asset = await chosen.GetNextAsset();
         if (asset != null)
         {
             await _tracker.RecordAssetLocation(chosen, asset.Id);
             return (chosen, asset);
         }
-        
+
         _logger.LogDebug("No next asset found");
         return null;
     }
@@ -83,5 +83,5 @@ public class TotalAccountImagesSelectionStrategy(ILogger<TotalAccountImagesSelec
     }
 
     public T ForAsset<T>(Guid assetId, Func<IAccountImmichFrameLogic, T> f)
-        => _tracker.ForAsset(assetId.ToString(), f);
+        => _tracker.ForAsset(assetId, f);
 }
