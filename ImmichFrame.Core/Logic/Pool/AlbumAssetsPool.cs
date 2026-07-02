@@ -23,7 +23,9 @@ public class AlbumAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSe
                     {
                         Page = page,
                         Size = batchSize,
-                        AlbumIds = [albumId]
+                        AlbumIds = [albumId],
+                        WithExif = true,
+                        WithPeople = true,
                     };
                     var searchResponse = await immichApi.SearchAssetsAsync(metadataBody, ct);
 
