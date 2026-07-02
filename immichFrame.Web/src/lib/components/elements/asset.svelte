@@ -56,7 +56,7 @@
 		onAssetError = () => {}
 	}: Props = $props();
 
-	let debug = true;
+	let debug = false;
 	const isVideo = $derived(isVideoAsset(asset[1]));
 
 	// Re-evaluate only when the asset changes; keep the interval stable for the
