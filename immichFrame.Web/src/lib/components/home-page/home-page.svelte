@@ -396,10 +396,7 @@
 		}
 
 		let faces: api.AssetFaceResponseDto[] = [];
-		if (
-			(assetResponse.people?.length ?? 0) > 0 &&
-			($configStore.imageZoom || $configStore.imagePan)
-		) {
+		if ($configStore.imageZoom || $configStore.imagePan) {
 			const facesRequest = await api.getAssetFaces(assetResponse.id, {
 				clientIdentifier: $clientIdentifierStore
 			});
