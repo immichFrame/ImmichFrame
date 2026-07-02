@@ -220,7 +220,7 @@
 			--pan-end-y: {panDirection === 'up' ? '-5%' : panDirection === 'down' ? '5%' : '0'};"
 	>
 		{#if debug}
-			{#each asset[1].people?.map((x) => x.name) ?? [] as _, i}
+			{#each asset[2]?.map((x) => x.person?.name) ?? [] as _, i}
 				<div
 					class="face z-[900] bg-red-600 absolute"
 					style="top: {getFaceMetric(i, 'y1')}%;
