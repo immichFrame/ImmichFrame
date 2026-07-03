@@ -137,7 +137,7 @@
 
 	async function loadAssets() {
 		try {
-			let assetRequest = await api.getAssets();
+			let assetRequest = await api.getAssets({ clientIdentifier: $clientIdentifierStore });
 
 			if (assetRequest.status != 200) {
 				if (assetRequest.status == 401) {
@@ -230,8 +230,10 @@
 			return;
 		}
 
-		const useSplit = shouldUseSplitView(assetBacklog);
-		const next = assetBacklog.splice(0, useSplit ? 2 : 1);
+		const candidates = assetBacklog.slice(0, 3);
+		const selectedIndices = selectAssetsForDisplay($configStore.layout, candidates);
+		const next = selectedIndices.map((i) => assetBacklog[i]);
+		assetBacklog = removeAtIndices(assetBacklog, selectedIndices);
 
 		if (displayingAssets.length) {
 			assetHistory.push(...displayingAssets);
@@ -251,8 +253,16 @@
 			return;
 		}
 
-		const useSplit = shouldUseSplitView(assetHistory.slice(-2));
-		const next = assetHistory.splice(useSplit ? -2 : -1);
+		// Take up to 3 most-recent history entries, reversed so the selection logic
+		// treats the most recently shown asset as the "first" candidate.
+		const historyLength = assetHistory.length;
+		const candidates = assetHistory.slice(historyLength - Math.min(3, historyLength)).reverse();
+		const selectedIndices = selectAssetsForDisplay($configStore.layout, candidates);
+
+		// Convert candidate indices back to history positions and restore display order.
+		const historyIndices = selectedIndices.map((i) => historyLength - 1 - i).reverse();
+		const next = historyIndices.map((i) => assetHistory[i]);
+		assetHistory = removeAtIndices(assetHistory, historyIndices);
 
 		if (displayingAssets.length) {
 			assetBacklog.unshift(...displayingAssets);
@@ -277,15 +287,53 @@
 		return assetHeight > assetWidth;
 	}
 
-	function shouldUseSplitView(assets: api.AssetResponseDto[]): boolean {
-		return (
-			$configStore.layout?.trim().toLowerCase() === 'splitview' &&
-			assets.length > 1 &&
-			isImageAsset(assets[0]) &&
-			isImageAsset(assets[1]) &&
-			isPortrait(assets[0]) &&
-			isPortrait(assets[1])
-		);
+	function removeAtIndices<T>(arr: T[], indicesToRemove: number[]): T[] {
+		const skipSet = new Set(indicesToRemove);
+		return arr.filter((_, i) => !skipSet.has(i));
+	}
+
+	// Selects which assets to display based on layout and orientation.
+	// For splitview, tries to pair portrait images together, to be shown side by side.
+	// Landscape images (and videos, which isPortrait treats as non-portrait) are shown alone.
+	function selectAssetsForDisplay(
+		layout: string | null | undefined,
+		candidates: api.AssetResponseDto[]
+	): number[] {
+		if (candidates.length < 1) {
+			return [];
+		}
+		if (candidates.length === 1 || layout?.trim().toLowerCase() !== 'splitview') {
+			return [0];
+		}
+
+		const isImage0Portrait = isPortrait(candidates[0]);
+		const isImage1Portrait = candidates.length > 1 ? isPortrait(candidates[1]) : false;
+		const isImage2Portrait = candidates.length > 2 ? isPortrait(candidates[2]) : false;
+
+		if (!isImage0Portrait) {
+			// first image is landscape, show it alone
+			return [0];
+		}
+
+		// otherwise, first image is portrait
+
+		if (candidates.length > 1 && isImage1Portrait) {
+			// pair with second if it's also portrait
+			return [0, 1];
+		}
+
+		if (candidates.length > 2 && isImage2Portrait) {
+			// pair with third if it's portrait (skip landscape second)
+			return [0, 2];
+		}
+
+		if (candidates[1] != null) {
+			// no portrait pair found, show second (landscape) instead
+			return [1];
+		}
+
+		// Unreachable state, but fallback to returning the first image.
+		return [0];
 	}
 
 	function hasBirthday(assets: api.AssetResponseDto[]) {
