@@ -35,7 +35,8 @@
     "ImagePan": true,
     "ImageFill": true,
     "PlayAudio": true,
-    "Layout": "Layout_TEST"
+    "Layout": "Layout_TEST",
+    "AssetBatchSize": 7
   },
   "Accounts": [
     {

@@ -34,6 +34,7 @@ General:
   ImageFill: false
   PlayAudio: false
   Layout: splitview
+  AssetBatchSize: 25
 Accounts:
   - ImmichServerUrl: REQUIRED
     # Exactly one of ApiKey or ApiKeyFile must be set.

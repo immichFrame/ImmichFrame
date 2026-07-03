@@ -72,6 +72,7 @@ public class GeneralSettings : IGeneralSettings, IConfigSettable
     public string? WeatherLatLong { get; set; } = "40.7128,74.0060";
     public string? Webhook { get; set; }
     public string? AuthenticationSecret { get; set; }
+    public int AssetBatchSize { get; set; } = 25;
 
     public void Validate() { }
 }

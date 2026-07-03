@@ -72,7 +72,10 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
 
     public async Task<IEnumerable<AssetResponseDto>> GetAssets()
     {
-        return await _pool.GetAssets(25);
+        // Immich's random search caps `size` at 1000 (and requires >= 1). Clamp here so any
+        // config source (V1 or V2) stays within bounds and can't fail the request.
+        var batchSize = Math.Clamp(_generalSettings.AssetBatchSize, 1, 1000);
+        return await _pool.GetAssets(batchSize);
     }
 
     public async Task<AssetResponseDto> GetAssetInfoById(Guid assetId) => await _immichApi.GetAssetInfoAsync(assetId, null, null);

@@ -104,6 +104,8 @@ General:
   PlayAudio: false  # boolean
   # Allow two portrait images to be displayed next to each other
   Layout: 'splitview'  # single | splitview
+  # Number of assets fetched per request from the server. Larger values show more distinct images before the random pool reshuffles, at the cost of a bigger initial fetch. Clamped to Immich's random-search range of 1-1000.
+  AssetBatchSize: 25  # int (1-1000)
 
 # multiple accounts permitted
 Accounts:
