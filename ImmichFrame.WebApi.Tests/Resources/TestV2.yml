@@ -35,6 +35,7 @@ General:
   ImageFill: true
   PlayAudio: true
   Layout: Layout_TEST
+  ClientPersistAssets: true
 Accounts:
 - ImmichServerUrl: Account1.ImmichServerUrl_TEST
   ApiKey: Account1.ApiKey_TEST

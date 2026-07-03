@@ -56,6 +56,7 @@ public class ServerSettingsV1 : IConfigSettable
     public bool ImageFill { get; set; } = false;
     public bool PlayAudio { get; set; } = false;
     public string Layout { get; set; } = "splitview";
+    public bool ClientPersistAssets { get; set; } = false;
 }
 
 /// <summary>
@@ -135,6 +136,7 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
         public bool PlayAudio => _delegate.PlayAudio;
         public string Layout => _delegate.Layout;
         public string Language => _delegate.Language;
+        public bool ClientPersistAssets => _delegate.ClientPersistAssets;
 
         public void Validate() { }
     }

@@ -104,6 +104,9 @@ General:
   PlayAudio: false  # boolean
   # Allow two portrait images to be displayed next to each other
   Layout: 'splitview'  # single | splitview
+  # Persist the asset queue, current assets, and history (back button) in client localStorage so a refresh/reload resumes in place instead of re-fetching.
+  # Note: a server restart clears the persisted assets on all clients (they can no longer be resolved after a restart).
+  ClientPersistAssets: false  # boolean
 
 # multiple accounts permitted
 Accounts:

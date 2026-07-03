@@ -34,6 +34,7 @@ General:
   ImageFill: false
   PlayAudio: false
   Layout: splitview
+  ClientPersistAssets: false
 Accounts:
   - ImmichServerUrl: REQUIRED
     # Exactly one of ApiKey or ApiKeyFile must be set.

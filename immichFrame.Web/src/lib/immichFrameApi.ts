@@ -228,6 +228,8 @@ export type ClientSettingsDto = {
     playAudio?: boolean;
     layout?: string | null;
     language?: string | null;
+    clientPersistAssets?: boolean;
+    serverSessionId?: string;
 };
 export type IWeather = {
     location?: string | null;

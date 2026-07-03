@@ -35,7 +35,8 @@
     "ImagePan": false,
     "ImageFill": false,
     "PlayAudio": false,
-    "Layout": "splitview"
+    "Layout": "splitview",
+    "ClientPersistAssets": false
   },
   "Accounts": [
     {
