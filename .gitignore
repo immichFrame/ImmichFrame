@@ -457,3 +457,9 @@ $RECYCLE.BIN/
 ## Ignore Settings file
 ImmichFrame/Settings.json
 ImmichFrame.WebApi/Config/Settings.json
+
+# QNAP NAS thumbnail cache
+.@__thumb/
+
+# Docker CLI / BuildKit local state
+.docker/
