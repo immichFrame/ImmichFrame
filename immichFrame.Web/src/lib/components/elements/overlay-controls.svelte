@@ -48,7 +48,7 @@
 	}
 
 	// Define your shortcut list
-	const shortcutList = [
+	const shortcutList = $derived([
 		{
 			key: 'ArrowRight',
 			action: next
@@ -65,7 +65,7 @@
 			key: 'i',
 			action: showInfo
 		}
-	];
+	]);
 </script>
 
 <svelte:window use:shortcuts={shortcutList} />
