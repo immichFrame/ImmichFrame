@@ -2,6 +2,7 @@ using System.Collections.Frozen;
 using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
+using ImmichFrame.Core.Logic.QueueMutator;
 using ImmichFrame.Core.Models;
 using Microsoft.Extensions.Logging;
 
@@ -13,13 +14,15 @@ public class MultiImmichFrameLogicDelegate : IImmichFrameLogic
     private readonly IServerSettings _serverSettings;
     private readonly IAccountSelectionStrategy _accountSelectionStrategy;
     private readonly ILogger<MultiImmichFrameLogicDelegate> _logger;
+    private readonly IQueueMutator<AssetResponseDto> _queueMutator;
 
     public MultiImmichFrameLogicDelegate(IServerSettings serverSettings,
         Func<IAccountSettings, IAccountImmichFrameLogic> logicFactory, ILogger<MultiImmichFrameLogicDelegate> logger,
-        IAccountSelectionStrategy accountSelectionStrategy)
+        IAccountSelectionStrategy accountSelectionStrategy, IQueueMutator<AssetResponseDto> queueMutator)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _accountSelectionStrategy = accountSelectionStrategy;
+        _queueMutator = queueMutator;
         _serverSettings = serverSettings;
         _accountToDelegate = serverSettings.Accounts.ToFrozenDictionary(
             keySelector: a => a,
@@ -32,7 +35,7 @@ public class MultiImmichFrameLogicDelegate : IImmichFrameLogic
 
 
     public async Task<IEnumerable<AssetResponseDto>> GetAssets()
-        => (await _accountSelectionStrategy.GetAssets()).Shuffle().Select(it => it.ToAsset());
+        => _queueMutator.Mutate((await _accountSelectionStrategy.GetAssets()).Select(it => it.ToAsset()));
 
 
     public Task<AssetResponseDto> GetAssetInfoById(Guid assetId)
