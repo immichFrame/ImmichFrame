@@ -1,4 +1,6 @@
-﻿namespace ImmichFrame.Core.Interfaces
+﻿using ImmichFrame.Core.Models;
+
+namespace ImmichFrame.Core.Interfaces
 {
     public interface IServerSettings
     {
@@ -66,6 +68,9 @@
         public bool PlayAudio { get; }
         public string Layout { get; }
         public string Language { get; }
+        public bool ShowCustomWidget { get; }
+        public List<CustomWidgetSourceConfig> CustomWidgetSources { get; }
+        public string CustomWidgetPosition { get; }
 
         public void Validate();
     }

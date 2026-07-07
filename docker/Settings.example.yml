@@ -34,6 +34,11 @@ General:
   ImageFill: false
   PlayAudio: false
   Layout: splitview
+  ShowCustomWidget: false
+  CustomWidgetPosition: 'top-left'
+  CustomWidgetSources:
+    - Url: 'http://example:3001/api/stats'
+      RefreshMinutes: 10
 Accounts:
   - ImmichServerUrl: REQUIRED
     # Exactly one of ApiKey or ApiKeyFile must be set.

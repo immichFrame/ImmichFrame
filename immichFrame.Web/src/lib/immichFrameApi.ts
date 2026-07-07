@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * ImmichFrame.WebApi
  * 1.0
@@ -191,6 +190,15 @@ export type ImageResponse = {
     photoDate: string | null;
     imageLocation: string | null;
 };
+export type CustomWidgetItem = {
+    label?: string | null;
+    value?: string | null;
+    secondary?: string | null;
+};
+export type CustomWidgetData = {
+    title?: string | null;
+    items?: CustomWidgetItem[] | null;
+};
 export type IAppointment = {
     startTime?: string;
     duration?: string;
@@ -228,6 +236,8 @@ export type ClientSettingsDto = {
     playAudio?: boolean;
     layout?: string | null;
     language?: string | null;
+    showCustomWidget?: boolean;
+    customWidgetPosition?: string | null;
 };
 export type IWeather = {
     location?: string | null;
@@ -324,6 +334,18 @@ export function getRandomImageAndInfo({ clientIdentifier }: {
         status: 200;
         data: ImageResponse;
     }>(`/api/Asset/RandomImageAndInfo${QS.query(QS.explode({
+        clientIdentifier
+    }))}`, {
+        ...opts
+    });
+}
+export function getCustomWidgetData({ clientIdentifier }: {
+    clientIdentifier?: string;
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: CustomWidgetData[];
+    }>(`/api/CustomWidget${QS.query(QS.explode({
         clientIdentifier
     }))}`, {
         ...opts
