@@ -14,8 +14,20 @@ public class BloomFilterAssetAccountTracker(ILogger<BloomFilterAssetAccountTrack
 
     public async ValueTask<bool> RecordAssetLocation(IAccountImmichFrameLogic account, Guid assetId)
     {
-        var filter = await logicToFilter.GetOrAdd(account,
-            acc => new Lazy<Task<IBloomFilter>>(() => NewFilter(acc))).Value;
+        var lazyFilter = logicToFilter.GetOrAdd(account,
+            acc => new Lazy<Task<IBloomFilter>>(() => NewFilter(acc)));
+        IBloomFilter filter;
+        try
+        {
+            filter = await lazyFilter.Value;
+        }
+        catch
+        {
+            // A faulted Lazy would otherwise be cached forever; evict it (only if it is
+            // still this exact entry) so the next call rebuilds the filter.
+            logicToFilter.TryRemove(KeyValuePair.Create(account, lazyFilter));
+            throw;
+        }
         return await filter.AddAsync(assetId.ToString());
     }
 

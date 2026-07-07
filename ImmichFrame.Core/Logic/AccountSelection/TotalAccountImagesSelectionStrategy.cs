@@ -51,6 +51,12 @@ public class TotalAccountImagesSelectionStrategy(
 
     public async Task<IEnumerable<(IAccountImmichFrameLogic, AssetResponseDto)>> GetAssets()
     {
+        if (_accounts.Count == 0)
+        {
+            _logger.LogDebug("No accounts configured, returning no assets");
+            return Enumerable.Empty<(IAccountImmichFrameLogic, AssetResponseDto)>();
+        }
+
         var proportions = await GetProportions(_accounts);
         var maxAccount = proportions.Max();
         var adjustedProportions = proportions.Select(x => x / maxAccount).ToList();

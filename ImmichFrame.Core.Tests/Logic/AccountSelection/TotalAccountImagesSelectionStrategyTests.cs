@@ -40,6 +40,16 @@ namespace ImmichFrame.Core.Tests.Logic.AccountSelection
         };
 
         [Test]
+        public async Task GetAssets_NoAccounts_ReturnsEmpty()
+        {
+            var strategy = CreateStrategy();
+
+            var assets = await strategy.GetAssets();
+
+            Assert.That(assets, Is.Empty);
+        }
+
+        [Test]
         public async Task GetAssets_AllAccountsEmpty_ReturnsEmptyWithoutNaN()
         {
             var account1 = CreateAccount(0, Enumerable.Empty<AssetResponseDto>());
