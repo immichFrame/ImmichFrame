@@ -8,6 +8,16 @@ using ImmichFrame.Core.Logic.AccountSelection;
 using ImmichFrame.WebApi.Helpers.Config;
 
 var builder = WebApplication.CreateBuilder(args);
+
+if (builder.Environment.IsDevelopment())
+{
+    var root = Directory.GetCurrentDirectory();
+    var dotenv = Path.Combine(root, "..", "docker", ".env");
+
+    dotenv = Path.GetFullPath(dotenv);
+    DotEnv.Load(dotenv);
+}
+
 //log the version number
 var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
 Console.WriteLine($@"
@@ -80,6 +90,28 @@ builder.Services.AddAuthentication("ImmichFrameScheme")
 
 var app = builder.Build();
 
+var settings = app.Services.GetRequiredService<IGeneralSettings>();
+var baseUrl = settings.BaseUrl?.TrimEnd('/');
+
+if (!string.IsNullOrEmpty(baseUrl) && baseUrl != "/")
+{
+    app.UsePathBase(baseUrl);
+
+    // Ensure that requests not starting with BaseUrl do not fall through to the app
+    app.Use(async (context, next) =>
+    {
+        if (!context.Request.PathBase.HasValue || !context.Request.PathBase.Value.Equals(baseUrl, StringComparison.OrdinalIgnoreCase))
+        {
+            context.Response.StatusCode = StatusCodes.Status404NotFound;
+            await context.Response.WriteAsync("Not Found");
+            return;
+        }
+        await next();
+    });
+}
+
+app.UseRouting();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -91,15 +123,6 @@ app.UseStaticFiles();
 if (app.Environment.IsProduction())
 {
     app.UseDefaultFiles();
-}
-
-if (app.Environment.IsDevelopment())
-{
-    var root = Directory.GetCurrentDirectory();
-    var dotenv = Path.Combine(root, "..", "docker", ".env");
-
-    dotenv = Path.GetFullPath(dotenv);
-    DotEnv.Load(dotenv);
 }
 
 // app.UseHttpsRedirection();

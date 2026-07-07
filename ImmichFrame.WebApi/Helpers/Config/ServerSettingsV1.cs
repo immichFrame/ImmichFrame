@@ -56,6 +56,7 @@ public class ServerSettingsV1 : IConfigSettable
     public bool ImageFill { get; set; } = false;
     public bool PlayAudio { get; set; } = false;
     public string Layout { get; set; } = "splitview";
+    public string BaseUrl { get; set; } = "/";
 }
 
 /// <summary>
@@ -64,6 +65,7 @@ public class ServerSettingsV1 : IConfigSettable
 /// <param name="_delegate">the V1 settings object to wrap</param>
 public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettings
 {
+    public ServerSettingsV1 Settings { get; } = _delegate;
     public IEnumerable<IAccountSettings> Accounts => new List<AccountSettingsV1Adapter> { new(_delegate) };
     public IGeneralSettings GeneralSettings => new GeneralSettingsV1Adapter(_delegate);
 
@@ -135,6 +137,7 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
         public bool PlayAudio => _delegate.PlayAudio;
         public string Layout => _delegate.Layout;
         public string Language => _delegate.Language;
+        public string BaseUrl => _delegate.BaseUrl;
 
         public void Validate() { }
     }
