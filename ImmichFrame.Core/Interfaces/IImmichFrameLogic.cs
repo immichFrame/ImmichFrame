@@ -24,7 +24,6 @@ namespace ImmichFrame.Core.Interfaces
 
     public interface IAccountSelectionStrategy
     {
-        void Initialize(IList<IAccountImmichFrameLogic> accounts);
         Task<(IAccountImmichFrameLogic, AssetResponseDto)?> GetNextAsset();
         Task<IEnumerable<(IAccountImmichFrameLogic, AssetResponseDto)>> GetAssets();
         T ForAsset<T>(Guid assetId, Func<IAccountImmichFrameLogic, T> f);
