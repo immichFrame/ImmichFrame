@@ -2,7 +2,15 @@
 	import * as api from '$lib/index';
 	import ProgressBar from '$lib/components/elements/progress-bar.svelte';
 	import { slideshowStore } from '$lib/stores/slideshow.store';
-	import { clientIdentifierStore, authSecretStore } from '$lib/stores/persist.store';
+	import {
+		clientIdentifierStore,
+		authSecretStore,
+		serverSessionIdStore,
+		assetBacklogStore,
+		assetHistoryStore,
+		displayingAssetsStore,
+		clearPersistedStore
+	} from '$lib/stores/persist.store';
 	import { onDestroy, onMount, setContext, tick } from 'svelte';
 	import OverlayControls from '../elements/overlay-controls.svelte';
 	import AssetComponent from '../elements/asset-component.svelte';
@@ -135,6 +143,33 @@
 		});
 	}
 
+	// persist helpers - save to localStorage when the corresponding option is enabled
+	function persistBacklog() {
+		if ($configStore.clientPersistAssets) {
+			assetBacklogStore.set(assetBacklog);
+		}
+	}
+
+	function persistHistory() {
+		if ($configStore.clientPersistAssets) {
+			assetHistoryStore.set(assetHistory);
+		}
+	}
+
+	function persistDisplaying() {
+		if ($configStore.clientPersistAssets) {
+			displayingAssetsStore.set(displayingAssets);
+		}
+	}
+
+	// Set the currently-displayed assets, persist them, and load their media.
+	async function showAssets(next: api.AssetResponseDto[]) {
+		displayingAssets = next;
+		persistDisplaying();
+		await updateAssetPromises();
+		assetsState = await pickAssets(next);
+	}
+
 	async function loadAssets() {
 		try {
 			let assetRequest = await api.getAssets();
@@ -151,6 +186,7 @@
 			assetBacklog = assetRequest.data.filter(
 				(asset) => isImageAsset(asset) || isVideoAsset(asset)
 			);
+			persistBacklog();
 		} catch {
 			error = true;
 		}
@@ -232,6 +268,7 @@
 
 		const useSplit = shouldUseSplitView(assetBacklog);
 		const next = assetBacklog.splice(0, useSplit ? 2 : 1);
+		persistBacklog();
 
 		if (displayingAssets.length) {
 			assetHistory.push(...displayingAssets);
@@ -240,10 +277,9 @@
 		if (assetHistory.length > 250) {
 			assetHistory = assetHistory.slice(-250);
 		}
+		persistHistory();
 
-		displayingAssets = next;
-		await updateAssetPromises();
-		assetsState = await pickAssets(next);
+		await showAssets(next);
 	}
 
 	async function getPreviousAssets() {
@@ -253,14 +289,14 @@
 
 		const useSplit = shouldUseSplitView(assetHistory.slice(-2));
 		const next = assetHistory.splice(useSplit ? -2 : -1);
+		persistHistory();
 
 		if (displayingAssets.length) {
 			assetBacklog.unshift(...displayingAssets);
+			persistBacklog();
 		}
 
-		displayingAssets = next;
-		await updateAssetPromises();
-		assetsState = await pickAssets(next);
+		await showAssets(next);
 	}
 
 	function isPortrait(asset: api.AssetResponseDto) {
@@ -460,7 +496,45 @@
 			}
 		});
 
-		getNextAssets();
+		// Detect a server restart: the server's asset-routing tracker (BloomFilter) resets on
+		// restart, so any persisted assets can no longer be resolved and must be dropped.
+		const currentServerSessionId = $configStore.serverSessionId;
+		const sessionChanged =
+			currentServerSessionId == null || $serverSessionIdStore !== currentServerSessionId;
+		if (sessionChanged) {
+			assetBacklogStore.set([]);
+			assetHistoryStore.set([]);
+			displayingAssetsStore.set([]);
+			if (currentServerSessionId != null){
+				serverSessionIdStore.set(currentServerSessionId);
+			} else {
+				clearPersistedStore('serverSessionId');
+			}
+		}
+
+		// Restore the persisted queue, currently-displayed assets, and history.
+		let restoredDisplaying = false;
+		if ($configStore.clientPersistAssets && !sessionChanged) {
+			const storedBacklog = $assetBacklogStore;
+			if (storedBacklog?.length) {
+				assetBacklog = storedBacklog;
+			}
+			const storedDisplaying = $displayingAssetsStore;
+			if (storedDisplaying?.length) {
+				displayingAssets = storedDisplaying;
+				restoredDisplaying = true;
+			}
+			const storedHistory = $assetHistoryStore;
+			if (storedHistory?.length) {
+				assetHistory = storedHistory;
+			}
+		}
+
+		if (restoredDisplaying) {
+			showAssets(displayingAssets);
+		} else {
+			getNextAssets();
+		}
 
 		return () => {
 			window.removeEventListener('mousemove', showCursor);

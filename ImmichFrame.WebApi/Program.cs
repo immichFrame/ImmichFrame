@@ -57,6 +57,7 @@ builder.Services.AddSingleton<IServerSettings>(srv => srv.GetRequiredService<Con
 builder.Services.AddSingleton<IGeneralSettings>(srv => srv.GetRequiredService<IServerSettings>().GeneralSettings);
 
 // Register services
+builder.Services.AddSingleton<ImmichFrame.WebApi.Helpers.ServerSession>();
 builder.Services.AddSingleton<IWeatherService, OpenWeatherMapService>();
 builder.Services.AddSingleton<ICalendarService, IcalCalendarService>();
 builder.Services.AddSingleton<IAssetAccountTracker, BloomFilterAssetAccountTracker>();

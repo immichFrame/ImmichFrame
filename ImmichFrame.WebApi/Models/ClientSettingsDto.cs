@@ -32,8 +32,10 @@ public class ClientSettingsDto
     public bool PlayAudio { get; set; }
     public string Layout { get; set; }
     public string Language { get; set; }
+    public bool ClientPersistAssets { get; set; }
+    public string ServerSessionId { get; set; } = string.Empty;
 
-    public static ClientSettingsDto FromGeneralSettings(IGeneralSettings generalSettings)
+    public static ClientSettingsDto FromGeneralSettings(IGeneralSettings generalSettings, string serverSessionId)
     {
         ClientSettingsDto dto = new ClientSettingsDto();
         dto.Interval = generalSettings.Interval;
@@ -64,6 +66,8 @@ public class ClientSettingsDto
         dto.PlayAudio = generalSettings.PlayAudio;
         dto.Layout = generalSettings.Layout;
         dto.Language = generalSettings.Language;
+        dto.ClientPersistAssets = generalSettings.ClientPersistAssets;
+        dto.ServerSessionId = serverSessionId;
         return dto;
     }
 }

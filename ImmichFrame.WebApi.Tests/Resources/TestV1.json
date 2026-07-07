@@ -9,6 +9,7 @@
     "ImageFill": true,
     "PlayAudio": true,
     "Layout": "Layout_TEST",
+    "ClientPersistAssets": true,
     "DownloadImages": true,
     "ShowMemories": true,
     "ShowFavorites": true,
