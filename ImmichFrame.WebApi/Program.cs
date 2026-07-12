@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using System.Reflection;
 using ImmichFrame.Core.Logic;
 using ImmichFrame.Core.Logic.AccountSelection;
+using ImmichFrame.WebApi.Helpers;
 using ImmichFrame.WebApi.Helpers.Config;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -42,6 +43,11 @@ builder.Services.AddLogging(builder =>
     builder.AddFilter("Microsoft.AspNetCore.SpaProxy", LogLevel.Warning);
     // Disable AspNetCore info logs
     builder.AddFilter("Microsoft.AspNetCore", LogLevel.Warning);
+    // Only show HttpClient request info logs when LOG_LEVEL is Debug or lower
+    if (level > LogLevel.Debug)
+    {
+        builder.AddFilter("System.Net.Http.HttpClient", LogLevel.Warning);
+    }
 });
 
 
@@ -111,6 +117,8 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.MapFallbackToFile("/index.html");
+
+await ImmichServerVersionLogger.LogServerVersions(app.Services, app.Logger);
 
 app.Run();
 
