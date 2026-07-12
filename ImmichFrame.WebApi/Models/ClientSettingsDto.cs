@@ -2,68 +2,34 @@ using ImmichFrame.Core.Interfaces;
 
 namespace ImmichFrame.WebApi.Models;
 
-public class ClientSettingsDto
+public class ClientSettingsDto(IClientSettings settings) : IClientSettings
 {
-    public int Interval { get; set; }
-    public double TransitionDuration { get; set; }
-    public bool DownloadImages { get; set; }
-    public int RenewImagesDuration { get; set; }
-    public bool ShowClock { get; set; }
-    public string? ClockFormat { get; set; }
-    public string? ClockDateFormat { get; set; }
-    public bool ShowPhotoDate { get; set; }
-    public bool ShowProgressBar { get; set; }
-    public string? PhotoDateFormat { get; set; }
-    public bool ShowImageDesc { get; set; }
-    public bool ShowPeopleDesc { get; set; }
-    public bool ShowTagsDesc { get; set; }
-    public bool ShowAlbumName { get; set; }
-    public bool ShowImageLocation { get; set; }
-    public string? ImageLocationFormat { get; set; }
-    public string? PrimaryColor { get; set; }
-    public string? SecondaryColor { get; set; }
-    public string Style { get; set; }
-    public string? BaseFontSize { get; set; }
-    public bool ShowWeatherDescription { get; set; }
-    public string? WeatherIconUrl { get; set; }
-    public bool ImageZoom { get; set; }
-    public bool ImagePan { get; set; }
-    public bool ImageFill { get; set; }
-    public bool PlayAudio { get; set; }
-    public string Layout { get; set; }
-    public string Language { get; set; }
-
-    public static ClientSettingsDto FromGeneralSettings(IGeneralSettings generalSettings)
-    {
-        ClientSettingsDto dto = new ClientSettingsDto();
-        dto.Interval = generalSettings.Interval;
-        dto.TransitionDuration = generalSettings.TransitionDuration;
-        dto.DownloadImages = generalSettings.DownloadImages;
-        dto.RenewImagesDuration = generalSettings.RenewImagesDuration;
-        dto.ShowClock = generalSettings.ShowClock;
-        dto.ClockFormat = generalSettings.ClockFormat;
-        dto.ClockDateFormat = generalSettings.ClockDateFormat;
-        dto.ShowPhotoDate = generalSettings.ShowPhotoDate;
-        dto.ShowProgressBar = generalSettings.ShowProgressBar;
-        dto.PhotoDateFormat = generalSettings.PhotoDateFormat;
-        dto.ShowImageDesc = generalSettings.ShowImageDesc;
-        dto.ShowPeopleDesc = generalSettings.ShowPeopleDesc;
-        dto.ShowTagsDesc = generalSettings.ShowTagsDesc;
-        dto.ShowAlbumName = generalSettings.ShowAlbumName;
-        dto.ShowImageLocation = generalSettings.ShowImageLocation;
-        dto.ImageLocationFormat = generalSettings.ImageLocationFormat;
-        dto.PrimaryColor = generalSettings.PrimaryColor;
-        dto.SecondaryColor = generalSettings.SecondaryColor;
-        dto.Style = generalSettings.Style;
-        dto.BaseFontSize = generalSettings.BaseFontSize;
-        dto.ShowWeatherDescription = generalSettings.ShowWeatherDescription;
-        dto.WeatherIconUrl = generalSettings.WeatherIconUrl;
-        dto.ImageZoom = generalSettings.ImageZoom;
-        dto.ImagePan = generalSettings.ImagePan;
-        dto.ImageFill = generalSettings.ImageFill;
-        dto.PlayAudio = generalSettings.PlayAudio;
-        dto.Layout = generalSettings.Layout;
-        dto.Language = generalSettings.Language;
-        return dto;
-    }
+    public int Interval => settings.Interval;
+    public double TransitionDuration => settings.TransitionDuration;
+    public bool DownloadImages => settings.DownloadImages;
+    public int RenewImagesDuration => settings.RenewImagesDuration;
+    public bool ShowClock => settings.ShowClock;
+    public string? ClockFormat => settings.ClockFormat;
+    public string? ClockDateFormat => settings.ClockDateFormat;
+    public bool ShowPhotoDate => settings.ShowPhotoDate;
+    public bool ShowProgressBar => settings.ShowProgressBar;
+    public string? PhotoDateFormat => settings.PhotoDateFormat;
+    public bool ShowImageDesc => settings.ShowImageDesc;
+    public bool ShowPeopleDesc => settings.ShowPeopleDesc;
+    public bool ShowTagsDesc => settings.ShowTagsDesc;
+    public bool ShowAlbumName => settings.ShowAlbumName;
+    public bool ShowImageLocation => settings.ShowImageLocation;
+    public string? ImageLocationFormat => settings.ImageLocationFormat;
+    public string? PrimaryColor => settings.PrimaryColor;
+    public string? SecondaryColor => settings.SecondaryColor;
+    public string Style => settings.Style;
+    public string? BaseFontSize => settings.BaseFontSize;
+    public bool ShowWeatherDescription => settings.ShowWeatherDescription;
+    public string? WeatherIconUrl => settings.WeatherIconUrl;
+    public bool ImageZoom => settings.ImageZoom;
+    public bool ImagePan => settings.ImagePan;
+    public bool ImageFill => settings.ImageFill;
+    public bool PlayAudio => settings.PlayAudio;
+    public string Layout => settings.Layout;
+    public string Language => settings.Language;
 }
