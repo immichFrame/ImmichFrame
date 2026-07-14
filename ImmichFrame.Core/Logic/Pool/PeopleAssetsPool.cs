@@ -36,7 +36,7 @@ public class PersonAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountS
                     metadataBody.Type = AssetTypeEnum.IMAGE;
                 }
 
-                var personInfo = await immichApi.SearchAssetsAsync(metadataBody, ct);
+                var personInfo = await immichApi.SearchAssetsAsync(null, null, metadataBody, ct);
 
                 total = personInfo.Assets.Total;
 

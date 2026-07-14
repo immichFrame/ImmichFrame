@@ -23,7 +23,7 @@ public static class AssetHelper
                     Size = batchSize,
                     AlbumIds = [albumId]
                 };
-                var searchResponse = await immichApi.SearchAssetsAsync(metadataBody, ct);
+                var searchResponse = await immichApi.SearchAssetsAsync(null, null, metadataBody, ct);
 
                 itemsInPage = searchResponse.Assets?.Items.Count ?? 0;
 

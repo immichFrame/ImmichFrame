@@ -28,7 +28,7 @@ public class FavoriteAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccoun
                 metadataBody.Type = AssetTypeEnum.IMAGE;
             }
 
-            var favoriteInfo = await immichApi.SearchAssetsAsync(metadataBody, ct);
+            var favoriteInfo = await immichApi.SearchAssetsAsync(null, null, metadataBody, ct);
 
             total = favoriteInfo.Assets.Total;
 
