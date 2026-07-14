@@ -1,17 +1,13 @@
 using System;
 using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
-using ImmichFrame.WebApi.Tests.Mocks;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Http; // Added this
 using Moq;
 using Moq.Protected;
 using ImmichFrame.Core.Api;
 using ImmichFrame.WebApi.Models;
+using ImmichFrame.WebApi.Tests.Mocks;
 using ImmichFrame.Core.Interfaces; // Added this back
 using System.Text.Json;
 using NUnit.Framework;
@@ -27,25 +23,16 @@ namespace ImmichFrame.WebApi.Tests.Controllers
         [SetUp]
         public void Setup()
         {
-            _mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+            _mockHttpMessageHandler = new Mock<HttpMessageHandler>().WithServerVersion();
+
             _factory = new WebApplicationFactory<Program>()
                 .WithWebHostBuilder(builder =>
                 {
                     builder.ConfigureTestServices(services =>
                     {
-                        // 1. Mock HttpMessageHandler and IHttpClientFactory
-                        services.AddSingleton<HttpMessageHandler>(_mockHttpMessageHandler.Object);
-                        services.AddHttpClient("ImmichApiAccountClient")
-                            .ConfigurePrimaryHttpMessageHandler(sp => sp.GetRequiredService<HttpMessageHandler>());
-                        services.ConfigureAll<HttpClientFactoryOptions>(options =>
-                        {
-                            options.HttpMessageHandlerBuilderActions.Add(b =>
-                            {
-                                b.PrimaryHandler = b.Services.GetRequiredService<HttpMessageHandler>();
-                            });
-                        });
+                        services.UseMockHandler(_mockHttpMessageHandler);
 
-                        // 2. Directly instantiate and register settings objects
+                        // Directly instantiate and register settings objects
                         var generalSettings = new GeneralSettings
                         {
                             ShowWeatherDescription = false, // Assuming this corresponds to ShowWeather

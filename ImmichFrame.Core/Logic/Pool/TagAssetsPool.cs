@@ -50,7 +50,7 @@ public class TagAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSett
                     metadataBody.Type = AssetTypeEnum.IMAGE;
                 }
 
-                var tagInfo = await immichApi.SearchAssetsAsync(metadataBody, ct);
+                var tagInfo = await immichApi.SearchAssetsAsync(null, null, metadataBody, ct);
 
                 itemsInPage = tagInfo.Assets.Items.Count;
 

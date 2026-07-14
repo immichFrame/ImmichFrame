@@ -1,10 +1,13 @@
+using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.WebApi.Models;
+using ImmichFrame.WebApi.Tests.Mocks;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using NUnit.Framework;
 
 namespace ImmichFrame.WebApi.Tests.Controllers
@@ -72,11 +75,15 @@ namespace ImmichFrame.WebApi.Tests.Controllers
                 }
             };
 
+            var versionHandler = new Mock<HttpMessageHandler>().WithServerVersion();
+
             _factory = new WebApplicationFactory<Program>()
                 .WithWebHostBuilder(builder =>
                 {
                     builder.ConfigureTestServices(services =>
                     {
+                        services.UseMockHandler(versionHandler);
+
                         services.AddSingleton<IServerSettings>(serverSettings);
                         services.AddSingleton<IGeneralSettings>(generalSettings);
                     });

@@ -185,7 +185,7 @@ public class AllAssetsPoolTests
 
         _mockImmichApi.Setup(api => api.SearchRandomAsync(It.IsAny<RandomSearchDto>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(assetsToReturnFromSearch);
-        _mockImmichApi.Setup(api => api.SearchAssetsAsync(It.Is<MetadataSearchDto>(d => d.AlbumIds.Contains(excludedAlbumId)), It.IsAny<CancellationToken>()))
+        _mockImmichApi.Setup(api => api.SearchAssetsAsync(It.IsAny<string>(), It.IsAny<string>(), It.Is<MetadataSearchDto>(d => d.AlbumIds.Contains(excludedAlbumId)), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new SearchResponseDto { Assets = new SearchAssetResponseDto { Items = new List<AssetResponseDto> { excludedAsset }, Total = 1 } });
 
         // Act
@@ -196,7 +196,7 @@ public class AllAssetsPoolTests
         Assert.That(result.Any(a => a.Id == FixtureHelpers.GuidFor("excluded1")), Is.False);
         var mainIds = mainAssets.Select(a => a.Id);
         Assert.That(result.All(a => mainIds.Contains(a.Id)));
-        _mockImmichApi.Verify(api => api.SearchAssetsAsync(It.Is<MetadataSearchDto>(d => d.AlbumIds.Contains(excludedAlbumId)), It.IsAny<CancellationToken>()), Times.Once);
+        _mockImmichApi.Verify(api => api.SearchAssetsAsync(It.IsAny<string>(), It.IsAny<string>(), It.Is<MetadataSearchDto>(d => d.AlbumIds.Contains(excludedAlbumId)), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Test]
@@ -218,6 +218,6 @@ public class AllAssetsPoolTests
         Assert.That(result, Is.EqualTo(allAssets));
 
         // Verify that no excluded-album lookup happened since ExcludedAlbums is null
-        _mockImmichApi.Verify(api => api.SearchAssetsAsync(It.IsAny<MetadataSearchDto>(), It.IsAny<CancellationToken>()), Times.Never);
+        _mockImmichApi.Verify(api => api.SearchAssetsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<MetadataSearchDto>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 }

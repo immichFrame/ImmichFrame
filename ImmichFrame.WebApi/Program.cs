@@ -121,7 +121,12 @@ app.MapControllers();
 
 app.MapFallbackToFile("/index.html");
 
-await ImmichServerVersionLogger.LogServerVersions(app.Services, app.Logger);
+var immichStartupAllowed = await ImmichServerVersionChecker.CheckServerVersions(app.Services, app.Logger);
+if (!immichStartupAllowed)
+{
+    app.Logger.LogCritical("ImmichFrame cannot start: Immich server requirements are not satisfied (see log above). Shutting down.");
+    Environment.Exit(1);
+}
 
 app.Run();
 
