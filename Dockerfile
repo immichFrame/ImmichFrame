@@ -44,6 +44,12 @@ WORKDIR /app
 ARG VERSION
 ENV APP_VERSION=$VERSION
 
+LABEL org.opencontainers.image.title="ImmichFrame" \
+      org.opencontainers.image.source="https://github.com/immichFrame/ImmichFrame" \
+      org.opencontainers.image.url="https://github.com/immichFrame/ImmichFrame" \
+      org.opencontainers.image.licenses="GPL-3.0" \
+      org.opencontainers.image.version="v${VERSION}" \
+      org.opencontainers.image.revision="d8bcf4f"
 # Copy .NET API and frontend assets
 COPY --from=publish-api /app ./
 COPY --from=build-node /app/build ./wwwroot
