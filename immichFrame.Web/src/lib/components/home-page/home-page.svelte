@@ -17,7 +17,7 @@
 	import { isImageAsset, isVideoAsset } from '$lib/constants/asset-type';
 
 	interface AssetsState {
-		assets: [string, api.AssetResponseDto, api.AlbumResponseDto[]][];
+		assets: [string, api.AssetResponseDto, api.AssetFaceResponseDto[], api.AlbumResponseDto[]][];
 		error: boolean;
 		loaded: boolean;
 		split: boolean;
@@ -26,11 +26,14 @@
 
 	api.init();
 
-	// TODO: make this configurable?
 	const PRELOAD_ASSETS = 5;
+	const TRANSITION_WATCHDOG_MS = 10000;
+	const VIDEO_STALL_MS = 15000;
+	const CURSOR_HIDE_MS = 2000;
+	const RELOAD_ON_ERROR_MS = 30000;
 
-	let assetHistory: api.AssetResponseDto[] = [];
-	let assetBacklog: api.AssetResponseDto[] = [];
+	let assetHistory: api.AssetResponseDto[] = $state([]);
+	let assetBacklog: api.AssetResponseDto[] = $state([]);
 
 	let displayingAssets: api.AssetResponseDto[] = $state([]);
 
@@ -40,6 +43,13 @@
 	let progressBar: ProgressBar = $state() as ProgressBar;
 	let assetComponent: AssetComponentInstance = $state() as AssetComponentInstance;
 	let currentDuration: number = $state($configStore.interval ?? 20);
+
+	let consecutiveErrorSkips = 0;
+	let errorSkipScheduled = false;
+	let watchdogTimer: number | undefined;
+	let videoStallTimeout: number | undefined;
+	let timeoutId: number | undefined;
+
 	let userPaused: boolean = $state(false);
 
 	let error: boolean = $state(false);
@@ -55,7 +65,7 @@
 	});
 	let assetPromisesDict: Record<
 		string,
-		Promise<[string, api.AssetResponseDto, api.AlbumResponseDto[]]>
+		Promise<[string, api.AssetResponseDto, api.AssetFaceResponseDto[], api.AlbumResponseDto[]]>
 	> = {};
 
 	let unsubscribeRestart: () => void;
@@ -63,7 +73,6 @@
 	let refreshInterval: number;
 
 	let cursorVisible = $state(true);
-	let timeoutId: number;
 
 	const clientIdentifier = page.url.searchParams.get('client');
 	const authsecret = page.url.searchParams.get('authsecret');
@@ -93,7 +102,7 @@
 	const showCursor = () => {
 		cursorVisible = true;
 		clearTimeout(timeoutId);
-		timeoutId = setTimeout(hideCursor, 2000);
+		timeoutId = window.setTimeout(hideCursor, CURSOR_HIDE_MS);
 	};
 
 	async function updateAssetPromises() {
@@ -116,16 +125,14 @@
 				!displayingAssets.find((item) => item.id === key) &&
 				!assetBacklog.find((item) => item.id === key)
 		);
-		for (const key of keysToRemove) {
-			try {
-				const [url] = await assetPromisesDict[key];
-				revokeObjectUrl(url);
-			} catch (err) {
-				console.warn('Failed to resolve asset during cleanup:', err);
-			} finally {
-				delete assetPromisesDict[key];
-			}
-		}
+
+		keysToRemove.forEach((key) => {
+			const promise = assetPromisesDict[key];
+			delete assetPromisesDict[key];
+			promise
+				.then(([url]) => revokeObjectUrl(url))
+				.catch((err) => console.warn('Failed to resolve asset during cleanup:', err));
+		});
 	}
 
 	async function loadAssets() {
@@ -149,12 +156,39 @@
 		}
 	}
 
-	let isHandlingAssetTransition = false;
+	let isHandlingAssetTransition = $state(false);
+	let transitionEpoch = 0;
+	let pendingTransition: { previous: boolean; instant: boolean } | null = $state(null);
+
 	const handleDone = async (previous: boolean = false, instant: boolean = false) => {
 		if (isHandlingAssetTransition) {
+			pendingTransition = { previous, instant };
 			return;
 		}
+
+		const currentEpoch = ++transitionEpoch;
 		isHandlingAssetTransition = true;
+
+		clearTimeout(watchdogTimer);
+		clearTimeout(videoStallTimeout);
+		// Watchdog: If the transition (fetching/loading assets) hangs, force-release the lock.
+		watchdogTimer = window.setTimeout(() => {
+			if (currentEpoch === transitionEpoch && isHandlingAssetTransition) {
+				console.error('Transition watchdog triggered: Force-resetting lock due to hang');
+				isHandlingAssetTransition = false;
+
+				// Bump the epoch so the original (still-awaiting) transition becomes a no-op
+				// when/if it eventually resolves, and force a fresh advance.
+				transitionEpoch++;
+				const next = pendingTransition ?? { previous: false, instant: true };
+				pendingTransition = null;
+				handleDone(next.previous, next.instant).catch((err) => {
+					console.error('handleDone failed:', err);
+					isHandlingAssetTransition = false;
+				});
+			}
+		}, TRANSITION_WATCHDOG_MS);
+
 		try {
 			userPaused = false;
 			progressBar.restart(false);
@@ -162,10 +196,26 @@
 			if (previous) await getPreviousAssets();
 			else await getNextAssets();
 			await tick();
+
+			if (currentEpoch !== transitionEpoch) return;
+
 			await assetComponent?.play?.();
 			progressBar.play();
+			consecutiveErrorSkips = 0;
 		} finally {
-			isHandlingAssetTransition = false;
+			if (currentEpoch === transitionEpoch) {
+				isHandlingAssetTransition = false;
+				clearTimeout(watchdogTimer);
+
+				if (pendingTransition) {
+					const next = pendingTransition;
+					pendingTransition = null;
+					handleDone(next.previous, next.instant).catch((err) => {
+						console.error('handleDone failed:', err);
+						isHandlingAssetTransition = false;
+					});
+				}
+			}
 		}
 	};
 
@@ -182,7 +232,6 @@
 
 		const useSplit = shouldUseSplitView(assetBacklog);
 		const next = assetBacklog.splice(0, useSplit ? 2 : 1);
-		assetBacklog = [...assetBacklog];
 
 		if (displayingAssets.length) {
 			assetHistory.push(...displayingAssets);
@@ -204,7 +253,6 @@
 
 		const useSplit = shouldUseSplitView(assetHistory.slice(-2));
 		const next = assetHistory.splice(useSplit ? -2 : -1);
-		assetHistory = [...assetHistory];
 
 		if (displayingAssets.length) {
 			assetBacklog.unshift(...displayingAssets);
@@ -275,28 +323,11 @@
 		return $configStore.interval ?? 20;
 	}
 
-	function parseAssetDuration(duration?: string | null) {
-		if (!duration) {
+	function parseAssetDuration(duration?: number | null) {
+		if (!duration || duration <= 0) {
 			return 0;
 		}
-		const parts = duration.split(':').map((value) => value.trim().replace(',', '.'));
-
-		if (parts.length === 0 || parts.length > 3) {
-			return 0;
-		}
-
-		const multipliers = [3600, 60, 1]; // hours, minutes, seconds
-		const offset = multipliers.length - parts.length;
-
-		let total = 0;
-		for (let i = 0; i < parts.length; i++) {
-			const numeric = parseFloat(parts[i]);
-			if (Number.isNaN(numeric)) {
-				return 0;
-			}
-			total += numeric * multipliers[offset + i];
-		}
-		return total;
+		return duration / 1000; // milliseconds → seconds
 	}
 
 	async function pickAssets(assets: api.AssetResponseDto[]) {
@@ -364,9 +395,18 @@
 			assetResponse.people = assetInfoRequest.data.people;
 		}
 
-		return [assetUrl, assetResponse, album] as [
+		let faces: api.AssetFaceResponseDto[] = [];
+		if (!isVideoAsset(assetResponse) && ($configStore.imageZoom || $configStore.imagePan)) {
+			const facesRequest = await api.getAssetFaces(assetResponse.id, {
+				clientIdentifier: $clientIdentifierStore
+			});
+			faces = facesRequest.data;
+		}
+
+		return [assetUrl, assetResponse, faces, album] as [
 			string,
 			api.AssetResponseDto,
+			api.AssetFaceResponseDto[],
 			api.AlbumResponseDto[]
 		];
 	}
@@ -392,7 +432,7 @@
 		// 30 second reload on error
 		refreshInterval = window.setInterval(() => {
 			if (error) window.location.reload();
-		}, 30000);
+		}, RELOAD_ON_ERROR_MS);
 
 		if ($configStore.primaryColor) {
 			document.documentElement.style.setProperty('--primary-color', $configStore.primaryColor);
@@ -426,6 +466,9 @@
 			window.removeEventListener('mousemove', showCursor);
 			window.removeEventListener('click', showCursor);
 			window.clearInterval(refreshInterval);
+			window.clearTimeout(timeoutId);
+			window.clearTimeout(videoStallTimeout);
+			window.clearTimeout(watchdogTimer);
 		};
 	});
 
@@ -473,11 +516,41 @@
 				playAudio={$configStore.playAudio}
 				onVideoWaiting={async () => {
 					await progressBar.pause();
+					clearTimeout(videoStallTimeout);
+					if (userPaused) return;
+
+					videoStallTimeout = window.setTimeout(
+						() => {
+							if (!userPaused) {
+								console.warn('Video stalled, skipping...');
+								handleDone(false, true);
+							}
+						},
+						Math.max(5000, Math.min(VIDEO_STALL_MS, currentDuration * 1000))
+					);
 				}}
 				onVideoPlaying={async () => {
+					consecutiveErrorSkips = 0;
+					clearTimeout(videoStallTimeout);
 					if (!userPaused) {
 						await progressBar.play();
 					}
+				}}
+				onAssetError={async () => {
+					if (errorSkipScheduled) return;
+					errorSkipScheduled = true;
+
+					consecutiveErrorSkips++;
+					if (consecutiveErrorSkips > 10) {
+						error = true;
+						errorMessage =
+							'Too many consecutive asset load failures. Please check your network or server connection.';
+						errorSkipScheduled = false;
+						return;
+					}
+
+					await handleDone(false, true);
+					errorSkipScheduled = false;
 				}}
 			/>
 		</div>

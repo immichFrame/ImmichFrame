@@ -39,7 +39,7 @@ public class QueuingAssetPoolTests
         var assets = new List<AssetResponseDto>();
         for (int i = 0; i < count; i++)
         {
-            assets.Add(new AssetResponseDto { Id = $"{prefix}_{i}", Type = AssetTypeEnum.IMAGE });
+            assets.Add(new AssetResponseDto { Id = FixtureHelpers.GuidFor($"{prefix}_{i}"), Type = AssetTypeEnum.IMAGE });
         }
 
         return assets;

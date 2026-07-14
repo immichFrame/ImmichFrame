@@ -1,8 +1,9 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import {
 		type AlbumResponseDto,
 		type AssetResponseDto,
-		type PersonWithFacesResponseDto
+		type AssetFaceResponseDto
 	} from '$lib/immichFrameApi';
 	import { isVideoAsset } from '$lib/constants/asset-type';
 	import { decodeBase64 } from '$lib/utils';
@@ -11,7 +12,12 @@
 	import ImageOverlay from '$lib/components/elements/imageoverlay/image-overlay.svelte';
 
 	interface Props {
-		asset: [url: string, asset: AssetResponseDto, albums: AlbumResponseDto[]];
+		asset: [
+			url: string,
+			asset: AssetResponseDto,
+			faces: AssetFaceResponseDto[],
+			albums: AlbumResponseDto[]
+		];
 		showLocation: boolean;
 		showPhotoDate: boolean;
 		showImageDesc: boolean;
@@ -27,6 +33,7 @@
 		playAudio: boolean;
 		onVideoWaiting?: () => void;
 		onVideoPlaying?: () => void;
+		onAssetError?: () => void;
 	}
 
 	let {
@@ -45,16 +52,23 @@
 		showInfo = $bindable(false),
 		playAudio,
 		onVideoWaiting = () => {},
-		onVideoPlaying = () => {}
+		onVideoPlaying = () => {},
+		onAssetError = () => {}
 	}: Props = $props();
 
 	let debug = false;
 	const isVideo = $derived(isVideoAsset(asset[1]));
 
+	// Re-evaluate only when the asset changes; keep the interval stable for the
+	// lifetime of the current asset so zoom/pan animations don't restart.
+	const animationDuration = $derived.by(() => {
+		void asset[1].id;
+		return untrack(() => interval);
+	});
+
 	let videoElement = $state<HTMLVideoElement | null>(null);
 
 	$effect(() => {
-		// Track asset URL to cleanup when it changes
 		asset[0];
 		return () => {
 			if (videoElement) {
@@ -86,9 +100,9 @@
 	}
 
 	function GetFace(i: number) {
-		const people = asset[1].people as PersonWithFacesResponseDto[];
-		const namedPeople = people.filter((x) => x.name);
-		return namedPeople[i]?.faces[0] ?? null;
+		const faces = asset[2] as AssetFaceResponseDto[];
+		const namedFaces = faces.filter((x) => x.person?.name);
+		return namedFaces[i] ?? null;
 	}
 
 	function getFaceMetric(
@@ -187,7 +201,7 @@
 </script>
 
 {#if showInfo}
-	<ImageOverlay asset={asset[1]} albums={asset[2]} />
+	<ImageOverlay asset={asset[1]} albums={asset[3]} />
 {/if}
 
 <div class="immichframe_image relative place-self-center overflow-hidden">
@@ -195,7 +209,7 @@
 	<div
 		class="relative w-full h-full {enableZoom ? 'zoom' : ''} {enablePan ? 'pan' : ''}"
 		style="
-			--interval: {interval + 2}s;
+			--interval: {animationDuration + 2}s;
 			--originX: {hasPerson && !isVideo ? getFaceMetric(0, 'centerX') + '%' : 'center'};
 			--originY: {hasPerson && !isVideo ? getFaceMetric(0, 'centerY') + '%' : 'center'};
 			--start-scale: {scaleValues.startScale};
@@ -206,7 +220,7 @@
 			--pan-end-y: {panDirection === 'up' ? '-5%' : panDirection === 'down' ? '5%' : '0'};"
 	>
 		{#if debug}
-			{#each asset[1].people?.map((x) => x.name) ?? [] as _, i}
+			{#each asset[2]?.map((x) => x.person?.name) ?? [] as _, i}
 				<div
 					class="face z-[900] bg-red-600 absolute"
 					style="top: {getFaceMetric(i, 'y1')}%;
@@ -246,7 +260,10 @@
 						}
 					}
 				}}
-				onerror={() => console.error('Video failed to load:', asset[0])}
+				onerror={() => {
+					console.error('Video failed to load:', asset[0]);
+					onAssetError();
+				}}
 				onwaiting={onVideoWaiting}
 				onplaying={onVideoPlaying}
 			></video>
@@ -257,13 +274,17 @@
 					: 'max-h-screen h-dvh-safe max-w-full object-contain'} w-full h-full"
 				src={asset[0]}
 				alt="data"
+				onerror={() => {
+					console.error('Image failed to load:', asset[0]);
+					onAssetError();
+				}}
 			/>
 		{/if}
 	</div>
 </div>
 <AssetInfo
 	asset={asset[1]}
-	albums={asset[2]}
+	albums={asset[3]}
 	{showLocation}
 	{showPhotoDate}
 	{showImageDesc}

@@ -103,6 +103,64 @@
         }
       }
     },
+    "/api/Asset/{id}/AssetFaces": {
+      "get": {
+        "tags": [
+          "Asset"
+        ],
+        "operationId": "GetAssetFaces",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "clientIdentifier",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AssetFaceResponseDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AssetFaceResponseDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AssetFaceResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Asset/{id}/AlbumInfo": {
       "get": {
         "tags": [
@@ -266,6 +324,60 @@
                 "schema": {
                   "type": "string",
                   "format": "binary"
+                }
+              }
+            }
+          },
+          "206": {
+            "description": "Partial Content",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/webp": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "video/mp4": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "video/quicktime": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "416": {
+            "description": "Range Not Satisfiable",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "image/webp": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "video/mp4": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "video/quicktime": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             }
@@ -469,12 +581,9 @@
         "required": [
           "albumName",
           "albumUsers",
-          "assets",
           "createdAt",
           "description",
           "id",
-          "owner",
-          "ownerId",
           "updatedAt"
         ],
         "type": "object",
@@ -483,24 +592,30 @@
             "type": "string"
           },
           "albumThumbnailAssetId": {
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$",
             "type": "string",
+            "format": "uuid",
             "nullable": true
           },
           "albumUsers": {
+            "minItems": 1,
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AlbumUserResponseDto"
             }
           },
           "assetCount": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
             "type": "integer",
-            "format": "int32"
+            "format": "int64"
           },
-          "assets": {
+          "contributorCounts": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/AssetResponseDto"
-            }
+              "$ref": "#/components/schemas/ContributorCountResponseDto"
+            },
+            "nullable": true
           },
           "createdAt": {
             "type": "string",
@@ -518,7 +633,9 @@
             "type": "boolean"
           },
           "id": {
-            "type": "string"
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$",
+            "type": "string",
+            "format": "uuid"
           },
           "isActivityEnabled": {
             "type": "boolean"
@@ -530,12 +647,6 @@
           },
           "order": {
             "$ref": "#/components/schemas/AssetOrder"
-          },
-          "owner": {
-            "$ref": "#/components/schemas/UserResponseDto"
-          },
-          "ownerId": {
-            "type": "string"
           },
           "shared": {
             "type": "boolean"
@@ -585,44 +696,61 @@
       "AlbumUserRole": {
         "enum": [
           0,
-          1
+          1,
+          2
         ],
         "type": "integer",
         "format": "int32"
       },
-      "AssetFaceWithoutPersonResponseDto": {
+      "AssetFaceResponseDto": {
         "required": [
           "id"
         ],
         "type": "object",
         "properties": {
           "boundingBoxX1": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
             "type": "integer",
-            "format": "int32"
+            "format": "int64"
           },
           "boundingBoxX2": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
             "type": "integer",
-            "format": "int32"
+            "format": "int64"
           },
           "boundingBoxY1": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
             "type": "integer",
-            "format": "int32"
+            "format": "int64"
           },
           "boundingBoxY2": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
             "type": "integer",
-            "format": "int32"
+            "format": "int64"
           },
           "id": {
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$",
             "type": "string",
             "format": "uuid"
           },
           "imageHeight": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
             "type": "integer",
-            "format": "int32"
+            "format": "int64"
           },
           "imageWidth": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
             "type": "integer",
-            "format": "int32"
+            "format": "int64"
+          },
+          "person": {
+            "$ref": "#/components/schemas/PersonResponseDto"
           },
           "sourceType": {
             "$ref": "#/components/schemas/SourceType"
@@ -648,9 +776,7 @@
       "AssetResponseDto": {
         "required": [
           "checksum",
-          "deviceAssetId",
-          "deviceId",
-          "duration",
+          "createdAt",
           "fileCreatedAt",
           "fileModifiedAt",
           "id",
@@ -671,18 +797,22 @@
           "checksum": {
             "type": "string"
           },
-          "deviceAssetId": {
-            "type": "string"
-          },
-          "deviceId": {
-            "type": "string"
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
           },
           "duplicateId": {
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$",
             "type": "string",
+            "format": "uuid",
             "nullable": true
           },
           "duration": {
-            "type": "string"
+            "maximum": 2147483647,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
           },
           "exifInfo": {
             "$ref": "#/components/schemas/ExifResponseDto"
@@ -698,10 +828,22 @@
           "hasMetadata": {
             "type": "boolean"
           },
+          "height": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
           "id": {
-            "type": "string"
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$",
+            "type": "string",
+            "format": "uuid"
           },
           "isArchived": {
+            "type": "boolean"
+          },
+          "isEdited": {
             "type": "boolean"
           },
           "isFavorite": {
@@ -714,9 +856,10 @@
             "type": "boolean"
           },
           "libraryId": {
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$",
             "type": "string",
-            "nullable": true,
-            "deprecated": true
+            "format": "uuid",
+            "nullable": true
           },
           "livePhotoVideoId": {
             "type": "string",
@@ -740,19 +883,20 @@
             "$ref": "#/components/schemas/UserResponseDto"
           },
           "ownerId": {
-            "type": "string"
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$",
+            "type": "string",
+            "format": "uuid"
           },
           "people": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/PersonWithFacesResponseDto"
+              "$ref": "#/components/schemas/PersonResponseDto"
             },
             "nullable": true
           },
           "resized": {
             "type": "boolean",
-            "nullable": true,
-            "deprecated": true
+            "nullable": true
           },
           "stack": {
             "$ref": "#/components/schemas/AssetStackResponseDto"
@@ -771,19 +915,19 @@
           "type": {
             "$ref": "#/components/schemas/AssetTypeEnum"
           },
-          "unassignedFaces": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AssetFaceWithoutPersonResponseDto"
-            },
-            "nullable": true
-          },
           "updatedAt": {
             "type": "string",
             "format": "date-time"
           },
           "visibility": {
             "$ref": "#/components/schemas/AssetVisibility"
+          },
+          "width": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
           },
           "additionalProperties": {
             "type": "object",
@@ -803,14 +947,20 @@
         "type": "object",
         "properties": {
           "assetCount": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
             "type": "integer",
-            "format": "int32"
+            "format": "int64"
           },
           "id": {
-            "type": "string"
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$",
+            "type": "string",
+            "format": "uuid"
           },
           "primaryAssetId": {
-            "type": "string"
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$",
+            "type": "string",
+            "format": "uuid"
           },
           "additionalProperties": {
             "type": "object",
@@ -946,6 +1096,33 @@
         },
         "additionalProperties": false
       },
+      "ContributorCountResponseDto": {
+        "required": [
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "assetCount": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int64"
+          },
+          "userId": {
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$",
+            "type": "string",
+            "format": "uuid"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "nullable": true
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "ExifResponseDto": {
         "type": "object",
         "properties": {
@@ -967,13 +1144,17 @@
             "nullable": true
           },
           "exifImageHeight": {
-            "type": "number",
-            "format": "double",
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int64",
             "nullable": true
           },
           "exifImageWidth": {
-            "type": "number",
-            "format": "double",
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int64",
             "nullable": true
           },
           "exposureTime": {
@@ -986,6 +1167,8 @@
             "nullable": true
           },
           "fileSizeInByte": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
             "type": "integer",
             "format": "int64",
             "nullable": true
@@ -996,8 +1179,10 @@
             "nullable": true
           },
           "iso": {
-            "type": "number",
-            "format": "double",
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer",
+            "format": "int64",
             "nullable": true
           },
           "latitude": {
@@ -1036,8 +1221,10 @@
             "nullable": true
           },
           "rating": {
-            "type": "number",
-            "format": "double",
+            "maximum": 5,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32",
             "nullable": true
           },
           "state": {
@@ -1146,9 +1333,8 @@
         },
         "additionalProperties": false
       },
-      "PersonWithFacesResponseDto": {
+      "PersonResponseDto": {
         "required": [
-          "faces",
           "id",
           "name",
           "thumbnailPath"
@@ -1164,14 +1350,10 @@
             "type": "string",
             "nullable": true
           },
-          "faces": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AssetFaceWithoutPersonResponseDto"
-            }
-          },
           "id": {
-            "type": "string"
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$",
+            "type": "string",
+            "format": "uuid"
           },
           "isFavorite": {
             "type": "boolean",
@@ -1201,6 +1383,33 @@
         },
         "additionalProperties": false
       },
+      "ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true
+          },
+          "instance": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": { }
+      },
       "SourceType": {
         "enum": [
           0,
@@ -1229,7 +1438,9 @@
             "format": "date-time"
           },
           "id": {
-            "type": "string"
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$",
+            "type": "string",
+            "format": "uuid"
           },
           "name": {
             "type": "string"
@@ -1286,10 +1497,13 @@
             "$ref": "#/components/schemas/UserAvatarColor"
           },
           "email": {
+            "pattern": "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$",
             "type": "string"
           },
           "id": {
-            "type": "string"
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$",
+            "type": "string",
+            "format": "uuid"
           },
           "name": {
             "type": "string"

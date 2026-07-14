@@ -6,7 +6,7 @@
 	}
 	let { id }: Props = $props();
 
-	let imageUrl = `https://my.immich.app/photos/${id}`;
+	let imageUrl = $derived(`https://my.immich.app/photos/${id}`);
 </script>
 
 <div

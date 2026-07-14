@@ -13,7 +13,7 @@
 	api.init();
 
 	interface Props {
-		assets: [string, AssetResponseDto, api.AlbumResponseDto[]][];
+		assets: [string, AssetResponseDto, api.AssetFaceResponseDto[], api.AlbumResponseDto[]][];
 		interval?: number;
 		error?: boolean;
 		loaded?: boolean;
@@ -32,6 +32,7 @@
 		playAudio?: boolean;
 		onVideoWaiting?: () => void;
 		onVideoPlaying?: () => void;
+		onAssetError?: () => void;
 	}
 
 	let {
@@ -53,7 +54,8 @@
 		showInfo = $bindable(false),
 		playAudio = false,
 		onVideoWaiting = () => {},
-		onVideoPlaying = () => {}
+		onVideoPlaying = () => {},
+		onAssetError = () => {}
 	}: Props = $props();
 	let instantTransition = slideshowStore.instantTransition;
 	let transitionDuration = $derived(
@@ -119,6 +121,7 @@
 							{playAudio}
 							{onVideoWaiting}
 							{onVideoPlaying}
+							{onAssetError}
 							bind:this={primaryAssetComponent}
 							bind:showInfo
 						/>
@@ -140,6 +143,7 @@
 							{playAudio}
 							{onVideoWaiting}
 							{onVideoPlaying}
+							{onAssetError}
 							bind:this={secondaryAssetComponent}
 							bind:showInfo
 						/>
@@ -163,6 +167,7 @@
 						{playAudio}
 						{onVideoWaiting}
 						{onVideoPlaying}
+						{onAssetError}
 						bind:this={primaryAssetComponent}
 						bind:showInfo
 					/>

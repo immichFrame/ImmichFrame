@@ -58,11 +58,11 @@ public class CachingApiAssetsPoolTests
     {
         return new List<AssetResponseDto>
         {
-            new AssetResponseDto { Id = "1", Type = AssetTypeEnum.IMAGE, IsArchived = false, ExifInfo = new ExifResponseDto { DateTimeOriginal = DateTime.Now.AddDays(-10), Rating = 5 } },
-            new AssetResponseDto { Id = "2", Type = AssetTypeEnum.VIDEO, IsArchived = false, ExifInfo = new ExifResponseDto { DateTimeOriginal = DateTime.Now.AddDays(-10) } }, // Video asset
-            new AssetResponseDto { Id = "3", Type = AssetTypeEnum.IMAGE, IsArchived = true, ExifInfo = new ExifResponseDto { DateTimeOriginal = DateTime.Now.AddDays(-5), Rating = 3 } }, // Potentially filtered by archive status
-            new AssetResponseDto { Id = "4", Type = AssetTypeEnum.IMAGE, IsArchived = false, ExifInfo = new ExifResponseDto { DateTimeOriginal = DateTime.Now.AddDays(-2), Rating = 5 } },
-            new AssetResponseDto { Id = "5", Type = AssetTypeEnum.IMAGE, IsArchived = false, ExifInfo = new ExifResponseDto { DateTimeOriginal = DateTime.Now.AddYears(-1), Rating = 1 } },
+            new AssetResponseDto { Id = FixtureHelpers.GuidFor("1"), Type = AssetTypeEnum.IMAGE, IsArchived = false, ExifInfo = new ExifResponseDto { DateTimeOriginal = DateTime.Now.AddDays(-10), Rating = 5 } },
+            new AssetResponseDto { Id = FixtureHelpers.GuidFor("2"), Type = AssetTypeEnum.VIDEO, IsArchived = false, ExifInfo = new ExifResponseDto { DateTimeOriginal = DateTime.Now.AddDays(-10) } }, // Video asset
+            new AssetResponseDto { Id = FixtureHelpers.GuidFor("3"), Type = AssetTypeEnum.IMAGE, IsArchived = true, ExifInfo = new ExifResponseDto { DateTimeOriginal = DateTime.Now.AddDays(-5), Rating = 3 } }, // Potentially filtered by archive status
+            new AssetResponseDto { Id = FixtureHelpers.GuidFor("4"), Type = AssetTypeEnum.IMAGE, IsArchived = false, ExifInfo = new ExifResponseDto { DateTimeOriginal = DateTime.Now.AddDays(-2), Rating = 5 } },
+            new AssetResponseDto { Id = FixtureHelpers.GuidFor("5"), Type = AssetTypeEnum.IMAGE, IsArchived = false, ExifInfo = new ExifResponseDto { DateTimeOriginal = DateTime.Now.AddYears(-1), Rating = 1 } },
         };
     }
 
@@ -197,8 +197,8 @@ public class CachingApiAssetsPoolTests
         var result = (await _testPool.GetAssets(5)).ToList(); // Request more than available to get all filtered
 
         // Assert
-        Assert.That(result.Any(a => a.Id == "2"), Is.False); // Video asset filtered out by default
-        Assert.That(result.Any(a => a.Id == "3"), Is.False); // Archived asset
+        Assert.That(result.Any(a => a.Id == FixtureHelpers.GuidFor("2")), Is.False); // Video asset filtered out by default
+        Assert.That(result.Any(a => a.Id == FixtureHelpers.GuidFor("3")), Is.False); // Archived asset
         Assert.That(result.Count, Is.EqualTo(3)); // 1, 4, 5
     }
 
@@ -215,7 +215,7 @@ public class CachingApiAssetsPoolTests
         var result = (await _testPool.GetAssets(5)).ToList(); // Request more than available to get all filtered
 
         // Assert
-        Assert.That(result.Any(a => a.Id == "3"), Is.False);
+        Assert.That(result.Any(a => a.Id == FixtureHelpers.GuidFor("3")), Is.False);
         Assert.That(result.Count, Is.EqualTo(4)); // 1, 2, 4, 5
     }
 
@@ -238,9 +238,9 @@ public class CachingApiAssetsPoolTests
         // Expected: Assets "1", "5"
         Assert.That(result.All(a => a.ExifInfo?.DateTimeOriginal <= untilDate));
         Assert.That(result.Count, Is.EqualTo(2), string.Join(",", result.Select(x => x.Id)));
-        Assert.That(result.Any(a => a.Id == "1"));
-        Assert.That(result.Any(a => a.Id == "2"), Is.False); // Video asset
-        Assert.That(result.Any(a => a.Id == "5"));
+        Assert.That(result.Any(a => a.Id == FixtureHelpers.GuidFor("1")));
+        Assert.That(result.Any(a => a.Id == FixtureHelpers.GuidFor("2")), Is.False); // Video asset
+        Assert.That(result.Any(a => a.Id == FixtureHelpers.GuidFor("5")));
     }
 
     [Test]
@@ -262,8 +262,8 @@ public class CachingApiAssetsPoolTests
         // Expected: Asset "3", "4"
         Assert.That(result.All(a => a.ExifInfo?.DateTimeOriginal >= fromDate));
         Assert.That(result.Count, Is.EqualTo(2), string.Join(",", result.Select(x => x.Id)));
-        Assert.That(result.Any(a => a.Id == "3"));
-        Assert.That(result.Any(a => a.Id == "4"));
+        Assert.That(result.Any(a => a.Id == FixtureHelpers.GuidFor("3")));
+        Assert.That(result.Any(a => a.Id == FixtureHelpers.GuidFor("4")));
     }
 
     [Test]
@@ -286,8 +286,8 @@ public class CachingApiAssetsPoolTests
         // Expected: Asset "3", "4"
         Assert.That(result.All(a => a.ExifInfo?.DateTimeOriginal >= fromDate));
         Assert.That(result.Count, Is.EqualTo(2), string.Join(",", result.Select(x => x.Id)));
-        Assert.That(result.Any(a => a.Id == "3"));
-        Assert.That(result.Any(a => a.Id == "4"));
+        Assert.That(result.Any(a => a.Id == FixtureHelpers.GuidFor("3")));
+        Assert.That(result.Any(a => a.Id == FixtureHelpers.GuidFor("4")));
     }
 
     [Test]
@@ -307,8 +307,8 @@ public class CachingApiAssetsPoolTests
         // Expected: Asset "1", "4" (both rating 5)
         Assert.That(result.All(a => a.ExifInfo?.Rating == 5));
         Assert.That(result.Count, Is.EqualTo(2), string.Join(",", result.Select(x => x.Id)));
-        Assert.That(result.Any(a => a.Id == "1"));
-        Assert.That(result.Any(a => a.Id == "4"));
+        Assert.That(result.Any(a => a.Id == FixtureHelpers.GuidFor("1")));
+        Assert.That(result.Any(a => a.Id == FixtureHelpers.GuidFor("4")));
     }
 
     [Test]
@@ -329,8 +329,8 @@ public class CachingApiAssetsPoolTests
         // Assert
         // Expected: Assets "1", "4"
         Assert.That(result.Count, Is.EqualTo(2));
-        Assert.That(result.Any(a => a.Id == "1"));
-        Assert.That(result.Any(a => a.Id == "4"));
-        Assert.That(result.Any(a => a.Id == "3" || a.Id == "5" || a.Id == "2"), Is.False);
+        Assert.That(result.Any(a => a.Id == FixtureHelpers.GuidFor("1")));
+        Assert.That(result.Any(a => a.Id == FixtureHelpers.GuidFor("4")));
+        Assert.That(result.Any(a => a.Id == FixtureHelpers.GuidFor("3") || a.Id == FixtureHelpers.GuidFor("5") || a.Id == FixtureHelpers.GuidFor("2")), Is.False);
     }
 }
