@@ -50,6 +50,42 @@ LABEL org.opencontainers.image.title="ImmichFrame" \
       org.opencontainers.image.licenses="GPL-3.0" \
       org.opencontainers.image.version="v${VERSION}" \
       org.opencontainers.image.revision="d8bcf4f"
+
+EXPOSE 8080
+
+# Legacy V1 environment configuration. These are intentionally declared so
+# container managers can discover the supported ImmichFrame settings.
+ENV ImmichServerUrl="" \
+    ApiKey="" \
+    Albums="" \
+    ExcludedAlbums="" \
+    People="" \
+    ShowMemories="false" \
+    ImagesFromDays="" \
+    ImagesFromDate="" \
+    ImagesUntilDate="" \
+    ImageZoom="true" \
+    Interval="45" \
+    TransitionDuration="2" \
+    WeatherApiKey="" \
+    UnitSystem="imperial" \
+    Language="en" \
+    ShowWeatherDescription="true" \
+    WeatherLatLong="" \
+    ShowClock="true" \
+    ClockFormat="hh:mm" \
+    Webcalendars="" \
+    ShowImageDesc="true" \
+    ShowPeopleDesc="true" \
+    ShowImageLocation="true" \
+    ImageLocationFormat="City,State,Country" \
+    ShowPhotoDate="true" \
+    PhotoDateFormat="yyyy-MM-dd" \
+    PrimaryColor="#f5deb3" \
+    SecondaryColor="#000000" \
+    Style="none" \
+    Layout="splitview" \
+    BaseFontSize="17px"
 # Copy .NET API and frontend assets
 COPY --from=publish-api /app ./
 COPY --from=build-node /app/build ./wwwroot
