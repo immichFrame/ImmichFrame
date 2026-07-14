@@ -94,6 +94,6 @@ public class TotalAccountImagesSelectionStrategy(
     public T ForAsset<T>(Guid assetId, Func<IAccountImmichFrameLogic, T> f)
         => _tracker.ForAsset(assetId, f);
 
-    public ValueTask<bool> RecordAssetLocation(IAccountImmichFrameLogic account, string assetId)
+    public ValueTask<bool> RecordAssetLocation(IAccountImmichFrameLogic account, Guid assetId)
         => _tracker.RecordAssetLocation(account, assetId);
 }

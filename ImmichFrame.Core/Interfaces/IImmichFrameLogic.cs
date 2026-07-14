@@ -27,7 +27,7 @@ namespace ImmichFrame.Core.Interfaces
     {
         Task<(IAccountImmichFrameLogic, AssetResponseDto)?> GetNextAsset();
         Task<IEnumerable<(IAccountImmichFrameLogic, AssetResponseDto)>> GetAssets();
-        ValueTask<bool> RecordAssetLocation(IAccountImmichFrameLogic account, string assetId);
+        ValueTask<bool> RecordAssetLocation(IAccountImmichFrameLogic account, Guid assetId);
         T ForAsset<T>(Guid assetId, Func<IAccountImmichFrameLogic, T> f);
     }
 }

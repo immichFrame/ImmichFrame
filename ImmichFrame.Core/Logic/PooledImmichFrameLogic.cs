@@ -80,7 +80,7 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
         return new MemoryAssetsPool(_immichApi, AccountSettings).GetAssetGroups();
     }
 
-    public Task<AssetResponseDto> GetAssetInfoById(Guid assetId) => _immichApi.GetAssetInfoAsync(assetId, null);
+    public Task<AssetResponseDto> GetAssetInfoById(Guid assetId) => _immichApi.GetAssetInfoAsync(assetId, null, null);
 
     public async Task<IEnumerable<AssetFaceResponseDto>> GetAssetFacesById(Guid assetId) => await _immichApi.GetFacesAsync(assetId);
 
