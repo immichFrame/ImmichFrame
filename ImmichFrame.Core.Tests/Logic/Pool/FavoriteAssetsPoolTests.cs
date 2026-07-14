@@ -51,7 +51,7 @@ public class FavoriteAssetsPoolTests
         var assetsPage1 = Enumerable.Range(0, batchSize).Select(i => CreateAsset($"fav_p1_{i}")).ToList();
         var assetsPage2 = Enumerable.Range(0, 50).Select(i => CreateAsset($"fav_p2_{i}")).ToList();
 
-        _mockImmichApi.SetupSequence(api => api.SearchAssetsAsync(It.IsAny<MetadataSearchDto>(), It.IsAny<CancellationToken>()))
+        _mockImmichApi.SetupSequence(api => api.SearchAssetsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<MetadataSearchDto>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(CreateSearchResult(assetsPage1, batchSize)) // Page 1, total indicates more might be available
             .ReturnsAsync(CreateSearchResult(assetsPage2, 50));      // Page 2, total indicates this is the last page
 
@@ -64,7 +64,7 @@ public class FavoriteAssetsPoolTests
         Assert.That(result.Any(a => a.Id == FixtureHelpers.GuidFor("fav_p2_49")));
 
         _mockImmichApi.Verify(api => api.SearchAssetsAsync(
-            It.Is<MetadataSearchDto>(dto =>
+            It.IsAny<string>(), It.IsAny<string>(), It.Is<MetadataSearchDto>(dto =>
                 dto.IsFavorite == true &&
                 dto.Type == AssetTypeEnum.IMAGE &&
                 dto.WithExif == true &&
@@ -73,7 +73,7 @@ public class FavoriteAssetsPoolTests
             It.IsAny<CancellationToken>()), Times.Once);
 
         _mockImmichApi.Verify(api => api.SearchAssetsAsync(
-            It.Is<MetadataSearchDto>(dto =>
+            It.IsAny<string>(), It.IsAny<string>(), It.Is<MetadataSearchDto>(dto =>
                 dto.IsFavorite == true &&
                 dto.Type == AssetTypeEnum.IMAGE &&
                 dto.Page == 2 && dto.Size == batchSize),
@@ -83,7 +83,7 @@ public class FavoriteAssetsPoolTests
     [Test]
     public async Task LoadAssets_HandlesEmptyFavorites()
     {
-        _mockImmichApi.Setup(api => api.SearchAssetsAsync(It.IsAny<MetadataSearchDto>(), It.IsAny<CancellationToken>()))
+        _mockImmichApi.Setup(api => api.SearchAssetsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<MetadataSearchDto>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(CreateSearchResult(new List<AssetResponseDto>(), 0));
 
         var result = (await _favoriteAssetsPool.TestLoadAssets()).ToList();

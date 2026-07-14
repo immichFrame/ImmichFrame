@@ -50,9 +50,9 @@ public class AlbumAssetsPoolTests
         _mockAccountSettings.SetupGet(s => s.Albums).Returns(new List<Guid> { album1Id });
         _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns(new List<Guid> { excludedAlbumId });
 
-        _mockImmichApi.Setup(api => api.SearchAssetsAsync(It.Is<MetadataSearchDto>(d => d.AlbumIds.Contains(album1Id)), It.IsAny<CancellationToken>()))
+        _mockImmichApi.Setup(api => api.SearchAssetsAsync(It.IsAny<string>(), It.IsAny<string>(), It.Is<MetadataSearchDto>(d => d.AlbumIds.Contains(album1Id)), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new SearchResponseDto { Assets = new SearchAssetResponseDto { Items = new List<AssetResponseDto> { assetA, assetB, assetD }, Total = 3 } });
-        _mockImmichApi.Setup(api => api.SearchAssetsAsync(It.Is<MetadataSearchDto>(d => d.AlbumIds.Contains(excludedAlbumId)), It.IsAny<CancellationToken>()))
+        _mockImmichApi.Setup(api => api.SearchAssetsAsync(It.IsAny<string>(), It.IsAny<string>(), It.Is<MetadataSearchDto>(d => d.AlbumIds.Contains(excludedAlbumId)), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new SearchResponseDto { Assets = new SearchAssetResponseDto { Items = new List<AssetResponseDto> { assetB, assetC }, Total = 2 } });
 
         // Act
@@ -62,8 +62,8 @@ public class AlbumAssetsPoolTests
         Assert.That(result.Count, Is.EqualTo(2));
         Assert.That(result.Any(a => a.Id == FixtureHelpers.GuidFor("A")));
         Assert.That(result.Any(a => a.Id == FixtureHelpers.GuidFor("D")));
-        _mockImmichApi.Verify(api => api.SearchAssetsAsync(It.Is<MetadataSearchDto>(d => d.AlbumIds.Contains(album1Id)), It.IsAny<CancellationToken>()), Times.Once);
-        _mockImmichApi.Verify(api => api.SearchAssetsAsync(It.Is<MetadataSearchDto>(d => d.AlbumIds.Contains(excludedAlbumId)), It.IsAny<CancellationToken>()), Times.Once);
+        _mockImmichApi.Verify(api => api.SearchAssetsAsync(It.IsAny<string>(), It.IsAny<string>(), It.Is<MetadataSearchDto>(d => d.AlbumIds.Contains(album1Id)), It.IsAny<CancellationToken>()), Times.Once);
+        _mockImmichApi.Verify(api => api.SearchAssetsAsync(It.IsAny<string>(), It.IsAny<string>(), It.Is<MetadataSearchDto>(d => d.AlbumIds.Contains(excludedAlbumId)), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Test]
@@ -71,7 +71,7 @@ public class AlbumAssetsPoolTests
     {
         _mockAccountSettings.SetupGet(s => s.Albums).Returns(new List<Guid>());
         _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns(new List<Guid> { Guid.NewGuid() });
-        _mockImmichApi.Setup(api => api.SearchAssetsAsync(It.IsAny<MetadataSearchDto>(), It.IsAny<CancellationToken>()))
+        _mockImmichApi.Setup(api => api.SearchAssetsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<MetadataSearchDto>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new SearchResponseDto { Assets = new SearchAssetResponseDto { Items = new List<AssetResponseDto> { CreateAsset("excluded_only") }, Total = 1 } });
 
 
@@ -86,7 +86,7 @@ public class AlbumAssetsPoolTests
         _mockAccountSettings.SetupGet(s => s.Albums).Returns(new List<Guid> { album1Id });
         _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns(new List<Guid>()); // Empty excluded
 
-        _mockImmichApi.Setup(api => api.SearchAssetsAsync(It.Is<MetadataSearchDto>(d => d.AlbumIds.Contains(album1Id)), It.IsAny<CancellationToken>()))
+        _mockImmichApi.Setup(api => api.SearchAssetsAsync(It.IsAny<string>(), It.IsAny<string>(), It.Is<MetadataSearchDto>(d => d.AlbumIds.Contains(album1Id)), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new SearchResponseDto { Assets = new SearchAssetResponseDto { Items = new List<AssetResponseDto> { CreateAsset("A") }, Total = 1 } });
 
         var result = (await _albumAssetsPool.GetAssets(25)).ToList();

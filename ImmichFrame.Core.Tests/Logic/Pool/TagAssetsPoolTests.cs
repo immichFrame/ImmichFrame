@@ -53,11 +53,11 @@ public class TagAssetsPoolTests
         var page2 = Enumerable.Range(0, 30).Select(i => Asset($"t1_p2_{i}")).ToList();
         var tag2Assets = Enumerable.Range(0, 20).Select(i => Asset($"t2_{i}")).ToList();
 
-        _api.Setup(a => a.SearchAssetsAsync(It.Is<MetadataSearchDto>(d => d.TagIds.Contains(tag1) && d.Page == 1), default))
+        _api.Setup(a => a.SearchAssetsAsync(It.IsAny<string>(), It.IsAny<string>(), It.Is<MetadataSearchDto>(d => d.TagIds.Contains(tag1) && d.Page == 1), default))
             .ReturnsAsync(SearchResult(page1));
-        _api.Setup(a => a.SearchAssetsAsync(It.Is<MetadataSearchDto>(d => d.TagIds.Contains(tag1) && d.Page == 2), default))
+        _api.Setup(a => a.SearchAssetsAsync(It.IsAny<string>(), It.IsAny<string>(), It.Is<MetadataSearchDto>(d => d.TagIds.Contains(tag1) && d.Page == 2), default))
             .ReturnsAsync(SearchResult(page2));
-        _api.Setup(a => a.SearchAssetsAsync(It.Is<MetadataSearchDto>(d => d.TagIds.Contains(tag2)), default))
+        _api.Setup(a => a.SearchAssetsAsync(It.IsAny<string>(), It.IsAny<string>(), It.Is<MetadataSearchDto>(d => d.TagIds.Contains(tag2)), default))
             .ReturnsAsync(SearchResult(tag2Assets));
 
         var result = (await _pool.LoadAssetsPublic()).ToList();
@@ -80,7 +80,7 @@ public class TagAssetsPoolTests
         var result = await _pool.LoadAssetsPublic();
 
         Assert.That(result, Is.Empty);
-        _api.Verify(a => a.SearchAssetsAsync(It.IsAny<MetadataSearchDto>(), default), Times.Never);
+        _api.Verify(a => a.SearchAssetsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<MetadataSearchDto>(), default), Times.Never);
     }
 
     [Test]
@@ -92,7 +92,7 @@ public class TagAssetsPoolTests
         var result = await _pool.LoadAssetsPublic();
 
         Assert.That(result, Is.Empty);
-        _api.Verify(a => a.SearchAssetsAsync(It.IsAny<MetadataSearchDto>(), default), Times.Never);
+        _api.Verify(a => a.SearchAssetsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<MetadataSearchDto>(), default), Times.Never);
     }
 
     [Test]
@@ -109,9 +109,9 @@ public class TagAssetsPoolTests
             ]);
 
         var assets = Enumerable.Range(0, 10).Select(i => Asset($"asset_{i}")).ToList();
-        _api.Setup(a => a.SearchAssetsAsync(It.Is<MetadataSearchDto>(d => d.TagIds.Contains(tag1)), default))
+        _api.Setup(a => a.SearchAssetsAsync(It.IsAny<string>(), It.IsAny<string>(), It.Is<MetadataSearchDto>(d => d.TagIds.Contains(tag1)), default))
             .ReturnsAsync(SearchResult(assets));
-        _api.Setup(a => a.SearchAssetsAsync(It.Is<MetadataSearchDto>(d => d.TagIds.Contains(tag2)), default))
+        _api.Setup(a => a.SearchAssetsAsync(It.IsAny<string>(), It.IsAny<string>(), It.Is<MetadataSearchDto>(d => d.TagIds.Contains(tag2)), default))
             .ReturnsAsync(SearchResult([]));
 
         var result = (await _pool.LoadAssetsPublic()).ToList();
@@ -129,13 +129,13 @@ public class TagAssetsPoolTests
 
         _api.Setup(a => a.GetAllTagsAsync(default))
             .ReturnsAsync([new TagResponseDto { Id = tagId, Value = "Tag" }]);
-        _api.Setup(a => a.SearchAssetsAsync(It.IsAny<MetadataSearchDto>(), default))
+        _api.Setup(a => a.SearchAssetsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<MetadataSearchDto>(), default))
             .ReturnsAsync(SearchResult([Asset("1")]));
 
         await _pool.LoadAssetsPublic();
 
         _api.Verify(a => a.SearchAssetsAsync(
-            It.Is<MetadataSearchDto>(d =>
+            It.IsAny<string>(), It.IsAny<string>(), It.Is<MetadataSearchDto>(d =>
                 d.TagIds.Contains(tagId) &&
                 d.Page == 1 &&
                 d.Size == 1000 &&
@@ -163,7 +163,7 @@ public class TagAssetsPoolTests
             People = [new PersonResponseDto { Name = "Person" }]
         };
 
-        _api.Setup(a => a.SearchAssetsAsync(It.IsAny<MetadataSearchDto>(), default))
+        _api.Setup(a => a.SearchAssetsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<MetadataSearchDto>(), default))
             .ReturnsAsync(SearchResult([assetWithoutTags]));
 
         var result = (await _pool.LoadAssetsPublic()).ToList();
@@ -196,15 +196,15 @@ public class TagAssetsPoolTests
             ]);
 
         var assets = Enumerable.Range(0, 5).Select(i => Asset($"asset_{i}")).ToList();
-        _api.Setup(a => a.SearchAssetsAsync(It.Is<MetadataSearchDto>(d => d.TagIds.Contains(match)), default))
+        _api.Setup(a => a.SearchAssetsAsync(It.IsAny<string>(), It.IsAny<string>(), It.Is<MetadataSearchDto>(d => d.TagIds.Contains(match)), default))
             .ReturnsAsync(SearchResult(assets));
 
         var result = (await _pool.LoadAssetsPublic()).ToList();
 
         Assert.That(result, Has.Count.EqualTo(5));
-        _api.Verify(a => a.SearchAssetsAsync(It.Is<MetadataSearchDto>(d => d.TagIds.Contains(match)), default), Times.Once);
-        _api.Verify(a => a.SearchAssetsAsync(It.Is<MetadataSearchDto>(d => d.TagIds.Contains(noMatch1)), default), Times.Never);
-        _api.Verify(a => a.SearchAssetsAsync(It.Is<MetadataSearchDto>(d => d.TagIds.Contains(noMatch2)), default), Times.Never);
+        _api.Verify(a => a.SearchAssetsAsync(It.IsAny<string>(), It.IsAny<string>(), It.Is<MetadataSearchDto>(d => d.TagIds.Contains(match)), default), Times.Once);
+        _api.Verify(a => a.SearchAssetsAsync(It.IsAny<string>(), It.IsAny<string>(), It.Is<MetadataSearchDto>(d => d.TagIds.Contains(noMatch1)), default), Times.Never);
+        _api.Verify(a => a.SearchAssetsAsync(It.IsAny<string>(), It.IsAny<string>(), It.Is<MetadataSearchDto>(d => d.TagIds.Contains(noMatch2)), default), Times.Never);
     }
 
     [Test]
@@ -221,14 +221,14 @@ public class TagAssetsPoolTests
             ]);
 
         var assets = Enumerable.Range(0, 5).Select(i => Asset($"asset_{i}")).ToList();
-        _api.Setup(a => a.SearchAssetsAsync(It.Is<MetadataSearchDto>(d => d.TagIds.Contains(lower)), default))
+        _api.Setup(a => a.SearchAssetsAsync(It.IsAny<string>(), It.IsAny<string>(), It.Is<MetadataSearchDto>(d => d.TagIds.Contains(lower)), default))
             .ReturnsAsync(SearchResult(assets));
 
         var result = (await _pool.LoadAssetsPublic()).ToList();
 
         Assert.That(result, Has.Count.EqualTo(5));
-        _api.Verify(a => a.SearchAssetsAsync(It.Is<MetadataSearchDto>(d => d.TagIds.Contains(lower)), default), Times.Once);
-        _api.Verify(a => a.SearchAssetsAsync(It.Is<MetadataSearchDto>(d => d.TagIds.Contains(upper)), default), Times.Never);
+        _api.Verify(a => a.SearchAssetsAsync(It.IsAny<string>(), It.IsAny<string>(), It.Is<MetadataSearchDto>(d => d.TagIds.Contains(lower)), default), Times.Once);
+        _api.Verify(a => a.SearchAssetsAsync(It.IsAny<string>(), It.IsAny<string>(), It.Is<MetadataSearchDto>(d => d.TagIds.Contains(upper)), default), Times.Never);
     }
 
     [Test]
@@ -245,9 +245,9 @@ public class TagAssetsPoolTests
             ]);
 
         var shared = Asset("shared");
-        _api.Setup(a => a.SearchAssetsAsync(It.Is<MetadataSearchDto>(d => d.TagIds.Contains(tag1)), default))
+        _api.Setup(a => a.SearchAssetsAsync(It.IsAny<string>(), It.IsAny<string>(), It.Is<MetadataSearchDto>(d => d.TagIds.Contains(tag1)), default))
             .ReturnsAsync(SearchResult([shared, Asset("tag1-only")]));
-        _api.Setup(a => a.SearchAssetsAsync(It.Is<MetadataSearchDto>(d => d.TagIds.Contains(tag2)), default))
+        _api.Setup(a => a.SearchAssetsAsync(It.IsAny<string>(), It.IsAny<string>(), It.Is<MetadataSearchDto>(d => d.TagIds.Contains(tag2)), default))
             .ReturnsAsync(SearchResult([shared, Asset("tag2-only")]));
 
         var result = (await _pool.LoadAssetsPublic()).ToList();
