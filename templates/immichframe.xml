@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>ImmichFrame</Name>
+  <Repository>dmitrydreko/immichframe:latest</Repository>
+  <Registry>https://hub.docker.com/r/dmitrydreko/immichframe</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/immichFrame/ImmichFrame/issues</Support>
+  <Project>https://github.com/immichFrame/ImmichFrame</Project>
+  <Overview>ImmichFrame displays your Immich photos in a configurable digital photo frame.</Overview>
+  <Description>Configure ImmichFrame with either a Settings.json/Settings.yml file mounted at /app/Config or the variables below. Do not use both methods: a settings file takes precedence.</Description>
+  <Category>MediaApp:Other</Category>
+  <WebUI>http://[IP]:[PORT:8080]</WebUI>
+  <TemplateURL>https://raw.githubusercontent.com/davayd/ImmichFrame/dd-edits/templates/immichframe.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/immichFrame/ImmichFrame/main/docs/static/img/logo.svg</Icon>
+  <Config Name="WebUI" Target="8080" Default="8080" Mode="tcp" Description="Container Port: 8080" Type="Port" Display="always" Required="true" Mask="false">8080</Config>
+  <Config Name="immichFrame Config" Target="/app/Config" Default="" Mode="rw" Description="LEAVE EMPTY IF YOU ARE USING THE OTHER VARIABLES - immichFrame Config-Folder, should contain a Settings.json or Settings.yml." Type="Path" Display="always" Required="false" Mask="false"></Config>
+  <Config Name="ImmichServerUrl" Target="ImmichServerUrl" Default="" Mode="" Description="The URL of your Immich server, e.g. https://photos.yourdomain.com or http://192.168.0.100:2283" Type="Variable" Display="always" Required="true" Mask="false"></Config>
+  <Config Name="ApiKey" Target="ApiKey" Default="" Mode="" Description="Your Immich API key." Type="Variable" Display="always" Required="true" Mask="true"></Config>
+  <Config Name="Albums" Target="Albums" Default="" Mode="" Description="Immich album UUIDs, comma-separated." Type="Variable" Display="always" Required="false" Mask="false"></Config>
+  <Config Name="ExcludedAlbums" Target="ExcludedAlbums" Default="" Mode="" Description="UUID of excluded album(s)." Type="Variable" Display="always" Required="false" Mask="false"></Config>
+  <Config Name="People" Target="People" Default="" Mode="" Description="UUID of person(s)." Type="Variable" Display="always" Required="false" Mask="false"></Config>
+  <Config Name="ShowMemories" Target="ShowMemories" Default="false" Mode="" Description="If true, memories are displayed." Type="Variable" Display="always" Required="false" Mask="false">false</Config>
+  <Config Name="ImagesFromDays" Target="ImagesFromDays" Default="" Mode="" Description="Show images from the last X days, e.g. 365 for one year." Type="Variable" Display="always" Required="false" Mask="false"></Config>
+  <Config Name="ImagesFromDate" Target="ImagesFromDate" Default="" Mode="" Description="Show images after this date; overrides ImagesFromDays." Type="Variable" Display="always" Required="false" Mask="false"></Config>
+  <Config Name="ImagesUntilDate" Target="ImagesUntilDate" Default="" Mode="" Description="Show images before this date." Type="Variable" Display="always" Required="false" Mask="false"></Config>
+  <Config Name="ImageZoom" Target="ImageZoom" Default="true" Mode="" Description="Zooms into or out of an image for a touch of life." Type="Variable" Display="always" Required="false" Mask="false">true</Config>
+  <Config Name="Interval (seconds)" Target="Interval" Default="45" Mode="" Description="How long an image is displayed, in seconds." Type="Variable" Display="always" Required="false" Mask="false">45</Config>
+  <Config Name="TransitionDuration (seconds)" Target="TransitionDuration" Default="2" Mode="" Description="Transition duration in seconds." Type="Variable" Display="always" Required="false" Mask="false">2</Config>
+  <Config Name="WeatherApiKey" Target="WeatherApiKey" Default="" Mode="" Description="OpenWeatherMap API key." Type="Variable" Display="always" Required="false" Mask="true"></Config>
+  <Config Name="UnitSystem" Target="UnitSystem" Default="imperial" Mode="" Description="Imperial or metric system." Type="Variable" Display="always" Required="false" Mask="false">imperial</Config>
+  <Config Name="Language" Target="Language" Default="en" Mode="" Description="Two-letter ISO code for weather descriptions." Type="Variable" Display="always" Required="false" Mask="false">en</Config>
+  <Config Name="ShowWeatherDescription" Target="ShowWeatherDescription" Default="true" Mode="" Description="Displays the current weather description." Type="Variable" Display="always" Required="false" Mask="false">true</Config>
+  <Config Name="WeatherLatLong" Target="WeatherLatLong" Default="" Mode="" Description="Weather location as latitude,longitude." Type="Variable" Display="always" Required="false" Mask="false"></Config>
+  <Config Name="ShowClock" Target="ShowClock" Default="true" Mode="" Description="Displays the current time." Type="Variable" Display="always" Required="false" Mask="false">true</Config>
+  <Config Name="ClockFormat" Target="ClockFormat" Default="hh:mm" Mode="" Description="Time format." Type="Variable" Display="always" Required="false" Mask="false">hh:mm</Config>
+  <Config Name="Webcalendars" Target="Webcalendars" Default="" Mode="" Description="Web calendar .ics URIs, comma-separated." Type="Variable" Display="always" Required="false" Mask="false"></Config>
+  <Config Name="ShowImageDesc" Target="ShowImageDesc" Default="true" Mode="" Description="Displays the current image description." Type="Variable" Display="always" Required="false" Mask="false">true</Config>
+  <Config Name="ShowPeopleDesc" Target="ShowPeopleDesc" Default="true" Mode="" Description="Displays a comma-separated list of people in the image." Type="Variable" Display="always" Required="false" Mask="false">true</Config>
+  <Config Name="ShowImageLocation" Target="ShowImageLocation" Default="true" Mode="" Description="Displays the current image location." Type="Variable" Display="always" Required="false" Mask="false">true</Config>
+  <Config Name="ImageLocationFormat" Target="ImageLocationFormat" Default="City,State,Country" Mode="" Description="Format for image location." Type="Variable" Display="always" Required="false" Mask="false">City,State,Country</Config>
+  <Config Name="ShowPhotoDate" Target="ShowPhotoDate" Default="true" Mode="" Description="Displays the current image date." Type="Variable" Display="always" Required="false" Mask="false">true</Config>
+  <Config Name="PhotoDateFormat" Target="PhotoDateFormat" Default="yyyy-MM-dd" Mode="" Description="Date format; see date-fns format documentation." Type="Variable" Display="always" Required="false" Mask="false">yyyy-MM-dd</Config>
+  <Config Name="PrimaryColor" Target="PrimaryColor" Default="#f5deb3" Mode="" Description="Primary UI color; use hex with alpha for opacity." Type="Variable" Display="always" Required="false" Mask="false">#f5deb3</Config>
+  <Config Name="SecondaryColor" Target="SecondaryColor" Default="#000000" Mode="" Description="Secondary UI color for solid or transition styles; use hex with alpha for opacity." Type="Variable" Display="always" Required="false" Mask="false">#000000</Config>
+  <Config Name="Style" Target="Style" Default="none" Mode="" Description="Background style of the clock and metadata." Type="Variable" Display="always" Required="false" Mask="false">none</Config>
+  <Config Name="Layout" Target="Layout" Default="splitview" Mode="" Description="Allows two portrait images to display next to each other." Type="Variable" Display="always" Required="false" Mask="false">splitview</Config>
+  <Config Name="BaseFontSize" Target="BaseFontSize" Default="17px" Mode="" Description="Base font size using standard CSS formats." Type="Variable" Display="always" Required="false" Mask="false">17px</Config>
+</Container>
