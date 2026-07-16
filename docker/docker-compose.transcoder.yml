@@ -1,0 +1,30 @@
+services:
+  immichframe:
+    environment:
+      # These opt-in settings leave existing installations unchanged unless this
+      # Compose override is included.
+      TRANSCODER_URL: http://immichframe-transcoder:8090
+      TRANSCODER_MEDIA_PATH: /transcoded
+      TRANSCODER_PLAYBACK_PROFILE: "720"
+    volumes:
+      - transcoded-media:/transcoded:ro
+
+  immichframe-transcoder:
+    build:
+      context: ../transcoder
+    restart: on-failure
+    environment:
+      # Set both values in docker/.env. Use the same account as ImmichFrame.
+      IMMICH_URL: ${IMMICH_URL}
+      IMMICH_API_KEY: ${IMMICH_API_KEY}
+      TRANSCODER_PROFILES: ${TRANSCODER_PROFILES:-720,1080}
+      TRANSCODER_PLAYBACK_PROFILE: ${TRANSCODER_PLAYBACK_PROFILE:-720}
+      TRANSCODER_DB_PATH: /data/transcoder.db
+      TRANSCODER_MEDIA_PATH: /transcoded
+    volumes:
+      - transcoder-state:/data
+      - transcoded-media:/transcoded
+
+volumes:
+  transcoder-state:
+  transcoded-media:
