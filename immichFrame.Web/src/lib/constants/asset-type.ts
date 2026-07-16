@@ -1,11 +1,5 @@
-import type { AssetResponseDto } from '$lib/immichFrameApi';
-export const AssetType = {
-    IMAGE: 0,
-    VIDEO: 1,
-    AUDIO: 2,
-    OTHER: 3
-} as const;
-export const isImageAsset = (asset: AssetResponseDto) => asset.type === AssetType.IMAGE;
-export const isVideoAsset = (asset: AssetResponseDto) => asset.type === AssetType.VIDEO;
+import { type AssetResponseDto, AssetTypeEnum } from '$lib/immichFrameApi';
+export const isImageAsset = (asset: AssetResponseDto) => asset.type === AssetTypeEnum.Image;
+export const isVideoAsset = (asset: AssetResponseDto) => asset.type === AssetTypeEnum.Video;
 export const isSupportedAsset = (asset: AssetResponseDto) =>
     isImageAsset(asset) || isVideoAsset(asset);

@@ -695,12 +695,11 @@
       },
       "AlbumUserRole": {
         "enum": [
-          0,
-          1,
-          2
+          "editor",
+          "owner",
+          "viewer"
         ],
-        "type": "integer",
-        "format": "int32"
+        "type": "string"
       },
       "AssetFaceResponseDto": {
         "required": [
@@ -767,11 +766,10 @@
       },
       "AssetOrder": {
         "enum": [
-          0,
-          1
+          "asc",
+          "desc"
         ],
-        "type": "integer",
-        "format": "int32"
+        "type": "string"
       },
       "AssetResponseDto": {
         "required": [
@@ -974,23 +972,21 @@
       },
       "AssetTypeEnum": {
         "enum": [
-          0,
-          1,
-          2,
-          3
+          "image",
+          "video",
+          "audio",
+          "other"
         ],
-        "type": "integer",
-        "format": "int32"
+        "type": "string"
       },
       "AssetVisibility": {
         "enum": [
-          0,
-          1,
-          2,
-          3
+          "archive",
+          "timeline",
+          "hidden",
+          "locked"
         ],
-        "type": "integer",
-        "format": "int32"
+        "type": "string"
       },
       "ClientSettingsDto": {
         "type": "object",
@@ -1412,12 +1408,11 @@
       },
       "SourceType": {
         "enum": [
-          0,
-          1,
-          2
+          "machineLearning",
+          "exif",
+          "manual"
         ],
-        "type": "integer",
-        "format": "int32"
+        "type": "string"
       },
       "TagResponseDto": {
         "required": [
@@ -1468,19 +1463,18 @@
       },
       "UserAvatarColor": {
         "enum": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9
+          "primary",
+          "pink",
+          "red",
+          "yellow",
+          "blue",
+          "green",
+          "purple",
+          "orange",
+          "gray",
+          "amber"
         ],
-        "type": "integer",
-        "format": "int32"
+        "type": "string"
       },
       "UserResponseDto": {
         "required": [

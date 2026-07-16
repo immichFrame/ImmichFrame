@@ -1,5 +1,5 @@
 // place files you want to import through the `$lib` alias in this folder.
-import { defaults } from './immichFrameApi.js';
+import { defaults, type AssetTypeEnum } from './immichFrameApi.js';
 import { authSecretStore } from '$lib/stores/persist.store';
 import { get } from 'svelte/store';
 
@@ -52,7 +52,7 @@ export const setBearer = () => {
 	defaults.headers['Authorization'] = "Bearer " + get(authSecretStore);
 };
 
-export const getAssetStreamUrl = (id: string, clientIdentifier?: string, assetType?: number) => {
+export const getAssetStreamUrl = (id: string, clientIdentifier?: string, assetType?: AssetTypeEnum) => {
 	const params = new URLSearchParams();
 	if (clientIdentifier) params.set('clientIdentifier', clientIdentifier);
 	if (assetType !== undefined) params.set('assetType', String(assetType));

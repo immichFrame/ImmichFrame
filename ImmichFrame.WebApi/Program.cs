@@ -1,12 +1,13 @@
 using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
-using ImmichFrame.WebApi.Models;
 using Microsoft.AspNetCore.Authentication;
 using System.Reflection;
 using ImmichFrame.Core.Logic;
 using ImmichFrame.Core.Logic.AccountSelection;
 using ImmichFrame.WebApi.Helpers;
 using ImmichFrame.WebApi.Helpers.Config;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 //log the version number
@@ -77,7 +78,10 @@ builder.Services.AddTransient<Func<IAccountSettings, IAccountImmichFrameLogic>>(
 
 builder.Services.AddSingleton<IImmichFrameLogic, MultiImmichFrameLogicDelegate>();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+      .AddJsonOptions(options =>
+          options.JsonSerializerOptions.Converters.Add(
+              new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options => options.SchemaFilter<ImmichFrame.WebApi.Helpers.NoReadOnlySchemaFilter>());
