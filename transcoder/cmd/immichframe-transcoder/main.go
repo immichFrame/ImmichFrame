@@ -42,6 +42,7 @@ type resolveRequest struct {
 }
 
 func main() {
+	log.SetOutput(os.Stdout)
 	cfg, err := loadConfig()
 	if err != nil { log.Fatal(err) }
 	if err = os.MkdirAll(filepath.Dir(cfg.databasePath), 0755); err != nil { log.Fatal(err) }
@@ -97,18 +98,42 @@ func (s *service) resolve(w http.ResponseWriter, r *http.Request) {
 	profile := req.PlaybackProfile
 	if profile == "" { profile = s.cfg.playbackProfile }
 	if !contains(s.cfg.profiles, profile) { http.Error(w, "unknown playback profile", http.StatusBadRequest); return }
+	log.Printf("video %s requested for playback profile %s", req.AssetID, profile)
 	status, err := s.resolveAsset(r.Context(), req.AssetID, req.Checksum, profile)
 	if err != nil { log.Printf("resolve %s: %v", req.AssetID, err); http.Error(w, "transcoder unavailable", http.StatusServiceUnavailable); return }
+	codec := s.codecFor(r.Context(), req.AssetID, req.Checksum)
+	log.Printf("video %s resolution: %s; codec=%s", req.AssetID, status, codec)
 	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(map[string]string{"status": status})
+	_ = json.NewEncoder(w).Encode(map[string]string{"status": status, "codec": codec})
+}
+
+func (s *service) codecFor(ctx context.Context, assetID, checksum string) string {
+	var codec sql.NullString
+	if err := s.db.QueryRowContext(ctx, "SELECT codec FROM assets WHERE asset_id=? AND checksum=?", assetID, checksum).Scan(&codec); err != nil || !codec.Valid {
+		return "unknown"
+	}
+	return codec.String
 }
 
 func (s *service) resolveAsset(ctx context.Context, assetID, checksum, playbackProfile string) (string, error) {
 	var state string
-	err := s.db.QueryRowContext(ctx, "SELECT state FROM assets WHERE asset_id=? AND checksum=?", assetID, checksum).Scan(&state)
-	if err == nil && state == "direct" { return "direct", nil }
+	var codec sql.NullString
+	err := s.db.QueryRowContext(ctx, "SELECT state, codec FROM assets WHERE asset_id=? AND checksum=?", assetID, checksum).Scan(&state, &codec)
+	if err == nil && state == "direct" {
+		if strings.EqualFold(codec.String, "h264") {
+			log.Printf("video %s is cached for direct playback; codec=%s", assetID, codec.String)
+			return "direct", nil
+		}
+
+		// Older versions marked every non-AV1 codec as direct. Requeue those
+		// cached assets so HEVC and other codecs follow the current H.264-only rule.
+		log.Printf("video %s has cached direct codec=%s; requeueing it for transcoding", assetID, codec.String)
+		if _, err = s.db.ExecContext(ctx, "UPDATE assets SET state='queued',updated_at=? WHERE asset_id=? AND checksum=?", time.Now().Unix(), assetID, checksum); err != nil { return "", err }
+		if _, err = s.db.ExecContext(ctx, "UPDATE jobs SET state='queued',updated_at=? WHERE asset_id=? AND checksum=?", time.Now().Unix(), assetID, checksum); err != nil { return "", err }
+		state = "queued"
+	}
 	path := s.outputPath(playbackProfile, assetID)
-	if err == nil && state == "ready" && fileExists(path) { return "ready", nil }
+	if err == nil && state == "ready" && fileExists(path) { log.Printf("video %s is cached as transcoded AV1 output: %s", assetID, path); return "ready", nil }
 	now := time.Now().Unix()
 	tx, err := s.db.BeginTx(ctx, nil); if err != nil { return "", err }; defer tx.Rollback()
 	if _, err = tx.ExecContext(ctx, "INSERT INTO assets(asset_id,checksum,state,updated_at) VALUES(?,?, 'queued', ?) ON CONFLICT(asset_id,checksum) DO UPDATE SET state=CASE WHEN assets.state='direct' THEN 'direct' ELSE 'queued' END, updated_at=excluded.updated_at", assetID, checksum, now); err != nil { return "", err }
@@ -118,6 +143,7 @@ func (s *service) resolveAsset(ctx context.Context, assetID, checksum, playbackP
 		if err != nil { return "", err }
 	}
 	if err = tx.Commit(); err != nil { return "", err }
+	log.Printf("video %s queued for codec detection and, if needed, transcoding", assetID)
 	select { case s.wake <- struct{}{}: default: }
 	return "pending", nil
 }
@@ -128,7 +154,7 @@ func (s *service) worker() {
 		job, err := s.nextJob(context.Background())
 		if err != nil { log.Printf("job query: %v", err); time.Sleep(5*time.Second); continue }
 		if job == nil { select { case <-s.wake: case <-time.After(30*time.Second): }; continue }
-		if err := s.process(*job); err != nil { log.Printf("transcode %s/%s: %v", job.assetID, job.profile, err); s.fail(*job, err) }
+		if err := s.process(*job); err != nil { log.Printf("video %s/%s failed: %v", job.assetID, job.profile, err); s.fail(*job, err) }
 	}
 }
 func (s *service) nextJob(ctx context.Context) (*job, error) {
@@ -141,20 +167,26 @@ func (s *service) nextJob(ctx context.Context) (*job, error) {
 	return &j, tx.Commit()
 }
 func (s *service) process(j job) error {
-	if fileExists(s.outputPath(j.profile,j.assetID)) { return s.done(j, "ready") }
+	log.Printf("processing video %s (profile=%s, attempt=%d)", j.assetID, j.profile, j.attempts+1)
+	if fileExists(s.outputPath(j.profile,j.assetID)) { log.Printf("video %s/%s output already exists", j.assetID, j.profile); return s.done(j, "ready") }
 	tmp, err := os.CreateTemp("", "immichframe-source-*.video"); if err != nil { return err }; source := tmp.Name(); defer os.Remove(source); defer tmp.Close()
+	log.Printf("downloading video %s from Immich", j.assetID)
 	if err = s.download(j.assetID, tmp); err != nil { return err }; if err = tmp.Close(); err != nil { return err }
 	codec, err := probe(source); if err != nil { return err }
-	if strings.ToLower(codec) != "av1" {
+	log.Printf("video %s codec detected: %s", j.assetID, codec)
+	if strings.EqualFold(codec, "h264") {
+		log.Printf("video %s uses H.264, so it will be played directly without transcoding", j.assetID)
 		_, err = s.db.Exec("UPDATE assets SET state='direct',codec=?,updated_at=? WHERE asset_id=? AND checksum=?",codec,time.Now().Unix(),j.assetID,j.checksum)
 		if err == nil { _, err = s.db.Exec("UPDATE jobs SET state='done',updated_at=? WHERE asset_id=? AND checksum=?",time.Now().Unix(),j.assetID,j.checksum) }; return err
 	}
 	output := s.outputPath(j.profile,j.assetID); if err = os.MkdirAll(filepath.Dir(output),0755); err != nil { return err }
-	partial := output+".partial"; _ = os.Remove(partial); defer os.Remove(partial)
+	partial := strings.TrimSuffix(output, ".mp4") + ".partial.mp4"; _ = os.Remove(partial); defer os.Remove(partial)
 	height, _ := strconv.Atoi(j.profile)
-	cmd := exec.Command("ffmpeg", "-nostdin", "-y", "-i", source, "-map", "0:v:0", "-map", "0:a?", "-vf", fmt.Sprintf("scale=-2:min(%d,ih):force_original_aspect_ratio=decrease",height), "-c:v", "libx264", "-preset", "veryfast", "-crf", "23", "-pix_fmt", "yuv420p", "-c:a", "aac", "-movflags", "+faststart", partial)
+	log.Printf("transcoding %s video %s to H.264/AAC MP4 at up to %dp", codec, j.assetID, height)
+	cmd := exec.Command("ffmpeg", "-nostdin", "-y", "-i", source, "-map", "0:v:0", "-map", "0:a:0?", "-vf", fmt.Sprintf("scale=-2:%d:force_original_aspect_ratio=decrease,scale=trunc(iw/2)*2:trunc(ih/2)*2",height), "-c:v", "libx264", "-preset", "veryfast", "-crf", "23", "-pix_fmt", "yuv420p", "-c:a", "aac", "-movflags", "+faststart", partial)
 	if out, e := cmd.CombinedOutput(); e != nil { return fmt.Errorf("ffmpeg: %w: %s",e,strings.TrimSpace(string(out))) }
 	if err = os.Rename(partial,output); err != nil { return err }
+	log.Printf("transcoding complete for video %s: %s", j.assetID, output)
 	return s.done(j,"ready")
 }
 func (s *service) download(assetID string, output io.Writer) error {

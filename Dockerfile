@@ -40,6 +40,11 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy AS final
 
 WORKDIR /app
 
+# Keep a lightweight HTTP client available for container-network diagnostics.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends wget \
+    && rm -rf /var/lib/apt/lists/*
+
 # Optional: für Diagnostik bei Laufzeit
 ARG VERSION
 ENV APP_VERSION=$VERSION

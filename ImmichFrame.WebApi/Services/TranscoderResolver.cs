@@ -32,20 +32,32 @@ public sealed class TranscoderResolver : ITranscoderResolver
         _profile = Environment.GetEnvironmentVariable("TRANSCODER_PLAYBACK_PROFILE") ?? "720";
         _httpClient = httpClientFactory.CreateClient("Transcoder");
         if (!string.IsNullOrWhiteSpace(url))
+        {
             _httpClient.BaseAddress = new Uri(url.TrimEnd('/') + "/");
+            _logger.LogInformation("Video transcoder enabled at {TranscoderUrl}; playback profile {PlaybackProfile}", _httpClient.BaseAddress, _profile);
+        }
+        else
+        {
+            _logger.LogInformation("Video transcoder is disabled: TRANSCODER_URL is not configured");
+        }
     }
 
     public async Task<TranscoderResolution> ResolveAsync(Guid assetId, string checksum, CancellationToken cancellationToken)
     {
         if (_httpClient.BaseAddress == null || string.IsNullOrWhiteSpace(_mediaPath))
+        {
+            _logger.LogInformation("Video {AssetId} bypasses transcoder because it is not fully configured", assetId);
             return new(TranscoderResolutionKind.Disabled);
+        }
 
         try
         {
+            _logger.LogInformation("Resolving video {AssetId} with transcoder; profile {PlaybackProfile}", assetId, _profile);
             using var response = await _httpClient.PostAsJsonAsync("v1/resolve",
                 new ResolveRequest(assetId, checksum, _profile), cancellationToken);
             response.EnsureSuccessStatusCode();
             var result = await response.Content.ReadFromJsonAsync<ResolveResponse>(cancellationToken: cancellationToken);
+            _logger.LogInformation("Transcoder returned status {TranscoderStatus} and codec {Codec} for video {AssetId}", result?.Status ?? "(empty)", result?.Codec ?? "unknown", assetId);
 
             return result?.Status switch
             {
@@ -68,5 +80,8 @@ public sealed class TranscoderResolver : ITranscoderResolver
     {
         [JsonPropertyName("status")]
         public string? Status { get; init; }
+
+        [JsonPropertyName("codec")]
+        public string? Codec { get; init; }
     }
 }
