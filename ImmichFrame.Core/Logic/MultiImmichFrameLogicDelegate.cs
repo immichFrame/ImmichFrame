@@ -33,6 +33,27 @@ public class MultiImmichFrameLogicDelegate : IImmichFrameLogic
     public async Task<IEnumerable<AssetResponseDto>> GetAssets()
         => (await _accountSelectionStrategy.GetAssets()).Shuffle().Select(it => it.ToAsset());
 
+    public async Task<IEnumerable<IEnumerable<AssetResponseDto>>> GetMemoryAssets()
+    {
+        var accountMemoryGroups = await Task.WhenAll(_accountToDelegate.Values.Select(async account =>
+        {
+            var groups = (await account.GetMemoryAssets())
+                .Select(group => group.ToList())
+                .Where(group => group.Any())
+                .ToList();
+
+            foreach (var asset in groups.SelectMany(group => group))
+            {
+                await _accountSelectionStrategy.RecordAssetLocation(account, asset.Id);
+            }
+
+            return groups
+                .Select(group => group.Select(asset => asset.WithAccount(account)))
+                .ToList();
+        }));
+
+        return accountMemoryGroups.SelectMany(groups => groups);
+    }
 
     public Task<AssetResponseDto> GetAssetInfoById(Guid assetId)
         => _accountSelectionStrategy.ForAsset(assetId, async logic => (await logic.GetAssetInfoById(assetId)).WithAccount(logic));

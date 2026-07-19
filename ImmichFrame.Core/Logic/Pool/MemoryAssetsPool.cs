@@ -7,12 +7,18 @@ namespace ImmichFrame.Core.Logic.Pool;
 
 public class MemoryAssetsPool(ImmichApi immichApi, IAccountSettings accountSettings) : CachingApiAssetsPool(new DailyApiCache(), immichApi, accountSettings)
 {
+    public async Task<IEnumerable<IEnumerable<AssetResponseDto>>> GetAssetGroups(CancellationToken ct = default)
+        => await LoadAssetGroups(ct);
+
     protected override async Task<IEnumerable<AssetResponseDto>> LoadAssets(CancellationToken ct = default)
+        => (await LoadAssetGroups(ct)).SelectMany(assets => assets);
+
+    private async Task<List<List<AssetResponseDto>>> LoadAssetGroups(CancellationToken ct = default)
     {
         var searchDate = DateTimeOffset.Now;
         var memories = await immichApi.SearchMemoriesAsync(searchDate, null, null, null, null, null, ct);
 
-        var memoryAssets = new List<AssetResponseDto>();
+        var memoryAssets = new List<List<AssetResponseDto>>();
         foreach (var memory in memories)
         {
             var assets = memory.Assets.ToList();
@@ -35,7 +41,10 @@ public class MemoryAssetsPool(ImmichApi immichApi, IAccountSettings accountSetti
                 asset.ExifInfo.Description = $"{yearsAgo} {(yearsAgo == 1 ? "year" : "years")} ago";
             }
 
-            memoryAssets.AddRange(assets);
+            if (assets.Any())
+            {
+                memoryAssets.Add(assets);
+            }
         }
 
         return memoryAssets;

@@ -42,6 +42,14 @@ namespace ImmichFrame.WebApi.Controllers
             return (await _logic.GetAssets()).ToList();
         }
 
+        [HttpGet("Memories", Name = "GetMemoryAssets")]
+        public async Task<List<List<AssetResponseDto>>> GetMemoryAssets(string clientIdentifier = "")
+        {
+            var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
+            _logger.LogDebug("Memory assets requested by '{sanitizedClientIdentifier}'", sanitizedClientIdentifier);
+            return (await _logic.GetMemoryAssets()).Select(group => group.ToList()).ToList();
+        }
+
         [HttpGet("{id}/AssetInfo", Name = "GetAssetInfo")]
         public async Task<AssetResponseDto> GetAssetInfo(Guid id, string clientIdentifier = "")
         {
