@@ -36,6 +36,15 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
 
     private IAssetPool BuildPool(IAccountSettings accountSettings)
     {
+        return WithExhaustiveShuffle(BuildSourcePool(accountSettings), accountSettings);
+    }
+
+    // Wraps the source pool so each asset is shown once before any repeats (see ShuffleBagAssetPool).
+    private static IAssetPool WithExhaustiveShuffle(IAssetPool pool, IAccountSettings accountSettings)
+        => accountSettings.ExhaustiveShuffle ? new ShuffleBagAssetPool(pool) : pool;
+
+    private IAssetPool BuildSourcePool(IAccountSettings accountSettings)
+    {
         var hasAlbums = accountSettings.Albums?.Any() ?? false;
         var hasPeople = accountSettings.People?.Any() ?? false;
         var hasTags = accountSettings.Tags?.Any() ?? false;
