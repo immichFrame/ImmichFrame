@@ -120,8 +120,14 @@ public class ConfigLoaderTest
                     Assert.That(value, Is.EqualTo(true), prop.Name);
                     break;
                 case var t when t == typeof(int):
-                    Assert.That(value, Is.EqualTo(7), prop.Name);
+                {
+                    var range = prop.GetCustomAttribute<System.ComponentModel.DataAnnotations.RangeAttribute>();
+                    var expected = range is null
+                        ? 7
+                        : Math.Clamp(7, (int)range.Minimum, (int)range.Maximum);
+                    Assert.That(value, Is.EqualTo(expected), prop.Name);
                     break;
+                }
                 case var t when t == typeof(double):
                     Assert.That(value, Is.EqualTo(7.7d), prop.Name);
                     break;
