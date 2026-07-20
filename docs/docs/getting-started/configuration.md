@@ -176,6 +176,42 @@ A webhook to notify an external service is available. This is only enabled when 
 
 A client can be identified by the `ClientIdentifier`. You can set/overwrite the `ClientIdentifier` by adding `?client=MyClient` to your ImmichFrame-URL. This only needs to be called once and is persisted. Delete the cache to reset the `ClientIdentifier`.
 
+#### Event Host
+ImmichFrame can receive real-time notifications (events) from external services via the `/api/events` endpoint. Enable the event host with the following settings:
+
+- `EventHostEnabled` — Set to `true` to enable the event host.
+- `EventPollingIntervalSeconds` — How often the client polls for new events (default: 2 seconds). Minimum 0.5 seconds.
+- `EventDefaultTimeoutMs` — Default timeout for events if `timeoutMs` is not specified (default: 15000 milliseconds).
+
+##### Posting frame events
+
+ImmichFrame's event host accepts two notification modes:
+
+- **PopupText** — full-screen modal that pauses the slideshow until dismissed (or its `timeoutMs` elapses).
+- **Banner** — passive top-of-screen notification that does *not* pause the slideshow. Tapping the banner dismisses it. Newer banners with the same `category` replace the older one.
+
+Example: post a banner via `curl`:
+
+```bash
+curl -X POST http://<your-host>:8080/api/events \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "deviceId": "<device-id>",
+    "id": "calendar-reminder-2026-05-18T14",
+    "type": "frame.ui.banner",
+    "mode": "Banner",
+    "message": "Coffee with Sam in 15 minutes",
+    "category": "banner.calendar",
+    "timeoutMs": 8000
+  }'
+```
+
+Both modes share the same `POST /api/events` schema; only `mode` differs.
+
+:::note
+If you have `AuthenticationSecret` set in your Settings, include `Authorization: Bearer <your-secret>` as a request header — without it the request will be rejected as unauthenticated.
+:::
+
 #### Events
 Events will always contain a `Name`, `ClientIdentifier` and a `DateTime` to differentiate, but can contain more information.
 
