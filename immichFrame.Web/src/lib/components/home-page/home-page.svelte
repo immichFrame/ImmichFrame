@@ -15,6 +15,17 @@
 	import { page } from '$app/state';
 	import { ProgressBarLocation, ProgressBarStatus } from '../elements/progress-bar.types';
 	import { isImageAsset, isVideoAsset } from '$lib/constants/asset-type';
+	import {
+		activePopupEvent,
+		activeBannerEvent,
+		acknowledgeEvent,
+		clearActivePopupEvent,
+		clearActiveBannerEvent,
+		startEventPolling,
+		stopEventPolling
+	} from '$lib/events/event-service';
+	import type { FrameEvent, FrameEventAckStatus } from '$lib/events/event-service';
+	import EventOverlayHost from '$lib/components/events/EventOverlayHost.svelte';
 
 	interface AssetsState {
 		assets: [string, api.AssetResponseDto, api.AssetFaceResponseDto[], api.AlbumResponseDto[]][];
@@ -73,6 +84,20 @@
 	let refreshInterval: number;
 
 	let cursorVisible = $state(true);
+	const deviceId = $derived.by(() => getCurrentDeviceId());
+	let pollingDeviceId: string | null = $state(null);
+	let hasMounted = $state(false);
+	let currentPopup: FrameEvent | null = $state(null);
+	let currentBanner: FrameEvent | null = $state(null);
+	let lastPopupId: string | null = $state(null);
+	let lastBannerId: string | null = $state(null);
+	let popupTimeoutHandle: ReturnType<typeof setTimeout> | null = null;
+	let bannerTimeoutHandle: ReturnType<typeof setTimeout> | null = null;
+	let popupPausedSlideshow = $state(false);
+	let popupShownAcked = $state(false);
+	let bannerShownAcked = $state(false);
+	let unsubscribePopupEvent: (() => void) | undefined;
+	let unsubscribeBannerEvent: (() => void) | undefined;
 
 	const clientIdentifier = page.url.searchParams.get('client');
 	const authsecret = page.url.searchParams.get('authsecret');
@@ -85,6 +110,14 @@
 		authSecretStore.set(authsecret);
 		api.init();
 	}
+
+	function getCurrentDeviceId(): string {
+		const storeId = typeof $clientIdentifierStore === 'string' ? $clientIdentifierStore.trim() : '';
+		const queryId = typeof clientIdentifier === 'string' ? clientIdentifier.trim() : '';
+		return storeId || queryId || 'default';
+	}
+
+	// Event polling is started in onMount after config is loaded
 
 	const hideCursor = () => {
 		cursorVisible = false;
@@ -104,6 +137,161 @@
 		clearTimeout(timeoutId);
 		timeoutId = window.setTimeout(hideCursor, CURSOR_HIDE_MS);
 	};
+
+	function clearPopupTimer() {
+		if (popupTimeoutHandle) {
+			clearTimeout(popupTimeoutHandle);
+			popupTimeoutHandle = null;
+		}
+	}
+
+	function clearBannerTimer() {
+		if (bannerTimeoutHandle) {
+			clearTimeout(bannerTimeoutHandle);
+			bannerTimeoutHandle = null;
+		}
+	}
+
+	function markPopupShownOnce() {
+		if (!($configStore.eventHostEnabled ?? false)) return;
+		if (!currentPopup || popupShownAcked || !deviceId) return;
+		popupShownAcked = true;
+		void acknowledgeEvent(deviceId, currentPopup.id, 'Shown');
+	}
+
+	function markBannerShownOnce() {
+		if (!($configStore.eventHostEnabled ?? false)) return;
+		if (!currentBanner || bannerShownAcked || !deviceId) return;
+		bannerShownAcked = true;
+		void acknowledgeEvent(deviceId, currentBanner.id, 'Shown');
+	}
+
+	async function dismissPopup(status: FrameEventAckStatus, explicitEvent: FrameEvent | null = null) {
+		if (!($configStore.eventHostEnabled ?? false)) return;
+		const target = explicitEvent ?? currentPopup;
+		if (!target) return;
+
+		clearPopupTimer();
+		clearActivePopupEvent();
+		if (!deviceId) return;
+
+		try {
+			await acknowledgeEvent(deviceId, target.id, status);
+		} catch (error) {
+			console.error('failed to acknowledge popup event', error);
+		}
+	}
+
+	async function dismissBanner(status: FrameEventAckStatus, explicitEvent: FrameEvent | null = null) {
+		if (!($configStore.eventHostEnabled ?? false)) return;
+		const target = explicitEvent ?? currentBanner;
+		if (!target) return;
+
+		clearBannerTimer();
+		clearActiveBannerEvent();
+		if (!deviceId) return;
+
+		try {
+			await acknowledgeEvent(deviceId, target.id, status);
+		} catch (error) {
+			console.error('failed to acknowledge banner event', error);
+		}
+	}
+
+	function resetPopupState() {
+		clearPopupTimer();
+		currentPopup = null;
+		popupShownAcked = false;
+		lastPopupId = null;
+		if (popupPausedSlideshow && progressBar) {
+			void progressBar.play();
+		}
+		popupPausedSlideshow = false;
+	}
+
+	function handlePopupEvent(event: FrameEvent | null) {
+		if (!($configStore.eventHostEnabled ?? false)) {
+			resetPopupState();
+			return;
+		}
+		clearPopupTimer();
+
+		if (!event) {
+			resetPopupState();
+			return;
+		}
+
+		if (event.mode === 'Close') {
+			void dismissPopup('Closed', event);
+			return;
+		}
+
+		currentPopup = event;
+		const isNewEvent = event.id !== lastPopupId;
+		if (isNewEvent) {
+			lastPopupId = event.id;
+			popupShownAcked = false;
+			if (progressBar && progressBarStatus !== ProgressBarStatus.Paused) {
+				void progressBar.pause();
+				popupPausedSlideshow = true;
+			} else if (progressBarStatus === ProgressBarStatus.Paused) {
+				popupPausedSlideshow = false;
+			}
+		}
+
+		markPopupShownOnce();
+
+		const fallbackTimeout = $configStore.eventDefaultTimeoutMs ?? 0;
+		const timeoutMs = event.timeoutMs ?? fallbackTimeout;
+		if (timeoutMs && timeoutMs > 0) {
+			popupTimeoutHandle = setTimeout(() => {
+				void dismissPopup('Timeout');
+			}, timeoutMs);
+		}
+	}
+
+	function resetBannerState() {
+		clearBannerTimer();
+		currentBanner = null;
+		bannerShownAcked = false;
+		lastBannerId = null;
+	}
+
+	function handleBannerEvent(event: FrameEvent | null) {
+		if (!($configStore.eventHostEnabled ?? false)) {
+			resetBannerState();
+			return;
+		}
+		clearBannerTimer();
+
+		if (!event) {
+			resetBannerState();
+			return;
+		}
+
+		if (event.mode === 'Close') {
+			void dismissBanner('Closed', event);
+			return;
+		}
+
+		currentBanner = event;
+		const isNewEvent = event.id !== lastBannerId;
+		if (isNewEvent) {
+			lastBannerId = event.id;
+			bannerShownAcked = false;
+			// Banners never pause the slideshow.
+		}
+
+		markBannerShownOnce();
+
+		const fallbackTimeout = $configStore.eventDefaultTimeoutMs ?? 0;
+		const timeoutMs = event.timeoutMs ?? fallbackTimeout;
+		if (timeoutMs && timeoutMs > 0) {
+			bannerTimeoutHandle = setTimeout(() => {
+				void dismissBanner('Timeout');
+			}, timeoutMs);
+		}
+	}
 
 	async function updateAssetPromises() {
 		for (let asset of displayingAssets) {
@@ -426,6 +614,17 @@
 	}
 
 	onMount(() => {
+		hasMounted = true;
+		unsubscribePopupEvent = activePopupEvent.subscribe(handlePopupEvent);
+		unsubscribeBannerEvent = activeBannerEvent.subscribe(handleBannerEvent);
+
+		// Start event polling unconditionally — startEventPolling checks eventHostEnabled internally.
+		const id = getCurrentDeviceId();
+		if (id) {
+			startEventPolling(id);
+			pollingDeviceId = id;
+		}
+
 		window.addEventListener('mousemove', showCursor);
 		window.addEventListener('click', showCursor);
 
@@ -469,6 +668,18 @@
 			window.clearTimeout(timeoutId);
 			window.clearTimeout(videoStallTimeout);
 			window.clearTimeout(watchdogTimer);
+			if (unsubscribePopupEvent) {
+				unsubscribePopupEvent();
+				unsubscribePopupEvent = undefined;
+			}
+			if (unsubscribeBannerEvent) {
+				unsubscribeBannerEvent();
+				unsubscribeBannerEvent = undefined;
+			}
+			clearPopupTimer();
+			clearBannerTimer();
+			stopEventPolling();
+			hasMounted = false;
 		};
 	});
 
@@ -480,6 +691,19 @@
 		if (unsubscribeStop) {
 			unsubscribeStop();
 		}
+
+		if (unsubscribePopupEvent) {
+			unsubscribePopupEvent();
+			unsubscribePopupEvent = undefined;
+		}
+		if (unsubscribeBannerEvent) {
+			unsubscribeBannerEvent();
+			unsubscribeBannerEvent = undefined;
+		}
+		clearPopupTimer();
+		clearBannerTimer();
+		stopEventPolling();
+		hasMounted = false;
 
 		const revokes = Object.values(assetPromisesDict).map(async (p) => {
 			try {
@@ -561,6 +785,15 @@
 
 		<Appointments />
 
+		{#if $configStore.eventHostEnabled}
+			<EventOverlayHost
+				popupEvent={currentPopup}
+				bannerEvent={currentBanner}
+				dismissPopup={dismissPopup}
+				dismissBanner={dismissBanner}
+			/>
+		{/if}
+
 		<OverlayControls
 			next={async () => {
 				await handleDone(false, true);
@@ -597,7 +830,7 @@
 			}}
 			bind:status={progressBarStatus}
 			bind:infoVisible
-			overlayVisible={cursorVisible}
+			overlayVisible={cursorVisible && !currentPopup}
 		/>
 
 		<ProgressBar

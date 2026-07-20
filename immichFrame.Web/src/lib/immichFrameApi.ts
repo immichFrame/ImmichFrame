@@ -228,6 +228,9 @@ export type ClientSettingsDto = {
     playAudio?: boolean;
     layout?: string | null;
     language?: string | null;
+    eventHostEnabled?: boolean;
+    eventPollingIntervalSeconds?: number;
+    eventDefaultTimeoutMs?: number;
 };
 export type IWeather = {
     location?: string | null;

@@ -1,14 +1,27 @@
 import type { ClientSettingsDto } from '$lib/immichFrameApi';
 import { writable } from 'svelte/store';
 
-function createConfigStore(settings: ClientSettingsDto) {
-  const { subscribe, set } = writable(settings);
+export type ClientSettingsWithUx = ClientSettingsDto & {
+  eventPollingIntervalSeconds?: number;
+  eventDefaultTimeoutMs?: number;
+  eventHostEnabled?: boolean;
+};
+
+function createConfigStore(settings: ClientSettingsWithUx) {
+  const { subscribe, set, update } = writable<ClientSettingsWithUx>(settings);
 
   function ps(settings: ClientSettingsDto) {
-    set(settings);
+    set({
+      ...settings,
+      eventHostEnabled: settings.eventHostEnabled ?? false
+    } as ClientSettingsWithUx);
   }
 
-  return { subscribe, ps }
+  function patch(partial: Partial<ClientSettingsWithUx>) {
+    update((current) => ({ ...current, ...partial }));
+  }
+
+  return { subscribe, ps, patch };
 }
 
-export const configStore = createConfigStore({});
+export const configStore = createConfigStore({} as ClientSettingsWithUx);
