@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { type AlbumResponseDto, type AssetResponseDto } from '$lib/immichFrameApi';
-	import { format } from 'date-fns';
+	import { type AlbumResponseDto, type AssetResponseDto, type PersonResponseDto } from '$lib/immichFrameApi';
+	import { differenceInYears, format } from 'date-fns';
 	import * as locale from 'date-fns/locale';
 	import { configStore } from '$lib/stores/config.store';
 	import Icon from './icon.svelte';
@@ -13,6 +13,7 @@
 		showPhotoDate: boolean;
 		showImageDesc: boolean;
 		showPeopleDesc: boolean;
+		showPeopleAge: boolean;
 		showTagsDesc: boolean;
 		showAlbumName: boolean;
 		split: boolean;
@@ -25,6 +26,7 @@
 		showPhotoDate,
 		showImageDesc,
 		showPeopleDesc,
+		showPeopleAge,
 		showTagsDesc,
 		showAlbumName,
 		split,
@@ -68,6 +70,17 @@
 	);
 	let availablePeople = $derived(asset.people?.filter((x) => x.name));
 	let availableTags = $derived(asset.tags?.filter((x) => x.name));
+
+	// Person's name, with their age at the time the photo was taken in brackets when ShowPeopleAge is on and a birthday is set, e.g. "John (7)"
+	function formatPerson(person: PersonResponseDto): string {
+		if (showPeopleAge && person.birthDate && assetDate) {
+			const age = differenceInYears(new Date(assetDate), new Date(person.birthDate));
+			if (age >= 0) {
+				return `${person.name} (${age})`;
+			}
+		}
+		return person.name;
+	}
 </script>
 
 {#if showPhotoDate || showLocation || showImageDesc || showPeopleDesc || showTagsDesc || showAlbumName}
@@ -99,7 +112,7 @@
 		{#if showPeopleDesc && availablePeople && availablePeople.length > 0}
 			<p id="peopledescription" class="info-item">
 				<Icon path={mdiAccount} />
-				<span class="info-text" class:short-text={split}>{availablePeople.map((x) => x.name).join(', ')}</span>
+				<span class="info-text" class:short-text={split}>{availablePeople.map(formatPerson).join(', ')}</span>
 			</p>
 		{/if}
 		{#if showTagsDesc && availableTags && availableTags.length > 0}

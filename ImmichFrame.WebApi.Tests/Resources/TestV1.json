@@ -43,6 +43,7 @@
     "PhotoDateFormat": "PhotoDateFormat_TEST",
     "ShowImageDesc": true,
     "ShowPeopleDesc": true,
+    "ShowPeopleAge": true,
     "ShowImageLocation": true,
     "ImageLocationFormat": "ImageLocationFormat_TEST",
     "PrimaryColor": "PrimaryColor_TEST",

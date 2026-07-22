@@ -505,6 +505,7 @@
 				showPhotoDate={$configStore.showPhotoDate}
 				showImageDesc={$configStore.showImageDesc}
 				showPeopleDesc={$configStore.showPeopleDesc}
+				showPeopleAge={$configStore.showPeopleAge}
 				showTagsDesc={$configStore.showTagsDesc}
 				showAlbumName={$configStore.showAlbumName}
 				{...assetsState}
