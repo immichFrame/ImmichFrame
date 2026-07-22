@@ -41,6 +41,7 @@ public class ServerSettingsV1 : IConfigSettable
     public string? PhotoDateFormat { get; set; } = "MM/dd/yyyy";
     public bool ShowImageDesc { get; set; } = true;
     public bool ShowPeopleDesc { get; set; } = true;
+    public bool ShowPeopleAge { get; set; } = false;
     public bool ShowTagsDesc { get; set; } = true;
     public bool ShowAlbumName { get; set; } = true;
     public bool ShowImageLocation { get; set; } = true;
@@ -119,6 +120,7 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
         public string? PhotoDateFormat => _delegate.PhotoDateFormat;
         public bool ShowImageDesc => _delegate.ShowImageDesc;
         public bool ShowPeopleDesc => _delegate.ShowPeopleDesc;
+        public bool ShowPeopleAge => _delegate.ShowPeopleAge;
         public bool ShowTagsDesc => _delegate.ShowTagsDesc;
         public bool ShowAlbumName => _delegate.ShowAlbumName;
         public bool ShowImageLocation => _delegate.ShowImageLocation;

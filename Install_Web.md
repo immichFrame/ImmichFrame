@@ -67,6 +67,7 @@ services:
       # PhotoDateFormat: "yyyy-MM-dd"
       # ShowImageDesc: "true"
       # ShowPeopleDesc: "true"
+      # ShowPeopleAge: "false"
       # ShowAlbumName: "true"
       # ShowImageLocation: "true"
       # ImageLocationFormat: "City,State,Country"

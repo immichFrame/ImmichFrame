@@ -50,6 +50,7 @@ public class GeneralSettings : IGeneralSettings, IConfigSettable
     public bool ShowPhotoDate { get; set; } = true;
     public bool ShowImageDesc { get; set; } = true;
     public bool ShowPeopleDesc { get; set; } = true;
+    public bool ShowPeopleAge { get; set; } = false;
     public bool ShowTagsDesc { get; set; } = true;
     public bool ShowAlbumName { get; set; } = true;
     public bool ShowImageLocation { get; set; } = true;

@@ -23,6 +23,7 @@
     "ShowPhotoDate": true,
     "ShowImageDesc": true,
     "ShowPeopleDesc": true,
+    "ShowPeopleAge": true,
     "ShowAlbumName": true,
     "ShowImageLocation": true,
     "PrimaryColor": "PrimaryColor_TEST",
