@@ -16,16 +16,15 @@ public class MultiImmichFrameLogicDelegate : IImmichFrameLogic
 
     public MultiImmichFrameLogicDelegate(IServerSettings serverSettings,
         Func<IAccountSettings, IAccountImmichFrameLogic> logicFactory, ILogger<MultiImmichFrameLogicDelegate> logger,
-        IAccountSelectionStrategy accountSelectionStrategy)
+        Func<IList<IAccountImmichFrameLogic>, IAccountSelectionStrategy> strategyFactory)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _accountSelectionStrategy = accountSelectionStrategy;
         _serverSettings = serverSettings;
         _accountToDelegate = serverSettings.Accounts.ToFrozenDictionary(
             keySelector: a => a,
             elementSelector: logicFactory
         );
-        _accountSelectionStrategy.Initialize(_accountToDelegate.Values);
+        _accountSelectionStrategy = strategyFactory(_accountToDelegate.Values.ToList());
     }
 
     public async Task<AssetResponseDto?> GetNextAsset() => (await _accountSelectionStrategy.GetNextAsset())?.ToAsset();
@@ -37,6 +36,9 @@ public class MultiImmichFrameLogicDelegate : IImmichFrameLogic
 
     public Task<AssetResponseDto> GetAssetInfoById(Guid assetId)
         => _accountSelectionStrategy.ForAsset(assetId, async logic => (await logic.GetAssetInfoById(assetId)).WithAccount(logic));
+
+    public Task<IEnumerable<AssetFaceResponseDto>> GetAssetFacesById(Guid assetId)
+        => _accountSelectionStrategy.ForAsset(assetId, async logic => await logic.GetAssetFacesById(assetId));
 
 
     public Task<IEnumerable<AlbumResponseDto>> GetAlbumInfoById(Guid assetId)

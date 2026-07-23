@@ -43,15 +43,4 @@ public static class CollectionExtensionMethods
     }
     
     public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source) => source.OrderBy(_ => _random.Next());
-    
-    public static async Task<TValue> GetOrCreateAsync<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key, Func<TKey, Task<TValue>> createNew)
-    {
-        if (!dict.TryGetValue(key, out var val))
-        {
-            val = await createNew(key);
-            dict.Add(key, val);
-        }
-
-        return val;
-    }
 }

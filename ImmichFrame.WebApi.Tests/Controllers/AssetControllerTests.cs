@@ -1,18 +1,15 @@
 using System;
 using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
-using ImmichFrame.WebApi.Tests.Mocks;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Http; // Added this
 using Moq;
 using Moq.Protected;
 using ImmichFrame.Core.Api;
 using ImmichFrame.WebApi.Models;
+using ImmichFrame.WebApi.Tests.Mocks;
 using ImmichFrame.Core.Interfaces; // Added this back
+using System.Text.Json;
 using NUnit.Framework;
 
 namespace ImmichFrame.WebApi.Tests.Controllers
@@ -26,25 +23,16 @@ namespace ImmichFrame.WebApi.Tests.Controllers
         [SetUp]
         public void Setup()
         {
-            _mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+            _mockHttpMessageHandler = new Mock<HttpMessageHandler>().WithServerVersion();
+
             _factory = new WebApplicationFactory<Program>()
                 .WithWebHostBuilder(builder =>
                 {
                     builder.ConfigureTestServices(services =>
                     {
-                        // 1. Mock HttpMessageHandler and IHttpClientFactory
-                        services.AddSingleton<HttpMessageHandler>(_mockHttpMessageHandler.Object);
-                        services.AddHttpClient("ImmichApiAccountClient")
-                            .ConfigurePrimaryHttpMessageHandler(sp => sp.GetRequiredService<HttpMessageHandler>());
-                        services.ConfigureAll<HttpClientFactoryOptions>(options =>
-                        {
-                            options.HttpMessageHandlerBuilderActions.Add(b =>
-                            {
-                                b.PrimaryHandler = b.Services.GetRequiredService<HttpMessageHandler>();
-                            });
-                        });
+                        services.UseMockHandler(_mockHttpMessageHandler);
 
-                        // 2. Directly instantiate and register settings objects
+                        // Directly instantiate and register settings objects
                         var generalSettings = new GeneralSettings
                         {
                             ShowWeatherDescription = false, // Assuming this corresponds to ShowWeather
@@ -106,49 +94,22 @@ namespace ImmichFrame.WebApi.Tests.Controllers
         {
             // Arrange
             var expectedAssetId = Guid.NewGuid();
-            var assetDtoJson = $@"
-            {{
-                ""id"": ""{expectedAssetId}"",
-                ""originalPath"": ""/path/to/image.jpg"",
-                ""type"": ""IMAGE"",
-                ""fileCreatedAt"": ""2023-10-26T10:00:00Z"",
-                ""fileModifiedAt"": ""2023-10-26T10:00:00Z"",
-                ""isFavorite"": true,
-                ""duration"": ""0:00:00"",
-                ""checksum"": ""testchecksum"",
-                ""deviceAssetId"": ""testDeviceAssetId"",
-                ""deviceId"": ""testDeviceId"",
-                ""ownerId"": ""testOwnerId"",
-                ""originalFileName"": ""image.jpg"",
-                ""localDateTime"": ""2023-10-26T10:00:00Z"",
-                ""visibility"": ""timeline"",
-                ""hasMetadata"": true,
-                ""isArchived"": false,
-                ""isOffline"": false,
-                ""isTrashed"": false,
-                ""thumbhash"": ""I0cMCQS94XmImZeXmYd3d3g="",
-                ""updatedAt"": ""2023-10-26T10:00:00Z""
-            }}";
 
-            // JSON structure for SearchResponseDto
-            var jsonResponse = $@"
-            {{
-                ""albums"": {{
-                    ""count"": 0,
-                    ""items"": [],
-                    ""total"": 0,
-                    ""facets"": []
-                }},
-                ""assets"": {{
-                    ""count"": 1,
-                    ""items"": [
-                        {assetDtoJson}
-                    ],
-                    ""total"": 1,
-                    ""facets"": [],
-                    ""nextPage"": null
-                }}
-            }}";
+            // Build the mock response from the generated DTOs so the test fails at
+            // compile time (not at runtime) if the OpenAPI schema changes.
+            var searchResponse = new SearchResponseDto
+            {
+                Assets = new SearchAssetResponseDto
+                {
+                    Count = 1,
+                    Total = 1,
+                    Items = { BuildAssetResponse(expectedAssetId) },
+                    NextPage = null,
+                },
+                // Albums is already initialised to an empty SearchAlbumResponseDto.
+            };
+
+            var jsonResponse = JsonSerializer.Serialize(searchResponse);
 
             // Setup for SearchAssetsAsync
             _mockHttpMessageHandler.Protected()
@@ -188,6 +149,38 @@ namespace ImmichFrame.WebApi.Tests.Controllers
             // For now, we'll just check if the response is not empty.
             // A more robust check would be to deserialize the response and check the asset ID.
             Assert.That(content, Is.Not.Empty);
+        }
+
+        // Builds a valid AssetResponseDto from the generated client types. Only the
+        // fields required by the schema are set; pass type/duration to reuse this for
+        // video assets. Changes to the OpenAPI schema surface here as compile errors.
+        private static AssetResponseDto BuildAssetResponse(
+            Guid id,
+            AssetTypeEnum type = AssetTypeEnum.IMAGE,
+            int? duration = null)
+        {
+            var timestamp = DateTimeOffset.Parse("2023-10-26T10:00:00Z");
+            return new AssetResponseDto
+            {
+                Id = id,
+                OwnerId = Guid.NewGuid(),
+                Type = type,
+                OriginalPath = "/path/to/image.jpg",
+                OriginalFileName = "image.jpg",
+                Checksum = "testchecksum",
+                Thumbhash = "I0cMCQS94XmImZeXmYd3d3g=",
+                Visibility = AssetVisibility.Timeline,
+                Duration = duration,
+                Width = 1920,
+                Height = 1080,
+                IsFavorite = true,
+                HasMetadata = true,
+                FileCreatedAt = timestamp,
+                FileModifiedAt = timestamp,
+                LocalDateTime = timestamp,
+                CreatedAt = timestamp,
+                UpdatedAt = timestamp,
+            };
         }
 
         // TODO: Fix Test

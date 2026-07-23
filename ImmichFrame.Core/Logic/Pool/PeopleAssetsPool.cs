@@ -26,7 +26,7 @@ public class PersonAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountS
         {
             int page = 1;
             int batchSize = 1000;
-            int total;
+            long total;
             do
             {
                 var metadataBody = new MetadataSearchDto
@@ -43,7 +43,7 @@ public class PersonAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountS
                     metadataBody.Type = AssetTypeEnum.IMAGE;
                 }
 
-                var personInfo = await immichApi.SearchAssetsAsync(metadataBody, ct);
+                var personInfo = await immichApi.SearchAssetsAsync(null, null, metadataBody, ct);
 
                 total = personInfo.Assets.Total;
 

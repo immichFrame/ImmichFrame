@@ -9,9 +9,9 @@ namespace ImmichFrame.WebApi.Controllers
     public class ConfigController : ControllerBase
     {
         private readonly ILogger<AssetController> _logger;
-        private readonly IGeneralSettings _settings;
+        private readonly IClientSettings _settings;
 
-        public ConfigController(ILogger<AssetController> logger, IGeneralSettings settings)
+        public ConfigController(ILogger<AssetController> logger, IClientSettings settings)
         {
             _logger = logger;
             _settings = settings;
@@ -22,7 +22,7 @@ namespace ImmichFrame.WebApi.Controllers
         {
             var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
             _logger.LogDebug("Config requested by '{sanitizedClientIdentifier}'", sanitizedClientIdentifier);
-            return ClientSettingsDto.FromGeneralSettings(_settings);
+            return new ClientSettingsDto(_settings);
         }
 
         [HttpGet("Version", Name = "GetVersion")]
