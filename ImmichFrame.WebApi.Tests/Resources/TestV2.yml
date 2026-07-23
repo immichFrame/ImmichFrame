@@ -53,6 +53,7 @@ Accounts:
   - 00000000-0000-0000-0000-000000000001
   People:
   - 00000000-0000-0000-0000-000000000001
+  RequireAllPeople: true
   Tags:
   - Account1.Tags_TEST
 - ImmichServerUrl: Account2.ImmichServerUrl_TEST
@@ -72,5 +73,6 @@ Accounts:
   - 00000000-0000-0000-0000-000000000001
   People:
   - 00000000-0000-0000-0000-000000000001
+  RequireAllPeople: true
   Tags:
   - Account2.Tags_TEST

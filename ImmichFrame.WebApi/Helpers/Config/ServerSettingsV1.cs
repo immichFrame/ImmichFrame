@@ -21,6 +21,7 @@ public class ServerSettingsV1 : IConfigSettable
     public List<Guid> Albums { get; set; } = new List<Guid>();
     public List<Guid> ExcludedAlbums { get; set; } = new List<Guid>();
     public List<Guid> People { get; set; } = new List<Guid>();
+    public bool RequireAllPeople { get; set; } = false;
     public List<string> Tags { get; set; } = new List<string>();
     public int? Rating { get; set; }
     public List<string> Webcalendars { get; set; } = new List<string>();
@@ -92,6 +93,7 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
         public List<Guid> Albums => _delegate.Albums;
         public List<Guid> ExcludedAlbums => _delegate.ExcludedAlbums;
         public List<Guid> People => _delegate.People;
+        public bool RequireAllPeople => _delegate.RequireAllPeople;
         public List<string> Tags => _delegate.Tags;
         public int? Rating => _delegate.Rating;
 
