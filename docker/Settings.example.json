@@ -10,6 +10,7 @@
     "PhotoDateFormat": "MM/dd/yyyy",
     "ImageLocationFormat": "City,State,Country",
     "WeatherApiKey": "",
+    "WeatherApiKeyFile": null,
     "UnitSystem": "imperial",
     "WeatherLatLong": "40.730610,-73.935242",
     "Webhook": null,

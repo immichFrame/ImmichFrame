@@ -7,7 +7,9 @@ General:
   RefreshAlbumPeopleInterval: 12
   PhotoDateFormat: MM/dd/yyyy
   ImageLocationFormat: 'City,State,Country'
+  # Set either WeatherApiKey or WeatherApiKeyFile; leave both empty to disable weather.
   WeatherApiKey: ''
+  # WeatherApiKeyFile: '/path/to/weather-api.key'
   UnitSystem: imperial
   WeatherLatLong: '40.730610,-73.935242'
   Webhook: null
