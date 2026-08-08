@@ -137,7 +137,7 @@
 
 	async function loadAssets() {
 		try {
-			let assetRequest = await api.getAssets();
+			let assetRequest = await api.getAssets({ clientIdentifier: $clientIdentifierStore });
 
 			if (assetRequest.status != 200) {
 				if (assetRequest.status == 401) {
