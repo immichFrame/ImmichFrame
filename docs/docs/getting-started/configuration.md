@@ -123,6 +123,8 @@ Accounts:
     ShowArchived: false  # boolean
     # If this is set, video assets are included in the slideshow.
     ShowVideos: false  # boolean
+    # If this is set, only assets that are part of any album are displayed.
+    ShowOnlyAssetsInAlbums: false  # boolean
     # Show images from the last X days, e.g., 365 -> show images from the last year
     ImagesFromDays: null  # int
     # Show images before date.
@@ -151,6 +153,8 @@ If this is enabled, the web api required the `Authorization`-Header with `Bearer
 
 ### Filtering on Albums or People
 You can get the UUIDs from the URL of the album/person. For this URL: `https://demo.immich.app/albums/85c85b29-c95d-4a8b-90f7-c87da1d518ba` this is the UUID: `85c85b29-c95d-4a8b-90f7-c87da1d518ba`
+
+Set `ShowOnlyAssetsInAlbums` to `true` to include assets from all albums without listing each album UUID. When enabled, only album assets are considered and `ExcludedAlbums` still applies.
 
 ### Filtering on Tags
 For tags, use the full hierarchical path (the `value` field) as it appears in Immich. Tags in Immich support hierarchical structures using forward slashes (e.g., `Parent/Child`). Matching is case-sensitive, and the full path will be automatically resolved to the tag ID.
