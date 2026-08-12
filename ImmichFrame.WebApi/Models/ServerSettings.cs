@@ -68,12 +68,24 @@ public class GeneralSettings : IGeneralSettings, IConfigSettable
     public List<string> Webcalendars { get; set; } = new();
     public int RefreshAlbumPeopleInterval { get; set; } = 12;
     public string? WeatherApiKey { get; set; } = string.Empty;
+    public string? WeatherApiKeyFile { get; set; } = null;
     public string? UnitSystem { get; set; } = "imperial";
     public string? WeatherLatLong { get; set; } = "40.7128,74.0060";
     public string? Webhook { get; set; }
     public string? AuthenticationSecret { get; set; }
 
-    public void Validate() { }
+    public void Validate()
+    {
+        if (!string.IsNullOrWhiteSpace(WeatherApiKeyFile))
+        {
+            if (!string.IsNullOrWhiteSpace(WeatherApiKey))
+            {
+                throw new Exception("Cannot specify both WeatherApiKey and WeatherApiKeyFile. Please provide only one.");
+            }
+
+            WeatherApiKey = File.ReadAllText(WeatherApiKeyFile).Trim();
+        }
+    }
 }
 
 public class ServerAccountSettings : IAccountSettings, IConfigSettable

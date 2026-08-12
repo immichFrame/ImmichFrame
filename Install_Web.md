@@ -75,6 +75,7 @@ services:
       # Style: "none"
       # BaseFontSize: "17px"
       # WeatherApiKey: ""
+      # WeatherApiKeyFile: "/path/to/weather-api.key"
       # ShowWeatherDescription: "true"
       # WeatherIconUrl: "https://openweathermap.org/img/wn/{IconId}.png"
       # UnitSystem: "imperial"
