@@ -13,6 +13,7 @@ namespace ImmichFrame.Core.Interfaces
         public bool ShowProgressBar { get; }
         public string? PhotoDateFormat { get; }
         public bool ShowImageDesc { get; }
+        public bool ShowImageExif { get; }
         public bool ShowPeopleDesc { get; }
         public bool ShowTagsDesc { get; }
         public bool ShowAlbumName { get; }

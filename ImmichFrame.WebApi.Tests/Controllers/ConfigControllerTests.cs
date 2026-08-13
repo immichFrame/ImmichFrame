@@ -34,6 +34,7 @@ namespace ImmichFrame.WebApi.Tests.Controllers
                 ShowProgressBar = false,
                 PhotoDateFormat = "dd.MM.yyyy",
                 ShowImageDesc = false,
+                ShowImageExif = true,
                 ShowPeopleDesc = false,
                 ShowTagsDesc = false,
                 ShowAlbumName = false,

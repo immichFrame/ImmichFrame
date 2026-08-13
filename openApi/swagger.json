@@ -1034,6 +1034,9 @@
           "showImageDesc": {
             "type": "boolean"
           },
+          "showImageExif": {
+            "type": "boolean"
+          },
           "showPeopleDesc": {
             "type": "boolean"
           },

@@ -21,6 +21,7 @@
 		showLocation: boolean;
 		showPhotoDate: boolean;
 		showImageDesc: boolean;
+		showImageExif: boolean;
 		showPeopleDesc: boolean;
 		showTagsDesc: boolean;
 		showAlbumName: boolean;
@@ -41,6 +42,7 @@
 		showLocation,
 		showPhotoDate,
 		showImageDesc,
+		showImageExif,
 		showPeopleDesc,
 		showTagsDesc,
 		showAlbumName,
@@ -288,6 +290,7 @@
 	{showLocation}
 	{showPhotoDate}
 	{showImageDesc}
+	{showImageExif}
 	{showPeopleDesc}
 	{showTagsDesc}
 	{showAlbumName}

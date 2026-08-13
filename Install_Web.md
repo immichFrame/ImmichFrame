@@ -66,6 +66,7 @@ services:
       # ShowPhotoDate: "true"
       # PhotoDateFormat: "yyyy-MM-dd"
       # ShowImageDesc: "true"
+      # ShowImageExif: "false"
       # ShowPeopleDesc: "true"
       # ShowAlbumName: "true"
       # ShowImageLocation: "true"

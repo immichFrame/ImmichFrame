@@ -22,6 +22,7 @@
 		showLocation?: boolean;
 		showPhotoDate?: boolean;
 		showImageDesc?: boolean;
+		showImageExif?: boolean;
 		showPeopleDesc?: boolean;
 		showTagsDesc?: boolean;
 		showAlbumName?: boolean;
@@ -45,6 +46,7 @@
 		showLocation = true,
 		showPhotoDate = true,
 		showImageDesc = true,
+		showImageExif = false,
 		showPeopleDesc = true,
 		showTagsDesc = true,
 		showAlbumName = true,
@@ -111,6 +113,7 @@
 							{showLocation}
 							{showPhotoDate}
 							{showImageDesc}
+							{showImageExif}
 							{showPeopleDesc}
 							{showTagsDesc}
 							{showAlbumName}
@@ -133,6 +136,7 @@
 							{showLocation}
 							{showPhotoDate}
 							{showImageDesc}
+							{showImageExif}
 							{showPeopleDesc}
 							{showTagsDesc}
 							{showAlbumName}
@@ -157,6 +161,7 @@
 						{showLocation}
 						{showPhotoDate}
 						{showImageDesc}
+						{showImageExif}
 						{showPeopleDesc}
 						{showTagsDesc}
 						{showAlbumName}

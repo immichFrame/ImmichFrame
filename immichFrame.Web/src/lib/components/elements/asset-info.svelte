@@ -4,7 +4,7 @@
 	import * as locale from 'date-fns/locale';
 	import { configStore } from '$lib/stores/config.store';
 	import Icon from './icon.svelte';
-	import { mdiCalendar, mdiMapMarker, mdiAccount, mdiText, mdiImageAlbum, mdiTag } from '@mdi/js';
+	import { mdiCalendar, mdiMapMarker, mdiAccount, mdiText, mdiImageAlbum, mdiTag, mdiCameraIris } from '@mdi/js';
 
 	interface Props {
 		asset: AssetResponseDto;
@@ -12,6 +12,7 @@
 		showLocation: boolean;
 		showPhotoDate: boolean;
 		showImageDesc: boolean;
+		showImageExif: boolean;
 		showPeopleDesc: boolean;
 		showTagsDesc: boolean;
 		showAlbumName: boolean;
@@ -24,6 +25,7 @@
 		showLocation,
 		showPhotoDate,
 		showImageDesc,
+		showImageExif,
 		showPeopleDesc,
 		showTagsDesc,
 		showAlbumName,
@@ -46,6 +48,11 @@
 
 		return Array.from(locationParts).join(', ');
 	}
+
+	function trimFloat(value: number) {
+		return value.toFixed(2).replace(/\.?0+$/, '');
+	}
+
 	let assetDate = $derived(asset.exifInfo?.dateTimeOriginal);
 	let desc = $derived(asset.exifInfo?.description ?? '');
 	let time = $derived(assetDate ? new Date(assetDate) : null);
@@ -66,11 +73,19 @@
 			asset.exifInfo?.country ?? ''
 		)
 	);
+	let imageExif = $derived(
+		[
+			asset.exifInfo?.fNumber ? `ƒ/${asset.exifInfo.fNumber.toFixed(1)}` : null,
+			asset.exifInfo?.exposureTime ? `${asset.exifInfo.exposureTime}s` : null,
+			asset.exifInfo?.focalLength ? `${trimFloat(asset.exifInfo.focalLength)}mm` : null,
+			asset.exifInfo?.iso ? `ISO ${asset.exifInfo.iso}` : null
+		].filter((item): item is string => item !== null)
+	);
 	let availablePeople = $derived(asset.people?.filter((x) => x.name));
 	let availableTags = $derived(asset.tags?.filter((x) => x.name));
 </script>
 
-{#if showPhotoDate || showLocation || showImageDesc || showPeopleDesc || showTagsDesc || showAlbumName}
+{#if showPhotoDate || showLocation || showImageDesc || showImageExif || showPeopleDesc || showTagsDesc || showAlbumName}
 	<div
 		id="imageinfo"
 		class="immichframe_image_metadata absolute bottom-0 right-0 z-100 text-primary p-1 text-right
@@ -88,6 +103,12 @@
 			<p id="imagedescription" class="info-item">
 				<Icon path={mdiText} class="info-icon" />
 				<span class="info-text" class:short-text={split}>{desc}</span>
+			</p>
+		{/if}
+		{#if showImageExif && imageExif.length > 0}
+			<p id="imageexif" class="info-item">
+				<Icon path={mdiCameraIris} />
+				<span class="info-text" class:short-text={split}>{imageExif.join(' | ')}</span>
 			</p>
 		{/if}
 		{#if showAlbumName && albums && albums.length > 0}
