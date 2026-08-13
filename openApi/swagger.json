@@ -1294,11 +1294,13 @@
           },
           "minimumTemperature": {
             "type": "number",
-            "format": "double"
+            "format": "double",
+            "nullable": true
           },
           "maximumTemperature": {
             "type": "number",
-            "format": "double"
+            "format": "double",
+            "nullable": true
           },
           "humidity": {
             "type": "number",

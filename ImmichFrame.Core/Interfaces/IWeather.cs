@@ -4,8 +4,8 @@
     {
         public string Location { get; set; }
         public double Temperature { get; set; }
-        public double MinimumTemperature { get; set; }
-        public double MaximumTemperature { get; set; }
+        public double? MinimumTemperature { get; set; }
+        public double? MaximumTemperature { get; set; }
         public double Humidity { get; set; }
         public string Unit { get; set; }
         public string TemperatureUnit { get; set; }

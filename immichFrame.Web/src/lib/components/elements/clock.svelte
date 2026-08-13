@@ -32,12 +32,16 @@
 		return firstId || null;
 	});
 
-	function formatTemperature(value?: number) {
+	function formatTemperature(value?: number | null) {
 		return value?.toFixed(1);
 	}
 
-	function formatHumidity(value?: number) {
+	function formatHumidity(value?: number | null) {
 		return value?.toFixed(0);
+	}
+
+	function isFiniteNumber(value?: number | null) {
+		return Number.isFinite(value);
 	}
 
 	onMount(() => {
@@ -106,7 +110,7 @@
 				<div class="weather-temperature">{weather.temperature?.toFixed(1)}°</div>
 			</div>
 			<div class="weather-stats text-sm sm:text-sm md:text-md lg:text-xl text-shadow-sm">
-				{#if $configStore.weatherShowTemperatureRange}
+				{#if $configStore.weatherShowTemperatureRange && isFiniteNumber(weather.maximumTemperature) && isFiniteNumber(weather.minimumTemperature)}
 					<div id="clockweathertemperaturerange" class="weather-stat">
 						<Icon path={mdiThermometer} class="weather-stat-icon" />
 						<span
@@ -116,7 +120,7 @@
 						>
 					</div>
 				{/if}
-				{#if $configStore.weatherShowHumidity}
+				{#if $configStore.weatherShowHumidity && isFiniteNumber(weather.humidity)}
 					<div id="clockweatherhumidity" class="weather-stat">
 						<Icon path={mdiWaterPercent} class="weather-stat-icon" />
 						<span>{formatHumidity(weather.humidity)}%</span>

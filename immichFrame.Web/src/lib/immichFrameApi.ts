@@ -234,8 +234,8 @@ export type ClientSettingsDto = {
 export type IWeather = {
     location?: string | null;
     temperature?: number;
-    minimumTemperature?: number;
-    maximumTemperature?: number;
+    minimumTemperature?: number | null;
+    maximumTemperature?: number | null;
     humidity?: number;
     unit?: string | null;
     temperatureUnit?: string | null;
