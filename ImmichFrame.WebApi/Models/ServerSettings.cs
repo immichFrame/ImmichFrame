@@ -49,6 +49,7 @@ public class GeneralSettings : IGeneralSettings, IConfigSettable
     public bool ShowProgressBar { get; set; } = true;
     public bool ShowPhotoDate { get; set; } = true;
     public bool ShowImageDesc { get; set; } = true;
+    public bool ShowImageCamera { get; set; } = false;
     public bool ShowImageExif { get; set; } = false;
     public bool ShowPeopleDesc { get; set; } = true;
     public bool ShowTagsDesc { get; set; } = true;

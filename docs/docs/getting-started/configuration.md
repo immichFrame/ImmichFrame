@@ -74,6 +74,8 @@ General:
   ShowPhotoDate: true  # boolean
   # Displays the description of the current image.
   ShowImageDesc: true  # boolean
+  # Displays camera make and model for the current image.
+  ShowImageCamera: false  # boolean
   # Displays image EXIF details: f-number, shutter speed, focal length, and ISO.
   ShowImageExif: false  # boolean
   # Displays a comma separated list of names of all the people that are assigned in immich.

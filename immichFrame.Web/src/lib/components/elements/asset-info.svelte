@@ -4,7 +4,16 @@
 	import * as locale from 'date-fns/locale';
 	import { configStore } from '$lib/stores/config.store';
 	import Icon from './icon.svelte';
-	import { mdiCalendar, mdiMapMarker, mdiAccount, mdiText, mdiImageAlbum, mdiTag, mdiCameraIris } from '@mdi/js';
+	import {
+		mdiCalendar,
+		mdiMapMarker,
+		mdiAccount,
+		mdiText,
+		mdiImageAlbum,
+		mdiTag,
+		mdiCamera,
+		mdiCameraIris
+	} from '@mdi/js';
 
 	interface Props {
 		asset: AssetResponseDto;
@@ -12,6 +21,7 @@
 		showLocation: boolean;
 		showPhotoDate: boolean;
 		showImageDesc: boolean;
+		showImageCamera: boolean;
 		showImageExif: boolean;
 		showPeopleDesc: boolean;
 		showTagsDesc: boolean;
@@ -25,11 +35,12 @@
 		showLocation,
 		showPhotoDate,
 		showImageDesc,
+		showImageCamera,
 		showImageExif,
 		showPeopleDesc,
 		showTagsDesc,
 		showAlbumName,
-		split,
+		split
 	}: Props = $props();
 
 	function formatLocation(format: string, city?: string, state?: string, country?: string) {
@@ -53,6 +64,23 @@
 		return value.toFixed(2).replace(/\.?0+$/, '');
 	}
 
+	function containsWholeWord(value: string, word: string) {
+		if (!word) return false;
+		const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+		return new RegExp(`(^|\\s)${escaped}(?=\\s|$)`, 'i').test(value);
+	}
+
+	function formatCamera(make?: string | null, model?: string | null) {
+		const trimmedMake = make?.trim() ?? '';
+		const trimmedModel = model?.trim() ?? '';
+
+		if (containsWholeWord(trimmedMake, trimmedModel)) {
+			return trimmedModel;
+		}
+
+		return `${trimmedMake} ${trimmedModel}`.trim();
+	}
+
 	let assetDate = $derived(asset.exifInfo?.dateTimeOriginal);
 	let desc = $derived(asset.exifInfo?.description ?? '');
 	let time = $derived(assetDate ? new Date(assetDate) : null);
@@ -73,6 +101,7 @@
 			asset.exifInfo?.country ?? ''
 		)
 	);
+	let imageCamera = $derived(formatCamera(asset.exifInfo?.make, asset.exifInfo?.model));
 	let imageExif = $derived(
 		[
 			asset.exifInfo?.fNumber ? `ƒ/${asset.exifInfo.fNumber.toFixed(1)}` : null,
@@ -85,7 +114,7 @@
 	let availableTags = $derived(asset.tags?.filter((x) => x.name));
 </script>
 
-{#if showPhotoDate || showLocation || showImageDesc || showImageExif || showPeopleDesc || showTagsDesc || showAlbumName}
+{#if showPhotoDate || showLocation || showImageDesc || showImageCamera || showImageExif || showPeopleDesc || showTagsDesc || showAlbumName}
 	<div
 		id="imageinfo"
 		class="immichframe_image_metadata absolute bottom-0 right-0 z-100 text-primary p-1 text-right
@@ -105,6 +134,12 @@
 				<span class="info-text" class:short-text={split}>{desc}</span>
 			</p>
 		{/if}
+		{#if showImageCamera && imageCamera}
+			<p id="imagecamera" class="info-item">
+				<Icon path={mdiCamera} />
+				<span class="info-text" class:short-text={split}>{imageCamera}</span>
+			</p>
+		{/if}
 		{#if showImageExif && imageExif.length > 0}
 			<p id="imageexif" class="info-item">
 				<Icon path={mdiCameraIris} />
@@ -114,19 +149,25 @@
 		{#if showAlbumName && albums && albums.length > 0}
 			<p id="imagealbums" class="info-item">
 				<Icon path={mdiImageAlbum} />
-				<span class="info-text" class:short-text={split}>{albums.map((x) => x.albumName).join(', ')}</span>
+				<span class="info-text" class:short-text={split}
+					>{albums.map((x) => x.albumName).join(', ')}</span
+				>
 			</p>
 		{/if}
 		{#if showPeopleDesc && availablePeople && availablePeople.length > 0}
 			<p id="peopledescription" class="info-item">
 				<Icon path={mdiAccount} />
-				<span class="info-text" class:short-text={split}>{availablePeople.map((x) => x.name).join(', ')}</span>
+				<span class="info-text" class:short-text={split}
+					>{availablePeople.map((x) => x.name).join(', ')}</span
+				>
 			</p>
 		{/if}
 		{#if showTagsDesc && availableTags && availableTags.length > 0}
 			<p id="tagsdescription" class="info-item">
 				<Icon path={mdiTag} />
-				<span class="info-text" class:short-text={split}>{availableTags.map((x) => x.name).join(', ')}</span>
+				<span class="info-text" class:short-text={split}
+					>{availableTags.map((x) => x.name).join(', ')}</span
+				>
 			</p>
 		{/if}
 		{#if showLocation && location}

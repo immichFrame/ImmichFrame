@@ -1034,6 +1034,9 @@
           "showImageDesc": {
             "type": "boolean"
           },
+          "showImageCamera": {
+            "type": "boolean"
+          },
           "showImageExif": {
             "type": "boolean"
           },

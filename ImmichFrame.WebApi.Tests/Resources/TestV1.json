@@ -42,6 +42,7 @@
     "ShowPhotoDate": true,
     "PhotoDateFormat": "PhotoDateFormat_TEST",
     "ShowImageDesc": true,
+    "ShowImageCamera": true,
     "ShowImageExif": true,
     "ShowPeopleDesc": true,
     "ShowImageLocation": true,

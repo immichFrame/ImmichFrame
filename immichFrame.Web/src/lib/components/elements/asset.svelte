@@ -21,6 +21,7 @@
 		showLocation: boolean;
 		showPhotoDate: boolean;
 		showImageDesc: boolean;
+		showImageCamera: boolean;
 		showImageExif: boolean;
 		showPeopleDesc: boolean;
 		showTagsDesc: boolean;
@@ -42,6 +43,7 @@
 		showLocation,
 		showPhotoDate,
 		showImageDesc,
+		showImageCamera,
 		showImageExif,
 		showPeopleDesc,
 		showTagsDesc,
@@ -290,6 +292,7 @@
 	{showLocation}
 	{showPhotoDate}
 	{showImageDesc}
+	{showImageCamera}
 	{showImageExif}
 	{showPeopleDesc}
 	{showTagsDesc}

@@ -15,6 +15,7 @@ public class ClientSettingsDto(IClientSettings settings) : IClientSettings
     public bool ShowProgressBar => settings.ShowProgressBar;
     public string? PhotoDateFormat => settings.PhotoDateFormat;
     public bool ShowImageDesc => settings.ShowImageDesc;
+    public bool ShowImageCamera => settings.ShowImageCamera;
     public bool ShowImageExif => settings.ShowImageExif;
     public bool ShowPeopleDesc => settings.ShowPeopleDesc;
     public bool ShowTagsDesc => settings.ShowTagsDesc;
