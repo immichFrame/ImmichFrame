@@ -7,9 +7,10 @@ General:
   RefreshAlbumPeopleInterval: 12
   PhotoDateFormat: MM/dd/yyyy
   ImageLocationFormat: 'City,State,Country'
-  # Exactly one of WeatherApiKey or WeatherApiKeyFile may be set.
+  # At most one of WeatherApiKey or WeatherApiKeyFile may be set.
   WeatherApiKey: ''
-  # WeatherApiKeyFile: "/path/to/weather-api.key"
+  # Optionally set WeatherApiKeyFile to a file path instead of WeatherApiKey.
+  # WeatherApiKeyFile: "/run/secrets/weather-api.key"
   UnitSystem: imperial
   WeatherLatLong: '40.730610,-73.935242'
   Webhook: null

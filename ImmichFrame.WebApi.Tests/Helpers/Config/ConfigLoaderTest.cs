@@ -131,6 +131,32 @@ public class ConfigLoaderTest
         }
     }
 
+    [Test]
+    public void ServerSettingsV1AdapterValidate_ThrowsWhenWeatherApiKeyAndWeatherApiKeyFileAreBothSet()
+    {
+        var apiKeyFile = Path.GetTempFileName();
+        File.WriteAllText(apiKeyFile, "weather-api-key\n");
+
+        try
+        {
+            var settings = new ServerSettingsV1
+            {
+                WeatherApiKey = "weather-api-key",
+                WeatherApiKeyFile = apiKeyFile,
+            };
+
+            var adapter = new ServerSettingsV1Adapter(settings);
+
+            var exception = Assert.Throws<Exception>(() => adapter.Validate());
+
+            exception!.Message.Should().Contain("Cannot specify both WeatherApiKey and WeatherApiKeyFile");
+        }
+        finally
+        {
+            File.Delete(apiKeyFile);
+        }
+    }
+
     private void VerifyConfig(IServerSettings serverSettings, bool usePrefix, bool expectNullApiKeyFile)
     {
         VerifyProperties(serverSettings.GeneralSettings);
