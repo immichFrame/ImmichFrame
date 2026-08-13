@@ -221,6 +221,8 @@ export type ClientSettingsDto = {
     style?: string | null;
     baseFontSize?: string | null;
     showWeatherDescription?: boolean;
+    weatherShowHumidity?: boolean;
+    weatherShowTemperatureRange?: boolean;
     weatherIconUrl?: string | null;
     imageZoom?: boolean;
     imagePan?: boolean;
@@ -232,6 +234,9 @@ export type ClientSettingsDto = {
 export type IWeather = {
     location?: string | null;
     temperature?: number;
+    minimumTemperature?: number;
+    maximumTemperature?: number;
+    humidity?: number;
     unit?: string | null;
     temperatureUnit?: string | null;
     description?: string | null;

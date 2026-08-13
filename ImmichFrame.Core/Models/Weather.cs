@@ -6,6 +6,9 @@ namespace ImmichFrame.Core.Models
     {
         public string Location { get; set; } = "";
         public double Temperature { get; set; } = 0d;
+        public double MinimumTemperature { get; set; } = 0d;
+        public double MaximumTemperature { get; set; } = 0d;
+        public double Humidity { get; set; } = 0d;
         public string Unit { get; set; } = "";
         public string TemperatureUnit { get; set; } = "";
         public string Description { get; set; } = "";

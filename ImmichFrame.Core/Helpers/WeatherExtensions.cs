@@ -15,6 +15,9 @@ namespace ImmichFrame.Core.Helpers
                 Location = weatherInfo.CityName,
                 Description = $"{string.Join(',', weatherInfo.Weather.Select(x => x.Description))}",
                 Temperature = weatherInfo.Main.Temperature.Value,
+                MinimumTemperature = weatherInfo.Main.MinimumTemperature.Value,
+                MaximumTemperature = weatherInfo.Main.MaximumTemperature.Value,
+                Humidity = weatherInfo.Main.Humidity.Value,
                 Unit = Temperature.GetAbbreviation(weatherInfo.Main.Temperature.Unit),
                 TemperatureUnit = weatherInfo.Main.Temperature.ToString(),
                 IconId = $"{string.Join(',', weatherInfo.Weather.Select(x => x.IconId))}"

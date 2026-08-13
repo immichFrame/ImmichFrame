@@ -23,6 +23,8 @@ namespace ImmichFrame.Core.Interfaces
         public string Style { get; }
         public string? BaseFontSize { get; }
         public bool ShowWeatherDescription { get; }
+        public bool WeatherShowHumidity { get; }
+        public bool WeatherShowTemperatureRange { get; }
         public string? WeatherIconUrl { get; }
         public bool ImageZoom { get; }
         public bool ImagePan { get; }

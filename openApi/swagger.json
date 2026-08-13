@@ -1069,6 +1069,12 @@
           "showWeatherDescription": {
             "type": "boolean"
           },
+          "weatherShowHumidity": {
+            "type": "boolean"
+          },
+          "weatherShowTemperatureRange": {
+            "type": "boolean"
+          },
           "weatherIconUrl": {
             "type": "string",
             "nullable": true
@@ -1283,6 +1289,18 @@
             "nullable": true
           },
           "temperature": {
+            "type": "number",
+            "format": "double"
+          },
+          "minimumTemperature": {
+            "type": "number",
+            "format": "double"
+          },
+          "maximumTemperature": {
+            "type": "number",
+            "format": "double"
+          },
+          "humidity": {
             "type": "number",
             "format": "double"
           },
