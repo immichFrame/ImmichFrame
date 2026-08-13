@@ -74,7 +74,7 @@
 		const trimmedMake = make?.trim() ?? '';
 		const trimmedModel = model?.trim() ?? '';
 
-		if (containsWholeWord(trimmedMake, trimmedModel)) {
+		if (containsWholeWord(trimmedModel, trimmedMake)) {
 			return trimmedModel;
 		}
 
