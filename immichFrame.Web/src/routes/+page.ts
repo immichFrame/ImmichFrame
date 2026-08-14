@@ -6,9 +6,12 @@ import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ url }) => {
 
-  const clientIdentifier = url.searchParams.get('client') ?? get(clientIdentifierStore);
+  const clientParam = url.searchParams.get('client');
+  if (clientParam) {
+    clientIdentifierStore.set(clientParam);
+  }
 
-  const configRequest = await api.getConfig({ clientIdentifier });
+  const configRequest = await api.getConfig({ clientIdentifier: get(clientIdentifierStore) });
 
   const config = configRequest.data;
 

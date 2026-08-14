@@ -74,12 +74,7 @@
 
 	let cursorVisible = $state(true);
 
-	const clientIdentifier = page.url.searchParams.get('client');
 	const authsecret = page.url.searchParams.get('authsecret');
-
-	if (clientIdentifier && clientIdentifier != $clientIdentifierStore) {
-		clientIdentifierStore.set(clientIdentifier);
-	}
 
 	if (authsecret && authsecret != $authSecretStore) {
 		authSecretStore.set(authsecret);
