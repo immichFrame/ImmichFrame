@@ -74,12 +74,7 @@
 
 	let cursorVisible = $state(true);
 
-	const clientIdentifier = page.url.searchParams.get('client');
 	const authsecret = page.url.searchParams.get('authsecret');
-
-	if (clientIdentifier && clientIdentifier != $clientIdentifierStore) {
-		clientIdentifierStore.set(clientIdentifier);
-	}
 
 	if (authsecret && authsecret != $authSecretStore) {
 		authSecretStore.set(authsecret);
@@ -137,7 +132,7 @@
 
 	async function loadAssets() {
 		try {
-			let assetRequest = await api.getAssets();
+			let assetRequest = await api.getAssets({ clientIdentifier: $clientIdentifierStore });
 
 			if (assetRequest.status != 200) {
 				if (assetRequest.status == 401) {
