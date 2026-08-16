@@ -25,6 +25,7 @@
         public List<Guid> People { get; }
         public List<string> Tags { get; }
         public int? Rating { get; }
+        public bool ExhaustiveShuffle { get; }
 
         public void ValidateAndInitialize();
     }

@@ -50,6 +50,7 @@
       "ImagesFromDays": null,
       "ImagesUntilDate": "2020-01-02",
       "Rating": null,
+      "ExhaustiveShuffle": false,
       "Albums": [
         "UUID"
       ],
