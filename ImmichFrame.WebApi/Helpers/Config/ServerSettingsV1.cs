@@ -24,6 +24,7 @@ public class ServerSettingsV1 : IConfigSettable
     public List<string> Tags { get; set; } = new List<string>();
     public int? Rating { get; set; }
     public List<string> Webcalendars { get; set; } = new List<string>();
+    public int CalendarDaysAhead { get; set; } = 0;
     public int RefreshAlbumPeopleInterval { get; set; } = 12;
     public string? WeatherApiKey { get; set; } = string.Empty;
     public string? UnitSystem { get; set; } = "imperial";
@@ -101,6 +102,7 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
     class GeneralSettingsV1Adapter(ServerSettingsV1 _delegate) : IGeneralSettings
     {
         public List<string> Webcalendars => _delegate.Webcalendars;
+        public int CalendarDaysAhead => _delegate.CalendarDaysAhead;
         public int RefreshAlbumPeopleInterval => _delegate.RefreshAlbumPeopleInterval;
         public string? WeatherApiKey => _delegate.WeatherApiKey;
         public string? WeatherLatLong => _delegate.WeatherLatLong;

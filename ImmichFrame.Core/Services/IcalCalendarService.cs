@@ -47,14 +47,18 @@ public class IcalCalendarService : ICalendarService
 
             var icals = await GetCalendars(cals);
 
+            // Clamp to a sane range: never negative, and cap well below DateTime overflow.
+            var daysAhead = Math.Clamp(_serverSettings.CalendarDaysAhead, 0, 3650);
+            var endDate = DateTime.Today.AddDays(daysAhead + 1);
+
             foreach (var ical in icals)
             {
                 var calendar = Calendar.Load(ical);
-
-                appointments.AddRange(calendar.GetOccurrences(DateTime.Today, DateTime.Today.AddDays(1)).Select(x => x.ToAppointment()));
+                appointments.AddRange(calendar.GetOccurrences(DateTime.Today, endDate)
+                    .Select(x => x.ToAppointment()));
             }
 
-            return appointments;
+            return appointments.OrderBy(x => x.StartTime).ToList();
         });
     }
 
