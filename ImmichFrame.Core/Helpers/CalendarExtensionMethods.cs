@@ -9,14 +9,14 @@ namespace ImmichFrame.WebApi.Helpers
         public static IAppointment ToAppointment(this Occurrence occurrence)
         {
             string summary = "";
-            string? description = null;
-            string? location = null;
+            string description = "";
+            string location = "";
 
             if (occurrence.Source is CalendarEvent calEvent)
             {
                 summary = calEvent.Summary;
-                description = calEvent.Description;
-                location = calEvent.Location;
+                description = calEvent.Description ?? "";
+                location = calEvent.Location ?? "";
             }
 
             return new Appointment
@@ -34,11 +34,11 @@ namespace ImmichFrame.WebApi.Helpers
             return new Appointment
             {
                 Summary = calEvent.Summary,
-                Description = calEvent.Description,
+                Description = calEvent.Description ?? "",
                 StartTime = calEvent.Start.AsSystemLocal,
                 Duration = calEvent.Duration,
                 EndTime = calEvent.End.AsSystemLocal,
-                Location = calEvent.Location
+                Location = calEvent.Location ?? ""
             };
         }
     }
