@@ -66,6 +66,7 @@ public class GeneralSettings : IGeneralSettings, IConfigSettable
     public string Layout { get; set; } = "splitview";
     public int RenewImagesDuration { get; set; } = 30;
     public List<string> Webcalendars { get; set; } = new();
+    public int CalendarDaysAhead { get; set; } = 0;
     public int RefreshAlbumPeopleInterval { get; set; } = 12;
     public string? WeatherApiKey { get; set; } = string.Empty;
     public string? UnitSystem { get; set; } = "imperial";

@@ -4,43 +4,38 @@
 	import { format } from 'date-fns';
 	import { configStore } from '$lib/stores/config.store';
 	import { clientIdentifierStore } from '$lib/stores/persist.store';
-
 	api.init();
-
 	function formatDates(startTime: string, endTime: string) {
 		let startDate = new Date(startTime);
 		let endDate = new Date(endTime);
-		let sameDay = startDate.getDate() == endDate.getDate();
-
+		let sameDay = startDate.toDateString() == endDate.toDateString();
+		let today = new Date();
+		let isToday = startDate.toDateString() == today.toDateString();
 		let clockFormat = $configStore.clockFormat ?? 'HH:mm';
 		let clockDateFormat = $configStore.clockDateFormat ?? 'eee, MMM d';
 		let fullFormat = clockDateFormat + ' ' + clockFormat;
-
 		if (sameDay) {
-			return format(startDate, clockFormat) + ' - ' + format(endDate, clockFormat);
+			if (isToday) {
+				return format(startDate, clockFormat) + ' - ' + format(endDate, clockFormat);
+			}
+			return format(startDate, clockDateFormat) + ' ' + format(startDate, clockFormat) + ' - ' + format(endDate, clockFormat);
 		}
-
 		return format(startDate, fullFormat) + ' - ' + format(endDate, fullFormat);
 	}
-
 	let appointments: api.IAppointment[] = $state() as api.IAppointment[];
-
 	onMount(() => {
 		GetAppointments();
 		const appointmentInterval = setInterval(() => GetAppointments(), 10 * 60 * 1000); //every 10 minutes
-
 		return () => {
 			clearInterval(appointmentInterval);
 		};
 	});
-
 	async function GetAppointments() {
 		let appointmentRequest = await api.getAppointments({
 			clientIdentifier: $clientIdentifierStore
 		});
 		if (appointmentRequest.status == 200) {
 			appointments = appointmentRequest.data;
-
 			appointments = appointmentRequest.data.sort((a, b) => {
 				return new Date(a.startTime ?? '').getTime() - new Date(b.startTime ?? '').getTime();
 			});

@@ -47,11 +47,14 @@ public class IcalCalendarService : ICalendarService
 
             var icals = await GetCalendars(cals);
 
+            var endDate = DateTime.Today.AddDays(_serverSettings.CalendarDaysAhead + 1);
+
             foreach (var ical in icals)
             {
                 var calendar = Calendar.Load(ical);
-
-                appointments.AddRange(calendar.GetOccurrences(DateTime.Today, DateTime.Today.AddDays(1)).Select(x => x.ToAppointment()));
+                appointments.AddRange(calendar.GetOccurrences(DateTime.Today, endDate)
+                    .OrderBy(x => x.Period.StartTime.AsSystemLocal)
+                    .Select(x => x.ToAppointment()));
             }
 
             return appointments;

@@ -1,26 +1,32 @@
-﻿using Ical.Net.CalendarComponents;
+using Ical.Net.CalendarComponents;
 using Ical.Net.DataTypes;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.Core.Models;
-
 namespace ImmichFrame.WebApi.Helpers
 {
     public static class CalendarExtensionMethods
     {
         public static IAppointment ToAppointment(this Occurrence occurrence)
         {
-            if (occurrence.Source.GetType() == typeof(CalendarEvent)) {
-                return ((CalendarEvent)occurrence.Source).ToAppointment();
+            string summary = "";
+            string? description = null;
+            string? location = null;
+
+            if (occurrence.Source is CalendarEvent calEvent)
+            {
+                summary = calEvent.Summary;
+                description = calEvent.Description;
+                location = calEvent.Location;
             }
 
             return new Appointment
             {
-                //Summary = occurrence.Period.Duration.Summary,
-                //Description = occurrence.Source.Description,
+                Summary = summary,
+                Description = description,
                 StartTime = occurrence.Period.StartTime.AsSystemLocal,
                 Duration = occurrence.Period.Duration,
                 EndTime = occurrence.Period.EndTime.AsSystemLocal,
-                Location = ""
+                Location = location
             };
         }
         public static IAppointment ToAppointment(this CalendarEvent calEvent)
