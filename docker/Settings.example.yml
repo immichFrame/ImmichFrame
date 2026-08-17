@@ -20,6 +20,8 @@ General:
   ShowProgressBar: true
   ShowPhotoDate: true
   ShowImageDesc: true
+  ShowImageCamera: false
+  ShowImageExif: false
   ShowPeopleDesc: true
   ShowAlbumName: true
   ShowImageLocation: true

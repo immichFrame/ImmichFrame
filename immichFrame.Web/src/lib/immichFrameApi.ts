@@ -211,6 +211,8 @@ export type ClientSettingsDto = {
     showProgressBar?: boolean;
     photoDateFormat?: string | null;
     showImageDesc?: boolean;
+    showImageCamera?: boolean;
+    showImageExif?: boolean;
     showPeopleDesc?: boolean;
     showTagsDesc?: boolean;
     showAlbumName?: boolean;

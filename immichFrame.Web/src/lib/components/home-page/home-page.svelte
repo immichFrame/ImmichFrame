@@ -499,6 +499,8 @@
 				interval={currentDuration}
 				showPhotoDate={$configStore.showPhotoDate}
 				showImageDesc={$configStore.showImageDesc}
+				showImageCamera={$configStore.showImageCamera}
+				showImageExif={$configStore.showImageExif}
 				showPeopleDesc={$configStore.showPeopleDesc}
 				showTagsDesc={$configStore.showTagsDesc}
 				showAlbumName={$configStore.showAlbumName}

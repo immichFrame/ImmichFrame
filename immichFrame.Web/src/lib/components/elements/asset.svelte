@@ -21,6 +21,8 @@
 		showLocation: boolean;
 		showPhotoDate: boolean;
 		showImageDesc: boolean;
+		showImageCamera: boolean;
+		showImageExif: boolean;
 		showPeopleDesc: boolean;
 		showTagsDesc: boolean;
 		showAlbumName: boolean;
@@ -41,6 +43,8 @@
 		showLocation,
 		showPhotoDate,
 		showImageDesc,
+		showImageCamera,
+		showImageExif,
 		showPeopleDesc,
 		showTagsDesc,
 		showAlbumName,
@@ -288,6 +292,8 @@
 	{showLocation}
 	{showPhotoDate}
 	{showImageDesc}
+	{showImageCamera}
+	{showImageExif}
 	{showPeopleDesc}
 	{showTagsDesc}
 	{showAlbumName}
