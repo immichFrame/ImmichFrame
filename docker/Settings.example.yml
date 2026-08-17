@@ -34,6 +34,9 @@ General:
   ImageFill: false
   PlayAudio: false
   Layout: splitview
+  EventHostEnabled: false
+  EventPollingIntervalSeconds: 2
+  EventDefaultTimeoutMs: 15000
 Accounts:
   - ImmichServerUrl: REQUIRED
     # Exactly one of ApiKey or ApiKeyFile must be set.

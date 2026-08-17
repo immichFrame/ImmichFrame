@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.WebApi.Helpers;
 using YamlDotNet.Serialization;
@@ -72,6 +73,23 @@ public class GeneralSettings : IGeneralSettings, IConfigSettable
     public string? WeatherLatLong { get; set; } = "40.7128,74.0060";
     public string? Webhook { get; set; }
     public string? AuthenticationSecret { get; set; }
+    public bool EventHostEnabled { get; set; } = false;
+
+    private int _eventPollingIntervalSeconds = 2;
+    [Range(1, 3600)]
+    public int EventPollingIntervalSeconds
+    {
+        get => _eventPollingIntervalSeconds;
+        set => _eventPollingIntervalSeconds = Math.Clamp(value, 1, 3600);
+    }
+
+    private int _eventDefaultTimeoutMs = 15000;
+    [Range(100, 300_000)]
+    public int EventDefaultTimeoutMs
+    {
+        get => _eventDefaultTimeoutMs;
+        set => _eventDefaultTimeoutMs = Math.Clamp(value, 100, 300_000);
+    }
 
     public void Validate() { }
 }

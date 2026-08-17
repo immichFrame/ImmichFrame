@@ -35,7 +35,10 @@
     "ImagePan": true,
     "ImageFill": true,
     "PlayAudio": true,
-    "Layout": "Layout_TEST"
+    "Layout": "Layout_TEST",
+    "EventHostEnabled": true,
+    "EventPollingIntervalSeconds": 7,
+    "EventDefaultTimeoutMs": 7
   },
   "Accounts": [
     {
