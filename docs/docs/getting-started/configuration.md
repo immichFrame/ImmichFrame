@@ -138,6 +138,8 @@ Accounts:
     # UUID of People
     People:  # string[]
       - UUID
+    # If this is set, all specified people must be present in an image for it to be displayed.
+    RequireAllPeople: false # boolean
     # Tag values (full hierarchical paths, case-sensitive)
     Tags:  # string[]
       - "Vacation"

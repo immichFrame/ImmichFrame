@@ -18,7 +18,8 @@
       ],
       "People": [
         "00000000-0000-0000-0000-000000000001"
-      ]
+      ],
+      "RequireAllPeople": true
     },
     {
       "ImmichServerUrl": "Account2.ImmichServerUrl_TEST",
