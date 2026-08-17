@@ -23,6 +23,7 @@
 		showPhotoDate?: boolean;
 		showImageDesc?: boolean;
 		showPeopleDesc?: boolean;
+		showPeopleAge?: boolean;
 		showTagsDesc?: boolean;
 		showAlbumName?: boolean;
 		imageFill?: boolean;
@@ -46,6 +47,7 @@
 		showPhotoDate = true,
 		showImageDesc = true,
 		showPeopleDesc = true,
+		showPeopleAge = false,
 		showTagsDesc = true,
 		showAlbumName = true,
 		imageFill = false,
@@ -112,6 +114,7 @@
 							{showPhotoDate}
 							{showImageDesc}
 							{showPeopleDesc}
+							{showPeopleAge}
 							{showTagsDesc}
 							{showAlbumName}
 							{imageFill}
@@ -134,6 +137,7 @@
 							{showPhotoDate}
 							{showImageDesc}
 							{showPeopleDesc}
+							{showPeopleAge}
 							{showTagsDesc}
 							{showAlbumName}
 							{imageFill}
@@ -158,6 +162,7 @@
 						{showPhotoDate}
 						{showImageDesc}
 						{showPeopleDesc}
+						{showPeopleAge}
 						{showTagsDesc}
 						{showAlbumName}
 						{imageFill}

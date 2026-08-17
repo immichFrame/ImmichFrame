@@ -21,6 +21,7 @@ General:
   ShowPhotoDate: true
   ShowImageDesc: true
   ShowPeopleDesc: true
+  ShowPeopleAge: false
   ShowAlbumName: true
   ShowImageLocation: true
   PrimaryColor: '#f5deb3'

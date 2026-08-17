@@ -76,6 +76,8 @@ General:
   ShowImageDesc: true  # boolean
   # Displays a comma separated list of names of all the people that are assigned in immich.
   ShowPeopleDesc: true  # boolean
+  # Appends each person's age at the time the photo was taken in brackets, e.g. "John (7)". Requires ShowPeopleDesc and a birthday set in immich.
+  ShowPeopleAge: false  # boolean
   # Displays a comma separated list of names of all the tags that are assigned in immich.
   ShowTagsDesc: true  # boolean
   # Displays a comma separated list of names of all the albums for an image.

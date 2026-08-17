@@ -16,6 +16,7 @@ public class ClientSettingsDto(IClientSettings settings) : IClientSettings
     public string? PhotoDateFormat => settings.PhotoDateFormat;
     public bool ShowImageDesc => settings.ShowImageDesc;
     public bool ShowPeopleDesc => settings.ShowPeopleDesc;
+    public bool ShowPeopleAge => settings.ShowPeopleAge;
     public bool ShowTagsDesc => settings.ShowTagsDesc;
     public bool ShowAlbumName => settings.ShowAlbumName;
     public bool ShowImageLocation => settings.ShowImageLocation;

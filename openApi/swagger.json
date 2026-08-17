@@ -1037,6 +1037,9 @@
           "showPeopleDesc": {
             "type": "boolean"
           },
+          "showPeopleAge": {
+            "type": "boolean"
+          },
           "showTagsDesc": {
             "type": "boolean"
           },

@@ -14,6 +14,7 @@ namespace ImmichFrame.Core.Interfaces
         public string? PhotoDateFormat { get; }
         public bool ShowImageDesc { get; }
         public bool ShowPeopleDesc { get; }
+        public bool ShowPeopleAge { get; }
         public bool ShowTagsDesc { get; }
         public bool ShowAlbumName { get; }
         public bool ShowImageLocation { get; }
