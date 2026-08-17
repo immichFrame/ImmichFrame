@@ -49,7 +49,9 @@ General:
   PhotoDateFormat: 'MM/dd/yyyy'  # string
   ImageLocationFormat: 'City,State,Country'
   # Get an API key from OpenWeatherMap: https://openweathermap.org/appid
+  # Set either WeatherApiKey or WeatherApiKeyFile; leave both empty to disable weather.
   WeatherApiKey: ''  # string
+  # WeatherApiKeyFile: '/path/to/weather-api.key'
   # Imperial or metric system (Fahrenheit or Celsius)
   UnitSystem: 'imperial'  # 'imperial' | 'metric'
   # Set the weather location with lat/lon.

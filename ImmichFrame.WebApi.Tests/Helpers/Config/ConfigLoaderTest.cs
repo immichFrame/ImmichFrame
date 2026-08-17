@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Collections;
 using System.Reflection;
 using ImmichFrame.Core.Interfaces;
@@ -68,6 +69,56 @@ public class ConfigLoaderTest
         VerifyConfig(config, true, false);
     }
 
+    [Test]
+    public void TestLoadConfigV2Json_WeatherApiKeyFile()
+    {
+        var configDir = Path.Combine(Path.GetTempPath(), $"immichframe-weather-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(configDir);
+        var keyFile = Path.Combine(configDir, "weather-api-key");
+
+        try
+        {
+            File.WriteAllText(keyFile, " weather-api-key \n");
+            var settings = new
+            {
+                General = new { WeatherApiKey = "", WeatherApiKeyFile = keyFile },
+                Accounts = new[]
+                {
+                    new { ImmichServerUrl = "https://immich.example", ApiKey = "account-api-key" }
+                }
+            };
+            File.WriteAllText(
+                Path.Combine(configDir, "Settings.json"),
+                JsonSerializer.Serialize(settings));
+
+            var config = _configLoader.LoadConfig(configDir);
+
+            Assert.That(config.GeneralSettings.WeatherApiKey, Is.EqualTo("weather-api-key"));
+        }
+        finally
+        {
+            Directory.Delete(configDir, recursive: true);
+        }
+    }
+
+    [Test]
+    public void TestLoadConfigV2Json_WeatherApiKeyFile_ConflictsWithInlineKey()
+    {
+        var settings = new GeneralSettings
+        {
+            WeatherApiKey = "inline-weather-api-key",
+            WeatherApiKeyFile = "weather-api-key-file"
+        };
+
+        var exception = Assert.Throws<Exception>(() => settings.Validate());
+
+        Assert.That(
+            exception!.Message,
+            Is.EqualTo("Cannot specify both WeatherApiKey and WeatherApiKeyFile. Please provide only one."));
+    }
+
+
+
     private void VerifyConfig(IServerSettings serverSettings, bool usePrefix, bool expectNullApiKeyFile)
     {
         VerifyProperties(serverSettings.GeneralSettings);
@@ -107,7 +158,8 @@ public class ConfigLoaderTest
             switch (type)
             {
                 case var t when t == typeof(string):
-                    if (prop.Name.Equals("ApiKeyFile") && expectNullApiKeyFile)
+                    if (prop.Name.Equals("ApiKeyFile") && expectNullApiKeyFile ||
+                        prop.Name.Equals("WeatherApiKeyFile") && value is null)
                     {
                         Assert.That(value, Is.EqualTo(null), prop.Name);
                     }
