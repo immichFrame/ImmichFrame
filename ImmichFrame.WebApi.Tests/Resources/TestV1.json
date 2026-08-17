@@ -50,6 +50,7 @@
     "Style": "Style_TEST",
     "BaseFontSize": "BaseFontSize_TEST",
     "WeatherApiKey": "WeatherApiKey_TEST",
+    "WeatherApiKeyFile": "WeatherApiKeyFile_TEST",
     "ShowWeatherDescription": true,
     "WeatherIconUrl": "WeatherIconUrl_TEST",
     "UnitSystem": "UnitSystem_TEST",

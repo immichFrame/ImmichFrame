@@ -53,6 +53,7 @@ namespace ImmichFrame.WebApi.Tests.Controllers
                 Language = "de",
                 // Server-only values that must never surface in the client config:
                 WeatherApiKey = "secret-weather-key",
+                WeatherApiKeyFile = "/run/secrets/secret-weather-key-file",
                 WeatherLatLong = "1.23,4.56",
                 UnitSystem = "metric",
                 Webhook = "https://webhook.example.com/secret-hook",
@@ -128,11 +129,13 @@ namespace ImmichFrame.WebApi.Tests.Controllers
             {
                 Assert.That(json, Does.Not.Contain("secret-auth-token"));
                 Assert.That(json, Does.Not.Contain("secret-weather-key"));
+                Assert.That(json, Does.Not.Contain("secret-weather-key-file"));
                 Assert.That(json, Does.Not.Contain("secret-api-key"));
                 Assert.That(json, Does.Not.Contain("secret-hook"));
                 Assert.That(json, Does.Not.Contain("secret.ics"));
                 Assert.That(json, Does.Not.Contain("authenticationSecret"));
                 Assert.That(json, Does.Not.Contain("weatherApiKey"));
+                Assert.That(json, Does.Not.Contain("weatherApiKeyFile"));
                 Assert.That(json, Does.Not.Contain("apiKey"));
                 Assert.That(json, Does.Not.Contain("webhook"));
                 Assert.That(json, Does.Not.Contain("webcalendars"));

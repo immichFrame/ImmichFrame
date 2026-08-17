@@ -9,6 +9,7 @@ General:
   PhotoDateFormat: PhotoDateFormat_TEST
   ImageLocationFormat: ImageLocationFormat_TEST
   WeatherApiKey: WeatherApiKey_TEST
+  WeatherApiKeyFile: WeatherApiKeyFile_TEST
   UnitSystem: UnitSystem_TEST
   WeatherLatLong: WeatherLatLong_TEST
   Language: Language_TEST

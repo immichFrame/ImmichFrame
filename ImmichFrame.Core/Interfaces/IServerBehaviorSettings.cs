@@ -5,6 +5,7 @@ namespace ImmichFrame.Core.Interfaces
         public List<string> Webcalendars { get; }
         public int RefreshAlbumPeopleInterval { get; }
         public string? WeatherApiKey { get; }
+        public string? WeatherApiKeyFile { get; }
         public string? WeatherLatLong { get; }
         public string? UnitSystem { get; }
         public string? Webhook { get; }

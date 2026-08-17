@@ -68,6 +68,95 @@ public class ConfigLoaderTest
         VerifyConfig(config, true, false);
     }
 
+    [Test]
+    public void GeneralSettingsValidate_ReadsWeatherApiKeyFile()
+    {
+        var apiKeyFile = Path.GetTempFileName();
+        File.WriteAllText(apiKeyFile, "weather-api-key\n");
+
+        try
+        {
+            var settings = new GeneralSettings
+            {
+                WeatherApiKey = "",
+                WeatherApiKeyFile = apiKeyFile,
+            };
+
+            settings.Validate();
+
+            settings.WeatherApiKey.Should().Be("weather-api-key");
+        }
+        finally
+        {
+            File.Delete(apiKeyFile);
+        }
+    }
+
+    [Test]
+    public void GeneralSettingsValidate_ThrowsWhenWeatherApiKeyAndWeatherApiKeyFileAreBothSet()
+    {
+        var settings = new GeneralSettings
+        {
+            WeatherApiKey = "weather-api-key",
+            WeatherApiKeyFile = "/path/to/weather-api-key",
+        };
+
+        var exception = Assert.Throws<Exception>(() => settings.Validate());
+
+        exception!.Message.Should().Contain("Cannot specify both WeatherApiKey and WeatherApiKeyFile");
+    }
+
+    [Test]
+    public void ServerSettingsV1AdapterValidate_ReadsWeatherApiKeyFile()
+    {
+        var apiKeyFile = Path.GetTempFileName();
+        File.WriteAllText(apiKeyFile, "weather-api-key\n");
+
+        try
+        {
+            var settings = new ServerSettingsV1
+            {
+                WeatherApiKey = "",
+                WeatherApiKeyFile = apiKeyFile,
+            };
+
+            var adapter = new ServerSettingsV1Adapter(settings);
+            adapter.Validate();
+
+            adapter.GeneralSettings.WeatherApiKey.Should().Be("weather-api-key");
+        }
+        finally
+        {
+            File.Delete(apiKeyFile);
+        }
+    }
+
+    [Test]
+    public void ServerSettingsV1AdapterValidate_ThrowsWhenWeatherApiKeyAndWeatherApiKeyFileAreBothSet()
+    {
+        var apiKeyFile = Path.GetTempFileName();
+        File.WriteAllText(apiKeyFile, "weather-api-key\n");
+
+        try
+        {
+            var settings = new ServerSettingsV1
+            {
+                WeatherApiKey = "weather-api-key",
+                WeatherApiKeyFile = apiKeyFile,
+            };
+
+            var adapter = new ServerSettingsV1Adapter(settings);
+
+            var exception = Assert.Throws<Exception>(() => adapter.Validate());
+
+            exception!.Message.Should().Contain("Cannot specify both WeatherApiKey and WeatherApiKeyFile");
+        }
+        finally
+        {
+            File.Delete(apiKeyFile);
+        }
+    }
+
     private void VerifyConfig(IServerSettings serverSettings, bool usePrefix, bool expectNullApiKeyFile)
     {
         VerifyProperties(serverSettings.GeneralSettings);

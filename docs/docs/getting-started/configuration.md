@@ -48,8 +48,11 @@ General:
   # Date format. See https://date-fns.org/v4.1.0/docs/format for more information.
   PhotoDateFormat: 'MM/dd/yyyy'  # string
   ImageLocationFormat: 'City,State,Country'
-  # Get an API key from OpenWeatherMap: https://openweathermap.org/appid
+  # Get an API key from OpenWeatherMap: https://openweathermap.org/appid.
+  # At most one of WeatherApiKey or WeatherApiKeyFile may be set.
   WeatherApiKey: ''  # string
+  # Optionally set WeatherApiKeyFile to a file path instead of WeatherApiKey.
+  # WeatherApiKeyFile: '/run/secrets/weather-api.key'  # string
   # Imperial or metric system (Fahrenheit or Celsius)
   UnitSystem: 'imperial'  # 'imperial' | 'metric'
   # Set the weather location with lat/lon.
@@ -160,7 +163,7 @@ For tags, use the full hierarchical path (the `value` field) as it appears in Im
 - `"Travel/Europe"` - matches a tag "Europe" under parent "Travel"
 
 ### Weather
-Weather is enabled by entering an API key. Get yours free from [OpenWeatherMap][openweathermap-url]
+Weather is enabled by entering an API key. Get yours free from [OpenWeatherMap][openweathermap-url]. Set either `WeatherApiKey` or `WeatherApiKeyFile`, but not both. Leave both empty to disable weather.
 
 ### Calendar
 If you are using Google Calendar, more information can be found [here](https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Cget-your-calendar-view-only).

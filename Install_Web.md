@@ -34,6 +34,9 @@ services:
     restart: on-failure
     ports:
       - "8080:8080"
+    # To use WeatherApiKeyFile below, mount the host file at the configured container path.
+    # volumes:
+    #   - /path/on/host/weather-api.key:/run/secrets/weather-api.key:ro
     environment:
       TZ: "Europe/Berlin"
       ImmichServerUrl: "URL"
@@ -75,6 +78,7 @@ services:
       # Style: "none"
       # BaseFontSize: "17px"
       # WeatherApiKey: ""
+      # WeatherApiKeyFile: "/run/secrets/weather-api.key"
       # ShowWeatherDescription: "true"
       # WeatherIconUrl: "https://openweathermap.org/img/wn/{IconId}.png"
       # UnitSystem: "imperial"

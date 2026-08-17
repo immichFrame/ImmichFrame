@@ -30,6 +30,7 @@ sidebar_position: 4
 | Image                   | Interval                   | int                                 | 45                                             | Image interval in seconds. How long a image is displayed in the frame.                                                                |
 | Image                   | TransitionDuration         | float                               | 2                                              | Duration in seconds.                                                                                                                  |
 | [Weather](#weather)     | WeatherApiKey              | string                              |                                                | Get an API key from [OpenWeatherMap][openweathermap-url].                                                                             |
+| [Weather](#weather)     | WeatherApiKeyFile          | string                              |                                                | Path to a file containing an API key from [OpenWeatherMap][openweathermap-url]. Cannot be used together with `WeatherApiKey`.          |
 | [Weather](#weather)     | UnitSystem                 | imperial \| metric                  | imperial                                       | Imperial or metric system. (Fahrenheit or degrees)                                                                                    |
 | [Weather](#weather)     | Language                   | string                              | en                                             | 2 digit ISO code, sets the language of the weather description.                                                                       |
 | [Weather](#weather)     | ShowWeatherDescription     | boolean                             | true                                           | Displays the description of the current weather.                                                                                      |
@@ -62,7 +63,7 @@ If this is enabled, the web api required the `Authorization`-Header with `Bearer
 You can get the UUIDs from the URL of the album/person. For this URL: `https://demo.immich.app/albums/85c85b29-c95d-4a8b-90f7-c87da1d518ba` this is the UUID: `85c85b29-c95d-4a8b-90f7-c87da1d518ba`
 
 ### Weather
-Weather is enabled by entering an API key. Get yours free from [OpenWeatherMap][openweathermap-url]
+Weather is enabled by entering an API key. Get yours free from [OpenWeatherMap][openweathermap-url]. Set either `WeatherApiKey` or `WeatherApiKeyFile`.
 
 ### Calendar
 If you are using Google Calendar, more information can be found [here](https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Cget-your-calendar-view-only).

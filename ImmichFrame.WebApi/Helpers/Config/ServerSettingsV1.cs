@@ -26,6 +26,7 @@ public class ServerSettingsV1 : IConfigSettable
     public List<string> Webcalendars { get; set; } = new List<string>();
     public int RefreshAlbumPeopleInterval { get; set; } = 12;
     public string? WeatherApiKey { get; set; } = string.Empty;
+    public string? WeatherApiKeyFile { get; set; } = null;
     public string? UnitSystem { get; set; } = "imperial";
     public string? WeatherLatLong { get; set; } = "40.7128,74.0060";
     public string Language { get; set; } = "en";
@@ -103,6 +104,7 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
         public List<string> Webcalendars => _delegate.Webcalendars;
         public int RefreshAlbumPeopleInterval => _delegate.RefreshAlbumPeopleInterval;
         public string? WeatherApiKey => _delegate.WeatherApiKey;
+        public string? WeatherApiKeyFile => _delegate.WeatherApiKeyFile;
         public string? WeatherLatLong => _delegate.WeatherLatLong;
         public string? UnitSystem => _delegate.UnitSystem;
         public string? Webhook => _delegate.Webhook;
@@ -136,6 +138,17 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
         public string Layout => _delegate.Layout;
         public string Language => _delegate.Language;
 
-        public void Validate() { }
+        public void Validate()
+        {
+            if (!string.IsNullOrWhiteSpace(_delegate.WeatherApiKeyFile))
+            {
+                if (!string.IsNullOrWhiteSpace(_delegate.WeatherApiKey))
+                {
+                    throw new Exception("Cannot specify both WeatherApiKey and WeatherApiKeyFile. Please provide only one.");
+                }
+
+                _delegate.WeatherApiKey = File.ReadAllText(_delegate.WeatherApiKeyFile).Trim();
+            }
+        }
     }
 }
