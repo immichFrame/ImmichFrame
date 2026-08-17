@@ -13,6 +13,7 @@ public class ServerSettingsV1 : IConfigSettable
     public bool ShowFavorites { get; set; } = false;
     public bool ShowArchived { get; set; } = false;
     public bool ShowVideos { get; set; } = false;
+    public bool ShowOnlyAssetsInAlbums { get; set; } = false;
     public bool DownloadImages { get; set; } = false;
     public int RenewImagesDuration { get; set; } = 30;
     public int? ImagesFromDays { get; set; }
@@ -85,6 +86,7 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
         public bool ShowFavorites => _delegate.ShowFavorites;
         public bool ShowArchived => _delegate.ShowArchived;
         public bool ShowVideos => _delegate.ShowVideos;
+        public bool ShowOnlyAssetsInAlbums => _delegate.ShowOnlyAssetsInAlbums;
         public bool PlayAudio => _delegate.PlayAudio;
         public int? ImagesFromDays => _delegate.ImagesFromDays;
         public DateTime? ImagesFromDate => _delegate.ImagesFromDate;

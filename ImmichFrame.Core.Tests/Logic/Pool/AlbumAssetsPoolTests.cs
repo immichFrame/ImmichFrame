@@ -31,6 +31,7 @@ public class AlbumAssetsPoolTests
 
         _mockAccountSettings.SetupGet(s => s.Albums).Returns(new List<Guid>());
         _mockAccountSettings.SetupGet(s => s.ExcludedAlbums).Returns(new List<Guid>());
+        _mockAccountSettings.SetupGet(s => s.ShowOnlyAssetsInAlbums).Returns(false);
     }
 
     private AssetResponseDto CreateAsset(string id) => new AssetResponseDto { Id = FixtureHelpers.GuidFor(id), Type = AssetTypeEnum.IMAGE };
@@ -92,6 +93,58 @@ public class AlbumAssetsPoolTests
         var result = (await _albumAssetsPool.GetAssets(25)).ToList();
         Assert.That(result.Count, Is.EqualTo(1));
         Assert.That(result.Any(a => a.Id == FixtureHelpers.GuidFor("A")));
+    }
+
+    [Test]
+    public async Task LoadAssets_ShowOnlyAssetsInAlbums_LoadsAssetsFromAllAlbums()
+    {
+        var album1Id = Guid.NewGuid();
+        var album2Id = Guid.NewGuid();
+
+        _mockAccountSettings.SetupGet(s => s.ShowOnlyAssetsInAlbums).Returns(true);
+        _mockAccountSettings.SetupGet(s => s.Albums).Returns(new List<Guid>());
+        _mockImmichApi.Setup(api => api.GetAllAlbumsAsync(null, null, null, null, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<AlbumResponseDto>
+            {
+                new() { Id = album1Id, AlbumName = "One" },
+                new() { Id = album2Id, AlbumName = "Two" },
+            });
+        _mockImmichApi.Setup(api => api.SearchAssetsAsync(It.IsAny<string>(), It.IsAny<string>(), It.Is<MetadataSearchDto>(d => d.AlbumIds.Contains(album1Id)), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new SearchResponseDto { Assets = new SearchAssetResponseDto { Items = new List<AssetResponseDto> { CreateAsset("A") }, Total = 1 } });
+        _mockImmichApi.Setup(api => api.SearchAssetsAsync(It.IsAny<string>(), It.IsAny<string>(), It.Is<MetadataSearchDto>(d => d.AlbumIds.Contains(album2Id)), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new SearchResponseDto { Assets = new SearchAssetResponseDto { Items = new List<AssetResponseDto> { CreateAsset("B") }, Total = 1 } });
+
+        var result = (await _albumAssetsPool.GetAssets(25)).ToList();
+
+        Assert.That(result.Count, Is.EqualTo(2));
+        Assert.That(result.Any(a => a.Id == FixtureHelpers.GuidFor("A")));
+        Assert.That(result.Any(a => a.Id == FixtureHelpers.GuidFor("B")));
+        _mockImmichApi.Verify(api => api.GetAllAlbumsAsync(null, null, null, null, null, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Test]
+    public async Task LoadAssets_ShowOnlyAssetsInAlbums_DeduplicatesAssetsInMultipleAlbums()
+    {
+        var album1Id = Guid.NewGuid();
+        var album2Id = Guid.NewGuid();
+        var sharedAsset = CreateAsset("shared");
+
+        _mockAccountSettings.SetupGet(s => s.ShowOnlyAssetsInAlbums).Returns(true);
+        _mockImmichApi.Setup(api => api.GetAllAlbumsAsync(null, null, null, null, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<AlbumResponseDto>
+            {
+                new() { Id = album1Id, AlbumName = "One" },
+                new() { Id = album2Id, AlbumName = "Two" },
+            });
+        _mockImmichApi.Setup(api => api.SearchAssetsAsync(It.IsAny<string>(), It.IsAny<string>(), It.Is<MetadataSearchDto>(d => d.AlbumIds.Contains(album1Id)), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new SearchResponseDto { Assets = new SearchAssetResponseDto { Items = new List<AssetResponseDto> { sharedAsset }, Total = 1 } });
+        _mockImmichApi.Setup(api => api.SearchAssetsAsync(It.IsAny<string>(), It.IsAny<string>(), It.Is<MetadataSearchDto>(d => d.AlbumIds.Contains(album2Id)), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new SearchResponseDto { Assets = new SearchAssetResponseDto { Items = new List<AssetResponseDto> { sharedAsset }, Total = 1 } });
+
+        var result = (await _albumAssetsPool.GetAssets(25)).ToList();
+
+        Assert.That(result.Count, Is.EqualTo(1));
+        Assert.That(result.Single().Id, Is.EqualTo(sharedAsset.Id));
     }
 
     [Test]

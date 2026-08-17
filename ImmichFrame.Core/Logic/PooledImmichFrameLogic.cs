@@ -36,6 +36,11 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
 
     private IAssetPool BuildPool(IAccountSettings accountSettings)
     {
+        if (accountSettings.ShowOnlyAssetsInAlbums)
+        {
+            return new AlbumAssetsPool(_apiCache, _immichApi, accountSettings);
+        }
+
         var hasAlbums = accountSettings.Albums?.Any() ?? false;
         var hasPeople = accountSettings.People?.Any() ?? false;
         var hasTags = accountSettings.Tags?.Any() ?? false;

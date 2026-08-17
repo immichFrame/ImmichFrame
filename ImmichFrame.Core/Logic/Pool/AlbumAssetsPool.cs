@@ -9,7 +9,7 @@ public class AlbumAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSe
     {
         var albumAssets = new List<AssetResponseDto>();
 
-        var albums = accountSettings.Albums;
+        var albums = await GetAlbumIds(ct);
         if (albums != null)
         {
             foreach (var albumId in albums)
@@ -37,6 +37,17 @@ public class AlbumAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSe
             }
         }
 
-        return albumAssets;
+        return albumAssets.DistinctBy(asset => asset.Id);
+    }
+
+    private async Task<IEnumerable<Guid>?> GetAlbumIds(CancellationToken ct)
+    {
+        if (!accountSettings.ShowOnlyAssetsInAlbums)
+        {
+            return accountSettings.Albums;
+        }
+
+        var albums = await immichApi.GetAllAlbumsAsync(null, null, null, null, null, ct);
+        return albums.Select(album => album.Id);
     }
 }

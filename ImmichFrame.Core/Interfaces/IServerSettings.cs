@@ -17,6 +17,7 @@
         public bool ShowFavorites { get; }
         public bool ShowArchived { get; }
         public bool ShowVideos { get; }
+        public bool ShowOnlyAssetsInAlbums { get; }
         public int? ImagesFromDays { get; }
         public DateTime? ImagesFromDate { get; }
         public DateTime? ImagesUntilDate { get; }
