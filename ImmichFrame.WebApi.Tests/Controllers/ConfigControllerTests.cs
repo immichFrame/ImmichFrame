@@ -44,6 +44,8 @@ namespace ImmichFrame.WebApi.Tests.Controllers
                 Style = "blur",
                 BaseFontSize = "18px",
                 ShowWeatherDescription = false,
+                WeatherShowHumidity = true,
+                WeatherShowTemperatureRange = true,
                 WeatherIconUrl = "https://example.com/{IconId}.png",
                 ImageZoom = false,
                 ImagePan = true,

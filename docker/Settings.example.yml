@@ -28,6 +28,8 @@ General:
   Style: none
   BaseFontSize: 17px
   ShowWeatherDescription: true
+  WeatherShowHumidity: false
+  WeatherShowTemperatureRange: false
   WeatherIconUrl: 'https://openweathermap.org/img/wn/{IconId}.png'
   ImageZoom: true
   ImagePan: false

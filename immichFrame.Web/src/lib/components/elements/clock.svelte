@@ -5,6 +5,8 @@
 	import * as locale from 'date-fns/locale';
 	import { configStore } from '$lib/stores/config.store';
 	import { clientIdentifierStore } from '$lib/stores/persist.store';
+	import Icon from './icon.svelte';
+	import { mdiThermometer, mdiWaterPercent } from '@mdi/js';
 
 	api.init();
 
@@ -25,10 +27,22 @@
 	const timePortion = $derived(() => format(now, $configStore.clockFormat ?? 'HH:mm:ss'));
 
 	const primaryIconId = $derived(() => {
-        if (!weather?.iconId) return null;
-        const firstId = weather.iconId.split(',')[0].trim();
-        return firstId || null;
-    });
+		if (!weather?.iconId) return null;
+		const firstId = weather.iconId.split(',')[0].trim();
+		return firstId || null;
+	});
+
+	function formatTemperature(value?: number | null) {
+		return value?.toFixed(1);
+	}
+
+	function formatHumidity(value?: number | null) {
+		return value?.toFixed(0);
+	}
+
+	function isFiniteNumber(value?: number | null) {
+		return Number.isFinite(value);
+	}
 
 	onMount(() => {
 		const interval = setInterval(() => {
@@ -76,28 +90,49 @@
 		{timePortion()}
 	</p>
 	{#if weather}
-    <div id="clockweather">
-        <div
-            id="clockweatherinfo"
-            class="text-xl sm:text-xl md:text-2xl lg:text-3xl font-semibold text-shadow-sm weather-info"
-        >
-            {#if $configStore.weatherIconUrl && primaryIconId()}
-                <img 
-                    src="{$configStore.weatherIconUrl.replace('{IconId}', encodeURIComponent(primaryIconId()!))}" 
-                    class="icon-weather" 
-                    alt="{weather.description}"
-                >
-            {/if}
-            
-            <div class="weather-location">{weather.location},</div>
-            <div class="weather-temperature">{weather.temperature?.toFixed(1)}°</div>
-        </div>
-        
-        {#if $configStore.showWeatherDescription}
-            <p id="clockweatherdesc" class="text-sm sm:text-sm md:text-md lg:text-xl text-shadow-sm">
-                {weather.description}
-            </p>
-        {/if}
-    </div>
-{/if}
+		<div id="clockweather">
+			<div
+				id="clockweatherinfo"
+				class="text-xl sm:text-xl md:text-2xl lg:text-3xl font-semibold text-shadow-sm weather-info"
+			>
+				{#if $configStore.weatherIconUrl && primaryIconId()}
+					<img
+						src={$configStore.weatherIconUrl.replace(
+							'{IconId}',
+							encodeURIComponent(primaryIconId()!)
+						)}
+						class="icon-weather"
+						alt={weather.description}
+					/>
+				{/if}
+
+				<div class="weather-location">{weather.location},</div>
+				<div class="weather-temperature">{weather.temperature?.toFixed(1)}°</div>
+			</div>
+			<div class="weather-stats text-sm sm:text-sm md:text-md lg:text-xl text-shadow-sm">
+				{#if $configStore.weatherShowTemperatureRange && isFiniteNumber(weather.maximumTemperature) && isFiniteNumber(weather.minimumTemperature)}
+					<div id="clockweathertemperaturerange" class="weather-stat">
+						<Icon path={mdiThermometer} class="weather-stat-icon" />
+						<span
+							>{formatTemperature(weather.maximumTemperature)}° | {formatTemperature(
+								weather.minimumTemperature
+							)}°</span
+						>
+					</div>
+				{/if}
+				{#if $configStore.weatherShowHumidity && isFiniteNumber(weather.humidity)}
+					<div id="clockweatherhumidity" class="weather-stat">
+						<Icon path={mdiWaterPercent} class="weather-stat-icon" />
+						<span>{formatHumidity(weather.humidity)}%</span>
+					</div>
+				{/if}
+			</div>
+
+			{#if $configStore.showWeatherDescription}
+				<p id="clockweatherdesc" class="text-sm sm:text-sm md:text-md lg:text-xl text-shadow-sm">
+					{weather.description}
+				</p>
+			{/if}
+		</div>
+	{/if}
 </div>

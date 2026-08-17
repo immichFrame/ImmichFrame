@@ -84,6 +84,23 @@ div.weather-unit {
 	order: 4;
 }
 
+div.weather-stats {
+	display: flex;
+	justify-content: center;
+	gap: 0.75rem;
+}
+
+div.weather-stat {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+}
+
+svg.weather-stat-icon {
+	width: 1em;
+	height: 1em;
+}
+
 img.icon-weather {
 	display: inline-block;
 	vertical-align: middle;

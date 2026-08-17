@@ -92,6 +92,10 @@ General:
   BaseFontSize: '17px'  # string
   # Displays the description of the current weather.
   ShowWeatherDescription: true  # boolean
+  # Displays the current humidity.
+  WeatherShowHumidity: false  # boolean
+  # Displays the current minimum and maximum temperature.
+  WeatherShowTemperatureRange: false  # boolean
   # URL for the icon to load for the current weather condition
   WeatherIconUrl: 'https://openweathermap.org/img/wn/{IconId}.png'
   # Zooms into or out of an image and gives it a touch of life.
