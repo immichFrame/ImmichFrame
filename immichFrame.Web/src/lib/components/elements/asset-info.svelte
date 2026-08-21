@@ -56,16 +56,14 @@
 		}
 	}
 	function parseExifTimeZone(exifTz?: string | null) {
-		if (exifTz && isValidTimeZone(exifTz)) return exifTz;
-
-		const match = exifTz?.match(/UTC([+-])(\d{1,2})(?::(\d{2}))?/i);
+		const match = exifTz?.match(/^UTC([+-])(\d{1,2})(?::(\d{2}))?$/i);
 		if (match) {
 			const [, sign, hours, minutes = '00'] = match;
 			const paddedHours = hours.padStart(2, '0');
-			return `${sign}${paddedHours}:${minutes}`;
+			exifTz = `${sign}${paddedHours}:${minutes}`;
 		}
-
-		return 'UTC';
+		
+		return exifTz && isValidTimeZone(exifTz) ? exifTz : 'UTC';
 	}
 	let assetDate = $derived(asset.exifInfo?.dateTimeOriginal);
 	let assetTimeZone = $derived(asset.exifInfo?.timeZone);
