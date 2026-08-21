@@ -25,6 +25,7 @@ public class ClientSettingsDto(IClientSettings settings) : IClientSettings
     public string Style => settings.Style;
     public string? BaseFontSize => settings.BaseFontSize;
     public bool ShowWeatherDescription => settings.ShowWeatherDescription;
+    public int TemperatureDecimalDigits => settings.TemperatureDecimalDigits;
     public string? WeatherIconUrl => settings.WeatherIconUrl;
     public bool ImageZoom => settings.ImageZoom;
     public bool ImagePan => settings.ImagePan;

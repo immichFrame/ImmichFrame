@@ -1069,6 +1069,10 @@
           "showWeatherDescription": {
             "type": "boolean"
           },
+          "temperatureDecimalDigits": {
+            "type": "integer",
+            "format": "int32"
+          },
           "weatherIconUrl": {
             "type": "string",
             "nullable": true

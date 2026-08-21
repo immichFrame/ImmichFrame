@@ -30,6 +30,7 @@
     "Style": "none",
     "BaseFontSize": "17px",
     "ShowWeatherDescription": true,
+    "TemperatureDecimalDigits": 1,
     "WeatherIconUrl": "https://openweathermap.org/img/wn/{IconId}.png",
     "ImageZoom": true,
     "ImagePan": false,

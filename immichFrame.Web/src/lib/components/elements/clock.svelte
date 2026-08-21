@@ -90,7 +90,7 @@
             {/if}
             
             <div class="weather-location">{weather.location},</div>
-            <div class="weather-temperature">{weather.temperature?.toFixed(1)}°</div>
+            <div class="weather-temperature">{weather.temperature?.toFixed($configStore.temperatureDecimalDigits ?? 1)}°</div>
         </div>
         
         {#if $configStore.showWeatherDescription}
