@@ -333,4 +333,65 @@ public class CachingApiAssetsPoolTests
         Assert.That(result.Any(a => a.Id == FixtureHelpers.GuidFor("4")));
         Assert.That(result.Any(a => a.Id == FixtureHelpers.GuidFor("3") || a.Id == FixtureHelpers.GuidFor("5") || a.Id == FixtureHelpers.GuidFor("2")), Is.False);
     }
+
+    [Test]
+    public async Task ApplyAccountFilters_ExcludesAssetsContainingExcludedPeople()
+    {
+        // Arrange
+        var excludedPersonId = Guid.NewGuid();
+        var assets = CreateSampleAssets();
+        _testPool.LoadAssetsFunc = () => Task.FromResult<IEnumerable<AssetResponseDto>>(assets);
+        _mockAccountSettings.SetupGet(s => s.ShowArchived).Returns(true);
+        _mockAccountSettings.SetupGet(s => s.ExcludedPeople).Returns(new List<Guid> { excludedPersonId });
+
+        // Asset "4" is the one that contains the excluded person
+        _mockImmichApi.Setup(api => api.SearchAssetsAsync(
+                It.IsAny<string>(), It.IsAny<string>(),
+                It.Is<MetadataSearchDto>(d => d.PersonIds != null && d.PersonIds.Contains(excludedPersonId)),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new SearchResponseDto
+            {
+                Assets = new SearchAssetResponseDto
+                {
+                    Items = new List<AssetResponseDto> { new AssetResponseDto { Id = FixtureHelpers.GuidFor("4") } },
+                    Total = 1
+                }
+            });
+
+        // Act
+        var result = (await _testPool.GetAssets(5)).ToList();
+
+        // Assert
+        // Images are 1, 3, 4, 5 (2 is video); "4" must be dropped
+        Assert.That(result.Any(a => a.Id == FixtureHelpers.GuidFor("4")), Is.False,
+            "asset containing an excluded person should not be returned");
+        Assert.That(result.Count, Is.EqualTo(3));
+    }
+
+    [Test]
+    public async Task ExcludedPeopleLookup_ForwardsCallersCancellationToken()
+    {
+        // Arrange
+        var excludedPersonId = Guid.NewGuid();
+        using var cts = new CancellationTokenSource();
+        _testPool.LoadAssetsFunc = () => Task.FromResult<IEnumerable<AssetResponseDto>>(new List<AssetResponseDto>());
+        _mockAccountSettings.SetupGet(s => s.ExcludedPeople).Returns(new List<Guid> { excludedPersonId });
+
+        _mockImmichApi.Setup(api => api.SearchAssetsAsync(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<MetadataSearchDto>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new SearchResponseDto
+            {
+                Assets = new SearchAssetResponseDto { Items = new List<AssetResponseDto>(), Total = 0 }
+            });
+
+        // Act
+        await _testPool.GetAssets(1, cts.Token);
+
+        // Assert
+        _mockImmichApi.Verify(api => api.SearchAssetsAsync(
+                It.IsAny<string>(), It.IsAny<string>(),
+                It.Is<MetadataSearchDto>(d => d.PersonIds != null && d.PersonIds.Contains(excludedPersonId)),
+                cts.Token),
+            Times.Once, "a cancelled request must not leave the excluded-person search running");
+    }
 }

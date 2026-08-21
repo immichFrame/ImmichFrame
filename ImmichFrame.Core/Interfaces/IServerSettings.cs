@@ -23,6 +23,7 @@
         public List<Guid> Albums { get; }
         public List<Guid> ExcludedAlbums { get; }
         public List<Guid> People { get; }
+        public List<Guid> ExcludedPeople { get; }
         public List<string> Tags { get; }
         public int? Rating { get; }
 

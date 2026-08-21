@@ -64,8 +64,11 @@ public class AllAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSett
         var excludedAlbumAssets = await apiCache.GetOrAddAsync(
             $"{nameof(AllAssetsPool)}_ExcludedAlbums",
             () => AssetHelper.GetExcludedAlbumAssets(immichApi, accountSettings, ct));
+        var excludedPeopleAssets = await apiCache.GetOrAddAsync(
+            $"{nameof(AllAssetsPool)}_ExcludedPeople",
+            () => AssetHelper.GetExcludedPeopleAssets(immichApi, accountSettings, ct));
 
-        return assets.ApplyAccountFilters(accountSettings, excludedAlbumAssets);
+        return assets.ApplyAccountFilters(accountSettings, excludedAlbumAssets, excludedPeopleAssets);
     }
 
 }
