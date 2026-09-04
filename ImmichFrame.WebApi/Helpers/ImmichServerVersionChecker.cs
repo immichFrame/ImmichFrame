@@ -4,6 +4,8 @@ using ImmichFrame.Core.Interfaces;
 
 namespace ImmichFrame.WebApi.Helpers
 {
+    public record AccountCheckResult(bool Success, string Message, string? Version);
+
     public static class ImmichServerVersionChecker
     {
         private static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(5);
@@ -14,13 +16,43 @@ namespace ImmichFrame.WebApi.Helpers
         public const int MinimumSupportedMajorVersion = 3;
 
         /// <summary>
+        /// Checks a single account: is the Immich server reachable and running a supported version?
+        /// </summary>
+        public static async Task<AccountCheckResult> CheckAccount(IAccountSettings account, IHttpClientFactory httpClientFactory)
+        {
+            try
+            {
+                var httpClient = httpClientFactory.CreateClient("ImmichApiAccountClient");
+                httpClient.UseApiKey(account.ApiKey);
+                var immichApi = new ImmichApi(account.ImmichServerUrl, httpClient);
+
+                using var cts = new CancellationTokenSource(RequestTimeout);
+                var version = await immichApi.GetServerVersionAsync(cts.Token);
+                var versionString = $"{version.Major}.{version.Minor}.{version.Patch}";
+
+                if (version.Major < MinimumSupportedMajorVersion)
+                {
+                    return new AccountCheckResult(false,
+                        $"Immich server {account.ImmichServerUrl} is running v{versionString}, but this version of ImmichFrame requires Immich v{MinimumSupportedMajorVersion} or newer. Please update your Immich server.",
+                        versionString);
+                }
+
+                return new AccountCheckResult(true,
+                    $"Immich server {account.ImmichServerUrl} is running v{versionString}", versionString);
+            }
+            catch (Exception ex)
+            {
+                return new AccountCheckResult(false,
+                    $"Could not determine Immich server version for {account.ImmichServerUrl}: {ex.Message}", null);
+            }
+        }
+
+        /// <summary>
         /// Checks and logs the version of every configured Immich server.
         /// </summary>
         /// <returns>
         /// <c>true</c> only if every configured Immich server was reachable and reported a version of
-        /// v<see cref="MinimumSupportedMajorVersion"/> or newer. Returns <c>false</c> if the configuration
-        /// could not be loaded, if a server reported an older version, or if a server's version could not
-        /// be determined (e.g. unreachable) — in every one of these cases ImmichFrame must not start.
+        /// v<see cref="MinimumSupportedMajorVersion"/> or newer.
         /// </returns>
         public static async Task<bool> CheckServerVersions(IServiceProvider services, ILogger logger)
         {
@@ -37,38 +69,22 @@ namespace ImmichFrame.WebApi.Helpers
 
             var httpClientFactory = services.GetRequiredService<IHttpClientFactory>();
 
-            var allCompatible = true;
+            // In parallel: one unreachable server must not add its timeout to all the others
+            var results = await Task.WhenAll(accounts.Select(account => CheckAccount(account, httpClientFactory)));
 
-            foreach (var account in accounts)
+            foreach (var result in results)
             {
-                try
+                if (result.Success)
                 {
-                    var httpClient = httpClientFactory.CreateClient("ImmichApiAccountClient");
-                    httpClient.UseApiKey(account.ApiKey);
-                    var immichApi = new ImmichApi(account.ImmichServerUrl, httpClient);
-
-                    using var cts = new CancellationTokenSource(RequestTimeout);
-                    var version = await immichApi.GetServerVersionAsync(cts.Token);
-
-                    logger.LogInformation("Immich server {Url} is running v{Major}.{Minor}.{Patch}",
-                        account.ImmichServerUrl, version.Major, version.Minor, version.Patch);
-
-                    if (version.Major < MinimumSupportedMajorVersion)
-                    {
-                        allCompatible = false;
-                        logger.LogCritical("Immich server {Url} is running v{Major}.{Minor}.{Patch}, but this version of ImmichFrame requires Immich v{Minimum} or newer. Please update your Immich server.",
-                            account.ImmichServerUrl, version.Major, version.Minor, version.Patch, MinimumSupportedMajorVersion);
-                    }
+                    logger.LogInformation("{Message}", result.Message);
                 }
-                catch (Exception ex)
+                else
                 {
-                    allCompatible = false;
-                    logger.LogCritical("Could not determine Immich server version for {Url}: {Message}",
-                        account.ImmichServerUrl, ex.Message);
+                    logger.LogCritical("{Message}", result.Message);
                 }
             }
 
-            return allCompatible;
+            return results.All(r => r.Success);
         }
     }
 }

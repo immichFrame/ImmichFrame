@@ -5,6 +5,211 @@
     "version": "1.0"
   },
   "paths": {
+    "/api/Admin/Status": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "GetAdminStatus",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminStatusDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminStatusDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminStatusDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Admin/Setup": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "SetupAdmin",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminSetupDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminSetupDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminSetupDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsUpdateResultDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsUpdateResultDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsUpdateResultDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Admin/Settings": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "GetAdminSettings",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerSettings"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerSettings"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerSettings"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "UpdateAdminSettings",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServerSettings"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServerSettings"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServerSettings"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsUpdateResultDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsUpdateResultDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsUpdateResultDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Admin/Settings/TestAccount": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "TestAccount",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServerAccountSettings"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServerAccountSettings"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServerAccountSettings"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountTestResultDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountTestResultDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountTestResultDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Asset": {
       "get": {
         "tags": [
@@ -577,6 +782,50 @@
   },
   "components": {
     "schemas": {
+      "AccountTestResultDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminSetupDto": {
+        "type": "object",
+        "properties": {
+          "adminPassword": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminStatusDto": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "$ref": "#/components/schemas/AdminUiState"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminUiState": {
+        "enum": [
+          "setup",
+          "login",
+          "disabled"
+        ],
+        "type": "string"
+      },
       "AlbumResponseDto": {
         "required": [
           "albumName",
@@ -695,12 +944,11 @@
       },
       "AlbumUserRole": {
         "enum": [
-          0,
-          1,
-          2
+          "editor",
+          "owner",
+          "viewer"
         ],
-        "type": "integer",
-        "format": "int32"
+        "type": "string"
       },
       "AssetFaceResponseDto": {
         "required": [
@@ -767,11 +1015,10 @@
       },
       "AssetOrder": {
         "enum": [
-          0,
-          1
+          "asc",
+          "desc"
         ],
-        "type": "integer",
-        "format": "int32"
+        "type": "string"
       },
       "AssetResponseDto": {
         "required": [
@@ -974,23 +1221,21 @@
       },
       "AssetTypeEnum": {
         "enum": [
-          0,
-          1,
-          2,
-          3
+          "image",
+          "video",
+          "audio",
+          "other"
         ],
-        "type": "integer",
-        "format": "int32"
+        "type": "string"
       },
       "AssetVisibility": {
         "enum": [
-          0,
-          1,
-          2,
-          3
+          "archive",
+          "timeline",
+          "hidden",
+          "locked"
         ],
-        "type": "integer",
-        "format": "int32"
+        "type": "string"
       },
       "ClientSettingsDto": {
         "type": "object",
@@ -1245,6 +1490,145 @@
         },
         "additionalProperties": false
       },
+      "GeneralSettings": {
+        "type": "object",
+        "properties": {
+          "downloadImages": {
+            "type": "boolean"
+          },
+          "language": {
+            "type": "string",
+            "nullable": true
+          },
+          "imageLocationFormat": {
+            "type": "string",
+            "nullable": true
+          },
+          "photoDateFormat": {
+            "type": "string",
+            "nullable": true
+          },
+          "interval": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "transitionDuration": {
+            "type": "number",
+            "format": "double"
+          },
+          "showClock": {
+            "type": "boolean"
+          },
+          "clockFormat": {
+            "type": "string",
+            "nullable": true
+          },
+          "clockDateFormat": {
+            "type": "string",
+            "nullable": true
+          },
+          "showProgressBar": {
+            "type": "boolean"
+          },
+          "showPhotoDate": {
+            "type": "boolean"
+          },
+          "showImageDesc": {
+            "type": "boolean"
+          },
+          "showPeopleDesc": {
+            "type": "boolean"
+          },
+          "showTagsDesc": {
+            "type": "boolean"
+          },
+          "showAlbumName": {
+            "type": "boolean"
+          },
+          "showImageLocation": {
+            "type": "boolean"
+          },
+          "primaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "secondaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "style": {
+            "type": "string",
+            "nullable": true
+          },
+          "baseFontSize": {
+            "type": "string",
+            "nullable": true
+          },
+          "showWeatherDescription": {
+            "type": "boolean"
+          },
+          "weatherIconUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "imageZoom": {
+            "type": "boolean"
+          },
+          "imagePan": {
+            "type": "boolean"
+          },
+          "imageFill": {
+            "type": "boolean"
+          },
+          "playAudio": {
+            "type": "boolean"
+          },
+          "layout": {
+            "type": "string",
+            "nullable": true
+          },
+          "renewImagesDuration": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "webcalendars": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "refreshAlbumPeopleInterval": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "weatherApiKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "unitSystem": {
+            "type": "string",
+            "nullable": true
+          },
+          "weatherLatLong": {
+            "type": "string",
+            "nullable": true
+          },
+          "webhook": {
+            "type": "string",
+            "nullable": true
+          },
+          "authenticationSecret": {
+            "type": "string",
+            "nullable": true
+          },
+          "adminPassword": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "IAppointment": {
         "type": "object",
         "properties": {
@@ -1410,14 +1794,123 @@
         },
         "additionalProperties": { }
       },
+      "ServerAccountSettings": {
+        "type": "object",
+        "properties": {
+          "immichServerUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "apiKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "apiKeyFile": {
+            "type": "string",
+            "nullable": true
+          },
+          "showMemories": {
+            "type": "boolean"
+          },
+          "showFavorites": {
+            "type": "boolean"
+          },
+          "showArchived": {
+            "type": "boolean"
+          },
+          "showVideos": {
+            "type": "boolean"
+          },
+          "imagesFromDays": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "imagesFromDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "imagesUntilDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "albums": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "nullable": true
+          },
+          "excludedAlbums": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "nullable": true
+          },
+          "people": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "rating": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ServerSettings": {
+        "type": "object",
+        "properties": {
+          "General": {
+            "$ref": "#/components/schemas/GeneralSettings"
+          },
+          "Accounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ServerAccountSettings"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SettingsUpdateResultDto": {
+        "type": "object",
+        "properties": {
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "SourceType": {
         "enum": [
-          0,
-          1,
-          2
+          "machineLearning",
+          "exif",
+          "manual"
         ],
-        "type": "integer",
-        "format": "int32"
+        "type": "string"
       },
       "TagResponseDto": {
         "required": [
@@ -1468,19 +1961,18 @@
       },
       "UserAvatarColor": {
         "enum": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9
+          "primary",
+          "pink",
+          "red",
+          "yellow",
+          "blue",
+          "green",
+          "purple",
+          "orange",
+          "gray",
+          "amber"
         ],
-        "type": "integer",
-        "format": "int32"
+        "type": "string"
       },
       "UserResponseDto": {
         "required": [

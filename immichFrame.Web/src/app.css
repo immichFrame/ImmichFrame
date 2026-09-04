@@ -1,6 +1,42 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Pulls in Tailwind itself plus the @immich/ui design tokens. */
+@import '@immich/ui/theme/default.css';
+
+/*
+  @immich/ui composes its classes at runtime (tailwind-variants), so the
+  package has to be scanned explicitly — Tailwind skips node_modules.
+*/
+@source '../node_modules/@immich/ui';
+
+/*
+  The user-configurable slideshow palette. Kept under its own `frame-` prefix
+  so it never collides with the @immich/ui tokens the admin UI is built on —
+  `bg-primary` stays Immich's, `bg-frame-primary` is the frame's.
+
+  The underlying variables are set on :root at runtime from the server config
+  (see $lib/hooks/useTheme), so they are declared inline to keep that live.
+*/
+@theme inline {
+	--color-frame-primary: var(--primary-color);
+	--color-frame-secondary: var(--secondary-color);
+}
+
+@theme {
+	--text-shadow-sm: 2px 2px 4px rgb(0 0 0 / 0.8); /* for small text */
+	--text-shadow-lg: 3px 3px 6px rgb(0 0 0 / 0.5); /* for large text */
+}
+
+/* Viewport height that accounts for mobile browser chrome, fed by useViewportHeight. */
+@utility h-dvh-safe {
+	height: calc(var(--vh) * 100);
+}
+
+@utility min-h-dvh-safe {
+	min-height: calc(var(--vh) * 100);
+}
+
+@utility max-h-dvh-safe {
+	max-height: calc(var(--vh) * 100);
+}
 
 @layer base {
 	:root {
@@ -87,6 +123,6 @@ div.weather-unit {
 img.icon-weather {
 	display: inline-block;
 	vertical-align: middle;
-	margin-top: -8px;	/* adjust icon top to line up with text */
+	margin-top: -8px; /* adjust icon top to line up with text */
 	order: 1;
 }

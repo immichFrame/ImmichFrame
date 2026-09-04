@@ -11,16 +11,17 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
-		"api": "oazapfts ../openApi/swagger.json src/lib/immichFrameApi.ts"
+		"api": "oazapfts --enumStyle=as-const ../openApi/swagger.json src/lib/immichFrameApi.ts"
 	},
 	"devDependencies": {
 		"@castlenine/svelte-qrcode": "^2.3.0",
+		"@immich/ui": "^0.85.0",
 		"@mdi/js": "^7.4.47",
 		"@sveltejs/adapter-static": "^3.0.5",
 		"@sveltejs/kit": "^2.46.4",
 		"@sveltejs/vite-plugin-svelte": "^6.2.1",
+		"@tailwindcss/postcss": "^4.3.3",
 		"@types/eslint": "^9.6.0",
-		"autoprefixer": "^10.4.20",
 		"date-fns": "^4.1.0",
 		"eslint": "^9.0.0",
 		"eslint-config-prettier": "^10.1.8",
@@ -33,11 +34,14 @@
 		"svelte": "^5.39.11",
 		"svelte-check": "^4.0.0",
 		"svelte-confetti": "^2.0.0",
-		"tailwindcss": "^3.4.10",
+		"tailwindcss": "^4.3.3",
 		"thumbhash": "^0.1.1",
 		"typescript": "^5.5.0",
 		"typescript-eslint": "^8.0.0",
 		"vite": "^7.1.9"
+	},
+	"overrides": {
+		"svelte-highlight": "7.14.1"
 	},
 	"type": "module"
 }

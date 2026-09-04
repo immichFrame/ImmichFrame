@@ -128,6 +128,20 @@ services:
 
 For more information, read [here](/README.md#configuration).
 
+## 🛠️ Admin UI
+
+ImmichFrame has a built-in admin interface at `/admin` where all settings (including your
+Immich accounts) can be edited in the browser — changes apply live, without a restart.
+
+- Enable it by setting the `IMMICHFRAME_ADMIN_PASSWORD` environment variable (without a
+  password the admin UI stays disabled).
+- Settings are stored in a SQLite database inside the config directory, so mount
+  `/app/Config` as a **writable** volume. An existing `Settings.json`/`Settings.yml` or
+  env config is imported once on first start; after that the database is the source of
+  truth and file changes are ignored.
+- If you lock yourself out, the `IMMICHFRAME_ADMIN_PASSWORD` environment variable always
+  overrides the stored admin password.
+
 ## 🆘 Help
 
 [Discord Channel][support-url]

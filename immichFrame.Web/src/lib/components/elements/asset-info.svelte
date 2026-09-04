@@ -31,7 +31,7 @@
 	}: Props = $props();
 
 	function formatLocation(format: string, city?: string, state?: string, country?: string) {
-		const locationParts: Array<string> = new Array();
+		const locationParts: Array<string> = [];
 
 		format.split(',').forEach((part) => {
 			const trimmedPart = part.trim().toLowerCase();
@@ -73,9 +73,9 @@
 {#if showPhotoDate || showLocation || showImageDesc || showPeopleDesc || showTagsDesc || showAlbumName}
 	<div
 		id="imageinfo"
-		class="immichframe_image_metadata absolute bottom-0 right-0 z-100 text-primary p-1 text-right
-		{$configStore.style == 'solid' ? 'bg-secondary rounded-tl-2xl' : ''}
-		{$configStore.style == 'transition' ? 'bg-gradient-to-l from-secondary from-0% pl-10' : ''}
+		class="immichframe_image_metadata absolute bottom-0 right-0 z-100 text-frame-primary p-1 text-right
+		{$configStore.style == 'solid' ? 'bg-frame-secondary rounded-tl-2xl' : ''}
+		{$configStore.style == 'transition' ? 'bg-linear-to-l from-frame-secondary from-0% pl-10' : ''}
 		{$configStore.style == 'blur' ? 'backdrop-blur-lg rounded-tl-2xl' : ''}	"
 	>
 		{#if showPhotoDate && formattedDate}
