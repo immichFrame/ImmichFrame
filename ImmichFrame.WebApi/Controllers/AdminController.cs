@@ -64,30 +64,31 @@ namespace ImmichFrame.WebApi.Controllers
         /// </summary>
         [HttpPost("Setup", Name = "SetupAdmin")]
         [AllowAnonymous]
+        [ProducesResponseType(typeof(SettingsUpdateResultDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
         public async Task<ActionResult<SettingsUpdateResultDto>> Setup([FromBody] AdminSetupDto setup)
         {
-            if (!_adminAuthService.SetupRequired)
-            {
-                return Problem(detail: "ImmichFrame is already configured.", statusCode: StatusCodes.Status409Conflict);
-            }
-
             if (string.IsNullOrWhiteSpace(setup.AdminPassword))
             {
                 return Problem(detail: "An admin password is required.", statusCode: StatusCodes.Status400BadRequest);
             }
 
-            var settings = _settingsService.GetRawSettings();
-            settings.GeneralSettingsImpl ??= new GeneralSettings();
-            settings.GeneralSettingsImpl.AdminPassword = setup.AdminPassword;
-
+            SetupResult result;
             try
             {
-                await _settingsService.UpdateAsync(settings);
+                result = await _settingsService.TryClaimSetupAsync(
+                    setup.AdminPassword, () => _adminAuthService.SetupRequired);
             }
             catch (SettingsNotValidException ex)
             {
                 _logger.LogWarning("Rejected setup: {message}", ex.Message);
                 return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
+            }
+
+            if (result == SetupResult.AlreadyClaimed)
+            {
+                return Problem(detail: "ImmichFrame is already configured.", statusCode: StatusCodes.Status409Conflict);
             }
 
             _logger.LogInformation("Admin password set through onboarding.");
@@ -102,10 +103,14 @@ namespace ImmichFrame.WebApi.Controllers
         [HttpGet("Settings", Name = "GetAdminSettings")]
         public ServerSettings GetSettings()
         {
+            // Secrets in the body: keep them out of browser and proxy caches.
+            Response.Headers.CacheControl = "no-store";
             return _settingsService.GetRawSettings();
         }
 
         [HttpPut("Settings", Name = "UpdateAdminSettings")]
+        [ProducesResponseType(typeof(SettingsUpdateResultDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<SettingsUpdateResultDto>> UpdateSettings([FromBody] ServerSettings settings)
         {
             Core.Interfaces.IServerSettings validated;

@@ -104,7 +104,7 @@ export const generalSections: SectionDef[] = [
 				key: 'weatherLatLong',
 				label: 'Weather latitude,longitude',
 				type: 'text',
-				placeholder: '40.7128,74.0060'
+				placeholder: '40.7128,-74.0060'
 			},
 			{ key: 'unitSystem', label: 'Unit system', type: 'select', options: ['imperial', 'metric'] },
 			{ key: 'showWeatherDescription', label: 'Show weather description', type: 'checkbox' },

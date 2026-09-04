@@ -20,8 +20,9 @@ Example configuration files:
 - [`Settings.json` example][example-json] — imported once on first start
 - [`.env` example][example-env] — admin password, config path and log level
 
-Starting without a settings file is fine: set `IMMICHFRAME_ADMIN_PASSWORD` and
-configure everything in the [admin UI](../admin-ui.md).
+Starting without a settings file is fine: open the [admin UI](../admin-ui.md) at `/admin`,
+pick an admin password on the setup screen and configure everything there. Setting
+`IMMICHFRAME_ADMIN_PASSWORD` (as below) chooses that password up front instead.
 
 ---
 

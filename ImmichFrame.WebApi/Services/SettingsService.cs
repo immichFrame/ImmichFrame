@@ -10,6 +10,16 @@ namespace ImmichFrame.WebApi.Services;
 
 public record SettingsServiceOptions(string ConfigPath);
 
+/// <summary>Outcome of an anonymous onboarding attempt.</summary>
+public enum SetupResult
+{
+    /// <summary>This request set the initial admin password.</summary>
+    Claimed,
+
+    /// <summary>Somebody else got there first; the instance is already configured.</summary>
+    AlreadyClaimed
+}
+
 /// <summary>
 /// Owns the runtime settings. The SQLite database is the source of truth; an existing
 /// file config is imported once on first run. <see cref="Current"/> always holds a
@@ -120,6 +130,51 @@ public class SettingsService : ISettingsProvider
 
     public async Task<IServerSettings> UpdateAsync(ServerSettings raw)
     {
+        var validated = NormalizeAndValidate(raw);
+
+        await _updateLock.WaitAsync();
+        try
+        {
+            return await PersistAsync(raw, validated);
+        }
+        finally
+        {
+            _updateLock.Release();
+        }
+    }
+
+    /// <summary>
+    /// Claims a never-configured instance by writing the initial admin password. The
+    /// <paramref name="setupRequired"/> check runs under the same lock as the write, so
+    /// two concurrent onboarding requests cannot both succeed; the loser gets
+    /// <see cref="SetupResult.AlreadyClaimed"/>.
+    /// </summary>
+    public async Task<SetupResult> TryClaimSetupAsync(string adminPassword, Func<bool> setupRequired)
+    {
+        await _updateLock.WaitAsync();
+        try
+        {
+            if (!setupRequired())
+            {
+                return SetupResult.AlreadyClaimed;
+            }
+
+            var raw = Clone(_raw);
+            raw.GeneralSettingsImpl ??= new GeneralSettings();
+            raw.GeneralSettingsImpl.AdminPassword = adminPassword;
+
+            var validated = NormalizeAndValidate(raw);
+            await PersistAsync(raw, validated);
+            return SetupResult.Claimed;
+        }
+        finally
+        {
+            _updateLock.Release();
+        }
+    }
+
+    private static ServerSettings NormalizeAndValidate(ServerSettings raw)
+    {
         Normalize(raw);
         var validated = Clone(raw);
         try
@@ -131,45 +186,43 @@ public class SettingsService : ISettingsProvider
             throw new SettingsNotValidException(ex.Message, ex);
         }
 
-        await _updateLock.WaitAsync();
-        try
+        return validated;
+    }
+
+    /// <summary>Writes the settings and publishes them. Caller must hold <see cref="_updateLock"/>.</summary>
+    private async Task<IServerSettings> PersistAsync(ServerSettings raw, ServerSettings validated)
+    {
+        await using var db = await _dbFactory.CreateDbContextAsync();
+        var row = await db.SettingsDocuments.FindAsync(1);
+        if (row == null)
         {
-            await using var db = await _dbFactory.CreateDbContextAsync();
-            var row = await db.SettingsDocuments.FindAsync(1);
-            if (row == null)
-            {
-                row = new SettingsDocument { Id = 1 };
-                db.SettingsDocuments.Add(row);
-            }
-
-            row.Json = Serialize(raw);
-            row.UpdatedAtUtc = DateTime.UtcNow;
-            row.Version++;
-            await db.SaveChangesAsync();
-
-            var old = _raw;
-            var accountsChanged = Serialize(old.AccountsImpl) != Serialize(raw.AccountsImpl)
-                || old.GeneralSettings.RefreshAlbumPeopleInterval != validated.GeneralSettings.RefreshAlbumPeopleInterval;
-            var generalChanged = Serialize(old.GeneralSettingsImpl) != Serialize(raw.GeneralSettingsImpl);
-
-            _raw = Clone(raw);
-            _current = validated;
-            _isUnconfigured = false;
-
-            _logger.LogInformation("Settings updated (accounts changed: {accountsChanged})", accountsChanged);
-            SettingsChanged?.Invoke(this, new SettingsChangedEventArgs
-            {
-                NewSettings = validated,
-                AccountsChanged = accountsChanged,
-                GeneralChanged = generalChanged
-            });
-
-            return validated;
+            row = new SettingsDocument { Id = 1 };
+            db.SettingsDocuments.Add(row);
         }
-        finally
+
+        row.Json = Serialize(raw);
+        row.UpdatedAtUtc = DateTime.UtcNow;
+        row.Version++;
+        await db.SaveChangesAsync();
+
+        var old = _raw;
+        var accountsChanged = Serialize(old.AccountsImpl) != Serialize(raw.AccountsImpl)
+            || old.GeneralSettings.RefreshAlbumPeopleInterval != validated.GeneralSettings.RefreshAlbumPeopleInterval;
+        var generalChanged = Serialize(old.GeneralSettingsImpl) != Serialize(raw.GeneralSettingsImpl);
+
+        _raw = Clone(raw);
+        _current = validated;
+        _isUnconfigured = false;
+
+        _logger.LogInformation("Settings updated (accounts changed: {accountsChanged})", accountsChanged);
+        SettingsChanged?.Invoke(this, new SettingsChangedEventArgs
         {
-            _updateLock.Release();
-        }
+            NewSettings = validated,
+            AccountsChanged = accountsChanged,
+            GeneralChanged = generalChanged
+        });
+
+        return validated;
     }
 
     /// <summary>The raw settings for editing: secrets included, ApiKeyFile unresolved.</summary>

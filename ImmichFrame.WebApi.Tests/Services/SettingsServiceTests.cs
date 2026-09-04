@@ -207,6 +207,28 @@ namespace ImmichFrame.WebApi.Tests.Services
             Assert.That(service.Current.Accounts.Single().ApiKey, Is.EqualTo("key123"));
         }
 
+        [Test]
+        public async Task TryClaimSetupAsync_OnlyFirstConcurrentClaimWins()
+        {
+            var service = CreateService();
+            await service.InitializeAsync();
+
+            // Mirrors AdminAuthService.SetupRequired: no password anywhere yet.
+            bool SetupRequired() => string.IsNullOrWhiteSpace(service.Current.GeneralSettings.AdminPassword)
+                && service.IsUnconfigured;
+
+            var results = await Task.WhenAll(
+                Enumerable.Range(0, 8).Select(i => Task.Run(() => service.TryClaimSetupAsync($"password-{i}", SetupRequired))));
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(results.Count(r => r == SetupResult.Claimed), Is.EqualTo(1));
+                Assert.That(results.Count(r => r == SetupResult.AlreadyClaimed), Is.EqualTo(7));
+                Assert.That(service.Current.GeneralSettings.AdminPassword, Does.StartWith("password-"));
+                Assert.That(service.IsUnconfigured, Is.False);
+            });
+        }
+
         private class TestDbContextFactory(DbContextOptions<SettingsDbContext> _options) : IDbContextFactory<SettingsDbContext>
         {
             public SettingsDbContext CreateDbContext() => new(_options);

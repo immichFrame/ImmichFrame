@@ -11,7 +11,3 @@ services:
       - "8080:8080"
     env_file:
       - .env
-    environment:
-      TZ: "Europe/Berlin"
-      # Required — without it the admin UI at /admin stays disabled.
-      IMMICHFRAME_ADMIN_PASSWORD: "CHANGE_ME"

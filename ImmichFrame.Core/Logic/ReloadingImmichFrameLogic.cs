@@ -18,7 +18,9 @@ public class ReloadingImmichFrameLogic : IImmichFrameLogic, IDisposable
     private readonly ISettingsProvider _settingsProvider;
     private readonly ILogger<ReloadingImmichFrameLogic> _logger;
     private readonly TimeSpan _disposeGraceDelay;
+    private readonly object _swapLock = new();
     private volatile IImmichFrameLogic _inner;
+    private bool _disposed;
 
     public ReloadingImmichFrameLogic(ISettingsProvider settingsProvider, Func<IImmichFrameLogic> innerFactory,
         ILogger<ReloadingImmichFrameLogic> logger, TimeSpan? disposeGraceDelay = null)
@@ -36,24 +38,36 @@ public class ReloadingImmichFrameLogic : IImmichFrameLogic, IDisposable
         if (!args.AccountsChanged)
             return;
 
-        _logger.LogInformation("Account settings changed, rebuilding asset logic");
-        var next = _innerFactory();
-        var old = Interlocked.Exchange(ref _inner, next);
+        IImmichFrameLogic? old;
+        lock (_swapLock)
+        {
+            if (_disposed)
+                return;
+
+            _logger.LogInformation("Account settings changed, rebuilding asset logic");
+            old = Interlocked.Exchange(ref _inner, _innerFactory());
+        }
+
         if (old is IDisposable disposable)
         {
             var delay = _disposeGraceDelay;
             _ = Task.Run(async () =>
             {
                 await Task.Delay(delay);
-                try
-                {
-                    disposable.Dispose();
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Failed to dispose previous asset logic");
-                }
+                DisposeInner(disposable);
             });
+        }
+    }
+
+    private void DisposeInner(IDisposable disposable)
+    {
+        try
+        {
+            disposable.Dispose();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to dispose previous asset logic");
         }
     }
 
@@ -77,6 +91,20 @@ public class ReloadingImmichFrameLogic : IImmichFrameLogic, IDisposable
     public void Dispose()
     {
         _settingsProvider.SettingsChanged -= OnSettingsChanged;
-        (_inner as IDisposable)?.Dispose();
+
+        IImmichFrameLogic? current;
+        lock (_swapLock)
+        {
+            if (_disposed)
+                return;
+
+            _disposed = true;
+            current = _inner;
+        }
+
+        if (current is IDisposable disposable)
+        {
+            DisposeInner(disposable);
+        }
     }
 }

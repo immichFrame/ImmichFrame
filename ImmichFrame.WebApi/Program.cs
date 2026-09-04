@@ -12,6 +12,7 @@ using ImmichFrame.WebApi.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 //log the version number
@@ -98,7 +99,17 @@ builder.Services.AddControllers()
               new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options => options.SchemaFilter<ImmichFrame.WebApi.Helpers.NoReadOnlySchemaFilter>());
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SchemaFilter<ImmichFrame.WebApi.Helpers.NoReadOnlySchemaFilter>();
+    options.AddSecurityDefinition(ImmichFrameAdminAuthenticationHandler.SchemeName, new OpenApiSecurityScheme
+    {
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        Description = "The admin password, sent as a bearer token."
+    });
+    options.OperationFilter<ImmichFrame.WebApi.Helpers.AdminSecuritySchemeOperationFilter>();
+});
 
 builder.Services.AddAuthorization(options => { options.AddPolicy("AllowAnonymous", policy => policy.RequireAssertion(context => true)); });
 

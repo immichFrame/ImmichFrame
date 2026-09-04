@@ -21,6 +21,14 @@ export type AdminSetupDto = {
 export type SettingsUpdateResultDto = {
     warnings?: string[] | null;
 };
+export type ProblemDetails = {
+    "type"?: string | null;
+    title?: string | null;
+    status?: number | null;
+    detail?: string | null;
+    instance?: string | null;
+    [key: string]: any;
+};
 export type GeneralSettings = {
     downloadImages?: boolean;
     language?: string | null;
@@ -243,14 +251,6 @@ export type AlbumResponseDto = {
         [key: string]: any | null;
     } | null;
 };
-export type ProblemDetails = {
-    "type"?: string | null;
-    title?: string | null;
-    status?: number | null;
-    detail?: string | null;
-    instance?: string | null;
-    [key: string]: any;
-};
 export type ImageResponse = {
     randomImageBase64: string | null;
     thumbHashImageBase64: string | null;
@@ -315,6 +315,12 @@ export function setupAdmin(adminSetupDto?: AdminSetupDto, opts?: Oazapfts.Reques
     return oazapfts.fetchJson<{
         status: 200;
         data: SettingsUpdateResultDto;
+    } | {
+        status: 400;
+        data: ProblemDetails;
+    } | {
+        status: 409;
+        data: ProblemDetails;
     }>("/api/Admin/Setup", oazapfts.json({
         ...opts,
         method: "POST",
@@ -325,6 +331,9 @@ export function getAdminSettings(opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
         status: 200;
         data: ServerSettings;
+    } | {
+        status: 401;
+        data: string;
     }>("/api/Admin/Settings", {
         ...opts
     });
@@ -333,6 +342,12 @@ export function updateAdminSettings(serverSettings?: ServerSettings, opts?: Oaza
     return oazapfts.fetchJson<{
         status: 200;
         data: SettingsUpdateResultDto;
+    } | {
+        status: 400;
+        data: ProblemDetails;
+    } | {
+        status: 401;
+        data: string;
     }>("/api/Admin/Settings", oazapfts.json({
         ...opts,
         method: "PUT",
@@ -343,6 +358,9 @@ export function testAccount(serverAccountSettings?: ServerAccountSettings, opts?
     return oazapfts.fetchJson<{
         status: 200;
         data: AccountTestResultDto;
+    } | {
+        status: 401;
+        data: string;
     }>("/api/Admin/Settings/TestAccount", oazapfts.json({
         ...opts,
         method: "POST",

@@ -28,8 +28,8 @@ it in the [admin UI](./admin-ui.md).
 :::info Configuring via environment variables was removed
 Settings are no longer read from environment variables. A configuration file is
 imported into the settings database once on first start; after that, manage your
-settings in the admin UI. `IMMICHFRAME_ADMIN_PASSWORD`, `IMMICHFRAME_CONFIG_PATH`
-and `LOG_LEVEL` are still read from the environment.
+settings in the admin UI. `IMMICHFRAME_ADMIN_PASSWORD`, `IMMICHFRAME_CONFIG_PATH`,
+`LOG_LEVEL` and `TZ` are still read from the environment.
 :::
 
 ### Full configuration reference:
