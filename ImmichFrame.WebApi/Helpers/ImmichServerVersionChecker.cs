@@ -29,7 +29,7 @@ namespace ImmichFrame.WebApi.Helpers
         {
             try
             {
-                var httpClient = httpClientFactory.CreateClient("ImmichApiAccountClient");
+                var httpClient = httpClientFactory.CreateClient(ImmichApiHttpClientExtensions.ImmichApiAccountClient);
                 httpClient.UseApiKey(account.ApiKey);
                 var immichApi = new ImmichApi(account.ImmichServerUrl, httpClient);
 
