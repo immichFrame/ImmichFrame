@@ -33,7 +33,7 @@ COPY --chown=node:node ./immichFrame.Web/package*.json ./
 # Cache npm dependencies
 RUN npm ci
 COPY --chown=node:node ./immichFrame.Web ./
-RUN npm run build && npm prune --omit=dev
+RUN npm rebuild && npm run build && npm prune --omit=dev
 
 # Stage 4: Final production stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy AS final
