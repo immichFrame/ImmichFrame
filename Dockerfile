@@ -24,7 +24,7 @@ ENV APP_VERSION=$VERSION
 RUN dotnet publish --runtime linux-${TARGETARCH} --self-contained false -p:AssemblyVersion=$VERSION -o /app
 
 # Stage 3: Build frontend with Node.js
-FROM node:22-alpine AS build-node
+FROM node:22-bookworm-slim AS build-node
 
 USER node
 WORKDIR /app
@@ -33,7 +33,7 @@ COPY --chown=node:node ./immichFrame.Web/package*.json ./
 # Cache npm dependencies
 RUN npm ci
 COPY --chown=node:node ./immichFrame.Web ./
-RUN npm rebuild && npm run build && npm prune --omit=dev
+RUN npm run build && npm prune --omit=dev
 
 # Stage 4: Final production stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy AS final
