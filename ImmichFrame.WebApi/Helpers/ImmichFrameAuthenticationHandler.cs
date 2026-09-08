@@ -24,8 +24,9 @@ public class ImmichFrameAuthenticationHandler : AuthenticationHandler<Authentica
     {
         var endpoint = Context.GetEndpoint();
         var authorizeAttribute = endpoint?.Metadata?.GetMetadata<IAuthorizeData>();
+        var allowAnonymous = endpoint?.Metadata?.GetMetadata<IAllowAnonymous>();
 
-        if (_authenticationSecret == null || authorizeAttribute == null)
+        if (_authenticationSecret == null || authorizeAttribute == null || allowAnonymous != null)
         {
             // No auth is required
             var claims = new[] { new Claim(ClaimTypes.NameIdentifier, "anonymous") };

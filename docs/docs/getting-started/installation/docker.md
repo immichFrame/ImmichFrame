@@ -16,9 +16,13 @@ For most users, the `Settings.yml` setup is easier to read and modify.
 
 Example configuration files:
 
-- [`Settings.yml` example][example-yaml]
-- [`Settings.json` example][example-json]
-- [`.env` example][example-env]
+- [`Settings.yml` example][example-yaml] — imported once on first start
+- [`Settings.json` example][example-json] — imported once on first start
+- [`.env` example][example-env] — admin password, config path and log level
+
+Starting without a settings file is fine: open the [admin UI](../admin-ui.md) at `/admin`,
+pick an admin password on the setup screen and configure everything there. Setting
+`IMMICHFRAME_ADMIN_PASSWORD` (as below) chooses that password up front instead.
 
 ---
 
@@ -41,6 +45,7 @@ services:
       - "8080:8080"
     environment:
       TZ: "Europe/Berlin"
+      IMMICHFRAME_ADMIN_PASSWORD: "CHANGE_ME"
 ```
 
 [github-root]: https://github.com/immichframe/ImmichFrame/blob/main

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * ImmichFrame.WebApi
  * 1.0
@@ -13,6 +12,87 @@ export const defaults: Oazapfts.Defaults<Oazapfts.CustomHeaders> = {
 };
 const oazapfts = Oazapfts.runtime(defaults);
 export const servers = {};
+export type AdminStatusDto = {
+    state?: AdminUiState;
+};
+export type AdminSetupDto = {
+    adminPassword?: string | null;
+};
+export type SettingsUpdateResultDto = {
+    warnings?: string[] | null;
+};
+export type ProblemDetails = {
+    "type"?: string | null;
+    title?: string | null;
+    status?: number | null;
+    detail?: string | null;
+    instance?: string | null;
+    [key: string]: any;
+};
+export type GeneralSettings = {
+    downloadImages?: boolean;
+    language?: string | null;
+    imageLocationFormat?: string | null;
+    photoDateFormat?: string | null;
+    interval?: number;
+    transitionDuration?: number;
+    showClock?: boolean;
+    clockFormat?: string | null;
+    clockDateFormat?: string | null;
+    showProgressBar?: boolean;
+    showPhotoDate?: boolean;
+    showImageDesc?: boolean;
+    showPeopleDesc?: boolean;
+    showTagsDesc?: boolean;
+    showAlbumName?: boolean;
+    showImageLocation?: boolean;
+    primaryColor?: string | null;
+    secondaryColor?: string | null;
+    style?: string | null;
+    baseFontSize?: string | null;
+    showWeatherDescription?: boolean;
+    weatherIconUrl?: string | null;
+    imageZoom?: boolean;
+    imagePan?: boolean;
+    imageFill?: boolean;
+    playAudio?: boolean;
+    layout?: string | null;
+    renewImagesDuration?: number;
+    webcalendars?: string[] | null;
+    refreshAlbumPeopleInterval?: number;
+    weatherApiKey?: string | null;
+    unitSystem?: string | null;
+    weatherLatLong?: string | null;
+    webhook?: string | null;
+    authenticationSecret?: string | null;
+    adminPassword?: string | null;
+};
+export type ServerAccountSettings = {
+    immichServerUrl?: string | null;
+    apiKey?: string | null;
+    apiKeyFile?: string | null;
+    showMemories?: boolean;
+    showFavorites?: boolean;
+    showArchived?: boolean;
+    showVideos?: boolean;
+    imagesFromDays?: number | null;
+    imagesFromDate?: string | null;
+    imagesUntilDate?: string | null;
+    albums?: string[] | null;
+    excludedAlbums?: string[] | null;
+    people?: string[] | null;
+    tags?: string[] | null;
+    rating?: number | null;
+};
+export type ServerSettings = {
+    General?: GeneralSettings;
+    Accounts?: ServerAccountSettings[] | null;
+};
+export type AccountTestResultDto = {
+    success?: boolean;
+    message?: string | null;
+    version?: string | null;
+};
 export type ExifResponseDto = {
     city?: string | null;
     country?: string | null;
@@ -40,7 +120,6 @@ export type ExifResponseDto = {
         [key: string]: any | null;
     } | null;
 };
-export type UserAvatarColor = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 export type UserResponseDto = {
     avatarColor: UserAvatarColor;
     email: string;
@@ -85,8 +164,6 @@ export type TagResponseDto = {
         [key: string]: any | null;
     } | null;
 };
-export type AssetTypeEnum = 0 | 1 | 2 | 3;
-export type AssetVisibility = 0 | 1 | 2 | 3;
 export type AssetResponseDto = {
     immichServerUrl?: string | null;
     checksum: string;
@@ -125,7 +202,6 @@ export type AssetResponseDto = {
         [key: string]: any | null;
     } | null;
 };
-export type SourceType = 0 | 1 | 2;
 export type AssetFaceResponseDto = {
     boundingBoxX1?: number;
     boundingBoxX2?: number;
@@ -140,7 +216,6 @@ export type AssetFaceResponseDto = {
         [key: string]: any | null;
     } | null;
 };
-export type AlbumUserRole = 0 | 1 | 2;
 export type AlbumUserResponseDto = {
     role: AlbumUserRole;
     user: UserResponseDto;
@@ -155,7 +230,6 @@ export type ContributorCountResponseDto = {
         [key: string]: any | null;
     } | null;
 };
-export type AssetOrder = 0 | 1;
 export type AlbumResponseDto = {
     albumName: string;
     albumThumbnailAssetId?: string | null;
@@ -176,14 +250,6 @@ export type AlbumResponseDto = {
     additionalProperties?: {
         [key: string]: any | null;
     } | null;
-};
-export type ProblemDetails = {
-    "type"?: string | null;
-    title?: string | null;
-    status?: number | null;
-    detail?: string | null;
-    instance?: string | null;
-    [key: string]: any;
 };
 export type ImageResponse = {
     randomImageBase64: string | null;
@@ -237,6 +303,70 @@ export type IWeather = {
     description?: string | null;
     iconId?: string | null;
 };
+export function getAdminStatus(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: AdminStatusDto;
+    }>("/api/Admin/Status", {
+        ...opts
+    });
+}
+export function setupAdmin(adminSetupDto?: AdminSetupDto, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: SettingsUpdateResultDto;
+    } | {
+        status: 400;
+        data: ProblemDetails;
+    } | {
+        status: 409;
+        data: ProblemDetails;
+    }>("/api/Admin/Setup", oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: adminSetupDto
+    }));
+}
+export function getAdminSettings(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: ServerSettings;
+    } | {
+        status: 401;
+        data: string;
+    }>("/api/Admin/Settings", {
+        ...opts
+    });
+}
+export function updateAdminSettings(serverSettings?: ServerSettings, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: SettingsUpdateResultDto;
+    } | {
+        status: 400;
+        data: ProblemDetails;
+    } | {
+        status: 401;
+        data: string;
+    }>("/api/Admin/Settings", oazapfts.json({
+        ...opts,
+        method: "PUT",
+        body: serverSettings
+    }));
+}
+export function testAccount(serverAccountSettings?: ServerAccountSettings, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: AccountTestResultDto;
+    } | {
+        status: 401;
+        data: string;
+    }>("/api/Admin/Settings/TestAccount", oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: serverAccountSettings
+    }));
+}
 export function getAssets({ clientIdentifier }: {
     clientIdentifier?: string;
 } = {}, opts?: Oazapfts.RequestOpts) {
@@ -373,3 +503,53 @@ export function getWeather({ clientIdentifier }: {
         ...opts
     });
 }
+export const AdminUiState = {
+    Setup: "setup",
+    Login: "login",
+    Disabled: "disabled"
+} as const;
+export type AdminUiState = (typeof AdminUiState)[keyof typeof AdminUiState];
+export const UserAvatarColor = {
+    Primary: "primary",
+    Pink: "pink",
+    Red: "red",
+    Yellow: "yellow",
+    Blue: "blue",
+    Green: "green",
+    Purple: "purple",
+    Orange: "orange",
+    Gray: "gray",
+    Amber: "amber"
+} as const;
+export type UserAvatarColor = (typeof UserAvatarColor)[keyof typeof UserAvatarColor];
+export const AssetTypeEnum = {
+    Image: "image",
+    Video: "video",
+    Audio: "audio",
+    Other: "other"
+} as const;
+export type AssetTypeEnum = (typeof AssetTypeEnum)[keyof typeof AssetTypeEnum];
+export const AssetVisibility = {
+    Archive: "archive",
+    Timeline: "timeline",
+    Hidden: "hidden",
+    Locked: "locked"
+} as const;
+export type AssetVisibility = (typeof AssetVisibility)[keyof typeof AssetVisibility];
+export const SourceType = {
+    MachineLearning: "machineLearning",
+    Exif: "exif",
+    Manual: "manual"
+} as const;
+export type SourceType = (typeof SourceType)[keyof typeof SourceType];
+export const AlbumUserRole = {
+    Editor: "editor",
+    Owner: "owner",
+    Viewer: "viewer"
+} as const;
+export type AlbumUserRole = (typeof AlbumUserRole)[keyof typeof AlbumUserRole];
+export const AssetOrder = {
+    Asc: "asc",
+    Desc: "desc"
+} as const;
+export type AssetOrder = (typeof AssetOrder)[keyof typeof AssetOrder];

@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace ImmichFrame.Core.Logic;
 
-public class MultiImmichFrameLogicDelegate : IImmichFrameLogic
+public class MultiImmichFrameLogicDelegate : IImmichFrameLogic, IDisposable
 {
     private readonly FrozenDictionary<IAccountSettings, IAccountImmichFrameLogic> _accountToDelegate;
     private readonly IServerSettings _serverSettings;
@@ -56,6 +56,14 @@ public class MultiImmichFrameLogicDelegate : IImmichFrameLogic
 
     public Task SendWebhookNotification(IWebhookNotification notification) =>
         WebhookHelper.SendWebhookNotification(notification, _serverSettings.GeneralSettings.Webhook);
+
+    public void Dispose()
+    {
+        foreach (var accountLogic in _accountToDelegate.Values)
+        {
+            (accountLogic as IDisposable)?.Dispose();
+        }
+    }
 }
 
 public static class AccountAndAssetExtensions

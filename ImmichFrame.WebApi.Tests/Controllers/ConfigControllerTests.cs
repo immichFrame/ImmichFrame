@@ -57,6 +57,7 @@ namespace ImmichFrame.WebApi.Tests.Controllers
                 UnitSystem = "metric",
                 Webhook = "https://webhook.example.com/secret-hook",
                 AuthenticationSecret = "secret-auth-token",
+                AdminPassword = "secret-admin-password",
                 Webcalendars = new List<string> { "https://calendar.example.com/secret.ics" },
                 RefreshAlbumPeopleInterval = 8,
             };
@@ -84,6 +85,7 @@ namespace ImmichFrame.WebApi.Tests.Controllers
                     {
                         services.UseMockHandler(versionHandler);
 
+                        services.AddSingleton<ISettingsProvider>(new StaticSettingsProvider(serverSettings));
                         services.AddSingleton<IServerSettings>(serverSettings);
                         services.AddSingleton<IGeneralSettings>(generalSettings);
                     });
@@ -131,7 +133,9 @@ namespace ImmichFrame.WebApi.Tests.Controllers
                 Assert.That(json, Does.Not.Contain("secret-api-key"));
                 Assert.That(json, Does.Not.Contain("secret-hook"));
                 Assert.That(json, Does.Not.Contain("secret.ics"));
+                Assert.That(json, Does.Not.Contain("secret-admin-password"));
                 Assert.That(json, Does.Not.Contain("authenticationSecret"));
+                Assert.That(json, Does.Not.Contain("adminPassword"));
                 Assert.That(json, Does.Not.Contain("weatherApiKey"));
                 Assert.That(json, Does.Not.Contain("apiKey"));
                 Assert.That(json, Does.Not.Contain("webhook"));

@@ -4,6 +4,12 @@ sidebar_position: 2
 
 # 🔧 Configuration
 
+:::tip Admin UI
+Settings can also be managed from the built-in [admin UI](./admin-ui.md) at `/admin`.
+Note that once ImmichFrame has started for the first time, the settings database becomes
+the source of truth and later changes to config files are ignored.
+:::
+
 ImmichFrame looks for a configuration directory in the following places:
 
 1. It reads the `IMMICHFRAME_CONFIG_PATH` environment variable (if present).
@@ -16,8 +22,15 @@ Inside the configuration directory, ImmichFrame loads the first of these files:
 2. `Settings.yml`
 3. `Settings.yaml`
 
-If none of these files are found, ImmichFrame loads its config from environment
-variables.
+If none of these files are found, ImmichFrame starts with defaults and you configure
+it in the [admin UI](./admin-ui.md).
+
+:::info Configuring via environment variables was removed
+Settings are no longer read from environment variables. A configuration file is
+imported into the settings database once on first start; after that, manage your
+settings in the admin UI. `IMMICHFRAME_ADMIN_PASSWORD`, `IMMICHFRAME_CONFIG_PATH`,
+`LOG_LEVEL` and `TZ` are still read from the environment.
+:::
 
 ### Full configuration reference:
 

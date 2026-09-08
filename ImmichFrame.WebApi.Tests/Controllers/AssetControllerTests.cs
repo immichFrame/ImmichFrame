@@ -73,6 +73,7 @@ namespace ImmichFrame.WebApi.Tests.Controllers
                             AccountsImpl = new List<ServerAccountSettings> { accountSettings }
                         };
 
+                        services.AddSingleton<ISettingsProvider>(new StaticSettingsProvider(serverSettings));
                         services.AddSingleton<IServerSettings>(serverSettings);
                         services.AddSingleton<IGeneralSettings>(generalSettings);
                         // Ensure IAccountSettings can be resolved if needed by MultiImmichFrameLogicDelegate directly
