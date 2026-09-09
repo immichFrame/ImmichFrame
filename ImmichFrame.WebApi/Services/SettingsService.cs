@@ -4,6 +4,7 @@ using ImmichFrame.Core.Interfaces;
 using ImmichFrame.WebApi.Database;
 using ImmichFrame.WebApi.Helpers.Config;
 using ImmichFrame.WebApi.Models;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
 namespace ImmichFrame.WebApi.Services;
@@ -34,6 +35,9 @@ public class SettingsService : ISettingsProvider
     private readonly SettingsServiceOptions _options;
     private readonly SemaphoreSlim _updateLock = new(1, 1);
 
+    /// <summary>SQLITE_CANTOPEN: the database file could not be opened, almost always a permission problem.</summary>
+    private const int SQLITE_CANTOPEN = 14;
+
     private volatile IServerSettings _current = EmptySettings();
     // The raw (pre-Validate) form: ApiKeyFile stays unresolved so it round-trips to the admin UI and DB
     private ServerSettings _raw = EmptySettings();
@@ -60,9 +64,24 @@ public class SettingsService : ISettingsProvider
 
     public async Task InitializeAsync()
     {
-        Directory.CreateDirectory(_options.ConfigPath);
+        try
+        {
+            Directory.CreateDirectory(_options.ConfigPath);
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
+        {
+            throw ConfigPathNotWritable(ex);
+        }
+
         await using var db = await _dbFactory.CreateDbContextAsync();
-        await db.Database.MigrateAsync();
+        try
+        {
+            await db.Database.MigrateAsync();
+        }
+        catch (SqliteException ex) when (ex.SqliteErrorCode == SQLITE_CANTOPEN)
+        {
+            throw ConfigPathNotWritable(ex);
+        }
 
         var row = await db.SettingsDocuments.FindAsync(1);
         if (row != null)
@@ -76,6 +95,16 @@ public class SettingsService : ISettingsProvider
         }
 
         await ImportOrBootstrap(db);
+    }
+
+    private ImmichFrameException ConfigPathNotWritable(Exception inner)
+    {
+        var message = $"Cannot open the settings database in '{_options.ConfigPath}'. " +
+            "The config directory has to exist and be writable by the user ImmichFrame runs as " +
+            "(uid 1000 in the official Docker image). For a bind mount, fix it on the host with " +
+            "'chown -R 1000:1000 /path/to/config'; a read-only mount does not work.";
+        _logger.LogError(inner, "{message}", message);
+        return new ImmichFrameException(message, inner);
     }
 
     private async Task ImportOrBootstrap(SettingsDbContext db)
