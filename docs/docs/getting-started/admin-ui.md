@@ -51,6 +51,9 @@ the config directory (`/app/Config` in Docker). This makes the config directory 
 place to persist:
 
 - Mount `/app/Config` as a **writable** volume, otherwise saving settings fails.
+  The container runs as uid `1000`, so a bind-mounted host directory has to belong to it:
+  `chown -R 1000:1000 /path/to/config`. If it does not, the container stops at startup with
+  `Cannot open the settings database in '/app/Config'`.
 - **The database is the source of truth.** On the very first start, an existing
   `Settings.json`, `Settings.yml` or `Settings.yaml` is imported into the database once.
   After that, changes to that file are ignored (a log line reminds you of this at startup).
