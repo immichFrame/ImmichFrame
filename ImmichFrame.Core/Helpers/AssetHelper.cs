@@ -10,7 +10,7 @@ public static class AssetHelper
     {
         var excludedAlbumAssets = new List<AssetResponseDto>();
 
-        foreach (var albumId in accountSettings?.ExcludedAlbums ?? new())
+        foreach (var albumId in await GetExcludedAlbumIds(immichApi, accountSettings, ct))
         {
             int page = 1;
             int batchSize = 1000;
@@ -37,5 +37,28 @@ public static class AssetHelper
         }
 
         return excludedAlbumAssets;
+    }
+
+    /// <summary>
+    /// The configured <see cref="IAccountSettings.ExcludedAlbums"/> plus, when
+    /// <see cref="IAccountSettings.HideAssetsInOtherAlbums"/> is set, every album (owned or shared)
+    /// that is not one of the selected <see cref="IAccountSettings.Albums"/>.
+    /// </summary>
+    private static async Task<IEnumerable<Guid>> GetExcludedAlbumIds(ImmichApi immichApi, IAccountSettings accountSettings, CancellationToken ct)
+    {
+        var excludedAlbumIds = accountSettings?.ExcludedAlbums ?? new();
+
+        // Without selected albums every album would count as "other", hiding every album asset
+        if (accountSettings?.HideAssetsInOtherAlbums != true || !(accountSettings.Albums?.Count > 0))
+        {
+            return excludedAlbumIds;
+        }
+
+        var selectedAlbumIds = accountSettings.Albums.ToHashSet();
+        var allAlbums = await immichApi.GetAllAlbumsAsync(null, null, null, null, null, ct);
+
+        return excludedAlbumIds
+            .Concat(allAlbums.Select(album => album.Id).Where(id => !selectedAlbumIds.Contains(id)))
+            .Distinct();
     }
 }
