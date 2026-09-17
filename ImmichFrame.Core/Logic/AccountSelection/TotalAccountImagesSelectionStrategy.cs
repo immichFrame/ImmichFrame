@@ -12,6 +12,12 @@ public class TotalAccountImagesSelectionStrategy(
 {
     public async Task<(IAccountImmichFrameLogic, AssetResponseDto)?> GetNextAsset()
     {
+        if (_accounts.Count == 0)
+        {
+            _logger.LogDebug("No accounts configured, returning no asset");
+            return null;
+        }
+
         var chosen = await _accounts.ChooseOne(logic => logic.GetTotalAssets());
 
         var asset = await chosen.GetNextAsset();

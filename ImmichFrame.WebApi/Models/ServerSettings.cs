@@ -1,11 +1,10 @@
 ﻿using System.Text.Json.Serialization;
 using ImmichFrame.Core.Interfaces;
-using ImmichFrame.WebApi.Helpers;
 using YamlDotNet.Serialization;
 
 namespace ImmichFrame.WebApi.Models;
 
-public class ServerSettings : IServerSettings, IConfigSettable
+public class ServerSettings : IServerSettings
 {
     [YamlMember(Alias = "General")]
     [JsonPropertyName("General")]
@@ -35,7 +34,7 @@ public class ServerSettings : IServerSettings, IConfigSettable
     }
 }
 
-public class GeneralSettings : IGeneralSettings, IConfigSettable
+public class GeneralSettings : IGeneralSettings
 {
     public bool DownloadImages { get; set; } = false;
     public string Language { get; set; } = "en";
@@ -72,11 +71,12 @@ public class GeneralSettings : IGeneralSettings, IConfigSettable
     public string? WeatherLatLong { get; set; } = "40.7128,74.0060";
     public string? Webhook { get; set; }
     public string? AuthenticationSecret { get; set; }
+    public string? AdminPassword { get; set; }
 
     public void Validate() { }
 }
 
-public class ServerAccountSettings : IAccountSettings, IConfigSettable
+public class ServerAccountSettings : IAccountSettings
 {
     public string ImmichServerUrl { get; set; } = string.Empty;
     public string ApiKey { get; set; } = string.Empty;

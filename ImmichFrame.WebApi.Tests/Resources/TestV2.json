@@ -1,6 +1,7 @@
 {
   "General": {
     "AuthenticationSecret": "AuthenticationSecret_TEST",
+    "AdminPassword": "AdminPassword_TEST",
     "DownloadImages": true,
     "RenewImagesDuration": 7,
     "Webcalendars": [

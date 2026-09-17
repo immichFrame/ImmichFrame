@@ -32,15 +32,15 @@
 	let close = getContext<() => void>('close');
 </script>
 
-<div class="p-0 absolute w-full h-full z-[200]">
+<div class="p-0 absolute w-full h-full z-200">
 	<div
-		class="info-overlay-background bg-black bg-opacity-70 w-full h-full relative items-center justify-center flex pt-32 pb-8 max-h-full overflow-auto"
+		class="info-overlay-background bg-black/70 w-full h-full relative items-center justify-center flex pt-32 pb-8 max-h-full overflow-auto"
 	>
-		<button class="absolute top-0 right-0 m-4 text-primary" onclick={close}>
+		<button class="absolute top-0 right-0 m-4 text-frame-primary" onclick={close}>
 			<Icon
 				path={mdiClose}
 				size={30}
-				class="info-overlay-close hover:scale-110 transition-transform duration-200 text-primary"
+				class="info-overlay-close hover:scale-110 transition-transform duration-200 text-frame-primary"
 			/>
 		</button>
 		<div class="flex h-full flex-col gap-5">

@@ -24,14 +24,14 @@ ENV APP_VERSION=$VERSION
 RUN dotnet publish --runtime linux-${TARGETARCH} --self-contained false -p:AssemblyVersion=$VERSION -o /app
 
 # Stage 3: Build frontend with Node.js
-FROM node:22-alpine AS build-node
+FROM node:22-bookworm-slim AS build-node
 
 USER node
 WORKDIR /app
 COPY --chown=node:node ./immichFrame.Web/package*.json ./
 
 # Cache npm dependencies
-RUN npm i
+RUN npm ci
 COPY --chown=node:node ./immichFrame.Web ./
 RUN npm run build && npm prune --omit=dev
 
@@ -48,8 +48,13 @@ ENV APP_VERSION=$VERSION
 COPY --from=publish-api /app ./
 COPY --from=build-node /app/build ./wwwroot
 
-# Set non-privileged user
+# The settings database lives here, so it has to be writable by the runtime user.
+# A fresh named volume inherits this ownership; a bind mount keeps the host's, which
+# is why the host directory has to be chown'ed to the same uid.
 ARG APP_UID=1000
+RUN mkdir -p /app/Config && chown -R $APP_UID:0 /app/Config && chmod -R g+w /app/Config
+
+# Set non-privileged user
 USER $APP_UID
 
 ENTRYPOINT ["dotnet", "ImmichFrame.WebApi.dll"]

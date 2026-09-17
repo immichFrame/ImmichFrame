@@ -9,5 +9,6 @@ namespace ImmichFrame.Core.Interfaces
         public string? UnitSystem { get; }
         public string? Webhook { get; }
         public string? AuthenticationSecret { get; }
+        public string? AdminPassword { get; }
     }
 }

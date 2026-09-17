@@ -8,6 +8,7 @@
 	import AssetComponent from '../elements/asset-component.svelte';
 	import type AssetComponentInstance from '../elements/asset-component.svelte';
 	import { configStore } from '$lib/stores/config.store';
+	import { applyBaseFontSize, applyFrameColors } from '$lib/hooks/useTheme';
 	import ErrorElement from '../elements/error-element.svelte';
 	import Clock from '../elements/clock.svelte';
 	import Appointments from '../elements/appointments.svelte';
@@ -420,6 +421,11 @@
 		}
 	}
 
+	// The configured theme applies to the slideshow only — the admin UI keeps
+	// the @immich/ui defaults.
+	$effect(() => applyFrameColors($configStore));
+	$effect(() => applyBaseFontSize($configStore.baseFontSize));
+
 	onMount(() => {
 		window.addEventListener('mousemove', showCursor);
 		window.addEventListener('click', showCursor);
@@ -428,18 +434,6 @@
 		refreshInterval = window.setInterval(() => {
 			if (error) window.location.reload();
 		}, RELOAD_ON_ERROR_MS);
-
-		if ($configStore.primaryColor) {
-			document.documentElement.style.setProperty('--primary-color', $configStore.primaryColor);
-		}
-
-		if ($configStore.secondaryColor) {
-			document.documentElement.style.setProperty('--secondary-color', $configStore.secondaryColor);
-		}
-
-		if ($configStore.baseFontSize) {
-			document.documentElement.style.fontSize = $configStore.baseFontSize;
-		}
 
 		unsubscribeRestart = restartProgress.subscribe((value) => {
 			if (value) {

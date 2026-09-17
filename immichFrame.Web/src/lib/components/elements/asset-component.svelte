@@ -79,7 +79,7 @@
 
 {#if hasBday}
 	<div
-		class="z-[1000] top-[-50px] fixed l-0 h-dvh-safe w-screen flex justify-center overflow-hidden pointer-events-none"
+		class="z-1000 top-[-50px] fixed l-0 h-dvh-safe w-screen flex justify-center overflow-hidden pointer-events-none"
 	>
 		<Confetti
 			x={[-5, 5]}
@@ -104,7 +104,10 @@
 		>
 			{#if split}
 				<div class="grid grid-cols-2">
-					<div id="image_portrait_1" class="relative grid border-r-2 border-primary h-dvh-safe">
+					<div
+						id="image_portrait_1"
+						class="relative grid border-r-2 border-frame-primary h-dvh-safe"
+					>
 						<Asset
 							asset={assets[0]}
 							{interval}
@@ -126,7 +129,10 @@
 							bind:showInfo
 						/>
 					</div>
-					<div id="image_portrait_2" class="relative grid border-l-2 border-primary h-dvh-safe">
+					<div
+						id="image_portrait_2"
+						class="relative grid border-l-2 border-frame-primary h-dvh-safe"
+					>
 						<Asset
 							asset={assets[1]}
 							{interval}

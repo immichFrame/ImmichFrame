@@ -25,29 +25,11 @@ public class ConfigLoaderTest
     }
 
     [Test]
-    public void TestLoadConfigV1Json()
-    {
-        var config = _configLoader.LoadConfigJson<ServerSettingsV1>(Path.Combine(
-            TestContext.CurrentContext.TestDirectory, "Resources/TestV1.json"));
-        VerifyConfig(new ServerSettingsV1Adapter(config), false, true);
-    }
-
-    [Test]
-    public void TestLoadConfigEnv()
-    {
-        var jsonConfig = _configLoader.LoadConfigJson<ServerSettingsV1>(Path.Combine(
-            TestContext.CurrentContext.TestDirectory, "Resources/TestV1.json"));
-
-        var config = _configLoader.LoadConfigFromDictionary<ServerSettingsV1>(ToDictionary(jsonConfig));
-        VerifyConfig(new ServerSettingsV1Adapter(config), false, true);
-    }
-
-    [Test]
     public void TestLoadConfigV2Json()
     {
         var config = _configLoader.LoadConfigJson<ServerSettings>(Path.Combine(
             TestContext.CurrentContext.TestDirectory, "Resources/TestV2.json"));
-        VerifyConfig(config, true, false);
+        VerifyConfig(config);
     }
     
     [Test]
@@ -65,26 +47,26 @@ public class ConfigLoaderTest
     {
         var config = _configLoader.LoadConfigYaml<ServerSettings>(Path.Combine(
             TestContext.CurrentContext.TestDirectory, "Resources/TestV2.yml"));
-        VerifyConfig(config, true, false);
+        VerifyConfig(config);
     }
 
-    private void VerifyConfig(IServerSettings serverSettings, bool usePrefix, bool expectNullApiKeyFile)
+    private void VerifyConfig(IServerSettings serverSettings)
     {
         VerifyProperties(serverSettings.GeneralSettings);
-        VerifyAccounts(serverSettings.Accounts, usePrefix, expectNullApiKeyFile);
+        VerifyAccounts(serverSettings.Accounts);
     }
 
-    private void VerifyAccounts(IEnumerable<IAccountSettings> accounts, bool usePrefix, bool expectNullApiKeyFile)
+    private void VerifyAccounts(IEnumerable<IAccountSettings> accounts)
     {
         var idx = 1;
         foreach (var account in accounts)
         {
-            VerifyProperties(account, usePrefix ? "Account" + idx + "." : "", expectNullApiKeyFile);
+            VerifyProperties(account, "Account" + idx + ".");
             idx++;
         }
     }
 
-    private void VerifyProperties(object o, string? prefix = "", bool expectNullApiKeyFile = false)
+    private void VerifyProperties(object o, string? prefix = "")
     {
         foreach (var prop in o.GetType().GetProperties())
         {
@@ -107,14 +89,7 @@ public class ConfigLoaderTest
             switch (type)
             {
                 case var t when t == typeof(string):
-                    if (prop.Name.Equals("ApiKeyFile") && expectNullApiKeyFile)
-                    {
-                        Assert.That(value, Is.EqualTo(null), prop.Name);
-                    }
-                    else
-                    {
-                        Assert.That(value, Is.EqualTo(prefix + prop.Name + "_TEST"), prop.Name);
-                    }
+                    Assert.That(value, Is.EqualTo(prefix + prop.Name + "_TEST"), prop.Name);
                     break;
                 case var t when t == typeof(Boolean):
                     Assert.That(value, Is.EqualTo(true), prop.Name);
@@ -135,47 +110,6 @@ public class ConfigLoaderTest
                     throw new NotImplementedException($"Not implemented for {prop.Name} as type ${type}");
             }
         }
-    }
-
-    public static IDictionary ToDictionary(object obj, bool ignoreNullValues = false)
-    {
-        if (obj == null)
-        {
-            throw new ArgumentNullException(nameof(obj));
-        }
-
-        var dictionary = new Dictionary<string, object>();
-        Type objType = obj.GetType();
-
-        // Get all public instance properties
-        PropertyInfo[] properties = objType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-
-        foreach (PropertyInfo prop in properties)
-        {
-            // Ensure the property has a public getter
-            if (prop.CanRead && prop.GetMethod?.IsPublic == true)
-            {
-                object value = prop.GetValue(obj);
-
-                if (ignoreNullValues && value == null)
-                {
-                    continue; // Skip if value is null and ignoreNullValues is true
-                }
-
-                if (!(value is string) && value is IEnumerable)
-                {
-                    value = string.Join(",", (value as IEnumerable).Cast<object>().Select(x => x.ToString()));
-                }
-                else
-                {
-                    value = value.ToString();
-                }
-
-                dictionary.Add(prop.Name, value);
-            }
-        }
-
-        return dictionary;
     }
 
 }

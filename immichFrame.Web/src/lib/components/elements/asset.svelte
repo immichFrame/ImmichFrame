@@ -222,14 +222,14 @@
 		{#if debug}
 			{#each asset[2]?.map((x) => x.person?.name) ?? [] as _, i}
 				<div
-					class="face z-[900] bg-red-600 absolute"
+					class="face z-900 bg-red-600 absolute"
 					style="top: {getFaceMetric(i, 'y1')}%;
 						   left: {getFaceMetric(i, 'x1')}%;
 						   width: {getFaceMetric(i, 'width')}%;
 						   height: {getFaceMetric(i, 'height')}%;"
 				></div>
 				<div
-					class="centerface z-[999] w-1 h-1 bg-blue-600 absolute"
+					class="centerface z-999 w-1 h-1 bg-blue-600 absolute"
 					style="top: {getFaceMetric(i, 'centerY')}%;
 						   left: {getFaceMetric(i, 'centerX')}%;"
 				></div>

@@ -1,12 +1,18 @@
 using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
-using ImmichFrame.WebApi.Models;
 using Microsoft.AspNetCore.Authentication;
 using System.Reflection;
 using ImmichFrame.Core.Logic;
 using ImmichFrame.Core.Logic.AccountSelection;
+using ImmichFrame.WebApi.Database;
 using ImmichFrame.WebApi.Helpers;
 using ImmichFrame.WebApi.Helpers.Config;
+using ImmichFrame.WebApi.Models;
+using ImmichFrame.WebApi.Services;
+using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 //log the version number
@@ -57,10 +63,17 @@ var configPath = Environment.GetEnvironmentVariable("IMMICHFRAME_CONFIG_PATH") ?
         .FirstOrDefault(d => string.Equals(Path.GetFileName(d), "Config", StringComparison.OrdinalIgnoreCase))
         ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config");
 builder.Services.AddTransient<ConfigLoader>();
-builder.Services.AddSingleton<IServerSettings>(srv => srv.GetRequiredService<ConfigLoader>().LoadConfig(configPath));
 
-// Register sub-settings
-builder.Services.AddSingleton<IGeneralSettings>(srv => srv.GetRequiredService<IServerSettings>().GeneralSettings);
+// Settings live in a SQLite db in the config directory; file/env config is imported on first run
+builder.Services.AddDbContextFactory<SettingsDbContext>(options =>
+    options.UseSqlite($"Data Source={Path.Combine(configPath, "immichframe.db")}"));
+builder.Services.AddSingleton(new SettingsServiceOptions(configPath));
+builder.Services.AddSingleton<SettingsService>();
+builder.Services.AddSingleton<ISettingsProvider>(srv => srv.GetRequiredService<SettingsService>());
+
+// Register settings as live facades over the provider so config changes apply without restart
+builder.Services.AddSingleton<IServerSettings, LiveServerSettings>();
+builder.Services.AddSingleton<IGeneralSettings, LiveGeneralSettings>();
 builder.Services.AddSingleton<IClientSettings>(srv => srv.GetRequiredService<IGeneralSettings>());
 builder.Services.AddSingleton<IServerBehaviorSettings>(srv => srv.GetRequiredService<IGeneralSettings>());
 
@@ -75,17 +88,36 @@ builder.Services.AddHttpClient(); // Ensures IHttpClientFactory is available
 builder.Services.AddTransient<Func<IAccountSettings, IAccountImmichFrameLogic>>(srv =>
     account => ActivatorUtilities.CreateInstance<PooledImmichFrameLogic>(srv, account));
 
-builder.Services.AddSingleton<IImmichFrameLogic, MultiImmichFrameLogicDelegate>();
+// The account logic graph is frozen at construction; wrap it so it can be rebuilt on settings changes
+builder.Services.AddSingleton<Func<IImmichFrameLogic>>(srv =>
+    () => ActivatorUtilities.CreateInstance<MultiImmichFrameLogicDelegate>(srv));
+builder.Services.AddSingleton<IImmichFrameLogic, ReloadingImmichFrameLogic>();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+      .AddJsonOptions(options =>
+          options.JsonSerializerOptions.Converters.Add(
+              new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options => options.SchemaFilter<ImmichFrame.WebApi.Helpers.NoReadOnlySchemaFilter>());
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SchemaFilter<ImmichFrame.WebApi.Helpers.NoReadOnlySchemaFilter>();
+    options.AddSecurityDefinition(ImmichFrameAdminAuthenticationHandler.SchemeName, new OpenApiSecurityScheme
+    {
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        Description = "The admin password, sent as a bearer token."
+    });
+    options.OperationFilter<ImmichFrame.WebApi.Helpers.AdminSecuritySchemeOperationFilter>();
+});
 
 builder.Services.AddAuthorization(options => { options.AddPolicy("AllowAnonymous", policy => policy.RequireAssertion(context => true)); });
 
+builder.Services.AddSingleton<AdminAuthService>();
+
 builder.Services.AddAuthentication("ImmichFrameScheme")
-    .AddScheme<AuthenticationSchemeOptions, ImmichFrameAuthenticationHandler>("ImmichFrameScheme", options => { });
+    .AddScheme<AuthenticationSchemeOptions, ImmichFrameAuthenticationHandler>("ImmichFrameScheme", options => { })
+    .AddScheme<AuthenticationSchemeOptions, ImmichFrameAdminAuthenticationHandler>(ImmichFrameAdminAuthenticationHandler.SchemeName, options => { });
 
 var app = builder.Build();
 
@@ -121,12 +153,29 @@ app.MapControllers();
 
 app.MapFallbackToFile("/index.html");
 
-var immichStartupAllowed = await ImmichServerVersionChecker.CheckServerVersions(app.Services, app.Logger);
-if (!immichStartupAllowed)
+// Skipped when tests replace ISettingsProvider with a stub
+if (app.Services.GetRequiredService<ISettingsProvider>() is SettingsService settingsService)
 {
-    app.Logger.LogCritical("ImmichFrame cannot start: Immich server requirements are not satisfied (see log above). Shutting down.");
-    Environment.Exit(1);
+    await settingsService.InitializeAsync();
 }
+
+// Deliberately not awaited: an unreachable Immich server must not delay startup, otherwise
+// the admin UI needed to fix that very server stays unreachable too.
+_ = Task.Run(async () =>
+{
+    try
+    {
+        var immichServersOk = await ImmichServerVersionChecker.CheckServerVersions(app.Services, app.Logger);
+        if (!immichServersOk)
+        {
+            app.Logger.LogCritical("One or more Immich servers are unreachable or unsupported (see log above). The slideshow may not work — fix the account settings via the admin UI at /admin.");
+        }
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogCritical("Immich server version check failed: {Message}", ex.Message);
+    }
+});
 
 app.Run();
 

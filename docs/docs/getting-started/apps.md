@@ -234,6 +234,9 @@ adb shell pm path com.android.webview
 #### Alternative WebView Method
 If the above method does not work, or you receive permissions issue, try this [Alternative Method][alternate-webview-method]
 
+### Pastigio Frameo Tablet
+ADB is is disabled on these (and possible other) Frameo devices, even though there is a toggle in the settings for it. See this page as a possible workaround:  
+[Pastigio ADB workarounbd][pastigio-adb-workaround]
 
 ## Desktop (Windows, MacOS, Linux)
 
@@ -274,3 +277,4 @@ The screen is configured in a 3x3 gird. You can touch or click:
 [setting-androidtv-screensaver]: https://youtu.be/m3Arh-hrWks
 [setting-androidtv-14-screensaver]: https://youtu.be/78z0Rs8KhsE?si=VQyuFnFITVTizYOf
 [alternate-webview-method]: https://docs.demonwarriortech.com/Documented%20Tutorials/Immich%20Frame/Frameo_Setup/#frameo-troubleshooting
+[pastigio-adb-workaround]: https://divinehawk.github.io/2026/07/08/pastigio-frame-adb-fel-mode.html

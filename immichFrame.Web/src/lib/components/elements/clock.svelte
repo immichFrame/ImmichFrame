@@ -60,9 +60,9 @@
 
 <div
 	id="clock"
-	class="fixed bottom-0 left-0 z-10 text-center text-primary
-	{$configStore.style == 'solid' ? 'bg-secondary rounded-tr-2xl' : ''}
-	{$configStore.style == 'transition' ? 'bg-gradient-to-r from-secondary from-0% pr-10' : ''}
+	class="fixed bottom-0 left-0 z-10 text-center text-frame-primary
+	{$configStore.style == 'solid' ? 'bg-frame-secondary rounded-tr-2xl' : ''}
+	{$configStore.style == 'transition' ? 'bg-linear-to-r from-frame-secondary from-0% pr-10' : ''}
 	{$configStore.style == 'blur' ? 'backdrop-blur-lg rounded-tr-2xl' : ''}	
 	drop-shadow-2xl p-3"
 >
