@@ -148,6 +148,8 @@ Accounts:
     # UUID of excluded album(s)
     ExcludedAlbums:  # string[]
       - UUID
+    # Hide assets that are also in any album not listed under Albums (including albums shared with you). Only applies when Albums is set.
+    HideAssetsInOtherAlbums: false  # boolean
     # UUID of People
     People:  # string[]
       - UUID
@@ -164,6 +166,9 @@ If this is enabled, the web api required the `Authorization`-Header with `Bearer
 
 ### Filtering on Albums or People
 You can get the UUIDs from the URL of the album/person. For this URL: `https://demo.immich.app/albums/85c85b29-c95d-4a8b-90f7-c87da1d518ba` this is the UUID: `85c85b29-c95d-4a8b-90f7-c87da1d518ba`
+
+### Hiding assets that are in other albums
+An asset can end up in more than one album, for example when the Immich mobile app's album sync adds a photo to a new album but never removes it from the old one. With `HideAssetsInOtherAlbums: true`, ImmichFrame skips any asset that is also in an album not listed under `Albums`, so you don't have to keep a list of every other album in `ExcludedAlbums`. New albums are picked up automatically when the album cache refreshes (see `RefreshAlbumPeopleInterval`). The setting has no effect unless `Albums` is set.
 
 ### Filtering on Tags
 For tags, use the full hierarchical path (the `value` field) as it appears in Immich. Tags in Immich support hierarchical structures using forward slashes (e.g., `Parent/Child`). Matching is case-sensitive, and the full path will be automatically resolved to the tag ID.
