@@ -14,11 +14,15 @@ public class AccountSearchPool(IApiCache apiCache, ImmichApi immichApi, IAccount
             return 0;
         }
 
-        var stats = await immichApi.SearchAssetStatisticsAsync(new StatisticsSearchDto
+        var filter = SearchFilters.ForAccount(accountSettings, tagIds);
+        return await apiCache.GetOrAddAsync("stats", async () =>
         {
-            Filter = SearchFilters.ForAccount(accountSettings, tagIds)
-        }, ct);
-        return stats.Total;
+            var stats = await immichApi.SearchAssetStatisticsAsync(new StatisticsSearchDto
+            {
+                Filter = filter
+            }, ct);
+            return stats.Total;
+        });
     }
 
     public async Task<IEnumerable<AssetResponseDto>> GetAssets(int requested, CancellationToken ct = default)

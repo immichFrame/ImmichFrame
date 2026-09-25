@@ -1,4 +1,5 @@
 using ImmichFrame.Core.Api;
+using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.Core.Logic.Pool;
 using Moq;
@@ -20,6 +21,8 @@ public class AccountSearchPoolTests
         _cache = new Mock<IApiCache>();
         _cache.Setup(c => c.GetOrAddAsync(It.IsAny<string>(), It.IsAny<Func<Task<ICollection<TagResponseDto>>>>()))
             .Returns<string, Func<Task<ICollection<TagResponseDto>>>>((_, factory) => factory());
+        _cache.Setup(c => c.GetOrAddAsync(It.IsAny<string>(), It.IsAny<Func<Task<long>>>()))
+            .Returns<string, Func<Task<long>>>((_, factory) => factory());
         _api = new Mock<ImmichApi>(null, null);
         _api.Setup(a => a.SearchRandomAsync(It.IsAny<RandomSearchDto>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<AssetResponseDto>());
@@ -235,6 +238,20 @@ public class AccountSearchPoolTests
 
         Assert.That(count, Is.EqualTo(0));
         _api.Verify(a => a.SearchAssetStatisticsAsync(It.IsAny<StatisticsSearchDto>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Test]
+    public async Task GetAssetCount_SameFilter_IsServedFromCache()
+    {
+        using var cache = new ApiCache(TimeSpan.FromHours(1));
+        var pool = new AccountSearchPool(cache, _api.Object, _settings.Object);
+        _api.Setup(a => a.SearchAssetStatisticsAsync(It.IsAny<StatisticsSearchDto>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new SearchStatisticsResponseDto { Total = 7 });
+
+        Assert.That(await pool.GetAssetCount(), Is.EqualTo(7));
+        Assert.That(await pool.GetAssetCount(), Is.EqualTo(7));
+
+        _api.Verify(a => a.SearchAssetStatisticsAsync(It.IsAny<StatisticsSearchDto>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     private void VerifyRandom(Func<RandomSearchDto, bool> match) =>
