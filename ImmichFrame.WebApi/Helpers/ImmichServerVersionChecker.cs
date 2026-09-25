@@ -11,9 +11,16 @@ namespace ImmichFrame.WebApi.Helpers
         private static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(5);
 
         /// <summary>
-        /// The minimum Immich server major version supported by this version of ImmichFrame.
+        /// The minimum Immich server version supported by this version of ImmichFrame.
         /// </summary>
         public const int MinimumSupportedMajorVersion = 3;
+        public const int MinimumSupportedMinorVersion = 2;
+        public const int MinimumSupportedPatchVersion = 0;
+
+        public static readonly Version MinimumSupportedVersion = new(
+            MinimumSupportedMajorVersion,
+            MinimumSupportedMinorVersion,
+            MinimumSupportedPatchVersion);
 
         /// <summary>
         /// Checks a single account: is the Immich server reachable and running a supported version?
@@ -30,10 +37,10 @@ namespace ImmichFrame.WebApi.Helpers
                 var version = await immichApi.GetServerVersionAsync(cts.Token);
                 var versionString = $"{version.Major}.{version.Minor}.{version.Patch}";
 
-                if (version.Major < MinimumSupportedMajorVersion)
+                if (!IsSupported(version))
                 {
                     return new AccountCheckResult(false,
-                        $"Immich server {account.ImmichServerUrl} is running v{versionString}, but this version of ImmichFrame requires Immich v{MinimumSupportedMajorVersion} or newer. Please update your Immich server.",
+                        $"Immich server {account.ImmichServerUrl} is running v{versionString}, but this version of ImmichFrame requires Immich v{MinimumSupportedVersion} or newer. Please update your Immich server.",
                         versionString);
                 }
 
@@ -52,7 +59,7 @@ namespace ImmichFrame.WebApi.Helpers
         /// </summary>
         /// <returns>
         /// <c>true</c> only if every configured Immich server was reachable and reported a version of
-        /// v<see cref="MinimumSupportedMajorVersion"/> or newer.
+        /// v<see cref="MinimumSupportedVersion"/> or newer.
         /// </returns>
         public static async Task<bool> CheckServerVersions(IServiceProvider services, ILogger logger)
         {
@@ -85,6 +92,15 @@ namespace ImmichFrame.WebApi.Helpers
             }
 
             return results.All(r => r.Success);
+        }
+
+        private static bool IsSupported(ServerVersionResponseDto version)
+        {
+            var numeric = new Version((int)version.Major, (int)version.Minor, (int)version.Patch);
+            if (numeric == MinimumSupportedVersion && version.Prerelease != null)
+                return false;
+
+            return numeric >= MinimumSupportedVersion;
         }
     }
 }
