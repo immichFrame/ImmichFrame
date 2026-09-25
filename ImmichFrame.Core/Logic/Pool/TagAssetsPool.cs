@@ -28,51 +28,56 @@ public class TagAssetsPool(IApiCache apiCache, ImmichApi immichApi, IAccountSett
             }
         }
 
-        var seenIds = new HashSet<Guid>();
+        if (tags.Count == 0)
+        {
+            return tagAssets;
+        }
+
+        var types = new List<AssetTypeEnum> { AssetTypeEnum.IMAGE };
+        if (accountSettings.ShowVideos)
+        {
+            types.Add(AssetTypeEnum.VIDEO);
+        }
+
+        // Search does not return tags. Query each configured tag so the matching tag can be attached.
+        var seen = new Dictionary<Guid, AssetResponseDto>();
+        const int batchSize = 1000;
+
         foreach (var tag in tags)
         {
-            int page = 1;
-            int batchSize = 1000;
-            int itemsInPage;
+            string? nextCursor = null;
             do
             {
                 var metadataBody = new MetadataSearchDto
                 {
-                    Page = page,
                     Size = batchSize,
-                    TagIds = [tag.Id],
+                    Cursor = nextCursor,
                     WithExif = true,
-                    WithPeople = true
+                    WithPeople = true,
+                    Filter = new SearchFilter
+                    {
+                        TrashedAt = new NullableDateFilter { Eq = null },
+                        TagIds = new IdsFilter { Any = [tag.Id] },
+                        Type = new EnumFilterAssetType { In = types }
+                    }
                 };
 
-                if (!accountSettings.ShowVideos)
+                var page = await immichApi.SearchAssetsAsync(null, null, metadataBody, ct);
+                foreach (var asset in page.Assets.Items)
                 {
-                    metadataBody.Type = AssetTypeEnum.IMAGE;
-                }
-
-                var tagInfo = await immichApi.SearchAssetsAsync(null, null, metadataBody, ct);
-
-                itemsInPage = tagInfo.Assets.Items.Count;
-
-                // Attach the tag that matched this search
-                foreach (var asset in tagInfo.Assets.Items)
-                {
-                    if (seenIds.Contains(asset.Id))
+                    if (seen.TryGetValue(asset.Id, out var existing))
                     {
-                        tagAssets.First(a => a.Id == asset.Id).Tags.Add(tag);
+                        existing.Tags!.Add(tag);
                         continue;
                     }
 
-                    // SearchAssetsAsync does not support a `WithTags`
-                    // parameter, so simply set the one that was configured
                     asset.Tags = new List<TagResponseDto> { tag };
-
-                    seenIds.Add(asset.Id);
+                    seen[asset.Id] = asset;
                     tagAssets.Add(asset);
                 }
 
-                page++;
-            } while (itemsInPage == batchSize);
+                nextCursor = page.Assets.NextCursor;
+            } while (nextCursor != null);
         }
 
         return tagAssets;
