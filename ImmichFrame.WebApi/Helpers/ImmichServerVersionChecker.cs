@@ -94,7 +94,13 @@ namespace ImmichFrame.WebApi.Helpers
             return results.All(r => r.Success);
         }
 
-        private static bool IsSupported(ServerVersionResponseDto version) =>
-            new Version((int)version.Major, (int)version.Minor, (int)version.Patch) >= MinimumSupportedVersion;
+        private static bool IsSupported(ServerVersionResponseDto version)
+        {
+            var numeric = new Version((int)version.Major, (int)version.Minor, (int)version.Patch);
+            if (numeric == MinimumSupportedVersion && version.Prerelease != null)
+                return false;
+
+            return numeric >= MinimumSupportedVersion;
+        }
     }
 }
