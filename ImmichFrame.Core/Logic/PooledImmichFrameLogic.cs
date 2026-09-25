@@ -36,33 +36,25 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic, IDisposable
 
     private IAssetPool BuildPool(IAccountSettings accountSettings)
     {
-        var hasAlbums = accountSettings.Albums?.Any() ?? false;
-        var hasPeople = accountSettings.People?.Any() ?? false;
-        var hasTags = accountSettings.Tags?.Any() ?? false;
-
-        if (!accountSettings.ShowFavorites && !accountSettings.ShowMemories && !hasAlbums && !hasPeople && !hasTags)
-        {
-            return new AllAssetsPool(_apiCache, _immichApi, accountSettings);
-        }
+        var hasSource = accountSettings.ShowFavorites
+            || (accountSettings.Albums?.Any() ?? false)
+            || (accountSettings.People?.Any() ?? false)
+            || (accountSettings.Tags?.Any() ?? false);
 
         var pools = new List<IAssetPool>();
 
-        if (accountSettings.ShowFavorites)
-            pools.Add(new FavoriteAssetsPool(_apiCache, _immichApi, accountSettings));
+        // Memories-only skips the library search. Every other case needs it.
+        if (!accountSettings.ShowMemories || hasSource)
+        {
+            pools.Add(new AccountSearchPool(_apiCache, _immichApi, accountSettings));
+        }
 
         if (accountSettings.ShowMemories)
+        {
             pools.Add(new MemoryAssetsPool(_immichApi, accountSettings));
+        }
 
-        if (hasAlbums)
-            pools.Add(new AlbumAssetsPool(_apiCache, _immichApi, accountSettings));
-
-        if (hasPeople)
-            pools.Add(new PersonAssetsPool(_apiCache, _immichApi, accountSettings));
-
-        if (hasTags)
-            pools.Add(new TagAssetsPool(_apiCache, _immichApi, accountSettings));
-
-        return new MultiAssetPool(pools);
+        return pools.Count == 1 ? pools[0] : new MultiAssetPool(pools);
     }
 
     public async Task<AssetResponseDto?> GetNextAsset()
