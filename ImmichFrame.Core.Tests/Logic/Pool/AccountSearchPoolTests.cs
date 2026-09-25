@@ -77,13 +77,13 @@ public class AccountSearchPoolTests
     }
 
     [Test]
-    public async Task GetAssets_Rating_SetsEq()
+    public async Task GetAssets_Rating_SetsGte()
     {
         _settings.SetupGet(s => s.Rating).Returns(3);
 
         await _pool.GetAssets(1);
 
-        VerifyRandom(dto => dto.Filter!.Rating!.Eq == 3);
+        VerifyRandom(dto => dto.Filter!.Rating!.Gte == 3);
     }
 
     [Test]

@@ -117,5 +117,5 @@ public static class SearchFilters
     }
 
     private static NumberFilterNullable? Rating(IAccountSettings settings) =>
-        settings.Rating is int rating ? new NumberFilterNullable { Eq = rating } : null;
+        settings.Rating is int rating ? new NumberFilterNullable { Gte = rating } : null;
 }
