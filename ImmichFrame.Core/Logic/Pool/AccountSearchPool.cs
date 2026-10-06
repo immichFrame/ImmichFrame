@@ -14,7 +14,7 @@ public class AccountSearchPool(IApiCache apiCache, ImmichApi immichApi, IAccount
             return 0;
         }
 
-        var filter = SearchFilters.ForAccount(accountSettings, tagIds);
+        var filter = SearchFilters.ForAccount(accountSettings, tagIds, await ResolveExcludedAlbumIds(ct));
         return await apiCache.GetOrAddAsync("stats", async () =>
         {
             var stats = await immichApi.SearchAssetStatisticsAsync(new StatisticsSearchDto
@@ -38,8 +38,33 @@ public class AccountSearchPool(IApiCache apiCache, ImmichApi immichApi, IAccount
             Size = requested,
             WithExif = true,
             WithPeople = true,
-            Filter = SearchFilters.ForAccount(accountSettings, tagIds)
+            Filter = SearchFilters.ForAccount(accountSettings, tagIds, await ResolveExcludedAlbumIds(ct))
         }, ct);
+    }
+
+    /// <summary>
+    /// The configured ExcludedAlbums plus, when HideAssetsInOtherAlbums is set, every album
+    /// (owned or shared) that is not one of the selected Albums. Immich applies them as a
+    /// "none of these albums" filter, so an asset that also sits in another album is skipped.
+    /// </summary>
+    private async Task<IReadOnlyList<Guid>> ResolveExcludedAlbumIds(CancellationToken ct)
+    {
+        var excluded = accountSettings.ExcludedAlbums ?? [];
+
+        // Without selected albums every album would count as "other", hiding every asset in an album
+        if (!accountSettings.HideAssetsInOtherAlbums || accountSettings.Albums is not { Count: > 0 } selected)
+        {
+            return excluded;
+        }
+
+        var selectedIds = selected.ToHashSet();
+        var allAlbums = await apiCache.GetOrAddAsync($"allAlbums_{accountSettings.ImmichServerUrl}",
+            () => immichApi.GetAllAlbumsAsync(null, null, null, null, null, ct));
+
+        return excluded
+            .Concat(allAlbums.Select(album => album.Id).Where(id => !selectedIds.Contains(id)))
+            .Distinct()
+            .ToList();
     }
 
     private async Task<IReadOnlyList<Guid>> ResolveTagIds(CancellationToken ct)

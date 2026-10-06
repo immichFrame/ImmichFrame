@@ -23,6 +23,8 @@ public class AccountSearchPoolTests
             .Returns<string, Func<Task<ICollection<TagResponseDto>>>>((_, factory) => factory());
         _cache.Setup(c => c.GetOrAddAsync(It.IsAny<string>(), It.IsAny<Func<Task<long>>>()))
             .Returns<string, Func<Task<long>>>((_, factory) => factory());
+        _cache.Setup(c => c.GetOrAddAsync(It.IsAny<string>(), It.IsAny<Func<Task<ICollection<AlbumResponseDto>>>>()))
+            .Returns<string, Func<Task<ICollection<AlbumResponseDto>>>>((_, factory) => factory());
         _api = new Mock<ImmichApi>(null, null);
         _api.Setup(a => a.SearchRandomAsync(It.IsAny<RandomSearchDto>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<AssetResponseDto>());
@@ -253,6 +255,75 @@ public class AccountSearchPoolTests
 
         _api.Verify(a => a.SearchAssetStatisticsAsync(It.IsAny<StatisticsSearchDto>(), It.IsAny<CancellationToken>()), Times.Once);
     }
+
+    [Test]
+    public async Task GetAssets_HideAssetsInOtherAlbums_ExcludesEveryUnselectedAlbum()
+    {
+        var selected = Guid.NewGuid();
+        var other = Guid.NewGuid();
+        var shared = Guid.NewGuid();
+        _settings.SetupGet(s => s.Albums).Returns(new List<Guid> { selected });
+        _settings.SetupGet(s => s.HideAssetsInOtherAlbums).Returns(true);
+        SetupAlbums(selected, other, shared);
+
+        await _pool.GetAssets(1);
+
+        VerifyRandom(dto =>
+            dto.Filter!.AlbumIds!.None!.Count == 2 &&
+            dto.Filter.AlbumIds.None.Contains(other) &&
+            dto.Filter.AlbumIds.None.Contains(shared) &&
+            !dto.Filter.AlbumIds.None.Contains(selected) &&
+            dto.Filter.Or!.Single().AlbumIds!.Any!.Contains(selected));
+    }
+
+    [Test]
+    public async Task GetAssets_HideAssetsInOtherAlbums_CombinesWithExcludedAlbumsWithoutDuplicates()
+    {
+        var selected = Guid.NewGuid();
+        var other = Guid.NewGuid();
+        _settings.SetupGet(s => s.Albums).Returns(new List<Guid> { selected });
+        _settings.SetupGet(s => s.ExcludedAlbums).Returns(new List<Guid> { other });
+        _settings.SetupGet(s => s.HideAssetsInOtherAlbums).Returns(true);
+        SetupAlbums(selected, other);
+
+        await _pool.GetAssets(1);
+
+        VerifyRandom(dto => dto.Filter!.AlbumIds!.None!.Count == 1 && dto.Filter.AlbumIds.None.Contains(other));
+    }
+
+    [Test]
+    public async Task GetAssets_HideAssetsInOtherAlbumsDisabled_DoesNotListAlbums()
+    {
+        var selected = Guid.NewGuid();
+        _settings.SetupGet(s => s.Albums).Returns(new List<Guid> { selected });
+        SetupAlbums(selected, Guid.NewGuid());
+
+        await _pool.GetAssets(1);
+
+        VerifyRandom(dto => dto.Filter!.AlbumIds == null);
+        VerifyNoAlbumLookup();
+    }
+
+    [Test]
+    public async Task GetAssets_HideAssetsInOtherAlbumsWithoutAlbums_HasNoEffect()
+    {
+        // Without selected albums every album would count as "other", hiding every asset in an album
+        _settings.SetupGet(s => s.HideAssetsInOtherAlbums).Returns(true);
+        SetupAlbums(Guid.NewGuid());
+
+        await _pool.GetAssets(1);
+
+        VerifyRandom(dto => dto.Filter!.AlbumIds == null);
+        VerifyNoAlbumLookup();
+    }
+
+    private void SetupAlbums(params Guid[] albumIds) =>
+        _api.Setup(a => a.GetAllAlbumsAsync(null, null, null, null, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(albumIds.Select(id => new AlbumResponseDto { Id = id }).ToList());
+
+    private void VerifyNoAlbumLookup() =>
+        _api.Verify(a => a.GetAllAlbumsAsync(It.IsAny<Guid?>(), It.IsAny<Guid?>(), It.IsAny<bool?>(), It.IsAny<bool?>(),
+            It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
 
     private void VerifyRandom(Func<RandomSearchDto, bool> match) =>
         _api.Verify(a => a.SearchRandomAsync(It.Is<RandomSearchDto>(dto => match(dto)), It.IsAny<CancellationToken>()), Times.Once);
