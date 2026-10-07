@@ -19,7 +19,7 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic, IDisposable
     {
         _generalSettings = generalSettings;
 
-        var httpClient = httpClientFactory.CreateClient("ImmichApiAccountClient");
+        var httpClient = httpClientFactory.CreateClient(ImmichApiHttpClientExtensions.ImmichApiAccountClient);
         AccountSettings = accountSettings;
 
         httpClient.UseApiKey(accountSettings.ApiKey);

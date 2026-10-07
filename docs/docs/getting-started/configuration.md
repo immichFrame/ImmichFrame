@@ -46,136 +46,142 @@ Defaults are below, only one account with `ImmichServerUrl` and `ApiKey`|`ApiKey
 # settings applicable to the web client - when viewing with a browser or webview
 General:
   # When set, every client needs to authenticate via Bearer Token and this value.
-  AuthenticationSecret: null  # string, no default
+  AuthenticationSecret: null # string, no default
   # whether to download images to the server
-  DownloadImages: false  # boolean
+  DownloadImages: false # boolean
   # if images are downloaded, re-download if age (in days) is more than this
-  RenewImagesDuration: 30  # int
+  RenewImagesDuration: 30 # int
   # A list of webcalendar URIs in the .ics format. Supports basic auth via standard URL format.
   # e.g. https://calendar.google.com/calendar/ical/XXXXXX/public/basic.ics
   # e.g. https://user:pass@calendar.immichframe.dev/dav/calendars/basic.ics
-  Webcalendars:  # string[]
+  Webcalendars: # string[]
     - UUID
   # Interval in hours. Determines how often images are pulled from a album/person in immich.
-  RefreshAlbumPeopleInterval: 12  # int
+  RefreshAlbumPeopleInterval: 12 # int
   # Date format. See https://date-fns.org/v4.1.0/docs/format for more information.
-  PhotoDateFormat: 'MM/dd/yyyy'  # string
-  ImageLocationFormat: 'City,State,Country'
+  PhotoDateFormat: "MM/dd/yyyy" # string
+  ImageLocationFormat: "City,State,Country"
   # Get an API key from OpenWeatherMap: https://openweathermap.org/appid
-  WeatherApiKey: ''  # string
+  WeatherApiKey: "" # string
   # Imperial or metric system (Fahrenheit or Celsius)
-  UnitSystem: 'imperial'  # 'imperial' | 'metric'
+  UnitSystem: "imperial" # 'imperial' | 'metric'
   # Set the weather location with lat/lon.
-  WeatherLatLong: '40.730610,-73.935242'  # string
+  WeatherLatLong: "40.730610,-73.935242" # string
   # 2 digit ISO code, sets the language of the weather description.
-  Language: 'en'  # string
+  Language: "en" # string
   # Webhook URL to be notified e.g. http://example.com/notify
-  Webhook: null  # string
+  Webhook: null # string
   # Image interval in seconds. How long an image is displayed in the frame.
   Interval: 45
   # Duration in seconds.
-  TransitionDuration: 2  # float
+  TransitionDuration: 2 # float
   # Displays the current time.
-  ShowClock: true  # boolean
+  ShowClock: true # boolean
   # Time format
-  ClockFormat: 'hh:mm'  # string
+  ClockFormat: "hh:mm" # string
   # Date format for the clock
-  ClockDateFormat: 'eee, MMM d' # string
+  ClockDateFormat: "eee, MMM d" # string
   # Displays the progress bar.
-  ShowProgressBar: true  # boolean
+  ShowProgressBar: true # boolean
   # Displays the date of the current image.
-  ShowPhotoDate: true  # boolean
+  ShowPhotoDate: true # boolean
   # Displays the description of the current image.
-  ShowImageDesc: true  # boolean
+  ShowImageDesc: true # boolean
   # Displays a comma separated list of names of all the people that are assigned in immich.
-  ShowPeopleDesc: true  # boolean
+  ShowPeopleDesc: true # boolean
   # Displays a comma separated list of names of all the tags that are assigned in immich.
-  ShowTagsDesc: true  # boolean
+  ShowTagsDesc: true # boolean
   # Displays a comma separated list of names of all the albums for an image.
-  ShowAlbumName: true  # boolean
+  ShowAlbumName: true # boolean
   # Displays the location of the current image.
-  ShowImageLocation: true  # boolean
+  ShowImageLocation: true # boolean
   # Lets you choose a primary color for your UI. Use hex with alpha value to edit opacity.
-  PrimaryColor: '#f5deb3'  # string
+  PrimaryColor: "#f5deb3" # string
   # Lets you choose a secondary color for your UI. (Only used with `style=solid or transition`) Use hex with alpha value to edit opacity.
-  SecondaryColor: '#000000'  # string
+  SecondaryColor: "#000000" # string
   # Background-style of the clock and metadata.
-  Style: 'none'  # none | solid | transition | blur
+  Style: "none" # none | solid | transition | blur
   # Sets the base font size, uses standard CSS formats (https://developer.mozilla.org/en-US/docs/Web/CSS/font-size)
-  BaseFontSize: '17px'  # string
+  BaseFontSize: "17px" # string
   # Displays the description of the current weather.
-  ShowWeatherDescription: true  # boolean
+  ShowWeatherDescription: true # boolean
   # URL for the icon to load for the current weather condition
-  WeatherIconUrl: 'https://openweathermap.org/img/wn/{IconId}.png'
+  WeatherIconUrl: "https://openweathermap.org/img/wn/{IconId}.png"
   # Zooms into or out of an image and gives it a touch of life.
-  ImageZoom: true  # boolean
+  ImageZoom: true # boolean
   # Pans an image in a random direction and gives it a touch of life.
-  ImagePan: false  # boolean
+  ImagePan: false # boolean
   # Whether image should fill available space. Aspect ratio maintained but may be cropped.
-  ImageFill: false  # boolean
+  ImageFill: false # boolean
   # Whether to play audio for videos that have audio tracks.
-  PlayAudio: false  # boolean
+  PlayAudio: false # boolean
   # Allow two portrait images to be displayed next to each other
-  Layout: 'splitview'  # single | splitview
+  Layout: "splitview" # single | splitview
 
 # multiple accounts permitted
 Accounts:
   - # The URL of your Immich server e.g. `http://photos.yourdomain.com` / `http://192.168.0.100:2283`.
-    ImmichServerUrl: 'REQUIRED'  # string, required, no default
+    ImmichServerUrl: "REQUIRED" # string, required, no default
     # Read more about how to obtain an Immich API key: https://immich.app/docs/features/command-line-interface#obtain-the-api-key
     # Exactly one of ApiKey or ApiKeyFile must be set.
     ApiKey: "super-secret-api-key"
     # ApiKeyFile: "/path/to/api.key"
     # Show images after date. Overwrites the `ImagesFromDays`-Setting
-    ImagesFromDate: null  # Date
+    ImagesFromDate: null # Date
     # If this is set, memories are displayed.
-    ShowMemories: false  # boolean
+    ShowMemories: false # boolean
     # If this is set, favorites are displayed.
-    ShowFavorites: false  # boolean
+    ShowFavorites: false # boolean
     # If this is set, assets marked archived are displayed.
-    ShowArchived: false  # boolean
+    ShowArchived: false # boolean
     # If this is set, video assets are included in the slideshow.
-    ShowVideos: false  # boolean
+    ShowVideos: false # boolean
     # Show images from the last X days, e.g., 365 -> show images from the last year
-    ImagesFromDays: null  # int
+    ImagesFromDays: null # int
     # Show images before date.
-    ImagesUntilDate: '2020-01-02'  # Date
+    ImagesUntilDate: "2020-01-02" # Date
     # Minimum rating in stars, allowed values from -1 to 5. Shows images with this rating or higher.
-    Rating: null  # int
+    Rating: null # int
     # UUID of album(s) - e.g. ['00000000-0000-0000-0000-000000000001']
-    Albums:  # string[]
+    Albums: # string[]
       - UUID
     # UUID of excluded album(s)
-    ExcludedAlbums:  # string[]
+    ExcludedAlbums: # string[]
       - UUID
     # UUID of People
-    People:  # string[]
+    People: # string[]
       - UUID
     # Tag values (full hierarchical paths, case-sensitive)
-    Tags:  # string[]
+    Tags: # string[]
       - "Vacation"
       - "Travel/Europe"
+```
 
-  ```
 ### Security
+
 Basic authentication can be added via `AuthenticationSecret`. It is **NOT** recommended to expose immichFrame to the public web, if you still choose to do so, you can set this to a secure secret. Every client needs to authenticate itself with this secret. This can be done in the Webclient via input field or via URL-Parameter. The URL-Parameter will look like this: `?authsecret=[MYSECRET]`
 
 If this is enabled, the web api required the `Authorization`-Header with `Bearer [MYSECRET]`.
 
 ### Filtering on Albums or People
+
 You can get the UUIDs from the URL of the album/person. For this URL: `https://demo.immich.app/albums/85c85b29-c95d-4a8b-90f7-c87da1d518ba` this is the UUID: `85c85b29-c95d-4a8b-90f7-c87da1d518ba`
 
 ### Filtering on Tags
+
 For tags, use the full hierarchical path (the `value` field) as it appears in Immich. Tags in Immich support hierarchical structures using forward slashes (e.g., `Parent/Child`). Matching is case-sensitive, and the full path will be automatically resolved to the tag ID.
 
 **Examples:**
+
 - `"Vacation"` - matches a top-level tag named "Vacation"
 - `"Travel/Europe"` - matches a tag "Europe" under parent "Travel"
 
 ### Weather
+
 Weather is enabled by entering an API key. Get yours free from [OpenWeatherMap][openweathermap-url]
 
 ### Calendar
+
 If you are using Google Calendar, more information can be found [here](https://support.google.com/calendar/answer/37648?hl=en#zippy=%2Cget-your-calendar-view-only).
 
 Calendar supports basic authentication using the standard URL userinfo format:
@@ -184,12 +190,15 @@ No Auth: `https://calendar.google.com/calendar/ical/XXXXXX/public/basic.ics`
 With Auth: `https://username:password@calendar.immichframe.dev/dav/calendars/basic.ics`
 
 ### Misc
+
 #### Webhook
+
 A webhook to notify an external service is available. This is only enabled when the `Webhook`-Setting is set in your configuration. Your configured Webhook will be notified via `HTTP POST`-request.
 
 A client can be identified by the `ClientIdentifier`. You can set/overwrite the `ClientIdentifier` by adding `?client=MyClient` to your ImmichFrame-URL. This only needs to be called once and is persisted. Delete the cache to reset the `ClientIdentifier`.
 
 #### Events
+
 Events will always contain a `Name`, `ClientIdentifier` and a `DateTime` to differentiate, but can contain more information.
 
 | **Event**                  | **Description**                      | **Payload**                                                                                                                                             |
@@ -197,11 +206,16 @@ Events will always contain a `Name`, `ClientIdentifier` and a `DateTime` to diff
 | AssetRequestedNotification | Notifies when an asset is requested. | `{"Name":"AssetRequestedNotification", "ClientIdentifier": "Frame_Kitchen", "DateTime":"2024-11-16T21:37:19.4933981+01:00", "RequestedAssetId":"UUID"}` |
 
 ### Multiple Immich Accounts
+
 ImmichFrame can be configured to access multiple Immich accounts, on the same or different servers.
 
 Images will be drawn from each account proportionally based on the total number of images present in each account (not included filtering, this is not yet implemented).
 
 ### API Key Permissions
+
+Create the key with only the permissions below. ImmichFrame never needs administrative
+permissions, and a key limited to this list cannot be used to take over your Immich server.
+
 For full ImmichFrame functionality, the API key being used needs the following permissions:
 
 - `album.read`
@@ -215,20 +229,23 @@ For full ImmichFrame functionality, the API key being used needs the following p
 - `person.statistics`
 - `tag.read`
 
-
 ### Custom CSS
+
 ImmichFrame can be customized even further using CSS. This will apply to browsers, and apps using WebView (i.e. everything but Frameo and AppleTV):
-- Create a custom.css file somewhere on your host server with your desired content, for example:  
+
+- Create a custom.css file somewhere on your host server with your desired content, for example:
+
 ```css
-#progressbar {  
-  visibility: hidden;  
+#progressbar {
+  visibility: hidden;
 }
 ```
-- Add an entry in your immichframe compose pointing to it:  
+
+- Add an entry in your immichframe compose pointing to it:
+
 ```
-volumes:  
+volumes:
       - /PATH/TO/YOUR/custom.css:/app/wwwroot/static/custom.css
 ```
-
 
 [openweathermap-url]: https://openweathermap.org/appid
