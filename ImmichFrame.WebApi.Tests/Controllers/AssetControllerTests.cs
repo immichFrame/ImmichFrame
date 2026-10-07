@@ -96,33 +96,33 @@ namespace ImmichFrame.WebApi.Tests.Controllers
             // Arrange
             var expectedAssetId = Guid.NewGuid();
 
-            // Build the mock response from the generated DTOs so the test fails at
-            // compile time (not at runtime) if the OpenAPI schema changes.
-            var searchResponse = new SearchResponseDto
-            {
-                Assets = new SearchAssetResponseDto
-                {
-                    Count = 1,
-                    Total = 1,
-                    Items = { BuildAssetResponse(expectedAssetId) },
-                    NextPage = null,
-                },
-                // Albums is already initialised to an empty SearchAlbumResponseDto.
-            };
-
-            var jsonResponse = JsonSerializer.Serialize(searchResponse);
-
-            // Setup for SearchAssetsAsync
+            // Account selection asks for the match count before the random pick.
+            var statsJson = JsonSerializer.Serialize(new SearchStatisticsResponseDto { Total = 1 });
             _mockHttpMessageHandler.Protected()
                 .Setup<Task<HttpResponseMessage>>(
                     "SendAsync",
-                    ItExpr.Is<HttpRequestMessage>(req => req.RequestUri!.ToString().Contains("/search/metadata")),
+                    ItExpr.Is<HttpRequestMessage>(req => req.RequestUri!.ToString().Contains("/search/statistics")),
                     ItExpr.IsAny<CancellationToken>()
                 )
-                .ReturnsAsync(() => new HttpResponseMessage // Use a Func to return new instance each time
+                .ReturnsAsync(() => new HttpResponseMessage
                 {
                     StatusCode = HttpStatusCode.OK,
-                    Content = new StringContent(jsonResponse)
+                    Content = new StringContent(statsJson)
+                });
+
+            // Build the mock response from the generated DTOs so the test fails at
+            // compile time (not at runtime) if the OpenAPI schema changes.
+            var randomJson = JsonSerializer.Serialize(new[] { BuildAssetResponse(expectedAssetId) });
+            _mockHttpMessageHandler.Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.Is<HttpRequestMessage>(req => req.RequestUri!.ToString().Contains("/search/random")),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ReturnsAsync(() => new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent(randomJson)
                 });
 
             // Setup for ViewAssetAsync (thumbnail)
