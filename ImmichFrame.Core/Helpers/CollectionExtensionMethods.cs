@@ -17,7 +17,15 @@ public static class CollectionExtensionMethods
         => WhereExcludes(source, excluded, t => t!);
 
     public static IEnumerable<T> WhereExcludes<T>(this IEnumerable<T> source, IEnumerable<T> excluded, Func<T, object> comparator)
-        => source.Where(item1 => !excluded.Any(item2 => Equals(comparator(item2), comparator(item1))));
+    {
+        // Hash the excluded keys once rather than rescanning `excluded` for every
+        // item in `source`. The previous Any() form was O(n*m), which is fine for a
+        // handful of excluded assets but stalls the asset pool when an excluded
+        // album holds thousands.
+        var excludedKeys = excluded.Select(comparator).ToHashSet();
+
+        return source.Where(item => !excludedKeys.Contains(comparator(item)));
+    }
 
     public static async Task<T?> ChooseOne<T>(this IEnumerable<T> sources, Func<T, Task<long>> probabilitySelector)
     {

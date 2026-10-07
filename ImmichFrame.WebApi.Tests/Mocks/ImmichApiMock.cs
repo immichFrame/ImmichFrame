@@ -22,8 +22,8 @@ namespace ImmichFrame.WebApi.Tests.Mocks
         public static Mock<HttpMessageHandler> WithServerVersion(
             this Mock<HttpMessageHandler> handler,
             long major = ImmichServerVersionChecker.MinimumSupportedMajorVersion,
-            long minor = 0,
-            long patch = 0)
+            long minor = ImmichServerVersionChecker.MinimumSupportedMinorVersion,
+            long patch = ImmichServerVersionChecker.MinimumSupportedPatchVersion)
         {
             handler.Protected()
                 .Setup<Task<HttpResponseMessage>>(
