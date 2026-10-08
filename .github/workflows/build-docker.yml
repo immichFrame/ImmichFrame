@@ -15,6 +15,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 permissions:
+  contents: read
   packages: write
 
 jobs:
@@ -49,10 +50,12 @@ jobs:
         id: version
         run: |
           if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
-            echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+            VERSION="${GITHUB_REF_NAME#v}"
           else
-            echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+            VERSION="${{ github.event.inputs.version }}"
           fi
+          # AssemblyVersion must be numeric, so drop any suffix such as "-pk1" (the git tag keeps it)
+          echo "VERSION=${VERSION%%-*}" >> $GITHUB_OUTPUT
 
       # Build and push Docker image for multiple platforms
       - name: Build and push Docker image (${{ env.IMAGE_NAME }})
