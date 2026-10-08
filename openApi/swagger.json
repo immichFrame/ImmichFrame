@@ -164,7 +164,7 @@
         },
         "security": [
           {
-            "ImmichFrameAdminScheme": [ ]
+            "ImmichFrameAdminScheme": []
           }
         ]
       },
@@ -246,7 +246,7 @@
         },
         "security": [
           {
-            "ImmichFrameAdminScheme": [ ]
+            "ImmichFrameAdminScheme": []
           }
         ]
       }
@@ -310,7 +310,7 @@
         },
         "security": [
           {
-            "ImmichFrameAdminScheme": [ ]
+            "ImmichFrameAdminScheme": []
           }
         ]
       }
@@ -877,6 +877,168 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/IWeather"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Admin/Accounts/{index}/Albums": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "GetAccountAlbums",
+        "parameters": [
+          {
+            "name": "index",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminAlbumDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Admin/Accounts/{index}/People": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "GetAccountPeople",
+        "parameters": [
+          {
+            "name": "index",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminPersonDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Admin/Accounts/{index}/Tags": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "GetAccountTags",
+        "parameters": [
+          {
+            "name": "index",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminTagDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             }
@@ -1897,11 +2059,16 @@
             "nullable": true
           }
         },
-        "additionalProperties": { }
+        "additionalProperties": {}
       },
       "ServerAccountSettings": {
         "type": "object",
         "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true,
+            "description": "Friendly label shown in the admin UI. Purely cosmetic."
+          },
           "immichServerUrl": {
             "type": "string",
             "nullable": true
@@ -2118,6 +2285,62 @@
               "nullable": true
             },
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminAlbumDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "assetCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "shared": {
+            "type": "boolean"
+          },
+          "thumbnailAssetId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "Asset to use as the cover; fetch it from the account's thumbnail endpoint."
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminPersonDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminTagDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "value": {
+            "type": "string",
+            "nullable": true,
+            "description": "The full tag path (e.g. \"Family/Kids\"); this is what the Tags setting stores."
           }
         },
         "additionalProperties": false

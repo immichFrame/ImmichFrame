@@ -1,4 +1,6 @@
+﻿using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Exceptions;
+using ImmichFrame.Core.Helpers;
 using ImmichFrame.WebApi.Helpers;
 using ImmichFrame.WebApi.Models;
 using ImmichFrame.WebApi.Services;
@@ -28,6 +30,29 @@ namespace ImmichFrame.WebApi.Controllers
         public bool Success { get; set; }
         public string Message { get; set; } = string.Empty;
         public string? Version { get; set; }
+    }
+
+    public class AdminAlbumDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public int AssetCount { get; set; }
+        public bool Shared { get; set; }
+        /// <summary>Asset to use as the cover; fetch it from the account's thumbnail endpoint.</summary>
+        public Guid? ThumbnailAssetId { get; set; }
+    }
+
+    public class AdminPersonDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    public class AdminTagDto
+    {
+        public Guid Id { get; set; }
+        /// <summary>The full tag path (e.g. "Family/Kids"); this is what the Tags setting stores.</summary>
+        public string Value { get; set; } = string.Empty;
     }
 
     [ApiController]
@@ -149,6 +174,174 @@ namespace ImmichFrame.WebApi.Controllers
 
             var check = await ImmichServerVersionChecker.CheckAccount(account, _httpClientFactory);
             return new AccountTestResultDto { Success = check.Success, Message = check.Message, Version = check.Version };
+        }
+
+        /// <summary>
+        /// Lists the albums visible to a saved account, so the admin UI can offer a picker
+        /// instead of asking for IDs. <paramref name="index"/> is the account's position in the saved settings.
+        /// </summary>
+        [HttpGet("Accounts/{index:int}/Albums", Name = "GetAccountAlbums")]
+        [ProducesResponseType(typeof(List<AdminAlbumDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<List<AdminAlbumDto>>> GetAccountAlbums(int index, CancellationToken ct)
+        {
+            var api = CreateAccountApi(index, out var problem);
+            if (api == null) return problem!;
+
+            try
+            {
+                var albums = await api.GetAllAlbumsAsync(null, null, null, null, null, ct);
+                return Ok(albums
+                    .Select(a => new AdminAlbumDto
+                    {
+                        Id = a.Id,
+                        Name = a.AlbumName,
+                        AssetCount = (int)a.AssetCount,
+                        Shared = a.Shared,
+                        ThumbnailAssetId = a.AlbumThumbnailAssetId
+                    })
+                    .OrderBy(a => a.Name, StringComparer.CurrentCultureIgnoreCase)
+                    .ToList());
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                _logger.LogWarning("Could not list albums for account {index}: {message}", index, ex.Message);
+                return Problem(detail: $"Could not load albums from Immich: {ex.Message}", statusCode: StatusCodes.Status502BadGateway);
+            }
+        }
+
+        /// <summary>
+        /// Proxies an asset thumbnail through the admin API. Browsers cannot attach the admin
+        /// password to an img tag, and this keeps the Immich API key on the server.
+        /// </summary>
+        [HttpGet("Accounts/{index:int}/Assets/{assetId:guid}/Thumbnail", Name = "GetAccountAssetThumbnail")]
+        [Produces("image/jpeg")]
+        [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetAccountAssetThumbnail(int index, Guid assetId, CancellationToken ct)
+        {
+            var api = CreateAccountApi(index, out var problem);
+            if (api == null) return problem!;
+
+            try
+            {
+                var data = await api.ViewAssetAsync(null, assetId, string.Empty, AssetMediaSize.Thumbnail, null, ct);
+                var contentType = data.Headers.TryGetValue("Content-Type", out var values)
+                    ? values.FirstOrDefault() ?? "image/jpeg"
+                    : "image/jpeg";
+                Response.Headers.CacheControl = "private, max-age=3600";
+                return File(data.Stream, contentType);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                _logger.LogWarning("Could not fetch thumbnail {assetId} for account {index}: {message}", assetId, index, ex.Message);
+                return NotFound();
+            }
+        }
+
+        /// <summary>Lists the named people visible to a saved account (unnamed faces are not useful to pick).</summary>
+        [HttpGet("Accounts/{index:int}/People", Name = "GetAccountPeople")]
+        [ProducesResponseType(typeof(List<AdminPersonDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<List<AdminPersonDto>>> GetAccountPeople(int index, CancellationToken ct)
+        {
+            var api = CreateAccountApi(index, out var problem);
+            if (api == null) return problem!;
+
+            try
+            {
+                var people = new List<AdminPersonDto>();
+                for (var page = 1; page <= 50; page++) // hard cap so a misbehaving server cannot loop us forever
+                {
+                    var result = await api.GetAllPeopleAsync(null, null, page, 500, false, ct);
+                    people.AddRange(result.People
+                        .Where(p => !string.IsNullOrWhiteSpace(p.Name))
+                        .Select(p => new AdminPersonDto { Id = p.Id, Name = p.Name }));
+                    if (!result.HasNextPage.GetValueOrDefault()) break;
+                }
+
+                return Ok(people.OrderBy(p => p.Name, StringComparer.CurrentCultureIgnoreCase).ToList());
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                _logger.LogWarning("Could not list people for account {index}: {message}", index, ex.Message);
+                return Problem(detail: $"Could not load people from Immich: {ex.Message}", statusCode: StatusCodes.Status502BadGateway);
+            }
+        }
+
+        [HttpGet("Accounts/{index:int}/People/{personId:guid}/Thumbnail", Name = "GetAccountPersonThumbnail")]
+        [Produces("image/jpeg")]
+        [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetAccountPersonThumbnail(int index, Guid personId, CancellationToken ct)
+        {
+            var api = CreateAccountApi(index, out var problem);
+            if (api == null) return problem!;
+
+            try
+            {
+                var data = await api.GetPersonThumbnailAsync(personId, ct);
+                var contentType = data.Headers.TryGetValue("Content-Type", out var values)
+                    ? values.FirstOrDefault() ?? "image/jpeg"
+                    : "image/jpeg";
+                Response.Headers.CacheControl = "private, max-age=3600";
+                return File(data.Stream, contentType);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                _logger.LogWarning("Could not fetch thumbnail of person {personId} for account {index}: {message}", personId, index, ex.Message);
+                return NotFound();
+            }
+        }
+
+        [HttpGet("Accounts/{index:int}/Tags", Name = "GetAccountTags")]
+        [ProducesResponseType(typeof(List<AdminTagDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<List<AdminTagDto>>> GetAccountTags(int index, CancellationToken ct)
+        {
+            var api = CreateAccountApi(index, out var problem);
+            if (api == null) return problem!;
+
+            try
+            {
+                var tags = await api.GetAllTagsAsync(ct);
+                return Ok(tags
+                    .Select(t => new AdminTagDto { Id = t.Id, Value = t.Value })
+                    .OrderBy(t => t.Value, StringComparer.CurrentCultureIgnoreCase)
+                    .ToList());
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                _logger.LogWarning("Could not list tags for account {index}: {message}", index, ex.Message);
+                return Problem(detail: $"Could not load tags from Immich: {ex.Message}", statusCode: StatusCodes.Status502BadGateway);
+            }
+        }
+
+        private ImmichApi? CreateAccountApi(int index, out ActionResult? problem)
+        {
+            var accounts = _settingsService.GetRawSettings().AccountsImpl.ToList();
+            if (index < 0 || index >= accounts.Count)
+            {
+                problem = Problem(detail: "No such account. Save your settings first.", statusCode: StatusCodes.Status404NotFound);
+                return null;
+            }
+
+            var account = accounts[index];
+            try
+            {
+                account.ValidateAndInitialize(); // resolves ApiKeyFile
+            }
+            catch (Exception ex)
+            {
+                problem = Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
+                return null;
+            }
+
+            var httpClient = _httpClientFactory.CreateClient(ImmichApiHttpClientExtensions.ImmichApiAccountClient);
+            httpClient.UseApiKey(account.ApiKey);
+            problem = null;
+            return new ImmichApi(account.ImmichServerUrl, httpClient);
         }
     }
 }

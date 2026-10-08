@@ -151,6 +151,13 @@ export const generalSections: SectionDef[] = [
 
 export const accountFields: FieldDef<ServerAccountSettings>[] = [
 	{
+		key: 'name',
+		label: 'Name',
+		type: 'text',
+		placeholder: 'e.g. Mom',
+		help: 'Just a label so you can tell accounts apart.'
+	},
+	{
 		key: 'immichServerUrl',
 		label: 'Immich server URL',
 		type: 'text',
@@ -171,9 +178,5 @@ export const accountFields: FieldDef<ServerAccountSettings>[] = [
 	{ key: 'imagesFromDays', label: 'Images from (days back)', type: 'number' },
 	{ key: 'rating', label: 'Minimum rating', type: 'number', min: 1, max: 5 },
 	{ key: 'imagesFromDate', label: 'Images from date', type: 'date' },
-	{ key: 'imagesUntilDate', label: 'Images until date', type: 'date' },
-	{ key: 'albums', label: 'Albums', type: 'guid-list', help: 'One ID per line.' },
-	{ key: 'excludedAlbums', label: 'Excluded albums', type: 'guid-list', help: 'One ID per line.' },
-	{ key: 'people', label: 'People', type: 'guid-list', help: 'One ID per line.' },
-	{ key: 'tags', label: 'Tags', type: 'list', help: 'One tag per line.' }
+	{ key: 'imagesUntilDate', label: 'Images until date', type: 'date' }
 ];

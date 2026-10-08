@@ -78,6 +78,8 @@ public class GeneralSettings : IGeneralSettings
 
 public class ServerAccountSettings : IAccountSettings
 {
+    /// <summary>Friendly label shown in the admin UI. Purely cosmetic.</summary>
+    public string? Name { get; set; }
     public string ImmichServerUrl { get; set; } = string.Empty;
     public string ApiKey { get; set; } = string.Empty;
     public string? ApiKeyFile { get; set; } = null;

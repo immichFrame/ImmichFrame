@@ -4,6 +4,7 @@
 	import { slideshowStore } from '$lib/stores/slideshow.store';
 	import { clientIdentifierStore, authSecretStore } from '$lib/stores/persist.store';
 	import { onDestroy, onMount, setContext, tick } from 'svelte';
+	import { get } from 'svelte/store';
 	import OverlayControls from '../elements/overlay-controls.svelte';
 	import AssetComponent from '../elements/asset-component.svelte';
 	import type AssetComponentInstance from '../elements/asset-component.svelte';
@@ -32,6 +33,7 @@
 	const VIDEO_STALL_MS = 15000;
 	const CURSOR_HIDE_MS = 2000;
 	const RELOAD_ON_ERROR_MS = 30000;
+	const CONFIG_REFRESH_MS = 2 * 60 * 1000;
 
 	let assetHistory: api.AssetResponseDto[] = $state([]);
 	let assetBacklog: api.AssetResponseDto[] = $state([]);
@@ -72,6 +74,7 @@
 	let unsubscribeRestart: () => void;
 	let unsubscribeStop: () => void;
 	let refreshInterval: number;
+	let configRefreshInterval: number;
 
 	let cursorVisible = $state(true);
 
@@ -421,6 +424,19 @@
 		}
 	}
 
+	// A frame can sit on this page for weeks, so pick up settings changed in the admin UI
+	// without needing a reload. A failed fetch keeps the current config.
+	async function refreshConfig() {
+		try {
+			const res = await api.getConfig({ clientIdentifier: get(clientIdentifierStore) });
+			if (res.status == 200 && JSON.stringify(res.data) !== JSON.stringify(get(configStore))) {
+				configStore.ps(res.data);
+			}
+		} catch {
+			// server briefly unreachable; try again next tick
+		}
+	}
+
 	// The configured theme applies to the slideshow only — the admin UI keeps
 	// the @immich/ui defaults.
 	$effect(() => applyFrameColors($configStore));
@@ -434,6 +450,8 @@
 		refreshInterval = window.setInterval(() => {
 			if (error) window.location.reload();
 		}, RELOAD_ON_ERROR_MS);
+
+		configRefreshInterval = window.setInterval(refreshConfig, CONFIG_REFRESH_MS);
 
 		unsubscribeRestart = restartProgress.subscribe((value) => {
 			if (value) {
@@ -455,6 +473,7 @@
 			window.removeEventListener('mousemove', showCursor);
 			window.removeEventListener('click', showCursor);
 			window.clearInterval(refreshInterval);
+			window.clearInterval(configRefreshInterval);
 			window.clearTimeout(timeoutId);
 			window.clearTimeout(videoStallTimeout);
 			window.clearTimeout(watchdogTimer);

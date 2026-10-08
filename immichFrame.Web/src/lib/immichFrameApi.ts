@@ -68,6 +68,8 @@ export type GeneralSettings = {
     adminPassword?: string | null;
 };
 export type ServerAccountSettings = {
+    /** Friendly label shown in the admin UI. Purely cosmetic. */
+    name?: string | null;
     immichServerUrl?: string | null;
     apiKey?: string | null;
     apiKeyFile?: string | null;
@@ -87,6 +89,23 @@ export type ServerAccountSettings = {
 export type ServerSettings = {
     General?: GeneralSettings;
     Accounts?: ServerAccountSettings[] | null;
+};
+export type AdminAlbumDto = {
+    id?: string;
+    name?: string | null;
+    assetCount?: number;
+    shared?: boolean;
+    /** Asset to use as the cover; fetch it from the account's thumbnail endpoint. */
+    thumbnailAssetId?: string | null;
+};
+export type AdminPersonDto = {
+    id?: string;
+    name?: string | null;
+};
+export type AdminTagDto = {
+    id?: string;
+    /** The full tag path (e.g. "Family/Kids"); this is what the Tags setting stores. */
+    value?: string | null;
 };
 export type AccountTestResultDto = {
     success?: boolean;
@@ -366,6 +385,48 @@ export function testAccount(serverAccountSettings?: ServerAccountSettings, opts?
         method: "POST",
         body: serverAccountSettings
     }));
+}
+export function getAccountAlbums(index: number, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: AdminAlbumDto[];
+    } | {
+        status: 400;
+        data: ProblemDetails;
+    } | {
+        status: 404;
+        data: ProblemDetails;
+    }>(`/api/Admin/Accounts/${encodeURIComponent(index)}/Albums`, {
+        ...opts
+    });
+}
+export function getAccountPeople(index: number, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: AdminPersonDto[];
+    } | {
+        status: 400;
+        data: ProblemDetails;
+    } | {
+        status: 404;
+        data: ProblemDetails;
+    }>(`/api/Admin/Accounts/${encodeURIComponent(index)}/People`, {
+        ...opts
+    });
+}
+export function getAccountTags(index: number, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: AdminTagDto[];
+    } | {
+        status: 400;
+        data: ProblemDetails;
+    } | {
+        status: 404;
+        data: ProblemDetails;
+    }>(`/api/Admin/Accounts/${encodeURIComponent(index)}/Tags`, {
+        ...opts
+    });
 }
 export function getAssets({ clientIdentifier }: {
     clientIdentifier?: string;

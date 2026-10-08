@@ -38,7 +38,7 @@
 <Card>
 	<CardHeader>
 		<div class="flex items-center justify-between">
-			<CardTitle>Account {index + 1}</CardTitle>
+			<CardTitle>{account.name?.trim() || `Account ${index + 1}`}</CardTitle>
 			<Button
 				leadingIcon={mdiDelete}
 				variant="outline"

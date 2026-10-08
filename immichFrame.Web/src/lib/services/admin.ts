@@ -32,6 +32,37 @@ export function testAccount(account: ServerAccountSettings) {
 	return api.testAccount(account, authOpts());
 }
 
+export function getAlbums(accountIndex: number) {
+	return api.getAccountAlbums(accountIndex, authOpts());
+}
+
+export function getPeople(accountIndex: number) {
+	return api.getAccountPeople(accountIndex, authOpts());
+}
+
+export function getTags(accountIndex: number) {
+	return api.getAccountTags(accountIndex, authOpts());
+}
+
+// <img> can't send the admin Authorization header, so thumbnails are fetched as
+// blobs and handed to the tile as object URLs. Returns null when unavailable.
+async function fetchImage(path: string): Promise<string | null> {
+	try {
+		const res = await fetch(path, authOpts());
+		return res.ok ? URL.createObjectURL(await res.blob()) : null;
+	} catch {
+		return null;
+	}
+}
+
+export function fetchAssetThumbnail(accountIndex: number, assetId: string) {
+	return fetchImage(`/api/Admin/Accounts/${accountIndex}/Assets/${assetId}/Thumbnail`);
+}
+
+export function fetchPersonThumbnail(accountIndex: number, personId: string) {
+	return fetchImage(`/api/Admin/Accounts/${accountIndex}/People/${personId}/Thumbnail`);
+}
+
 // Drop empty values so the server falls back to its defaults instead of
 // receiving empty strings / nulls for unset fields. The PUT replaces the whole
 // document, so an omitted key deserialises to the C# default.
