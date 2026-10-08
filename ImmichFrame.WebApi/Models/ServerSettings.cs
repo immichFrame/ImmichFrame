@@ -91,6 +91,7 @@ public class ServerAccountSettings : IAccountSettings
     public DateTime? ImagesUntilDate { get; set; }
     public List<Guid> Albums { get; set; } = new();
     public List<Guid> ExcludedAlbums { get; set; } = new();
+    public bool HideAssetsInOtherAlbums { get; set; } = false;
     public List<Guid> People { get; set; } = new();
     public List<string> Tags { get; set; } = new();
     public int? Rating { get; set; }
