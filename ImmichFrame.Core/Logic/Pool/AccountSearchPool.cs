@@ -14,15 +14,14 @@ public class AccountSearchPool(IApiCache apiCache, ImmichApi immichApi, IAccount
             return 0;
         }
 
-        var filter = SearchFilters.ForAccount(accountSettings, tagIds, await ResolveExcludedAlbumIds(ct));
-        return await apiCache.GetOrAddAsync("stats", async () =>
+        return await apiCache.GetOrAddAsync("stats", () => SearchWithCurrentAlbums(async excludedAlbumIds =>
         {
             var stats = await immichApi.SearchAssetStatisticsAsync(new StatisticsSearchDto
             {
-                Filter = filter
+                Filter = SearchFilters.ForAccount(accountSettings, tagIds, excludedAlbumIds)
             }, ct);
             return stats.Total;
-        });
+        }, ct));
     }
 
     public async Task<IEnumerable<AssetResponseDto>> GetAssets(int requested, CancellationToken ct = default)
@@ -33,13 +32,37 @@ public class AccountSearchPool(IApiCache apiCache, ImmichApi immichApi, IAccount
             return [];
         }
 
-        return await immichApi.SearchRandomAsync(new RandomSearchDto
+        return await SearchWithCurrentAlbums<IEnumerable<AssetResponseDto>>(async excludedAlbumIds =>
+            await immichApi.SearchRandomAsync(new RandomSearchDto
+            {
+                Size = requested,
+                WithExif = true,
+                WithPeople = true,
+                Filter = SearchFilters.ForAccount(accountSettings, tagIds, excludedAlbumIds)
+            }, ct), ct);
+    }
+
+    // Without selected albums every album would count as "other", hiding every asset in an album
+    private bool HidesOtherAlbums => accountSettings.HideAssetsInOtherAlbums && accountSettings.Albums is { Count: > 0 };
+
+    private string AllAlbumsCacheKey => $"allAlbums_{accountSettings.ImmichServerUrl}";
+
+    /// <summary>
+    /// Runs a search with the resolved excluded albums. Immich rejects the whole search with a 400
+    /// when any album id in the filter is no longer accessible, so a cached album list that still
+    /// names a deleted or unshared album is dropped and the search is retried once with a fresh one.
+    /// </summary>
+    private async Task<T> SearchWithCurrentAlbums<T>(Func<IReadOnlyList<Guid>, Task<T>> search, CancellationToken ct)
+    {
+        try
         {
-            Size = requested,
-            WithExif = true,
-            WithPeople = true,
-            Filter = SearchFilters.ForAccount(accountSettings, tagIds, await ResolveExcludedAlbumIds(ct))
-        }, ct);
+            return await search(await ResolveExcludedAlbumIds(ct));
+        }
+        catch (ApiException ex) when (ex.StatusCode == 400 && HidesOtherAlbums)
+        {
+            apiCache.Remove(AllAlbumsCacheKey);
+            return await search(await ResolveExcludedAlbumIds(ct));
+        }
     }
 
     /// <summary>
@@ -51,14 +74,13 @@ public class AccountSearchPool(IApiCache apiCache, ImmichApi immichApi, IAccount
     {
         var excluded = accountSettings.ExcludedAlbums ?? [];
 
-        // Without selected albums every album would count as "other", hiding every asset in an album
-        if (!accountSettings.HideAssetsInOtherAlbums || accountSettings.Albums is not { Count: > 0 } selected)
+        if (!HidesOtherAlbums)
         {
             return excluded;
         }
 
-        var selectedIds = selected.ToHashSet();
-        var allAlbums = await apiCache.GetOrAddAsync($"allAlbums_{accountSettings.ImmichServerUrl}",
+        var selectedIds = accountSettings.Albums.ToHashSet();
+        var allAlbums = await apiCache.GetOrAddAsync(AllAlbumsCacheKey,
             () => immichApi.GetAllAlbumsAsync(null, null, null, null, null, ct));
 
         return excluded
