@@ -2,6 +2,7 @@
   "Accounts": [
     {
       "ImmichServerUrl": "Account1.ImmichServerUrl_TEST",
+      "Name": "Account1.Name_TEST",
       "ApiKey": "Account1.ApiKey_TEST",
       "ImagesFromDate": "2020-01-02",
       "ShowMemories": true,
@@ -22,6 +23,7 @@
     },
     {
       "ImmichServerUrl": "Account2.ImmichServerUrl_TEST",
+      "Name": "Account2.Name_TEST",
       "ApiKey": "Account2.ApiKey_TEST",
       "ImagesFromDate": "2020-01-02",
       "ShowMemories": true,
