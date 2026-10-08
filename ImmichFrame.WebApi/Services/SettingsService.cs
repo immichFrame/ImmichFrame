@@ -60,6 +60,9 @@ public class SettingsService : ISettingsProvider
     }
 
     public IServerSettings Current => _current;
+
+    private long _contentRevision;
+    public long ContentRevision => Interlocked.Read(ref _contentRevision);
     public event EventHandler<SettingsChangedEventArgs>? SettingsChanged;
 
     public async Task InitializeAsync()
@@ -242,6 +245,7 @@ public class SettingsService : ISettingsProvider
         _raw = Clone(raw);
         _current = validated;
         _isUnconfigured = false;
+        if (accountsChanged) Interlocked.Increment(ref _contentRevision);
 
         _logger.LogInformation("Settings updated (accounts changed: {accountsChanged})", accountsChanged);
         SettingsChanged?.Invoke(this, new SettingsChangedEventArgs
@@ -252,6 +256,30 @@ public class SettingsService : ISettingsProvider
         });
 
         return validated;
+    }
+
+    /// <summary>
+    /// Throws away everything cached from Immich (album/people/tag lists, asset pools) and tells
+    /// connected slideshows to drop their queued photos, so the next photo comes from a fresh query.
+    /// </summary>
+    public async Task RefreshContentAsync()
+    {
+        await _updateLock.WaitAsync();
+        try
+        {
+            Interlocked.Increment(ref _contentRevision);
+            _logger.LogInformation("Photo refresh requested from the admin UI");
+            SettingsChanged?.Invoke(this, new SettingsChangedEventArgs
+            {
+                NewSettings = _current,
+                AccountsChanged = true,
+                GeneralChanged = false
+            });
+        }
+        finally
+        {
+            _updateLock.Release();
+        }
     }
 
     /// <summary>The raw settings for editing: secrets included, ApiKeyFile unresolved.</summary>

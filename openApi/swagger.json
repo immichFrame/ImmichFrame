@@ -1045,6 +1045,19 @@
           }
         }
       }
+    },
+    "/api/Admin/RefreshPhotos": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "operationId": "RefreshPhotos",
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1604,6 +1617,11 @@
           "language": {
             "type": "string",
             "nullable": true
+          },
+          "contentRevision": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Changes when the photo selection changed; clients drop their queued photos when it does."
           }
         },
         "additionalProperties": false

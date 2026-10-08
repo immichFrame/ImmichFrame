@@ -169,6 +169,43 @@ namespace ImmichFrame.WebApi.Tests.Services
         }
 
         [Test]
+        public async Task RefreshContentAsync_BumpsRevisionAndFlagsAccounts()
+        {
+            WriteSettingsJson(ValidV2Json);
+            var service = CreateService();
+            await service.InitializeAsync();
+
+            SettingsChangedEventArgs? received = null;
+            service.SettingsChanged += (_, args) => received = args;
+            var before = service.ContentRevision;
+
+            await service.RefreshContentAsync();
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(service.ContentRevision, Is.GreaterThan(before));
+                Assert.That(received, Is.Not.Null);
+                Assert.That(received!.AccountsChanged, Is.True);
+                Assert.That(received.GeneralChanged, Is.False);
+            });
+        }
+
+        [Test]
+        public async Task UpdateAsync_GeneralOnlyChange_DoesNotBumpContentRevision()
+        {
+            WriteSettingsJson(ValidV2Json);
+            var service = CreateService();
+            await service.InitializeAsync();
+            var before = service.ContentRevision;
+
+            var settings = service.GetRawSettings();
+            settings.GeneralSettingsImpl!.Interval = 60;
+            await service.UpdateAsync(settings);
+
+            Assert.That(service.ContentRevision, Is.EqualTo(before));
+        }
+
+        [Test]
         public async Task UpdateAsync_GeneralOnlyChange_DoesNotFlagAccounts()
         {
             WriteSettingsJson(ValidV2Json);

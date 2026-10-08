@@ -430,6 +430,11 @@
 		try {
 			const res = await api.getConfig({ clientIdentifier: get(clientIdentifierStore) });
 			if (res.status == 200 && JSON.stringify(res.data) !== JSON.stringify(get(configStore))) {
+				// The photo selection changed (or a refresh was requested): the queued photos may
+				// no longer match, so drop them and fetch a fresh batch for the next slide.
+				if (res.data.contentRevision !== get(configStore).contentRevision) {
+					assetBacklog = [];
+				}
 				configStore.ps(res.data);
 			}
 		} catch {

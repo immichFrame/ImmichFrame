@@ -32,6 +32,10 @@ export function testAccount(account: ServerAccountSettings) {
 	return api.testAccount(account, authOpts());
 }
 
+export function refreshPhotos() {
+	return api.refreshPhotos(authOpts());
+}
+
 export function getAlbums(accountIndex: number) {
 	return api.getAccountAlbums(accountIndex, authOpts());
 }

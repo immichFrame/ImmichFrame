@@ -160,6 +160,18 @@ namespace ImmichFrame.WebApi.Controllers
             });
         }
 
+        /// <summary>
+        /// Drops all cached Immich data and makes open slideshows discard their queued photos
+        /// (they notice within a couple of minutes).
+        /// </summary>
+        [HttpPost("RefreshPhotos", Name = "RefreshPhotos")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> RefreshPhotos()
+        {
+            await _settingsService.RefreshContentAsync();
+            return NoContent();
+        }
+
         [HttpPost("Settings/TestAccount", Name = "TestAccount")]
         public async Task<AccountTestResultDto> TestAccount([FromBody] ServerAccountSettings account)
         {

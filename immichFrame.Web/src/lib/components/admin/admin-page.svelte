@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
-	import { mdiContentSave, mdiLogout, mdiPlus } from '@mdi/js';
+	import { mdiContentSave, mdiLogout, mdiPlus, mdiRefresh } from '@mdi/js';
 	import {
 		Alert,
 		AppShell,
@@ -156,6 +156,36 @@
 		accountsVersion++;
 	}
 
+	let refreshing = $state(false);
+	let refreshNotice: { ok: boolean; text: string } | null = $state(null);
+
+	// Makes the server forget what it cached from Immich and every open frame drop its
+	// queued photos, so changes (and newly added photos) show up without waiting.
+	async function refreshPhotos() {
+		refreshing = true;
+		refreshNotice = null;
+		try {
+			const res = await adminApi.refreshPhotos();
+			if (res.status == 204) {
+				refreshNotice = {
+					ok: true,
+					text: 'Done. Frames will switch to fresh photos within a couple of minutes.'
+				};
+				contentVersion++;
+			} else if (res.status == 401) {
+				adminPasswordStore.set(null);
+				loginError = 'Session expired. Sign in again.';
+				pageState = 'login';
+			} else {
+				refreshNotice = { ok: false, text: 'Could not refresh. Check the server logs.' };
+			}
+		} catch {
+			refreshNotice = { ok: false, text: 'Could not refresh. Is the server reachable?' };
+		} finally {
+			refreshing = false;
+		}
+	}
+
 	async function save() {
 		saving = true;
 		saveError = '';
@@ -288,6 +318,31 @@
 					{:else}
 						{@const index = Math.min(contentAccount, accounts.length - 1)}
 						<div class="flex flex-col gap-4">
+							<div class="flex flex-wrap items-center justify-between gap-3">
+								<Text color="muted" size="small">
+									Pick what the frame shows, then press Save. Changes can take a few minutes to
+									reach the frame.
+								</Text>
+								<Button
+									leadingIcon={mdiRefresh}
+									variant="outline"
+									color="secondary"
+									size="small"
+									loading={refreshing}
+									onclick={refreshPhotos}
+								>
+									Refresh photos now
+								</Button>
+							</div>
+							{#if refreshNotice}
+								<Alert
+									color={refreshNotice.ok ? 'success' : 'danger'}
+									closable
+									onClose={() => (refreshNotice = null)}
+								>
+									{refreshNotice.text}
+								</Alert>
+							{/if}
 							{#if accounts.length > 1}
 								<div class="flex flex-wrap gap-2">
 									{#each accounts as account, i (i)}

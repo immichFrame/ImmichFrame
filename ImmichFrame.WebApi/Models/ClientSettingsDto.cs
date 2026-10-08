@@ -2,8 +2,10 @@ using ImmichFrame.Core.Interfaces;
 
 namespace ImmichFrame.WebApi.Models;
 
-public class ClientSettingsDto(IClientSettings settings) : IClientSettings
+public class ClientSettingsDto(IClientSettings settings, long contentRevision = 0) : IClientSettings
 {
+    /// <summary>Changes when the photo selection changed; clients drop their queued photos when it does.</summary>
+    public long ContentRevision => contentRevision;
     public int Interval => settings.Interval;
     public double TransitionDuration => settings.TransitionDuration;
     public bool DownloadImages => settings.DownloadImages;

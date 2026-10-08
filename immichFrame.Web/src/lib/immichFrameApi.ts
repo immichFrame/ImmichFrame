@@ -285,6 +285,8 @@ export type IAppointment = {
     location?: string | null;
 };
 export type ClientSettingsDto = {
+    /** Changes when the photo selection changed; clients drop their queued photos when it does. */
+    contentRevision?: number;
     interval?: number;
     transitionDuration?: number;
     downloadImages?: boolean;
@@ -426,6 +428,12 @@ export function getAccountTags(index: number, opts?: Oazapfts.RequestOpts) {
         data: ProblemDetails;
     }>(`/api/Admin/Accounts/${encodeURIComponent(index)}/Tags`, {
         ...opts
+    });
+}
+export function refreshPhotos(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchText("/api/Admin/RefreshPhotos", {
+        ...opts,
+        method: "POST"
     });
 }
 export function getAssets({ clientIdentifier }: {
