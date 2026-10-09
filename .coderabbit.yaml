@@ -1,3 +1,6 @@
+reviews:
+  auto_review:
+    enabled: false
 issue_enrichment:
   auto_enrich:
     enabled: false
