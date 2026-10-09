@@ -35,6 +35,7 @@
     "ImagePan": false,
     "ImageFill": false,
     "PlayAudio": false,
+    "TouchZoneControls": false,
     "Layout": "splitview"
   },
   "Accounts": [

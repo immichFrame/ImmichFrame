@@ -115,6 +115,8 @@ General:
   ImageFill: false # boolean
   # Whether to play audio for videos that have audio tracks.
   PlayAudio: false # boolean
+  # Replace the on-screen buttons with tap zones: left third = back, middle third = pause/play, right third = next.
+  TouchZoneControls: false # boolean
   # Allow two portrait images to be displayed next to each other
   Layout: "splitview" # single | splitview
 

@@ -32,6 +32,7 @@ public class ClientSettingsDto(IClientSettings settings, long contentRevision = 
     public bool ImagePan => settings.ImagePan;
     public bool ImageFill => settings.ImageFill;
     public bool PlayAudio => settings.PlayAudio;
+    public bool TouchZoneControls => settings.TouchZoneControls;
     public string Layout => settings.Layout;
     public string Language => settings.Language;
 }

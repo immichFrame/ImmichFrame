@@ -45,6 +45,7 @@ public class LiveGeneralSettings(ISettingsProvider _provider) : IGeneralSettings
     public bool ImagePan => Current.ImagePan;
     public bool ImageFill => Current.ImageFill;
     public bool PlayAudio => Current.PlayAudio;
+    public bool TouchZoneControls => Current.TouchZoneControls;
     public string Layout => Current.Layout;
     public string Language => Current.Language;
     public List<string> Webcalendars => Current.Webcalendars;

@@ -26,7 +26,7 @@
 	import AdminLogin from './admin-login.svelte';
 	import AdminSetup from './admin-setup.svelte';
 	import SettingsSection from './settings-section.svelte';
-	import SettingField from './setting-field.svelte';
+	import SettingsGrid from './settings-grid.svelte';
 	import AccountEditor from './account-editor.svelte';
 	import ContentPicker from './content-picker.svelte';
 
@@ -45,7 +45,27 @@
 	let saveSuccess = $state(false);
 	let saveWarnings: string[] = $state([]);
 
-	let tab: Tab = $state('content');
+	const TAB_KEY = 'adminTab';
+
+	function storedTab(): Tab | null {
+		try {
+			const value = localStorage.getItem(TAB_KEY);
+			return value === 'content' || value === 'settings' ? value : null;
+		} catch {
+			return null;
+		}
+	}
+
+	let tab: Tab = $state(storedTab() ?? 'content');
+
+	// Remember the tab across page refreshes
+	$effect(() => {
+		try {
+			localStorage.setItem(TAB_KEY, tab);
+		} catch {
+			// storage unavailable; the tab just won't be remembered
+		}
+	});
 	let contentAccount = $state(0);
 
 	// What the server knows about each account (url + credentials) as of the last load/save.
@@ -122,7 +142,8 @@
 				settings = { General: res.data.General ?? {}, Accounts: res.data.Accounts ?? [] };
 				accountsVersion++;
 				markSaved();
-				tab = settings.Accounts?.length ? 'content' : 'settings';
+				// "What to show" needs an account to browse, so without one always start on settings
+				if (!settings.Accounts?.length) tab = 'settings';
 				contentAccount = 0;
 				pageState = 'editor';
 				loginError = '';
@@ -372,11 +393,7 @@
 					<div class="flex flex-col gap-4">
 						{#each generalSections as section (section.title)}
 							<SettingsSection title={section.title} open={section.title === 'Display'}>
-								<div class="grid gap-x-8 sm:grid-cols-2">
-									{#each section.fields as field (field.key)}
-										<SettingField {field} target={settings.General ?? {}} />
-									{/each}
-								</div>
+								<SettingsGrid fields={section.fields} target={settings.General ?? {}} />
 							</SettingsSection>
 						{/each}
 

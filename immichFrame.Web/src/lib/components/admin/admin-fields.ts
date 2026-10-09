@@ -31,6 +31,14 @@ export interface SectionDef<T = GeneralSettings> {
 	fields: FieldDef<T>[];
 }
 
+// Non-checkbox fields first, then the checkboxes together (order within each group is kept).
+export function checkboxesLast<T>(fields: FieldDef<T>[]): FieldDef<T>[] {
+	return [
+		...fields.filter((f) => f.type !== 'checkbox'),
+		...fields.filter((f) => f.type === 'checkbox')
+	];
+}
+
 export const generalSections: SectionDef[] = [
 	{
 		title: 'Display',
@@ -49,28 +57,33 @@ export const generalSections: SectionDef[] = [
 				type: 'select',
 				options: ['none', 'solid', 'transition', 'blur']
 			},
+			{ key: 'primaryColor', label: 'Primary color', type: 'text', placeholder: '#f5deb3' },
+			{ key: 'secondaryColor', label: 'Secondary color', type: 'text', placeholder: '#0f0f0f' },
+			{ key: 'baseFontSize', label: 'Base font size', type: 'text', placeholder: '17px' },
+			{ key: 'language', label: 'Language', type: 'text', placeholder: 'en' },
 			{ key: 'imageZoom', label: 'Image zoom', type: 'checkbox' },
 			{ key: 'imagePan', label: 'Image pan', type: 'checkbox' },
 			{ key: 'imageFill', label: 'Image fill', type: 'checkbox' },
 			{ key: 'playAudio', label: 'Play audio (videos)', type: 'checkbox' },
-			{ key: 'showProgressBar', label: 'Show progress bar', type: 'checkbox' },
-			{ key: 'primaryColor', label: 'Primary color', type: 'text', placeholder: '#f5deb3' },
-			{ key: 'secondaryColor', label: 'Secondary color', type: 'text', placeholder: '#0f0f0f' },
-			{ key: 'baseFontSize', label: 'Base font size', type: 'text', placeholder: '17px' },
-			{ key: 'language', label: 'Language', type: 'text', placeholder: 'en' }
+			{
+				key: 'touchZoneControls',
+				label: 'Tap zones instead of buttons',
+				type: 'checkbox'
+			},
+			{ key: 'showProgressBar', label: 'Show progress bar', type: 'checkbox' }
 		]
 	},
 	{
 		title: 'Clock & Metadata',
 		fields: [
 			{ key: 'showClock', label: 'Show clock', type: 'checkbox' },
-			{ key: 'clockFormat', label: 'Clock format', type: 'text', placeholder: 'hh:mm' },
 			{
 				key: 'clockDateFormat',
 				label: 'Clock date format',
 				type: 'text',
 				placeholder: 'eee, MMM d'
 			},
+			{ key: 'clockFormat', label: 'Clock format', type: 'text', placeholder: 'hh:mm' },
 			{ key: 'showPhotoDate', label: 'Show photo date', type: 'checkbox' },
 			{
 				key: 'photoDateFormat',

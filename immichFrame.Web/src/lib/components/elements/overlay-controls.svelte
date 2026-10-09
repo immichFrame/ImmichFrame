@@ -13,6 +13,7 @@
 		status: ProgressBarStatus;
 		overlayVisible: boolean;
 		infoVisible: boolean;
+		touchZones?: boolean;
 		next: () => void;
 		back: () => void;
 		pause: () => void;
@@ -23,6 +24,7 @@
 		status = $bindable(),
 		overlayVisible,
 		infoVisible = $bindable(),
+		touchZones = false,
 		next,
 		back,
 		pause,
@@ -70,7 +72,32 @@
 
 <svelte:window use:shortcuts={shortcutList} />
 
-{#if overlayVisible}
+{#if touchZones}
+	<!-- Tap zones: left third = back, middle third = pause/play, right third = next. -->
+	<div class="fixed inset-0 z-100 grid grid-cols-3 {infoVisible ? 'hidden' : ''}">
+		<button
+			id="zoneback"
+			type="button"
+			aria-label="Back"
+			class="cursor-default bg-transparent"
+			onclick={back}
+		></button>
+		<button
+			id="zonepause"
+			type="button"
+			aria-label={status == ProgressBarStatus.Paused ? 'Play' : 'Pause'}
+			class="cursor-default bg-transparent"
+			onclick={pause}
+		></button>
+		<button
+			id="zonenext"
+			type="button"
+			aria-label="Next"
+			class="cursor-default bg-transparent"
+			onclick={next}
+		></button>
+	</div>
+{:else if overlayVisible}
 	<div class="inset-0 z-100 grid grid-cols-3 gap-2 {infoVisible ? 'hidden' : ''}">
 		<div id="overlayback" class="group grid place-items-center">
 			<button class="opacity-0 group-hover:opacity-100 text-frame-primary" onclick={back}

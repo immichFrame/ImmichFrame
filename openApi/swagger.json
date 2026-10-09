@@ -1610,6 +1610,9 @@
           "playAudio": {
             "type": "boolean"
           },
+          "touchZoneControls": {
+            "type": "boolean"
+          },
           "layout": {
             "type": "string",
             "nullable": true
@@ -1866,6 +1869,9 @@
             "type": "boolean"
           },
           "playAudio": {
+            "type": "boolean"
+          },
+          "touchZoneControls": {
             "type": "boolean"
           },
           "layout": {

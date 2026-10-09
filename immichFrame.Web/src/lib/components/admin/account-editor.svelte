@@ -4,7 +4,7 @@
 	import * as adminApi from '$lib/services/admin';
 	import type { ServerAccountSettings } from '$lib/immichFrameApi';
 	import { accountFields } from './admin-fields';
-	import SettingField from './setting-field.svelte';
+	import SettingsGrid from './settings-grid.svelte';
 
 	interface Props {
 		account: ServerAccountSettings;
@@ -51,11 +51,11 @@
 		</div>
 	</CardHeader>
 	<CardBody>
-		<div class="grid gap-x-8 sm:grid-cols-2">
-			{#each accountFields as field (field.key)}
-				<SettingField {field} target={account as Record<string, unknown>} />
-			{/each}
-		</div>
+		<SettingsGrid
+			fields={accountFields}
+			checkboxLabel="Include in the slideshow"
+			target={account as Record<string, unknown>}
+		/>
 
 		<div class="mt-4 flex flex-col gap-3">
 			<Button

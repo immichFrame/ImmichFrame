@@ -610,6 +610,7 @@
 			}}
 			bind:status={progressBarStatus}
 			bind:infoVisible
+			touchZones={$configStore.touchZoneControls}
 			overlayVisible={cursorVisible}
 		/>
 

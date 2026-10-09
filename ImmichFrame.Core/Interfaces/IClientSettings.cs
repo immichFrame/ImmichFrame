@@ -28,6 +28,7 @@ namespace ImmichFrame.Core.Interfaces
         public bool ImagePan { get; }
         public bool ImageFill { get; }
         public bool PlayAudio { get; }
+        public bool TouchZoneControls { get; }
         public string Layout { get; }
         public string Language { get; }
     }
