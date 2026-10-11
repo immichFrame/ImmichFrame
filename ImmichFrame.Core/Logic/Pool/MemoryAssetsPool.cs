@@ -39,6 +39,11 @@ public class MemoryAssetsPool(ImmichApi immichApi, IAccountSettings accountSetti
                 assets = assets.Where(a => a.Type == AssetTypeEnum.IMAGE).ToList();
             }
 
+            // Memories come from their own endpoint, not the search, so the account's
+            // date window has to be applied here. Filtered before the asset-info
+            // lookups below, so excluded assets cost no extra API calls.
+            assets = assets.Where(a => SearchFilters.IsWithinTakenAtWindow(accountSettings, a.FileCreatedAt)).ToList();
+
             foreach (var asset in assets)
             {
                 if (asset.ExifInfo == null)
