@@ -9,12 +9,24 @@ namespace ImmichFrame.Core.Helpers;
 /// </summary>
 public class RedirectLoggingHandler(ILogger<RedirectLoggingHandler> logger) : DelegatingHandler
 {
+    /// <summary>
+    /// Set on a request whose redirect is part of the Immich API contract (e.g. <c>size=fullsize</c>
+    /// answering with a redirect to the preview), so it is logged at Debug instead of as a misconfiguration.
+    /// </summary>
+    public static readonly HttpRequestOptionsKey<bool> RedirectExpected = new("ImmichFrame.RedirectExpected");
+
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
         CancellationToken cancellationToken)
     {
         var response = await base.SendAsync(request, cancellationToken);
 
-        if (IsRedirect(response.StatusCode))
+        if (IsRedirect(response.StatusCode) &&
+            request.Options.TryGetValue(RedirectExpected, out var expected) && expected)
+        {
+            logger.LogDebug("Immich server answered {Method} {Url} with an expected {StatusCode} to {Location}.",
+                request.Method, request.RequestUri, (int)response.StatusCode, response.Headers.Location);
+        }
+        else if (IsRedirect(response.StatusCode))
         {
             logger.LogWarning(
                 "Immich server answered {Method} {Url} with {StatusCode}, redirecting to {Location}. " +

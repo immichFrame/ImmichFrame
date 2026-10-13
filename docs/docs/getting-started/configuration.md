@@ -153,6 +153,12 @@ General:
   PlayAudio: false # boolean
   # Allow two portrait images to be displayed next to each other
   Layout: "splitview" # single | splitview
+  # Which rendition of each photo the server fetches from Immich.
+  # preview: Immich's preview (1440 px on the short side by default, set in Immich's image settings).
+  # fullsize: the original when a browser can display it (JPEG, PNG, WebP, GIF, AVIF), otherwise
+  #   Immich's full-size image if Immich generates it ("Generate full-size image"), otherwise the preview.
+  # original: always the original file. HEIC and RAW originals may not display in a browser or WebView.
+  ImageSize: "preview" # preview | fullsize | original
 
 # multiple accounts permitted
 Accounts:
