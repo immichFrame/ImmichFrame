@@ -113,6 +113,50 @@ public class MemoryAssetsPoolTests
     }
 
     [Test]
+    public async Task LoadAssets_HandlesNullExifInfo_WhenAssetInfoHasNoExif()
+    {
+        // Arrange
+        var memoryYear = DateTime.Now.Year - 2;
+        var memories = CreateSampleImageMemories(1, 1, false, memoryYear); // Asset without ExifInfo
+        var assetId = memories[0].Assets.First().Id;
+
+        _mockImmichApi.Setup(x => x.SearchMemoriesAsync(It.IsAny<DateTimeOffset>(), null, null, null, null, null, null, null, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(memories);
+        _mockImmichApi.Setup(x => x.GetAssetInfoAsync(assetId, null, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new AssetResponseDto { Id = assetId, ExifInfo = null, People = new List<PersonResponseDto>() });
+
+        // Act
+        var resultAsset = (await _memoryAssetsPool.GetAssets(1, CancellationToken.None)).First();
+
+        // Assert
+        _mockImmichApi.Verify(x => x.GetAssetInfoAsync(assetId, null, null, It.IsAny<CancellationToken>()), Times.Once);
+        Assert.That(resultAsset.ExifInfo, Is.Not.Null);
+        Assert.That(resultAsset.ExifInfo.Description, Is.EqualTo("2 years ago"));
+    }
+
+    [Test]
+    public async Task LoadAssets_HandlesNullAssetInfo_WhenGetAssetInfoReturnsNull()
+    {
+        // Arrange
+        var memoryYear = DateTime.Now.Year - 2;
+        var memories = CreateSampleImageMemories(1, 1, false, memoryYear); // Asset without ExifInfo
+        var assetId = memories[0].Assets.First().Id;
+
+        _mockImmichApi.Setup(x => x.SearchMemoriesAsync(It.IsAny<DateTimeOffset>(), null, null, null, null, null, null, null, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(memories);
+        _mockImmichApi.Setup(x => x.GetAssetInfoAsync(assetId, null, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((AssetResponseDto)null!);
+
+        // Act
+        var resultAsset = (await _memoryAssetsPool.GetAssets(1, CancellationToken.None)).First();
+
+        // Assert
+        _mockImmichApi.Verify(x => x.GetAssetInfoAsync(assetId, null, null, It.IsAny<CancellationToken>()), Times.Once);
+        Assert.That(resultAsset.ExifInfo, Is.Not.Null);
+        Assert.That(resultAsset.ExifInfo.Description, Is.EqualTo("2 years ago"));
+    }
+
+    [Test]
     public async Task LoadAssets_DoesNotFetchAssetInfo_WhenExifInfoIsPresent()
     {
         // Arrange
