@@ -60,7 +60,7 @@ ImmichFrame follows a **two-tier companion architecture**:
 3. **Display Clients**: The screen(s) showing your photo frame:
    - **Web Browser / PWA**: Open `http://<immichframe-ip>:8080` on any browser, smart display, or Raspberry Pi.
    - **[Android App & Screensaver][github-android-repo]**: Dedicated app for Android tablets, Google TV, Android TV, and digital photo frames ([Google Play][play-store-link] or [GitHub Releases][github-android-releases]).
-   - **[Apple TV & iOS App][github-apple-repo]**: Available on the [Apple App Store][app-store-link] for Apple TV, iPad, and iPhone.
+   - **Apple TV & iOS App**: Available on the [Apple App Store][app-store-link] for Apple TV, iPad, and iPhone.
 
 ## 🚀 Quick Start
 
@@ -71,11 +71,13 @@ ImmichFrame follows a **two-tier companion architecture**:
        container_name: immichframe
        image: ghcr.io/immichframe/immichframe:latest
        restart: on-failure
+       volumes:
+         - PATH/TO/CONFIG:/app/Config
        ports:
          - "8080:8080"
        environment:
          TZ: "Europe/Berlin"
-         IMMICHFRAME_ADMIN_PASSWORD: "CHANGE_ME"
+         IMMICHFRAME_ADMIN_PASSWORD: "${IMMICHFRAME_ADMIN_PASSWORD:?Set a unique admin password before deployment}"
    ```
 2. **Configure Immich Connection**:
    Open `http://<immichframe-ip>:8080/admin` in your browser to sign in and enter your Immich server URL, API key, and slideshow preferences (or use a `Settings.yml`/`Settings.json` file).
@@ -125,5 +127,4 @@ For advanced configuration, weather overlays, and multi-user setups, check out t
 [play-store-link]: https://play.google.com/store/apps/details?id=com.immichframe.immichframe
 [github-android-repo]: https://github.com/immichFrame/ImmichFrame_Android
 [github-android-releases]: https://github.com/immichFrame/ImmichFrame_Android/releases
-[github-apple-repo]: https://github.com/immichFrame/ImmichFrame_Apple
 [app-store-link]: https://apps.apple.com/us/app/immichframe/id6742748077
