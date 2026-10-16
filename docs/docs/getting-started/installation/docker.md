@@ -20,9 +20,9 @@ Example configuration files:
 - [`Settings.json` example][example-json] — imported once on first start
 - [`.env` example][example-env] — admin password, config path and log level
 
-Starting without a settings file is fine: open the [admin UI](../admin-ui.md) at `/admin`,
-pick an admin password on the setup screen and configure everything there. Setting
-`IMMICHFRAME_ADMIN_PASSWORD` (as below) chooses that password up front instead.
+Starting without a settings file is fine. This Compose example requires
+`IMMICHFRAME_ADMIN_PASSWORD` before startup. Open the [admin UI](../admin-ui.md) at
+`/admin`, sign in with that password, and configure everything there.
 
 ---
 

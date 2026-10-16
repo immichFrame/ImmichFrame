@@ -72,7 +72,7 @@ ImmichFrame follows a **two-tier companion architecture**:
        image: ghcr.io/immichframe/immichframe:latest
        restart: on-failure
        volumes:
-         - PATH/TO/CONFIG:/app/Config
+         - ./immichframe-config:/app/Config
        ports:
          - "8080:8080"
        environment:
