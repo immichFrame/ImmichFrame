@@ -45,7 +45,7 @@ services:
       - "8080:8080"
     environment:
       TZ: "Europe/Berlin"
-      IMMICHFRAME_ADMIN_PASSWORD: "CHANGE_ME"
+      IMMICHFRAME_ADMIN_PASSWORD: "${IMMICHFRAME_ADMIN_PASSWORD:?Set a unique admin password before deployment}"
 ```
 
 [github-root]: https://github.com/immichframe/ImmichFrame/blob/main

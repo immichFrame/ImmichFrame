@@ -83,5 +83,4 @@ Instead, you run the **ImmichFrame server** (typically via Docker), which commun
 [immich-api-url]: https://immich.app/docs/features/command-line-interface#obtain-the-api-key
 [play-store-link]: https://play.google.com/store/apps/details?id=com.immichframe.immichframe
 [github-android-repo]: https://github.com/immichFrame/ImmichFrame_Android
-[github-apple-repo]: https://github.com/immichFrame/ImmichFrame_Apple
 [app-store-link]: https://apps.apple.com/us/app/immichframe/id6742748077
