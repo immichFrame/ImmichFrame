@@ -23,9 +23,9 @@
     ·
     <a href="https://demo.immichframe.dev">Demo</a>
     ·
-    <a href="https://github.com/3rob3/ImmichFrame/issues">Report Bug</a>
+    <a href="https://github.com/immichFrame/ImmichFrame/issues">Report Bug</a>
     ·
-    <a href="https://github.com/3rob3/ImmichFrame/issues">Request Feature</a>
+    <a href="https://github.com/immichFrame/ImmichFrame/issues">Request Feature</a>
   </p>
 </div>
 
@@ -37,6 +37,22 @@ You can find the documentation [here](https://immichframe.dev).
 You can find a working demo [here](https://demo.immichframe.dev).
 
 <img src="/design/demo/web_demo.png" alt="Web Demo">
+
+## 🏛️ How It Works
+
+ImmichFrame connects to your Immich library and serves your photos to your display devices:
+
+```
+┌──────────────────┐            ┌────────────────────────┐            ┌───────────────────────────┐
+│                  │  API Key   │                        │  HTTP/LAN  │      Display Clients      │
+│  Immich Server   │ ◄────────► │   ImmichFrame Server   │ ◄────────► │  • Web Browser / PWA      │
+│ (Photo Library)  │            │   (Docker Container)   │            │  • Android App / TV       │
+│                  │            │                        │            │  • Apple TV / iPad / iOS  │
+└──────────────────┘            └────────────────────────┘            └───────────────────────────┘
+```
+
+> [!NOTE]
+> Display devices and apps connect to the **ImmichFrame server**, not directly to your Immich server. See the [documentation](https://immichframe.dev) for installation guides and client apps.
 
 ## ⚠️ Disclaimer
 
