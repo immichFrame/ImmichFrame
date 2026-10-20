@@ -13,7 +13,7 @@ That's where **ImmichFrame** comes in.
 
 ### How It Works
 
-ImmichFrame operates as a **two-tier architecture**:
+ImmichFrame operates as a bridge between your Immich library and your display devices:
 
 ```
 ┌──────────────────┐            ┌────────────────────────┐            ┌───────────────────────────┐
@@ -51,17 +51,9 @@ Instead, you run the **ImmichFrame server** (typically via Docker), which commun
 
 - A wall-mounted tablet as a dynamic photo frame
 - Raspberry Pi-powered digital frames
-- Smart TVs (Android TV, Apple TV, Google TV) as screensavers
+- Smart TVs (Android TV, Apple TV, Google TV)
 - E-Ink photo displays
 - Office displays or dashboards with rotating team/event photos
-
----
-
-### Wrapped up
-
-- **Immich** = Your photo library
-- **ImmichFrame Server** = The companion server that connects to Immich and orchestrates your frame
-- **ImmichFrame Clients** = The displays showing off your library
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
