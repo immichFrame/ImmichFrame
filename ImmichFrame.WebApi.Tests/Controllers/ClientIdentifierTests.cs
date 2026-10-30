@@ -19,7 +19,7 @@ namespace ImmichFrame.WebApi.Tests.Controllers
         {
             Assert.Multiple(() =>
             {
-                Assert.That(ClientIdentifier.Sanitize("frame-1.kitchen_2"), Is.EqualTo("frame-1.kitchen_2"));
+                Assert.That(ClientIdentifier.Sanitize("frame-1.kitchen_2 Küche"), Is.EqualTo("frame1.kitchen2 Küche"));
                 Assert.That(ClientIdentifier.Sanitize(LongId), Is.EqualTo(Expected));
                 Assert.That(ClientIdentifier.Sanitize(null), Is.Empty);
             });

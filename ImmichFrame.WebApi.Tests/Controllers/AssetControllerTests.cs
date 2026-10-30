@@ -170,11 +170,11 @@ namespace ImmichFrame.WebApi.Tests.Controllers
         }
 
         [Test]
-        public async Task GetAssets_KeepsDashInClientIdentifier()
+        public async Task GetAssets_DropsDashFromClientIdentifier_AsBefore()
         {
             var logic = await RequestAssetsAs("ab-cd");
 
-            logic.Verify(l => l.GetAssets("ab-cd", It.IsAny<CancellationToken>()), Times.Once);
+            logic.Verify(l => l.GetAssets("abcd", It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Test]
@@ -188,11 +188,11 @@ namespace ImmichFrame.WebApi.Tests.Controllers
         }
 
         [Test]
-        public async Task GetAssets_RemovesControlCharactersAndSpacesFromClientIdentifier()
+        public async Task GetAssets_RemovesControlCharactersButKeepsSpacesInClientIdentifier()
         {
             var logic = await RequestAssetsAs(Uri.EscapeDataString("ab\ncd ef\u001b"));
 
-            logic.Verify(l => l.GetAssets("abcdef", It.IsAny<CancellationToken>()), Times.Once);
+            logic.Verify(l => l.GetAssets("abcd ef", It.IsAny<CancellationToken>()), Times.Once);
         }
 
         // Builds a valid AssetResponseDto from the generated client types. Only the
