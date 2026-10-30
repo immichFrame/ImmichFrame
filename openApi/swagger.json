@@ -1976,6 +1976,9 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
+          },
+          "shuffleMode": {
+            "$ref": "#/components/schemas/ShuffleMode"
           }
         },
         "additionalProperties": false
@@ -2008,6 +2011,13 @@
           }
         },
         "additionalProperties": false
+      },
+      "ShuffleMode": {
+        "enum": [
+          "random",
+          "exhaustive"
+        ],
+        "type": "string"
       },
       "SourceType": {
         "enum": [

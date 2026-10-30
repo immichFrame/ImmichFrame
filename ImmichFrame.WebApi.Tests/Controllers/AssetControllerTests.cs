@@ -152,6 +152,49 @@ namespace ImmichFrame.WebApi.Tests.Controllers
             Assert.That(content, Is.Not.Empty);
         }
 
+        // Sends a GetAssets request with the given (already URL-encoded) identifier and
+        // returns the mock so the caller can verify what reached the logic.
+        private async Task<Mock<IImmichFrameLogic>> RequestAssetsAs(string encodedClientIdentifier)
+        {
+            var logic = new Mock<IImmichFrameLogic>();
+            logic.Setup(l => l.GetAssets(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new List<AssetResponseDto>());
+            using var factory = _factory.WithWebHostBuilder(builder =>
+                builder.ConfigureTestServices(services => services.AddSingleton(logic.Object)));
+            var client = factory.CreateClient();
+
+            var response = await client.GetAsync($"/api/Asset?clientIdentifier={encodedClientIdentifier}");
+
+            response.EnsureSuccessStatusCode();
+            return logic;
+        }
+
+        [Test]
+        public async Task GetAssets_KeepsDashInClientIdentifier()
+        {
+            var logic = await RequestAssetsAs("ab-cd");
+
+            logic.Verify(l => l.GetAssets("ab-cd", It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Test]
+        public async Task GetAssets_TruncatesLongClientIdentifier()
+        {
+            var longId = new string('a', 100);
+
+            var logic = await RequestAssetsAs(longId);
+
+            logic.Verify(l => l.GetAssets(new string('a', 64), It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Test]
+        public async Task GetAssets_RemovesControlCharactersAndSpacesFromClientIdentifier()
+        {
+            var logic = await RequestAssetsAs(Uri.EscapeDataString("ab\ncd ef\u001b"));
+
+            logic.Verify(l => l.GetAssets("abcdef", It.IsAny<CancellationToken>()), Times.Once);
+        }
+
         // Builds a valid AssetResponseDto from the generated client types. Only the
         // fields required by the schema are set; pass type/duration to reuse this for
         // video assets. Changes to the OpenAPI schema surface here as compile errors.

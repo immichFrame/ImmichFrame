@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using ImmichFrame.Core.Models;
+using System.Text.Json.Serialization;
 using ImmichFrame.Core.Interfaces;
 using YamlDotNet.Serialization;
 
@@ -70,7 +71,14 @@ public class GeneralSettings : IGeneralSettings
     public string? UnitSystem { get; set; } = "imperial";
     public string? WeatherLatLong { get; set; } = "40.7128,74.0060";
     public string? Webhook { get; set; }
-    public string? AuthenticationSecret { get; set; }
+    /// <summary>The bearer token the API asks for. An empty or whitespace value means no secret, the same as leaving it out.</summary>
+    public string? AuthenticationSecret
+    {
+        get => _authenticationSecret;
+        set => _authenticationSecret = string.IsNullOrWhiteSpace(value) ? null : value;
+    }
+
+    private string? _authenticationSecret;
     public string? AdminPassword { get; set; }
 
     public void Validate() { }
@@ -94,9 +102,18 @@ public class ServerAccountSettings : IAccountSettings
     public List<Guid> People { get; set; } = new();
     public List<string> Tags { get; set; } = new();
     public int? Rating { get; set; }
+    // On the property too: the API's global enum converter would otherwise win over the type's own
+    // and accept numbers.
+    [JsonConverter(typeof(StrictEnumJsonConverter<ShuffleMode>))]
+    public ShuffleMode ShuffleMode { get; set; } = ShuffleMode.Random;
 
     public void ValidateAndInitialize()
     {
+        if (!Enum.IsDefined(ShuffleMode))
+        {
+            throw new InvalidOperationException($"ShuffleMode must be one of: {string.Join(", ", Enum.GetNames<ShuffleMode>())}.");
+        }
+
         if (!string.IsNullOrWhiteSpace(ApiKeyFile))
         {
             if (!string.IsNullOrWhiteSpace(ApiKey))

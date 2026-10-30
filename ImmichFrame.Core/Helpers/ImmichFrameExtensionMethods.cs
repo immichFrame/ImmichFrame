@@ -1,9 +1,8 @@
-
-using ImmichFrame.Core.Api;
-using Microsoft.Extensions.Logging;
+using System.Text;
 
 public static class ImmichFrameExtensionMethods
 {
+    /// <summary>Keeps only ASCII letters, digits, '.', '_' and '-'; everything else is dropped.</summary>
     public static string SanitizeString(this string input)
     {
         if (string.IsNullOrWhiteSpace(input))
@@ -11,20 +10,15 @@ public static class ImmichFrameExtensionMethods
             return string.Empty;
         }
 
-        string removeChars = "'\"?&^$#@!()+-,:;<>’\'-_*/\\|`~{}[]";
-
-        input = input.Trim();
-
-        foreach (char c in removeChars)
+        var sanitized = new StringBuilder(input.Length);
+        foreach (var c in input)
         {
-            input = input.Replace(c.ToString(), string.Empty);
+            if (char.IsAsciiLetterOrDigit(c) || c is '.' or '_' or '-')
+            {
+                sanitized.Append(c);
+            }
         }
 
-        input = input.Replace(Environment.NewLine, string.Empty);
-        input = input.Replace("\r", string.Empty);
-        input = input.Replace("\n", string.Empty);
-
-        return input;
+        return sanitized.ToString();
     }
 }
-

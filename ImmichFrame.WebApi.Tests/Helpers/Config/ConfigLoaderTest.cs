@@ -1,5 +1,8 @@
 using System.Collections;
 using System.Reflection;
+using System.Text.Json;
+using ImmichFrame.Core.Exceptions;
+using ImmichFrame.Core.Models;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.WebApi.Helpers;
 using ImmichFrame.WebApi.Helpers.Config;
@@ -40,6 +43,85 @@ public class ConfigLoaderTest
         
         Assert.That(config.GeneralSettings, Is.Not.Null);
         config.GeneralSettings.Should().BeEquivalentTo(new GeneralSettings());
+    }
+
+    [TestCase("Exhaustive")]
+    [TestCase("exhaustive")]
+    public void TestLoadConfigYaml_ShuffleModeSpelling(string value)
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"immichframe-shuffle-{Guid.NewGuid()}.yml");
+        File.WriteAllText(path, $"Accounts:\n- ImmichServerUrl: http://immich.local\n  ShuffleMode: {value}\n");
+        try
+        {
+            var config = _configLoader.LoadConfigYaml<ServerSettings>(path);
+            Assert.That(config.Accounts.Single().ShuffleMode, Is.EqualTo(ImmichFrame.Core.Models.ShuffleMode.Exhaustive));
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [TestCase("1")]
+    [TestCase("\"5\"")]
+    [TestCase("Sometimes")]
+    public void TestLoadConfigYaml_InvalidShuffleMode_Throws(string value)
+    {
+        var path = WriteTempFile("yml", $"Accounts:\n- ImmichServerUrl: http://immich.local\n  ShuffleMode: {value}\n");
+        try
+        {
+            Assert.Throws<SettingsNotValidException>(() => _configLoader.LoadConfigYaml<ServerSettings>(path));
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [TestCase("1")]
+    [TestCase("\"1\"")]
+    [TestCase("\"Sometimes\"")]
+    public void TestLoadConfigJson_InvalidShuffleMode_Throws(string value)
+    {
+        var path = WriteTempFile("json", $$"""{ "Accounts": [ { "ImmichServerUrl": "http://immich.local", "ShuffleMode": {{value}} } ] }""");
+        try
+        {
+            Assert.Throws<SettingsNotValidException>(() => _configLoader.LoadConfigJson<ServerSettings>(path));
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Test]
+    public void TestLoadConfigJson_ShuffleModeByName()
+    {
+        var path = WriteTempFile("json", """{ "Accounts": [ { "ImmichServerUrl": "http://immich.local", "ShuffleMode": "Exhaustive" } ] }""");
+        try
+        {
+            var config = _configLoader.LoadConfigJson<ServerSettings>(path);
+            Assert.That(config.Accounts.Single().ShuffleMode, Is.EqualTo(ShuffleMode.Exhaustive));
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Test]
+    public void ShuffleMode_SerializesAsCamelCase()
+    {
+        var json = JsonSerializer.Serialize(new ServerAccountSettings { ShuffleMode = ShuffleMode.Exhaustive });
+
+        Assert.That(json, Does.Contain("\"ShuffleMode\":\"exhaustive\""));
+    }
+
+    private static string WriteTempFile(string extension, string content)
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"immichframe-shuffle-{Guid.NewGuid()}.{extension}");
+        File.WriteAllText(path, content);
+        return path;
     }
 
     [Test]
@@ -105,6 +187,10 @@ public class ConfigLoaderTest
                     break;
                 case var t when t == typeof(DateTime):
                     Assert.That(value, Is.Not.EqualTo(DateTime.MinValue), prop.Name);
+                    break;
+                case var t when t.IsEnum:
+                    // The default member would pass even if the file value were never read.
+                    Assert.That(Convert.ToInt32(value), Is.Not.EqualTo(0), prop.Name);
                     break;
                 default:
                     throw new NotImplementedException($"Not implemented for {prop.Name} as type ${type}");

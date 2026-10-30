@@ -130,4 +130,84 @@ public class CachingApiAssetsPoolTests
         // Assert
         Assert.That(loadAssetsCallCount, Is.EqualTo(1), "LoadAssets should only be called once.");
     }
+
+    [Test]
+    public async Task GetAllAssetIds_SameInstanceUntilTheCacheReloads()
+    {
+        var cacheStore = new Dictionary<string, IEnumerable<AssetResponseDto>>();
+        _mockApiCache.Setup(c => c.GetOrAddAsync(
+                It.IsAny<string>(),
+                It.IsAny<Func<Task<IEnumerable<AssetResponseDto>>>>()
+            ))
+            .Returns<string, Func<Task<IEnumerable<AssetResponseDto>>>>(async (key, factory) =>
+            {
+                if (!cacheStore.ContainsKey(key))
+                {
+                    cacheStore[key] = await factory();
+                }
+
+                return cacheStore[key];
+            });
+        var firstLoad = CreateSampleAssets();
+        _testPool.LoadAssetsFunc = () => Task.FromResult<IEnumerable<AssetResponseDto>>(firstLoad.ToList());
+
+        var first = await _testPool.GetAllAssetIds();
+        var second = await _testPool.GetAllAssetIds();
+
+        Assert.That(second, Is.SameAs(first));
+        Assert.That(first.Ids, Is.EquivalentTo(firstLoad.Select(a => a.Id)));
+
+        // The cache expires and reloads with a different asset set.
+        var added = new AssetResponseDto { Id = FixtureHelpers.GuidFor("6"), Type = AssetTypeEnum.IMAGE };
+        var secondLoad = firstLoad.Skip(1).Append(added).ToList();
+        _testPool.LoadAssetsFunc = () => Task.FromResult<IEnumerable<AssetResponseDto>>(secondLoad);
+        cacheStore.Clear();
+
+        var reloaded = await _testPool.GetAllAssetIds();
+
+        Assert.That(reloaded, Is.Not.SameAs(first));
+        Assert.That(reloaded.Version, Is.GreaterThan(first.Version));
+        Assert.That(reloaded.Ids, Is.EquivalentTo(secondLoad.Select(a => a.Id)));
+        Assert.That(await _testPool.GetAllAssetIds(), Is.SameAs(reloaded));
+    }
+
+    [Test]
+    public async Task GetAllAssetIds_OlderLoadSeenLater_KeepsTheNewerIndex()
+    {
+        IEnumerable<AssetResponseDto>? cached = null;
+        _mockApiCache.Setup(c => c.GetOrAddAsync(
+                It.IsAny<string>(),
+                It.IsAny<Func<Task<IEnumerable<AssetResponseDto>>>>()
+            ))
+            .Returns<string, Func<Task<IEnumerable<AssetResponseDto>>>>(async (key, factory) => cached ??= await factory());
+        var older = CreateSampleAssets();
+        var newer = older.Skip(2).ToList();
+
+        _testPool.LoadAssetsFunc = () => Task.FromResult<IEnumerable<AssetResponseDto>>(older);
+        var first = await _testPool.GetAllAssetIds();
+        cached = null;
+        _testPool.LoadAssetsFunc = () => Task.FromResult<IEnumerable<AssetResponseDto>>(newer);
+        var second = await _testPool.GetAllAssetIds();
+
+        // A caller still holding the older list (read before the cache reloaded) arrives last.
+        cached = older;
+        var third = await _testPool.GetAllAssetIds();
+
+        Assert.That(second.Version, Is.GreaterThan(first.Version));
+        Assert.That(third, Is.SameAs(second));
+        Assert.That(third.Ids, Is.EquivalentTo(newer.Select(a => a.Id)));
+    }
+
+    [Test]
+    public async Task LoadAssetsByIds_LooksUpIdsInOrderAndLeavesOutUnknown()
+    {
+        var assets = CreateSampleAssets();
+        _testPool.LoadAssetsFunc = () => Task.FromResult<IEnumerable<AssetResponseDto>>(assets);
+        var unknown = FixtureHelpers.GuidFor("unknown");
+
+        var loaded = await _testPool.LoadAssetsByIds(new List<Guid> { assets[3].Id, unknown, assets[0].Id });
+
+        Assert.That(loaded.Loaded, Is.EqualTo(new[] { assets[3], assets[0] }));
+        Assert.That(loaded.Retry, Is.Empty);
+    }
 }

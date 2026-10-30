@@ -1,4 +1,5 @@
 using ImmichFrame.Core.Interfaces;
+using ImmichFrame.WebApi.Helpers;
 using ImmichFrame.WebApi.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,7 +21,7 @@ namespace ImmichFrame.WebApi.Controllers
         [HttpGet(Name = "GetConfig")]
         public ClientSettingsDto GetConfig(string clientIdentifier = "")
         {
-            var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
+            var sanitizedClientIdentifier = ClientIdentifier.Sanitize(clientIdentifier);
             _logger.LogDebug("Config requested by '{sanitizedClientIdentifier}'", sanitizedClientIdentifier);
             return new ClientSettingsDto(_settings);
         }

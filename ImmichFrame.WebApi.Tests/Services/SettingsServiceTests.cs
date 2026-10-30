@@ -1,4 +1,5 @@
 using ImmichFrame.Core.Interfaces;
+using ImmichFrame.Core.Models;
 using ImmichFrame.WebApi.Database;
 using ImmichFrame.WebApi.Helpers.Config;
 using ImmichFrame.WebApi.Models;
@@ -74,6 +75,187 @@ namespace ImmichFrame.WebApi.Tests.Services
         }
 
         [Test]
+        public async Task InitializeAsync_ShuffleModeDefaultsToRandom()
+        {
+            WriteSettingsJson(ValidV2Json);
+
+            var service = CreateService();
+            await service.InitializeAsync();
+
+            Assert.That(service.Current.Accounts.Single().ShuffleMode, Is.EqualTo(ShuffleMode.Random));
+        }
+
+        [Test]
+        public async Task InitializeAsync_ReadsShuffleMode()
+        {
+            WriteSettingsJson("""
+                {
+                    "Accounts": [ { "ImmichServerUrl": "http://immich.local", "ApiKey": "key123", "ShuffleMode": "Exhaustive" } ]
+                }
+                """);
+
+            var service = CreateService();
+            await service.InitializeAsync();
+
+            Assert.That(service.Current.Accounts.Single().ShuffleMode, Is.EqualTo(ShuffleMode.Exhaustive));
+        }
+
+        [Test]
+        public void ShuffleMode_SurvivesStoredRoundTrip()
+        {
+            var settings = new ServerSettings
+            {
+                AccountsImpl = new List<ServerAccountSettings> { new() { ShuffleMode = ShuffleMode.Exhaustive } }
+            };
+
+            var json = SettingsService.Serialize(settings);
+            var restored = System.Text.Json.JsonSerializer.Deserialize<ServerSettings>(json)!;
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(json, Does.Contain("\"ShuffleMode\":\"exhaustive\""));
+                Assert.That(restored.AccountsImpl.Single().ShuffleMode, Is.EqualTo(ShuffleMode.Exhaustive));
+            });
+        }
+
+        [Test]
+        public void ShuffleMode_ReadsCamelCaseValue()
+        {
+            // The admin API writes enum values in camelCase.
+            const string json = """{ "Accounts": [ { "ShuffleMode": "exhaustive" } ] }""";
+
+            var restored = System.Text.Json.JsonSerializer.Deserialize<ServerSettings>(json)!;
+
+            Assert.That(restored.AccountsImpl.Single().ShuffleMode, Is.EqualTo(ShuffleMode.Exhaustive));
+        }
+
+        [TestCase("\"Sometimes\"")]
+        [TestCase("1")]
+        public async Task InitializeAsync_UnreadableShuffleMode_NotImportedAndSetupStaysClosed(string shuffleModeJson)
+        {
+            WriteSettingsJson($$"""
+                {
+                    "General": { "Interval": 10 },
+                    "Accounts": [ { "ImmichServerUrl": "http://immich.local", "ApiKey": "key123", "ShuffleMode": {{shuffleModeJson}} } ]
+                }
+                """);
+
+            var service = CreateService();
+            await service.InitializeAsync();
+            var adminAuth = new AdminAuthService(service);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(service.IsUnconfigured, Is.False);
+                Assert.That(service.Current.Accounts, Is.Empty);
+                Assert.That(service.Current.GeneralSettings.Interval, Is.EqualTo(new GeneralSettings().Interval));
+                if (Environment.GetEnvironmentVariable(AdminAuthService.AdminPasswordEnvVar) == null)
+                {
+                    Assert.That(adminAuth.SetupRequired, Is.False);
+                }
+            });
+
+            var options = new DbContextOptionsBuilder<SettingsDbContext>()
+                .UseSqlite($"Data Source={Path.Combine(_configDir, "immichframe.db")}")
+                .Options;
+            await using var db = new SettingsDbContext(options);
+            Assert.That(await db.SettingsDocuments.CountAsync(), Is.EqualTo(0));
+        }
+
+        [Test]
+        public async Task InitializeAsync_BrokenYaml_NotImportedAndSetupStaysClosed()
+        {
+            File.WriteAllText(Path.Combine(_configDir, "Settings.yml"), """
+                General:
+                  Interval: 10
+                Accounts:
+                  - ImmichServerUrl: "http://immich.local
+                    ApiKey: [key123
+                """);
+
+            var service = CreateService();
+            await service.InitializeAsync();
+            var adminAuth = new AdminAuthService(service);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(service.IsUnconfigured, Is.False);
+                Assert.That(service.Current.Accounts, Is.Empty);
+                if (Environment.GetEnvironmentVariable(AdminAuthService.AdminPasswordEnvVar) == null)
+                {
+                    Assert.That(adminAuth.SetupRequired, Is.False);
+                    Assert.That(adminAuth.State, Is.EqualTo(AdminUiState.Disabled));
+                }
+            });
+
+            var options = new DbContextOptionsBuilder<SettingsDbContext>()
+                .UseSqlite($"Data Source={Path.Combine(_configDir, "immichframe.db")}")
+                .Options;
+            await using var db = new SettingsDbContext(options);
+            Assert.That(await db.SettingsDocuments.CountAsync(), Is.EqualTo(0));
+        }
+
+        [TestCase("", null)]
+        [TestCase("   ", null)]
+        [TestCase(" \t\n", null)]
+        [TestCase(null, null)]
+        [TestCase("secret", "secret")]
+        public void AuthenticationSecret_EmptyOrWhitespaceMeansNoSecret(string? configured, string? expected)
+        {
+            Assert.That(new GeneralSettings { AuthenticationSecret = configured }.AuthenticationSecret, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public async Task InitializeAsync_EmptyAuthenticationSecretInFile_IsNoSecret()
+        {
+            WriteSettingsJson(ValidV2Json.Replace("\"AuthenticationSecret\": \"secret\"", "\"AuthenticationSecret\": \"\""));
+
+            var service = CreateService();
+            await service.InitializeAsync();
+
+            Assert.That(service.Current.GeneralSettings.AuthenticationSecret, Is.Null);
+        }
+
+        [TestCase("admin-pass", true)]
+        [TestCase("admin-pas", false)]
+        [TestCase("admin-pass-longer", false)]
+        [TestCase("ADMIN-PASS", false)]
+        [TestCase("", false)]
+        public async Task ValidatePassword_MatchesOnlyTheExactPassword(string candidate, bool expected)
+        {
+            if (Environment.GetEnvironmentVariable(AdminAuthService.AdminPasswordEnvVar) != null)
+            {
+                Assert.Ignore("The admin password comes from the environment here.");
+            }
+
+            WriteSettingsJson(ValidV2Json.Replace("\"AuthenticationSecret\": \"secret\"", "\"AdminPassword\": \"admin-pass\""));
+            var service = CreateService();
+            await service.InitializeAsync();
+
+            Assert.That(new AdminAuthService(service).ValidatePassword(candidate), Is.EqualTo(expected));
+        }
+
+        [TestCase(null, ShuffleMode.Exhaustive, true)]
+        [TestCase("", ShuffleMode.Exhaustive, true)]
+        [TestCase("secret", ShuffleMode.Exhaustive, false)]
+        [TestCase(null, ShuffleMode.Random, false)]
+        [TestCase("secret", ShuffleMode.Random, false)]
+        public void ExhaustiveWithoutSecret_OnlyWhenExhaustiveAndNoSecret(string? secret, ShuffleMode mode, bool expected)
+        {
+            var settings = new ServerSettings
+            {
+                GeneralSettingsImpl = new GeneralSettings { AuthenticationSecret = secret },
+                AccountsImpl = new List<ServerAccountSettings>
+                {
+                    new() { ShuffleMode = ShuffleMode.Random },
+                    new() { ShuffleMode = mode }
+                }
+            };
+
+            Assert.That(SettingsService.ExhaustiveWithoutSecret(settings), Is.EqualTo(expected));
+        }
+
+        [Test]
         public async Task InitializeAsync_DbWinsOverChangedFile()
         {
             WriteSettingsJson(ValidV2Json);
@@ -94,11 +276,19 @@ namespace ImmichFrame.WebApi.Tests.Services
         {
             var service = CreateService();
             await service.InitializeAsync();
+            var adminAuth = new AdminAuthService(service);
 
             Assert.Multiple(() =>
             {
                 Assert.That(service.Current.Accounts, Is.Empty);
                 Assert.That(service.Current.GeneralSettings.Interval, Is.EqualTo(new GeneralSettings().Interval));
+                // Only a genuinely fresh install opens anonymous setup.
+                Assert.That(service.IsUnconfigured, Is.True);
+                if (Environment.GetEnvironmentVariable(AdminAuthService.AdminPasswordEnvVar) == null)
+                {
+                    Assert.That(adminAuth.SetupRequired, Is.True);
+                    Assert.That(adminAuth.State, Is.EqualTo(AdminUiState.Setup));
+                }
             });
 
             var options = new DbContextOptionsBuilder<SettingsDbContext>()
