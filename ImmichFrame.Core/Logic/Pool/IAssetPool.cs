@@ -5,7 +5,7 @@ namespace ImmichFrame.Core.Logic.Pool;
 public interface IAssetPool
 {
     Task<long> GetAssetCount(CancellationToken ct = default);
-    Task<IEnumerable<AssetResponseDto>> GetAssets(int requested, CancellationToken ct = default);
+    Task<IEnumerable<AssetResponseDto>> GetAssets(int requested, string clientId = "", CancellationToken ct = default);
 
     protected static async Task<IEnumerable<AssetResponseDto>> WaitAssets(
         int requested,

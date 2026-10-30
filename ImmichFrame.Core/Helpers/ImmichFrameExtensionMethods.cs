@@ -1,9 +1,12 @@
-
-using ImmichFrame.Core.Api;
-using Microsoft.Extensions.Logging;
+using System.Text;
 
 public static class ImmichFrameExtensionMethods
 {
+    /// <summary>
+    /// Keeps letters and digits in any script, spaces and '.'; drops everything else
+    /// (control and format characters, quotes, other punctuation, '-' and '_'), then trims.
+    /// For ordinary names this gives the same result as the earlier blocklist.
+    /// </summary>
     public static string SanitizeString(this string input)
     {
         if (string.IsNullOrWhiteSpace(input))
@@ -11,20 +14,15 @@ public static class ImmichFrameExtensionMethods
             return string.Empty;
         }
 
-        string removeChars = "'\"?&^$#@!()+-,:;<>’\'-_*/\\|`~{}[]";
-
-        input = input.Trim();
-
-        foreach (char c in removeChars)
+        var sanitized = new StringBuilder(input.Length);
+        foreach (var c in input)
         {
-            input = input.Replace(c.ToString(), string.Empty);
+            if (char.IsLetterOrDigit(c) || c is ' ' or '.')
+            {
+                sanitized.Append(c);
+            }
         }
 
-        input = input.Replace(Environment.NewLine, string.Empty);
-        input = input.Replace("\r", string.Empty);
-        input = input.Replace("\n", string.Empty);
-
-        return input;
+        return sanitized.ToString().Trim();
     }
 }
-

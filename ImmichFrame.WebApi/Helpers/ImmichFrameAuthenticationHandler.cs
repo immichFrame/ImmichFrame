@@ -1,4 +1,5 @@
 using ImmichFrame.Core.Interfaces;
+using ImmichFrame.WebApi.Helpers;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
@@ -47,7 +48,7 @@ public class ImmichFrameAuthenticationHandler : AuthenticationHandler<Authentica
         {
             var token = authHeader.Substring("Bearer ".Length).Trim();
 
-            if (token == _authenticationSecret)
+            if (SecretComparison.Matches(_authenticationSecret, token))
             {
                 var claims = new[] { new Claim(ClaimTypes.NameIdentifier, "authenticatedUser") };
                 var identity = new ClaimsIdentity(claims, Scheme.Name);

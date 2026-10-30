@@ -1,4 +1,5 @@
 using ImmichFrame.Core.Interfaces;
+using ImmichFrame.WebApi.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,7 +22,7 @@ namespace ImmichFrame.WebApi.Controllers
         [HttpGet(Name = "GetAppointments")]
         public async Task<List<IAppointment>> GetAppointments(string clientIdentifier = "")
         {
-            var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
+            var sanitizedClientIdentifier = ClientIdentifier.Sanitize(clientIdentifier);
             _logger.LogDebug("Calendar requested by '{sanitizedClientIdentifier}'", sanitizedClientIdentifier);
             return await _calendarService.GetAppointments();
         }

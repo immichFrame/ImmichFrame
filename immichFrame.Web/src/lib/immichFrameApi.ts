@@ -83,6 +83,7 @@ export type ServerAccountSettings = {
     people?: string[] | null;
     tags?: string[] | null;
     rating?: number | null;
+    shuffleMode?: ShuffleMode;
 };
 export type ServerSettings = {
     General?: GeneralSettings;
@@ -509,6 +510,11 @@ export const AdminUiState = {
     Disabled: "disabled"
 } as const;
 export type AdminUiState = (typeof AdminUiState)[keyof typeof AdminUiState];
+export const ShuffleMode = {
+    Random: "random",
+    Exhaustive: "exhaustive"
+} as const;
+export type ShuffleMode = (typeof ShuffleMode)[keyof typeof ShuffleMode];
 export const UserAvatarColor = {
     Primary: "primary",
     Pink: "pink",

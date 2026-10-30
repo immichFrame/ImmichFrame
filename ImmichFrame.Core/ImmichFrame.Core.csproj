@@ -28,4 +28,8 @@
     <PackageReference Include="ThumbHash" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="ImmichFrame.Core.Tests" />
+  </ItemGroup>
+
 </Project>

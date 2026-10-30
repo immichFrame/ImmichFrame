@@ -1,4 +1,6 @@
-﻿namespace ImmichFrame.Core.Interfaces
+﻿using ImmichFrame.Core.Models;
+
+namespace ImmichFrame.Core.Interfaces
 {
     public interface IServerSettings
     {
@@ -25,6 +27,7 @@
         public List<Guid> People { get; }
         public List<string> Tags { get; }
         public int? Rating { get; }
+        public ShuffleMode ShuffleMode { get; }
 
         public void ValidateAndInitialize();
     }

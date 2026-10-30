@@ -84,7 +84,7 @@ public class MemoryAssetsPoolTests
         // Let's simulate this by calling a method that would trigger LoadAssets if cache is empty.
         // Since LoadAssets is protected, we'll test its effects via GetAsset.
         // We need to ensure the cache is empty or expired for LoadAssets to be called.
-        await _memoryAssetsPool.GetAssets(1, CancellationToken.None); // This should trigger LoadAssets
+        await _memoryAssetsPool.GetAssets(1, ct: CancellationToken.None); // This should trigger LoadAssets
 
         // Assert
         _mockImmichApi.Verify(x => x.SearchMemoriesAsync(It.IsAny<DateTimeOffset>(), null, null, null, null, null, null, null, null, It.IsAny<CancellationToken>()), Times.Once);
@@ -104,7 +104,7 @@ public class MemoryAssetsPoolTests
             .ReturnsAsync(new AssetResponseDto { Id = assetId, ExifInfo = new ExifResponseDto { DateTimeOriginal = new DateTime(memoryYear, 1, 1) }, People = new List<PersonResponseDto>() });
 
         // Act
-        var resultAsset = (await _memoryAssetsPool.GetAssets(1, CancellationToken.None)).First(); // Triggers LoadAssets
+        var resultAsset = (await _memoryAssetsPool.GetAssets(1, ct: CancellationToken.None)).First(); // Triggers LoadAssets
 
         // Assert
         _mockImmichApi.Verify(x => x.GetAssetInfoAsync(assetId, null, null, It.IsAny<CancellationToken>()), Times.Once);
@@ -124,7 +124,7 @@ public class MemoryAssetsPoolTests
             .ReturnsAsync(memories);
 
         // Act
-        var resultAsset = (await _memoryAssetsPool.GetAssets(1, CancellationToken.None)).First(); // Triggers LoadAssets
+        var resultAsset = (await _memoryAssetsPool.GetAssets(1, ct: CancellationToken.None)).First(); // Triggers LoadAssets
 
         // Assert
         _mockImmichApi.Verify(x => x.GetAssetInfoAsync(It.IsAny<Guid>(), null, null, It.IsAny<CancellationToken>()), Times.Never);
@@ -156,7 +156,7 @@ public class MemoryAssetsPoolTests
 
 
             // Act
-            var resultAsset = (await _memoryAssetsPool.GetAssets(1, CancellationToken.None)).First(); // Triggers LoadAssets
+            var resultAsset = (await _memoryAssetsPool.GetAssets(1, ct: CancellationToken.None)).First(); // Triggers LoadAssets
 
             // Assert
             Assert.That(resultAsset.ExifInfo, Is.Not.Null);
@@ -187,7 +187,7 @@ public class MemoryAssetsPoolTests
         // We need a way to inspect the result of LoadAssets directly.
         // We can make LoadAssets internal and use InternalsVisibleTo, or use reflection.
         // Or, we can rely on the setup of GetFromCacheAsync to capture the factory's result.
-        var loadedAssets = await _memoryAssetsPool.GetAssets(memories.Count * assetsPerMemory, CancellationToken.None); // Trigger load
+        var loadedAssets = await _memoryAssetsPool.GetAssets(memories.Count * assetsPerMemory, ct: CancellationToken.None); // Trigger load
 
         // Assert
         Assert.That(loadedAssets, Is.Not.Null);
@@ -221,12 +221,43 @@ public class MemoryAssetsPoolTests
         // We need a way to inspect the result of LoadAssets directly.
         // We can make LoadAssets internal and use InternalsVisibleTo, or use reflection.
         // Or, we can rely on the setup of GetFromCacheAsync to capture the factory's result.
-        var loadedAssets = await _memoryAssetsPool.GetAssets(memories.Count * assetsPerMemory, CancellationToken.None); // Trigger load
+        var loadedAssets = await _memoryAssetsPool.GetAssets(memories.Count * assetsPerMemory, ct: CancellationToken.None); // Trigger load
 
         // Assert
         Assert.That(loadedAssets, Is.Not.Null);
         Assert.That(loadedAssets.Count(), Is.EqualTo(8)); // 4 memories * 2 assets
         _mockImmichApi.VerifyAll();
 
+    }
+
+    [Test]
+    public async Task GetAllAssetIds_SameInstanceOnRepeatedCalls()
+    {
+        var memories = CreateSampleImageMemories(2, 3, true, DateTime.Now.Year - 1);
+        _mockImmichApi.Setup(x => x.SearchMemoriesAsync(It.IsAny<DateTimeOffset>(), null, null, null, null, null, null, null, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(memories);
+
+        var first = await _memoryAssetsPool.GetAllAssetIds();
+        var second = await _memoryAssetsPool.GetAllAssetIds();
+
+        Assert.That(second, Is.SameAs(first));
+        Assert.That(first.Ids, Is.EquivalentTo(memories.SelectMany(m => m.Assets).Select(a => a.Id)));
+        _mockImmichApi.Verify(x => x.SearchMemoriesAsync(It.IsAny<DateTimeOffset>(), null, null, null, null, null, null, null, null, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Test]
+    public async Task LoadAssetsByIds_LooksUpIdsInOrderAndLeavesOutUnknown()
+    {
+        var memories = CreateSampleImageMemories(2, 2, true, DateTime.Now.Year - 1);
+        var assets = memories.SelectMany(m => m.Assets).ToList();
+        _mockImmichApi.Setup(x => x.SearchMemoriesAsync(It.IsAny<DateTimeOffset>(), null, null, null, null, null, null, null, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(memories);
+        var unknown = Guid.NewGuid();
+
+        var loaded = await _memoryAssetsPool.LoadAssetsByIds(new List<Guid> { assets[2].Id, unknown, assets[0].Id });
+
+        Assert.That(loaded.Loaded.Select(a => a.Id), Is.EqualTo(new[] { assets[2].Id, assets[0].Id }));
+        Assert.That(loaded.Retry, Is.Empty);
+        _mockImmichApi.Verify(x => x.GetAssetInfoAsync(It.IsAny<Guid>(), null, null, It.IsAny<CancellationToken>()), Times.Never);
     }
 }
