@@ -10,13 +10,19 @@ public class MemoryAssetsPool(ImmichApi immichApi, IAccountSettings accountSetti
     protected override async Task<IEnumerable<AssetResponseDto>> LoadAssets(CancellationToken ct = default)
     {
         var searchDate = DateTimeOffset.Now;
-        var memories = await immichApi.SearchMemoriesAsync(searchDate, null, null, null, null, null, null, null, null, ct);
+        var memories = new List<MemoryResponseDto>();
+
+        // One request per enabled type, so the server filters out any memory type this client
+        // does not know. An unknown type in the response fails deserialization of the whole list.
+        foreach (var type in EnabledMemoryTypes())
+        {
+            memories.AddRange(await immichApi.SearchMemoriesAsync(searchDate, null, null, null, null, null, null, null, type, ct));
+        }
 
         var memoryAssets = new List<AssetResponseDto>();
         foreach (var memory in memories)
         {
             var assets = memory.Assets.ToList();
-            var yearsAgo = searchDate.Year - memory.Data.Year;
 
             if (!accountSettings.ShowVideos)
             {
@@ -32,6 +38,9 @@ public class MemoryAssetsPool(ImmichApi immichApi, IAccountSettings accountSetti
                     asset.People = assetInfo.People;
                 }
 
+                // A birthday memory's Data.Year is the person's birth year, not the year of the photo.
+                var photoYear = memory.Type == MemoryType.Birthday ? asset.LocalDateTime.Year : memory.Data.Year;
+                var yearsAgo = searchDate.Year - photoYear;
                 asset.ExifInfo.Description = $"{yearsAgo} {(yearsAgo == 1 ? "year" : "years")} ago";
             }
 
@@ -39,6 +48,19 @@ public class MemoryAssetsPool(ImmichApi immichApi, IAccountSettings accountSetti
         }
 
         return memoryAssets;
+    }
+
+    private IEnumerable<MemoryType> EnabledMemoryTypes()
+    {
+        if (accountSettings.ShowOnThisDayMemories)
+        {
+            yield return MemoryType.On_this_day;
+        }
+
+        if (accountSettings.ShowBirthdayMemories)
+        {
+            yield return MemoryType.Birthday;
+        }
     }
 }
 
