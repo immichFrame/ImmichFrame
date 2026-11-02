@@ -64,7 +64,7 @@ public class MemoryAssetsPoolTests
             {
                 Id = Guid.NewGuid(),
                 Assets = CreateSampleAssets(assetsPerMemory, withExifInAssets, memoryYear, assetType),
-                Data = new OnThisDayDto { Year = memoryYear }
+                Data = new MemoryDataDto { Year = memoryYear }
             };
             memories.Add(memory);
         }
