@@ -281,29 +281,36 @@ public class MemoryAssetsPoolTests
         _mockImmichApi.Setup(x => x.SearchMemoriesAsync(It.IsAny<DateTimeOffset>(), null, null, null, null, null, null, null, MemoryType.On_this_day, It.IsAny<CancellationToken>()))
             .ReturnsAsync(memories);
         _mockImmichApi.Setup(x => x.SearchMemoriesAsync(It.IsAny<DateTimeOffset>(), null, null, null, null, null, null, null, MemoryType.Birthday, It.IsAny<CancellationToken>()))
-            .ThrowsAsync(ApiError(400));
+            .ThrowsAsync(ApiError(400, UnsupportedTypeBody));
 
         var loadedAssets = await _memoryAssetsPool.GetAssets(2, CancellationToken.None);
 
         Assert.That(loadedAssets.Count(), Is.EqualTo(2));
     }
 
-    [TestCase(MemoryType.On_this_day, 400)]
-    [TestCase(MemoryType.Birthday, 500)]
-    public void LoadAssets_OtherApiErrors_StillPropagate(MemoryType failingType, int status)
+    [TestCase(MemoryType.On_this_day, 400, UnsupportedTypeBody)]
+    [TestCase(MemoryType.Birthday, 500, null)]
+    [TestCase(MemoryType.Birthday, 400, null)] // no body, e.g. a proxy
+    [TestCase(MemoryType.Birthday, 400, "<html><body>400 Bad Request</body></html>")]
+    [TestCase(MemoryType.Birthday, 400, """{"message":"Validation failed","errors":[{"code":"invalid_format","path":["for"],"message":"Invalid date"}]}""")]
+    public void LoadAssets_OtherApiErrors_StillPropagate(MemoryType failingType, int status, string? body)
     {
         _mockAccountSettings.Setup(x => x.ShowBirthdayMemories).Returns(true);
         _mockImmichApi.Setup(x => x.SearchMemoriesAsync(It.IsAny<DateTimeOffset>(), null, null, null, null, null, null, null, It.IsAny<MemoryType?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<MemoryResponseDto>());
         _mockImmichApi.Setup(x => x.SearchMemoriesAsync(It.IsAny<DateTimeOffset>(), null, null, null, null, null, null, null, failingType, It.IsAny<CancellationToken>()))
-            .ThrowsAsync(ApiError(status));
+            .ThrowsAsync(ApiError(status, body));
 
         var ex = Assert.ThrowsAsync<ApiException>(() => _memoryAssetsPool.GetAssets(1, CancellationToken.None));
         Assert.That(ex!.StatusCode, Is.EqualTo(status));
     }
 
-    private static ApiException ApiError(int status) =>
-        new($"Unexpected status code ({status}).", status, null, new Dictionary<string, IEnumerable<string>>(), null);
+    // Immich v3.2's body for ?type=birthday: its global exception filter wraps the zod 4.4.3 issues.
+    private const string UnsupportedTypeBody =
+        """{"message":"Validation failed","errors":[{"code":"invalid_value","values":["on_this_day"],"path":["type"],"message":"Invalid input: expected \"on_this_day\""}]}""";
+
+    private static ApiException ApiError(int status, string? body = null) =>
+        new($"Unexpected status code ({status}).", status, body, new Dictionary<string, IEnumerable<string>>(), null);
 
     [Test]
     public async Task SearchMemoriesAsync_DeserializesBirthdayMemory()
