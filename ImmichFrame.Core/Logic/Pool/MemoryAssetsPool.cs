@@ -16,7 +16,15 @@ public class MemoryAssetsPool(ImmichApi immichApi, IAccountSettings accountSetti
         // does not know. An unknown type in the response fails deserialization of the whole list.
         foreach (var type in EnabledMemoryTypes())
         {
-            memories.AddRange(await immichApi.SearchMemoriesAsync(searchDate, null, null, null, null, null, null, null, type, ct));
+            try
+            {
+                memories.AddRange(await immichApi.SearchMemoriesAsync(searchDate, null, null, null, null, null, null, null, type, ct));
+            }
+            catch (ApiException ex) when (ex.StatusCode == 400 && type != MemoryType.On_this_day)
+            {
+                // Older servers reject memory types they don't know (v3.2 has no "birthday").
+                // Skip that type instead of losing the on-this-day memories with it.
+            }
         }
 
         var memoryAssets = new List<AssetResponseDto>();

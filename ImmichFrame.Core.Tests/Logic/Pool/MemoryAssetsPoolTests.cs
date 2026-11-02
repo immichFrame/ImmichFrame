@@ -273,6 +273,39 @@ public class MemoryAssetsPoolTests
     }
 
     [Test]
+    public async Task LoadAssets_ServerRejectsBirthdayType_KeepsOnThisDayMemories()
+    {
+        // Immich v3.2 has no "birthday" type and answers type=birthday with a 400.
+        var memories = CreateSampleImageMemories(1, 2, true, DateTime.Now.Year - 1);
+        _mockAccountSettings.Setup(x => x.ShowBirthdayMemories).Returns(true);
+        _mockImmichApi.Setup(x => x.SearchMemoriesAsync(It.IsAny<DateTimeOffset>(), null, null, null, null, null, null, null, MemoryType.On_this_day, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(memories);
+        _mockImmichApi.Setup(x => x.SearchMemoriesAsync(It.IsAny<DateTimeOffset>(), null, null, null, null, null, null, null, MemoryType.Birthday, It.IsAny<CancellationToken>()))
+            .ThrowsAsync(ApiError(400));
+
+        var loadedAssets = await _memoryAssetsPool.GetAssets(2, CancellationToken.None);
+
+        Assert.That(loadedAssets.Count(), Is.EqualTo(2));
+    }
+
+    [TestCase(MemoryType.On_this_day, 400)]
+    [TestCase(MemoryType.Birthday, 500)]
+    public void LoadAssets_OtherApiErrors_StillPropagate(MemoryType failingType, int status)
+    {
+        _mockAccountSettings.Setup(x => x.ShowBirthdayMemories).Returns(true);
+        _mockImmichApi.Setup(x => x.SearchMemoriesAsync(It.IsAny<DateTimeOffset>(), null, null, null, null, null, null, null, It.IsAny<MemoryType?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<MemoryResponseDto>());
+        _mockImmichApi.Setup(x => x.SearchMemoriesAsync(It.IsAny<DateTimeOffset>(), null, null, null, null, null, null, null, failingType, It.IsAny<CancellationToken>()))
+            .ThrowsAsync(ApiError(status));
+
+        var ex = Assert.ThrowsAsync<ApiException>(() => _memoryAssetsPool.GetAssets(1, CancellationToken.None));
+        Assert.That(ex!.StatusCode, Is.EqualTo(status));
+    }
+
+    private static ApiException ApiError(int status) =>
+        new($"Unexpected status code ({status}).", status, null, new Dictionary<string, IEnumerable<string>>(), null);
+
+    [Test]
     public async Task SearchMemoriesAsync_DeserializesBirthdayMemory()
     {
         // The payload shape Immich v3.3 returns; the v3.2 client threw on "type": "birthday".
