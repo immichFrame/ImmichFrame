@@ -28,10 +28,14 @@ public class MemoryAssetsPool(ImmichApi immichApi, IAccountSettings accountSetti
                 if (asset.ExifInfo == null)
                 {
                     var assetInfo = await immichApi.GetAssetInfoAsync(asset.Id, null, null, ct);
-                    asset.ExifInfo = assetInfo.ExifInfo;
-                    asset.People = assetInfo.People;
+                    if (assetInfo != null)
+                    {
+                        asset.ExifInfo = assetInfo.ExifInfo;
+                        asset.People = assetInfo.People;
+                    }
                 }
 
+                asset.ExifInfo ??= new ExifResponseDto();
                 asset.ExifInfo.Description = $"{yearsAgo} {(yearsAgo == 1 ? "year" : "years")} ago";
             }
 
