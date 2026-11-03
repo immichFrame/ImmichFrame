@@ -130,6 +130,10 @@ Accounts:
     ImagesFromDate: null # Date
     # If this is set, memories are displayed.
     ShowMemories: false # boolean
+    # Memory types to include when ShowMemories is set.
+    ShowOnThisDayMemories: true # boolean
+    # Birthday memories need Immich v3.3+ and a birth date on the person.
+    ShowBirthdayMemories: true # boolean
     # If this is set, favorites are displayed.
     ShowFavorites: false # boolean
     # If this is set, assets marked archived are displayed.

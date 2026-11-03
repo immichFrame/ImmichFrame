@@ -82,6 +82,8 @@ public class ServerAccountSettings : IAccountSettings
     public string ApiKey { get; set; } = string.Empty;
     public string? ApiKeyFile { get; set; } = null;
     public bool ShowMemories { get; set; } = false;
+    public bool ShowOnThisDayMemories { get; set; } = true;
+    public bool ShowBirthdayMemories { get; set; } = true;
     public bool ShowFavorites { get; set; } = false;
     public bool ShowArchived { get; set; } = false;
     public bool ShowVideos { get; set; } = false;

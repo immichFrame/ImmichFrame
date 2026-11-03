@@ -42,6 +42,8 @@ Accounts:
 
     ImagesFromDate: null
     ShowMemories: false
+    ShowOnThisDayMemories: true
+    ShowBirthdayMemories: true
     ShowFavorites: false
     ShowArchived: false
     ShowVideos: false
