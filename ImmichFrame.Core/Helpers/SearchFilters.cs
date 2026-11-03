@@ -18,14 +18,14 @@ public static class SearchFilters
         return new EnumFilterAssetVisibility { In = visibilities };
     }
 
-    public static IdsFilter? ExcludedAlbums(IAccountSettings settings)
+    public static IdsFilter? ExcludedAlbums(IReadOnlyCollection<Guid> excludedAlbumIds)
     {
-        if (settings.ExcludedAlbums is not { Count: > 0 } excluded)
+        if (excludedAlbumIds is not { Count: > 0 })
         {
             return null;
         }
 
-        return new IdsFilter { None = excluded };
+        return new IdsFilter { None = excludedAlbumIds.ToList() };
     }
 
     public static EnumFilterAssetType Types(IAccountSettings settings)
@@ -45,14 +45,14 @@ public static class SearchFilters
         || settings.People is { Count: > 0 }
         || settings.Tags is { Count: > 0 };
 
-    public static SearchFilter ForAccount(IAccountSettings settings, IReadOnlyCollection<Guid> tagIds)
+    public static SearchFilter ForAccount(IAccountSettings settings, IReadOnlyCollection<Guid> tagIds, IReadOnlyCollection<Guid> excludedAlbumIds)
     {
         var filter = new SearchFilter
         {
             TrashedAt = NotTrashed(),
             Visibility = Visibility(settings),
             Type = Types(settings),
-            AlbumIds = ExcludedAlbums(settings),
+            AlbumIds = ExcludedAlbums(excludedAlbumIds),
             TakenAt = TakenAt(settings),
             Rating = Rating(settings)
         };

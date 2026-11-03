@@ -148,6 +148,8 @@ Accounts:
     # UUID of excluded album(s)
     ExcludedAlbums: # string[]
       - UUID
+    # Hide assets that are also in any album not listed under Albums (including albums shared with you). Only applies when Albums is set.
+    HideAssetsInOtherAlbums: false # boolean
     # UUID of People
     People: # string[]
       - UUID
@@ -166,6 +168,10 @@ If this is enabled, the web api required the `Authorization`-Header with `Bearer
 ### Filtering on Albums or People
 
 You can get the UUIDs from the URL of the album/person. For this URL: `https://demo.immich.app/albums/85c85b29-c95d-4a8b-90f7-c87da1d518ba` this is the UUID: `85c85b29-c95d-4a8b-90f7-c87da1d518ba`
+
+### Hiding assets that are in other albums
+
+An asset can end up in more than one album, for example when the Immich mobile app's album sync adds a photo to a new album but never removes it from the old one. With `HideAssetsInOtherAlbums: true`, every album that is not listed under `Albums` is added to the excluded albums of the search, so an asset that is also in one of them is skipped. This saves listing each of those albums in `ExcludedAlbums` by hand, and new albums are picked up when the album cache refreshes (see `RefreshAlbumPeopleInterval`). The setting has no effect unless `Albums` is set.
 
 ### Filtering on Tags
 
