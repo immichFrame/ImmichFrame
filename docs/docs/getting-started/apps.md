@@ -15,8 +15,6 @@ ImmichFrame is available on the [Apple App Store][app-store-link] for iOS 17+ (i
 
 You can alternatively "install" ImmichFrame as a PWA by opening in a browser and going to Share Menu-Add to Homescreen.
 
-See also: [ImmichFrame Apple repository][github-apple-repo]
-
 
 
 ## Android
@@ -269,7 +267,6 @@ The screen is configured in a 3x3 gird. You can touch or click:
 [play-store-link]: https://play.google.com/store/apps/details?id=com.immichframe.immichframe
 [github-android-repo]: https://github.com/immichFrame/ImmichFrame_Android
 [github-android-releases]: https://github.com/immichFrame/ImmichFrame_Android/releases
-[github-apple-repo]: https://github.com/immichFrame/ImmichFrame_Apple
 [app-store-link]: https://apps.apple.com/us/app/immichframe/id6742748077
 [releases-url]: https://github.com/immichFrame/ImmichFrame_Desktop/releases/latest
 [ADB-link]: https://www.xda-developers.com/install-adb-windows-macos-linux/
