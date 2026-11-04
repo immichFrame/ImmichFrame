@@ -1,6 +1,7 @@
 using System.Text.Json;
 using ImmichFrame.Core.Exceptions;
 using ImmichFrame.Core.Interfaces;
+using ImmichFrame.Core.Models;
 using ImmichFrame.WebApi.Database;
 using ImmichFrame.WebApi.Helpers.Config;
 using ImmichFrame.WebApi.Models;
@@ -91,10 +92,29 @@ public class SettingsService : ISettingsProvider
             _raw = raw;
             _current = ValidateOrSafeMode(raw);
             _logger.LogInformation("Loaded settings from database (last updated {updatedAt:u})", row.UpdatedAtUtc);
-            return;
+        }
+        else
+        {
+            await ImportOrBootstrap(db);
         }
 
-        await ImportOrBootstrap(db);
+        WarnIfExhaustiveWithoutSecret(_current);
+    }
+
+    /// <summary>
+    /// Exhaustive shuffle keeps state per client and lists every selected asset, so on an open
+    /// API anyone who can reach the port can drive that cost.
+    /// </summary>
+    internal static bool ExhaustiveWithoutSecret(IServerSettings settings) =>
+        settings.GeneralSettings.AuthenticationSecret == null
+        && settings.Accounts.Any(a => a.ShuffleMode == ShuffleMode.Exhaustive);
+
+    private void WarnIfExhaustiveWithoutSecret(IServerSettings settings)
+    {
+        if (ExhaustiveWithoutSecret(settings))
+        {
+            _logger.LogWarning("ShuffleMode Exhaustive is on but AuthenticationSecret is not set. Anyone who can reach ImmichFrame can make it keep per-client state and query your Immich server; set an AuthenticationSecret.");
+        }
     }
 
     private ImmichFrameException ConfigPathNotWritable(Exception inner)
@@ -113,6 +133,16 @@ public class SettingsService : ISettingsProvider
         try
         {
             raw = _configLoader.LoadConfigRaw(_options.ConfigPath);
+        }
+        catch (SettingsNotValidException ex)
+        {
+            // A config file exists but cannot be read. That is not "unconfigured": keep anonymous
+            // setup closed so nobody can claim the instance while its owner fixes the file.
+            _logger.LogCritical("The configuration file could not be read and was not imported: {message}. Fix the configuration and restart.", ex.Message);
+            _raw = EmptySettings();
+            _current = _raw;
+            _isUnconfigured = false;
+            return;
         }
         catch (ImmichFrameException)
         {
@@ -244,6 +274,7 @@ public class SettingsService : ISettingsProvider
         _isUnconfigured = false;
 
         _logger.LogInformation("Settings updated (accounts changed: {accountsChanged})", accountsChanged);
+        WarnIfExhaustiveWithoutSecret(validated);
         SettingsChanged?.Invoke(this, new SettingsChangedEventArgs
         {
             NewSettings = validated,

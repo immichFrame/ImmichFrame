@@ -113,7 +113,7 @@
 	}
 
 	function addAccount() {
-		settings.Accounts = [...(settings.Accounts ?? []), {}];
+		settings.Accounts = [...(settings.Accounts ?? []), { shuffleMode: 'random' }];
 	}
 
 	function removeAccount(index: number) {

@@ -9,10 +9,13 @@ namespace ImmichFrame.Core.Logic;
 
 public class PooledImmichFrameLogic : IAccountImmichFrameLogic, IDisposable
 {
+    private const int BatchSize = 25;
+
     private readonly IGeneralSettings _generalSettings;
     private readonly IApiCache _apiCache;
     private readonly IAssetPool _pool;
     private readonly ImmichApi _immichApi;
+    private readonly List<IDisposable> _disposables = new();
     private readonly string _downloadLocation = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ImageCache");
 
     public PooledImmichFrameLogic(IAccountSettings accountSettings, IGeneralSettings generalSettings, IHttpClientFactory httpClientFactory)
@@ -25,8 +28,9 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic, IDisposable
         httpClient.UseApiKey(accountSettings.ApiKey);
         _immichApi = new ImmichApi(accountSettings.ImmichServerUrl, httpClient);
 
-        _apiCache = new ApiCache(RefreshInterval(generalSettings.RefreshAlbumPeopleInterval));
-        _pool = BuildPool(accountSettings);
+        var refreshInterval = RefreshInterval(generalSettings.RefreshAlbumPeopleInterval);
+        _apiCache = new ApiCache(refreshInterval);
+        _pool = BuildPool(accountSettings, refreshInterval);
     }
 
     private static TimeSpan RefreshInterval(int hours)
@@ -34,7 +38,7 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic, IDisposable
 
     public IAccountSettings AccountSettings { get; }
 
-    private IAssetPool BuildPool(IAccountSettings accountSettings)
+    private IAssetPool BuildPool(IAccountSettings accountSettings, TimeSpan refreshInterval)
     {
         var hasSource = accountSettings.ShowFavorites
             || (accountSettings.Albums?.Any() ?? false)
@@ -46,25 +50,34 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic, IDisposable
         // Memories-only skips the library search. Every other case needs it.
         if (!accountSettings.ShowMemories || hasSource)
         {
-            pools.Add(new AccountSearchPool(_apiCache, _immichApi, accountSettings));
+            // The ID list is only used in Exhaustive mode, which keeps it at least AccountSearchPool.MinIdListLifetime.
+            var searchPool = new AccountSearchPool(_apiCache, _immichApi, accountSettings, refreshInterval);
+            _disposables.Add(searchPool);
+            pools.Add(ApplyShuffleMode(searchPool, accountSettings.ShuffleMode));
         }
 
         if (accountSettings.ShowMemories)
         {
-            pools.Add(new MemoryAssetsPool(_immichApi, accountSettings));
+            pools.Add(ApplyShuffleMode(new MemoryAssetsPool(_immichApi, accountSettings), accountSettings.ShuffleMode));
         }
 
         return pools.Count == 1 ? pools[0] : new MultiAssetPool(pools);
     }
 
-    public async Task<AssetResponseDto?> GetNextAsset()
+    // Exhaustive mode deals each source from its own deck; Random mode keeps the source as it is.
+    internal static IAssetPool ApplyShuffleMode(IDealableAssetPool pool, ShuffleMode mode)
+        => mode == ShuffleMode.Exhaustive ? new ShuffleDeckPool(pool) : pool;
+
+    public async Task<AssetResponseDto?> GetNextAsset(string clientId = "", CancellationToken ct = default)
     {
-        return (await _pool.GetAssets(1)).FirstOrDefault();
+        return (await _pool.GetAssets(1, clientId, ct)).FirstOrDefault();
     }
 
-    public async Task<IEnumerable<AssetResponseDto>> GetAssets()
+    public Task<IEnumerable<AssetResponseDto>> GetAssets(string clientId = "", CancellationToken ct = default) => GetAssets(BatchSize, clientId, ct);
+
+    public async Task<IEnumerable<AssetResponseDto>> GetAssets(int count, string clientId, CancellationToken ct = default)
     {
-        return await _pool.GetAssets(25);
+        return await _pool.GetAssets(count, clientId, ct);
     }
 
     public async Task<AssetResponseDto> GetAssetInfoById(Guid assetId) => await _immichApi.GetAssetInfoAsync(assetId, null, null);
@@ -197,5 +210,13 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic, IDisposable
 
     public override string ToString() => $"Account Pool [{_immichApi.BaseUrl}]";
 
-    public void Dispose() => (_apiCache as IDisposable)?.Dispose();
+    public void Dispose()
+    {
+        foreach (var disposable in _disposables)
+        {
+            disposable.Dispose();
+        }
+
+        (_apiCache as IDisposable)?.Dispose();
+    }
 }

@@ -1,9 +1,30 @@
 using System.Text.Json;
 using ImmichFrame.Core.Exceptions;
 using ImmichFrame.WebApi.Models;
+using ImmichFrame.Core.Models;
+using YamlDotNet.Core;
+using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
 
 namespace ImmichFrame.WebApi.Helpers.Config;
+
+/// <summary>Reads an enum only from one of its names, like <see cref="StrictEnumJsonConverter{TEnum}"/> does for JSON.</summary>
+public sealed class StrictEnumYamlConverter<TEnum> : IYamlTypeConverter where TEnum : struct, Enum
+{
+    public bool Accepts(Type type) => type == typeof(TEnum);
+
+    public object? ReadYaml(IParser parser, Type type, ObjectDeserializer rootDeserializer)
+    {
+        var scalar = parser.Consume<Scalar>();
+        return StrictEnumJsonConverter<TEnum>.TryParseName(scalar.Value, out var value)
+            ? value
+            : throw new YamlException(scalar.Start, scalar.End,
+                $"'{scalar.Value}' is not a valid {typeof(TEnum).Name}. Use one of: {string.Join(", ", Enum.GetNames<TEnum>())}.");
+    }
+
+    public void WriteYaml(IEmitter emitter, object? value, Type type, ObjectSerializer serializer)
+        => emitter.Emit(new Scalar(value == null ? string.Empty : JsonNamingPolicy.CamelCase.ConvertName(value.ToString()!)));
+}
 
 /// <summary>
 /// Reads an existing configuration file so it can be imported into the database once.
@@ -70,6 +91,7 @@ public class ConfigLoader(ILogger<ConfigLoader> _logger)
                 var yml = File.ReadAllText(configPath);
                 var deserializer = new DeserializerBuilder()
                     .IgnoreUnmatchedProperties()
+                    .WithTypeConverter(new StrictEnumYamlConverter<ShuffleMode>())
                     .Build();
                 return deserializer.Deserialize<T>(yml) ?? throw new FileLoadException("Failed to load config file", configPath);
             }

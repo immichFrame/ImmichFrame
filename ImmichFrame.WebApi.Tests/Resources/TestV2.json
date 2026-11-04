@@ -51,6 +51,7 @@
       "ImagesFromDays": 7,
       "ImagesUntilDate": "2020-01-02",
       "Rating": 7,
+      "ShuffleMode": "Exhaustive",
       "Albums": [
         "00000000-0000-0000-0000-000000000001"
       ],
@@ -76,6 +77,7 @@
       "ImagesFromDays": 7,
       "ImagesUntilDate": "2020-01-02",
       "Rating": 7,
+      "ShuffleMode": "Exhaustive",
       "Albums": [
         "00000000-0000-0000-0000-000000000001"
       ],

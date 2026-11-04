@@ -1,5 +1,4 @@
-using System.Security.Cryptography;
-using System.Text;
+using ImmichFrame.WebApi.Helpers;
 
 namespace ImmichFrame.WebApi.Services;
 
@@ -61,8 +60,6 @@ public class AdminAuthService(SettingsService _settingsService)
             return false;
         }
 
-        return CryptographicOperations.FixedTimeEquals(
-            Encoding.UTF8.GetBytes(candidate),
-            Encoding.UTF8.GetBytes(password));
+        return SecretComparison.Matches(password, candidate);
     }
 }

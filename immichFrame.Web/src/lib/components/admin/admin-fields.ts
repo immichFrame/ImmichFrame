@@ -168,6 +168,13 @@ export const accountFields: FieldDef<ServerAccountSettings>[] = [
 	{ key: 'showFavorites', label: 'Favorites', type: 'checkbox' },
 	{ key: 'showArchived', label: 'Archived', type: 'checkbox' },
 	{ key: 'showVideos', label: 'Videos', type: 'checkbox' },
+	{
+		key: 'shuffleMode',
+		label: 'Shuffle',
+		type: 'select',
+		options: ['random', 'exhaustive'],
+		help: 'Exhaustive shows every photo once before repeating.'
+	},
 	{ key: 'imagesFromDays', label: 'Images from (days back)', type: 'number' },
 	{ key: 'rating', label: 'Minimum rating', type: 'number', min: 1, max: 5 },
 	{ key: 'imagesFromDate', label: 'Images from date', type: 'date' },

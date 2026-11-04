@@ -48,6 +48,7 @@ Accounts:
     ImagesFromDays: null
     ImagesUntilDate: '2020-01-02'
     Rating: null
+    ShuffleMode: Random # Random | Exhaustive (show every photo once before repeating)
     Albums:
       - UUID
     ExcludedAlbums:

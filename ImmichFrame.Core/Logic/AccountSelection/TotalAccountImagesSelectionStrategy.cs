@@ -10,7 +10,10 @@ public class TotalAccountImagesSelectionStrategy(
     IAssetAccountTracker _tracker,
     IList<IAccountImmichFrameLogic> _accounts) : IAccountSelectionStrategy
 {
-    public async Task<(IAccountImmichFrameLogic, AssetResponseDto)?> GetNextAsset()
+    // The batch size of the account that holds the most assets; the others are asked for their share of it.
+    public const int BatchSize = 25;
+
+    public async Task<(IAccountImmichFrameLogic, AssetResponseDto)?> GetNextAsset(string clientId = "", CancellationToken ct = default)
     {
         if (_accounts.Count == 0)
         {
@@ -20,7 +23,7 @@ public class TotalAccountImagesSelectionStrategy(
 
         var chosen = await _accounts.ChooseOne(logic => logic.GetTotalAssets());
 
-        var asset = await chosen.GetNextAsset();
+        var asset = await chosen.GetNextAsset(clientId, ct);
         if (asset != null)
         {
             await _tracker.RecordAssetLocation(chosen, asset.Id);
@@ -55,7 +58,7 @@ public class TotalAccountImagesSelectionStrategy(
         return account.GetTotalAssets();
     }
 
-    public async Task<IEnumerable<(IAccountImmichFrameLogic, AssetResponseDto)>> GetAssets()
+    public async Task<IEnumerable<(IAccountImmichFrameLogic, AssetResponseDto)>> GetAssets(string clientId = "", CancellationToken ct = default)
     {
         if (_accounts.Count == 0)
         {
@@ -66,16 +69,22 @@ public class TotalAccountImagesSelectionStrategy(
         var proportions = await GetProportions(_accounts);
         var maxAccount = proportions.Max();
         var adjustedProportions = proportions.Select(x => x / maxAccount).ToList();
-        var assetLists = _accounts.Select(account => account.GetAssets()).ToList();
 
-        var taskList = assetLists
-            .Zip(_accounts, adjustedProportions)
+        // Ask each account only for its share, so nothing dealt from an account's deck is discarded.
+        var taskList = _accounts
+            .Zip(adjustedProportions)
             .Select(async tuple =>
             {
-                var (task, account, proportion) = tuple;
-                var assets = (await task).ToList();
-                _logger.LogDebug("Retrieved {total} asset(s) for account [{account}], will take {proportion}%", assets.Count(), account, proportion * 100);
-                return (account, assets.Shuffle().TakeProportional(proportion));
+                var (account, proportion) = tuple;
+                var count = proportion > 0 ? (int)Math.Ceiling(BatchSize * proportion) : 0;
+                if (count == 0)
+                {
+                    return (account, assets: (IEnumerable<AssetResponseDto>)[]);
+                }
+
+                var assets = (await account.GetAssets(count, clientId, ct)).ToList();
+                _logger.LogDebug("Retrieved {total} asset(s) for account [{account}], asked for {count}", assets.Count, account, count);
+                return (account, assets: (IEnumerable<AssetResponseDto>)assets);
             });
 
         var accountAssetTupleList = await Task.WhenAll(taskList);

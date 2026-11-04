@@ -45,7 +45,7 @@ Defaults are below, only one account with `ImmichServerUrl` and `ApiKey`|`ApiKey
 ```yaml
 # settings applicable to the web client - when viewing with a browser or webview
 General:
-  # When set, every client needs to authenticate via Bearer Token and this value.
+  # When set (and not empty), every client needs to authenticate via Bearer Token and this value.
   AuthenticationSecret: null # string, no default
   # whether to download images to the server
   DownloadImages: false # boolean
@@ -142,6 +142,9 @@ Accounts:
     ImagesUntilDate: "2020-01-02" # Date
     # Minimum rating in stars, allowed values from -1 to 5. Shows images with this rating or higher.
     Rating: null # int
+    # Random: each batch is an independent random pick, so photos can repeat.
+    # Exhaustive: every matching photo is shown once, in random order, before any repeats; each frame keeps its own order.
+    ShuffleMode: Random # Random | Exhaustive
     # UUID of album(s) - e.g. ['00000000-0000-0000-0000-000000000001']
     Albums: # string[]
       - UUID
@@ -175,6 +178,34 @@ For tags, use the full hierarchical path (the `value` field) as it appears in Im
 
 - `"Vacation"` - matches a top-level tag named "Vacation"
 - `"Travel/Europe"` - matches a tag "Europe" under parent "Travel"
+
+### Show every photo before repeating
+
+By default (`ShuffleMode: Random`) every batch is an independent random pick, so a photo can come back soon while others are not shown for a long time. Set `ShuffleMode: Exhaustive` on an account to show every photo its settings select (albums, people, tags, favorites, the whole library, memories) once, in random order, before any photo repeats:
+
+```yaml
+Accounts:
+  - ImmichServerUrl: "http://immich:2283"
+    ApiKey: "super-secret-api-key"
+    ShuffleMode: Exhaustive
+    Albums:
+      - UUID
+```
+
+- Each frame keeps its own shuffled order and its own place in the cycle. Up to 32 frames are tracked per account; a frame that has not asked for photos for 24 hours starts a new cycle. Past 8 frames, a new frame gets its own order at most once a minute, and a frame that has asked for photos in the last 10 minutes is never dropped to make room; frames turned away share one common order instead.
+- New photos join the current cycle when the list of photos is refreshed (every `RefreshAlbumPeopleInterval` hours), and deleted ones drop out; the cycle is not restarted. In Exhaustive mode the list is kept for **at least 5 minutes**, even with `RefreshAlbumPeopleInterval: 0`, because fetching it costs one Immich request per 1000 photos. `RefreshAlbumPeopleInterval` keeps its meaning for everything else.
+- A photo is checked against the account's settings when it is dealt, so a photo removed from the album, unfavorited, archived or retagged since the last refresh is skipped rather than shown.
+- Changing an account's settings, or restarting ImmichFrame, starts a new cycle on every frame.
+- `ShuffleMode` accepts only `Random` or `Exhaustive`; any other value (including a number) is a configuration error.
+
+:::tip
+Set an `AuthenticationSecret` (see [Security](#security)) when you use `Exhaustive`. ImmichFrame keeps an order for each frame that asks, and fetches the photo list from Immich, so on an open port anyone who can reach ImmichFrame can make it do that work. ImmichFrame logs a warning at startup when `Exhaustive` is on without a secret.
+
+What that work costs:
+
+- Every photo dealt is looked up in Immich with one search request, so the account's settings are checked at the moment it is shown. A batch of 25 photos is up to 25 searches, and when photos have to be skipped a request can deal at most twice what it asked for, so at most 50. At most 4 of these searches run at once per account, however many frames are asking, and a photo looked up in the last 3 minutes is not searched again.
+- Anyone who can reach the port can claim frame slots by sending made-up frame names. Their frames take the 32 slots and share the common order once new frames are rate-limited, so a real frame that is new, or has been idle for more than 10 minutes, may have to share the common order too. Its photos still show, but it doesn't get its own cycle.
+:::
 
 ### Weather
 
