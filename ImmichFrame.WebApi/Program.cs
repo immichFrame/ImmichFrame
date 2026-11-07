@@ -1,5 +1,6 @@
 using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
+using ImmichFrame.Core.Services;
 using Microsoft.AspNetCore.Authentication;
 using System.Reflection;
 using ImmichFrame.Core.Logic;
@@ -93,6 +94,8 @@ builder.Services.AddTransient<Func<IAccountSettings, IAccountImmichFrameLogic>>(
 builder.Services.AddSingleton<Func<IImmichFrameLogic>>(srv =>
     () => ActivatorUtilities.CreateInstance<MultiImmichFrameLogicDelegate>(srv));
 builder.Services.AddSingleton<IImmichFrameLogic, ReloadingImmichFrameLogic>();
+builder.Services.AddSingleton<IFrameEventQueue, InMemoryFrameEventQueue>();
+builder.Services.AddSingleton<FrameEventValidator>();
 
 builder.Services.AddControllers()
       .AddJsonOptions(options =>
