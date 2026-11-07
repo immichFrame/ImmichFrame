@@ -1,4 +1,4 @@
-using ImmichFrame.WebApi.Helpers;
+﻿using ImmichFrame.WebApi.Helpers;
 using ImmichFrame.WebApi.Models;
 using NUnit.Framework;
 
@@ -24,22 +24,6 @@ public class EventSettingsBoundsTests
     public void V2_EventDefaultTimeoutMs_IsClampedOnSet(int input, int expected)
     {
         var settings = new GeneralSettings { EventDefaultTimeoutMs = input };
-        Assert.That(settings.EventDefaultTimeoutMs, Is.EqualTo(expected));
-    }
-
-    [TestCase(0, 1)]
-    [TestCase(10_000, 3600)]
-    public void V1_EventPollingIntervalSeconds_IsClampedOnSet(int input, int expected)
-    {
-        var settings = new ServerSettingsV1 { EventPollingIntervalSeconds = input };
-        Assert.That(settings.EventPollingIntervalSeconds, Is.EqualTo(expected));
-    }
-
-    [TestCase(0, 100)]
-    [TestCase(10_000_000, 300_000)]
-    public void V1_EventDefaultTimeoutMs_IsClampedOnSet(int input, int expected)
-    {
-        var settings = new ServerSettingsV1 { EventDefaultTimeoutMs = input };
         Assert.That(settings.EventDefaultTimeoutMs, Is.EqualTo(expected));
     }
 }

@@ -109,8 +109,7 @@
 
 	function getCurrentDeviceId(): string {
 		const storeId = typeof $clientIdentifierStore === 'string' ? $clientIdentifierStore.trim() : '';
-		const queryId = typeof clientIdentifier === 'string' ? clientIdentifier.trim() : '';
-		return storeId || queryId || 'default';
+		return storeId || 'default';
 	}
 
 	// Event polling is started in onMount after config is loaded
