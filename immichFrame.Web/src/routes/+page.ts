@@ -2,6 +2,7 @@ import * as api from '$lib/immichFrameApi';
 import { AdminUiState } from '$lib/immichFrameApi';
 import { configStore } from '$lib/stores/config.store.js';
 import { clientIdentifierStore } from '$lib/stores/persist.store';
+import { assetSelectionStore, selectionFromUrl } from '$lib/stores/asset-selection.store';
 import { redirect } from '@sveltejs/kit';
 import { get } from 'svelte/store';
 import type { PageLoad } from './$types';
@@ -11,6 +12,7 @@ export const load: PageLoad = async ({ url }) => {
 	if (clientParam) {
 		clientIdentifierStore.set(clientParam);
 	}
+	assetSelectionStore.set(selectionFromUrl(url));
 
 	const [configRequest, adminState] = await Promise.all([
 		api.getConfig({ clientIdentifier: get(clientIdentifierStore) }),

@@ -191,6 +191,17 @@ namespace ImmichFrame.WebApi.Tests.Services
         }
 
         [Test]
+        public async Task InitializeAsync_InvalidAccountName_KeepsAccount()
+        {
+            WriteSettingsJson(ValidV2Json.Replace("\"ImmichServerUrl\"", "\"Name\": \"living room\", \"ImmichServerUrl\""));
+
+            var service = CreateService();
+            await service.InitializeAsync();
+
+            Assert.That(service.Current.Accounts.Single().ApiKey, Is.EqualTo("key123"));
+        }
+
+        [Test]
         public async Task UpdateAsync_InvalidSettings_ThrowsAndKeepsCurrent()
         {
             WriteSettingsJson(ValidV2Json);

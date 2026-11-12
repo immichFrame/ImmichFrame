@@ -12,6 +12,7 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic, IDisposable
     private readonly IGeneralSettings _generalSettings;
     private readonly IApiCache _apiCache;
     private readonly IAssetPool _pool;
+    private readonly MemoryAssetsPool? _memoryPool;
     private readonly ImmichApi _immichApi;
     private readonly string _downloadLocation = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ImageCache");
 
@@ -26,6 +27,8 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic, IDisposable
         _immichApi = new ImmichApi(accountSettings.ImmichServerUrl, httpClient);
 
         _apiCache = new ApiCache(RefreshInterval(generalSettings.RefreshAlbumPeopleInterval));
+        // Built once and shared, so per-request album overrides do not reload the daily memories.
+        _memoryPool = accountSettings.ShowMemories ? new MemoryAssetsPool(_immichApi, accountSettings) : null;
         _pool = BuildPool(accountSettings);
     }
 
@@ -49,9 +52,9 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic, IDisposable
             pools.Add(new AccountSearchPool(_apiCache, _immichApi, accountSettings));
         }
 
-        if (accountSettings.ShowMemories)
+        if (_memoryPool != null)
         {
-            pools.Add(new MemoryAssetsPool(_immichApi, accountSettings));
+            pools.Add(_memoryPool);
         }
 
         return pools.Count == 1 ? pools[0] : new MultiAssetPool(pools);
@@ -65,6 +68,17 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic, IDisposable
     public async Task<IEnumerable<AssetResponseDto>> GetAssets()
     {
         return await _pool.GetAssets(25);
+    }
+
+    public async Task<IEnumerable<AssetResponseDto>> GetAssets(AssetSelection selection)
+    {
+        if (selection.AlbumIds is not { Count: > 0 } albumIds)
+        {
+            return await GetAssets();
+        }
+
+        var pool = BuildPool(new AlbumOverrideAccountSettings(AccountSettings, albumIds));
+        return await pool.GetAssets(25);
     }
 
     public async Task<AssetResponseDto> GetAssetInfoById(Guid assetId) => await _immichApi.GetAssetInfoAsync(assetId, null, null);

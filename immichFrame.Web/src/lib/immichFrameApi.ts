@@ -68,6 +68,7 @@ export type GeneralSettings = {
     adminPassword?: string | null;
 };
 export type ServerAccountSettings = {
+    name?: string | null;
     immichServerUrl?: string | null;
     apiKey?: string | null;
     apiKeyFile?: string | null;
@@ -367,14 +368,21 @@ export function testAccount(serverAccountSettings?: ServerAccountSettings, opts?
         body: serverAccountSettings
     }));
 }
-export function getAssets({ clientIdentifier }: {
+export function getAssets({ clientIdentifier, accountName, albumIds }: {
     clientIdentifier?: string;
+    accountName?: string;
+    albumIds?: string;
 } = {}, opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
         status: 200;
         data: AssetResponseDto[];
+    } | {
+        status: 400;
+        data: ProblemDetails;
     }>(`/api/Asset${QS.query(QS.explode({
-        clientIdentifier
+        clientIdentifier,
+        accountName,
+        albumIds
     }))}`, {
         ...opts
     });

@@ -19,6 +19,7 @@ namespace ImmichFrame.WebApi.Tests.Controllers
     {
         private WebApplicationFactory<Program> _factory;
         private Mock<HttpMessageHandler> _mockHttpMessageHandler;
+        private readonly Guid _configuredAlbum = Guid.NewGuid();
 
         [SetUp]
         public void Setup()
@@ -57,12 +58,13 @@ namespace ImmichFrame.WebApi.Tests.Controllers
 
                         var accountSettings = new ServerAccountSettings
                         {
+                            Name = "family",
                             ImmichServerUrl = "http://mock-immich-server.com",
                             ApiKey = "test-api-key",
                             ShowMemories = false,
                             ShowFavorites = true,
                             ShowArchived = false,
-                            Albums = new List<Guid>(),
+                            Albums = new List<Guid> { _configuredAlbum },
                             ExcludedAlbums = new List<Guid>(),
                             People = new List<Guid>()
                         };
@@ -150,6 +152,89 @@ namespace ImmichFrame.WebApi.Tests.Controllers
             // For now, we'll just check if the response is not empty.
             // A more robust check would be to deserialize the response and check the asset ID.
             Assert.That(content, Is.Not.Empty);
+        }
+
+        // Answers /search/statistics and /search/random, recording each /search/random request body.
+        private List<string> CaptureRandomSearches()
+        {
+            var bodies = new List<string>();
+            var randomJson = JsonSerializer.Serialize(new[] { BuildAssetResponse(Guid.NewGuid()) });
+            _mockHttpMessageHandler.Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.Is<HttpRequestMessage>(req => req.RequestUri!.ToString().Contains("/search/random")),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .Callback<HttpRequestMessage, CancellationToken>((req, _) => bodies.Add(req.Content!.ReadAsStringAsync().Result))
+                .ReturnsAsync(() => new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent(randomJson)
+                });
+            var statsJson = JsonSerializer.Serialize(new SearchStatisticsResponseDto { Total = 1 });
+            _mockHttpMessageHandler.Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.Is<HttpRequestMessage>(req => req.RequestUri!.ToString().Contains("/search/statistics")),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ReturnsAsync(() => new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent(statsJson)
+                });
+            return bodies;
+        }
+
+        [Test]
+        public async Task GetAssets_AccountWithAlbums_SearchesOnlyThoseAlbums()
+        {
+            var bodies = CaptureRandomSearches();
+            var album1 = Guid.NewGuid();
+            var album2 = Guid.NewGuid();
+            var client = _factory.CreateClient();
+
+            var response = await client.GetAsync($"/api/Asset?accountName=Family&albumIds={album1}, {album2}");
+
+            response.EnsureSuccessStatusCode();
+            Assert.That(bodies, Has.Count.EqualTo(1));
+            Assert.That(bodies[0], Does.Contain(album1.ToString()).And.Contain(album2.ToString()));
+            Assert.That(bodies[0], Does.Not.Contain(_configuredAlbum.ToString()));
+        }
+
+        [Test]
+        public async Task GetAssets_AlbumsWithoutAccount_AreIgnored()
+        {
+            var bodies = CaptureRandomSearches();
+            var album = Guid.NewGuid();
+            var client = _factory.CreateClient();
+
+            var response = await client.GetAsync($"/api/Asset?albumIds={album}");
+
+            response.EnsureSuccessStatusCode();
+            Assert.That(bodies, Is.Not.Empty);
+            Assert.That(bodies.Any(b => b.Contains(album.ToString())), Is.False);
+        }
+
+        [Test]
+        public async Task GetAssets_InvalidAlbums_ReturnsBadRequest()
+        {
+            var client = _factory.CreateClient();
+
+            var response = await client.GetAsync("/api/Asset?accountName=family&albumIds=not-an-id");
+
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+        }
+
+        [Test]
+        public async Task GetAssets_UnknownAccount_ReturnsEmptyList()
+        {
+            var client = _factory.CreateClient();
+
+            var response = await client.GetAsync("/api/Asset?accountName=unknown");
+
+            response.EnsureSuccessStatusCode();
+            Assert.That(await response.Content.ReadAsStringAsync(), Is.EqualTo("[]"));
         }
 
         // Builds a valid AssetResponseDto from the generated client types. Only the

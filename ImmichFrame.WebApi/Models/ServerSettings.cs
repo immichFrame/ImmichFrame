@@ -1,10 +1,11 @@
 ﻿using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using ImmichFrame.Core.Interfaces;
 using YamlDotNet.Serialization;
 
 namespace ImmichFrame.WebApi.Models;
 
-public class ServerSettings : IServerSettings
+public partial class ServerSettings : IServerSettings
 {
     [YamlMember(Alias = "General")]
     [JsonPropertyName("General")]
@@ -23,13 +24,30 @@ public class ServerSettings : IServerSettings
     [YamlIgnore]
     public IEnumerable<IAccountSettings> Accounts => AccountsImpl;
 
+    [GeneratedRegex("^[A-Za-z0-9_-]+$")]
+    private static partial Regex AccountNameRegex();
+
     public void Validate()
     {
         GeneralSettings.Validate();
 
-        foreach (var account in Accounts)
+        foreach (var account in AccountsImpl)
         {
             account.ValidateAndInitialize();
+
+            if (account.Name != null && !AccountNameRegex().IsMatch(account.Name))
+            {
+                throw new InvalidOperationException($"Account name '{account.Name}' is invalid. Use only a-z, A-Z, 0-9, '-' and '_'.");
+            }
+        }
+
+        var duplicateName = AccountsImpl
+            .Where(account => account.Name != null)
+            .GroupBy(account => account.Name!, StringComparer.OrdinalIgnoreCase)
+            .FirstOrDefault(group => group.Count() > 1);
+        if (duplicateName != null)
+        {
+            throw new InvalidOperationException($"Account name '{duplicateName.Key}' is used more than once.");
         }
     }
 }
@@ -78,6 +96,7 @@ public class GeneralSettings : IGeneralSettings
 
 public class ServerAccountSettings : IAccountSettings
 {
+    public string? Name { get; set; }
     public string ImmichServerUrl { get; set; } = string.Empty;
     public string ApiKey { get; set; } = string.Empty;
     public string? ApiKeyFile { get; set; } = null;
@@ -97,6 +116,8 @@ public class ServerAccountSettings : IAccountSettings
 
     public void ValidateAndInitialize()
     {
+        Name = string.IsNullOrWhiteSpace(Name) ? null : Name.Trim();
+
         if (!string.IsNullOrWhiteSpace(ApiKeyFile))
         {
             if (!string.IsNullOrWhiteSpace(ApiKey))
