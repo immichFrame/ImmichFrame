@@ -27,6 +27,8 @@ public partial class ServerSettings : IServerSettings
     [GeneratedRegex("^[A-Za-z0-9_-]+$")]
     private static partial Regex AccountNameRegex();
 
+    public static bool IsValidAccountName(string name) => AccountNameRegex().IsMatch(name);
+
     public void Validate()
     {
         GeneralSettings.Validate();
@@ -35,7 +37,7 @@ public partial class ServerSettings : IServerSettings
         {
             account.ValidateAndInitialize();
 
-            if (account.Name != null && !AccountNameRegex().IsMatch(account.Name))
+            if (account.Name != null && !IsValidAccountName(account.Name))
             {
                 throw new InvalidOperationException($"Account name '{account.Name}' is invalid. Use only a-z, A-Z, 0-9, '-' and '_'.");
             }

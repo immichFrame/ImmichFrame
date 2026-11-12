@@ -198,7 +198,36 @@ namespace ImmichFrame.WebApi.Tests.Services
             var service = CreateService();
             await service.InitializeAsync();
 
-            Assert.That(service.Current.Accounts.Single().ApiKey, Is.EqualTo("key123"));
+            var account = service.Current.Accounts.Single();
+            Assert.Multiple(() =>
+            {
+                Assert.That(account.ApiKey, Is.EqualTo("key123"));
+                Assert.That(account.Name, Is.Null);
+            });
+        }
+
+        [Test]
+        public async Task InitializeAsync_DuplicateAccountNames_KeepsAccountsWithoutNames()
+        {
+            WriteSettingsJson("""
+                {
+                    "Accounts": [
+                        { "Name": "family", "ImmichServerUrl": "http://immich.local", "ApiKey": "key1" },
+                        { "Name": "Family", "ImmichServerUrl": "http://immich.local", "ApiKey": "key2" },
+                        { "Name": "holidays", "ImmichServerUrl": "http://immich.local", "ApiKey": "key3" }
+                    ]
+                }
+                """);
+
+            var service = CreateService();
+            await service.InitializeAsync();
+
+            Assert.That(service.Current.Accounts.Select(a => (a.ApiKey, a.Name)), Is.EqualTo(new (string, string?)[]
+            {
+                ("key1", null),
+                ("key2", null),
+                ("key3", "holidays")
+            }));
         }
 
         [Test]
