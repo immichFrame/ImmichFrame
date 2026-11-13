@@ -35,7 +35,8 @@ General:
   PlayAudio: false
   Layout: splitview
 Accounts:
-  - ImmichServerUrl: REQUIRED
+  - Name: family
+    ImmichServerUrl: REQUIRED
     # Exactly one of ApiKey or ApiKeyFile must be set.
     ApiKey: "super-secret-api-key"
     # ApiKeyFile: "/path/to/api.key"

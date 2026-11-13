@@ -1,6 +1,7 @@
 using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
+using ImmichFrame.Core.Logic;
 using ImmichFrame.Core.Logic.Pool;
 using Moq;
 using NUnit.Framework;
@@ -252,6 +253,39 @@ public class AccountSearchPoolTests
         Assert.That(await pool.GetAssetCount(), Is.EqualTo(7));
 
         _api.Verify(a => a.SearchAssetStatisticsAsync(It.IsAny<StatisticsSearchDto>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Test]
+    public async Task GetAssets_AlbumOverride_ReplacesConfiguredAlbumsOnly()
+    {
+        var configuredAlbum = Guid.NewGuid();
+        var urlAlbum = Guid.NewGuid();
+        _settings.SetupGet(s => s.ShowFavorites).Returns(true);
+        _settings.SetupGet(s => s.Albums).Returns(new List<Guid> { configuredAlbum });
+        var pool = new AccountSearchPool(_cache.Object, _api.Object,
+            new AlbumOverrideAccountSettings(_settings.Object, [urlAlbum]));
+
+        await pool.GetAssets(1);
+
+        VerifyRandom(dto =>
+            dto.Filter!.Or.Count == 2 &&
+            dto.Filter.Or.Any(branch => branch.IsFavorite != null && branch.IsFavorite.Eq) &&
+            dto.Filter.Or.Any(branch => branch.AlbumIds != null &&
+                branch.AlbumIds.Any.Contains(urlAlbum) && !branch.AlbumIds.Any.Contains(configuredAlbum)));
+    }
+
+    [Test]
+    public async Task GetAssetCount_AlbumOverride_UsesSeparateCacheKey()
+    {
+        var urlAlbum = Guid.NewGuid();
+        var pool = new AccountSearchPool(_cache.Object, _api.Object,
+            new AlbumOverrideAccountSettings(_settings.Object, [urlAlbum]));
+
+        await _pool.GetAssetCount();
+        await pool.GetAssetCount();
+
+        _cache.Verify(c => c.GetOrAddAsync("stats", It.IsAny<Func<Task<long>>>()), Times.Once);
+        _cache.Verify(c => c.GetOrAddAsync($"stats_{urlAlbum}", It.IsAny<Func<Task<long>>>()), Times.Once);
     }
 
     private void VerifyRandom(Func<RandomSearchDto, bool> match) =>

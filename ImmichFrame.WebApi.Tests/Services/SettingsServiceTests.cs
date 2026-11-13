@@ -191,6 +191,46 @@ namespace ImmichFrame.WebApi.Tests.Services
         }
 
         [Test]
+        public async Task InitializeAsync_InvalidAccountName_KeepsAccount()
+        {
+            WriteSettingsJson(ValidV2Json.Replace("\"ImmichServerUrl\"", "\"Name\": \"living room\", \"ImmichServerUrl\""));
+
+            var service = CreateService();
+            await service.InitializeAsync();
+
+            var account = service.Current.Accounts.Single();
+            Assert.Multiple(() =>
+            {
+                Assert.That(account.ApiKey, Is.EqualTo("key123"));
+                Assert.That(account.Name, Is.Null);
+            });
+        }
+
+        [Test]
+        public async Task InitializeAsync_DuplicateAccountNames_KeepsAccountsWithoutNames()
+        {
+            WriteSettingsJson("""
+                {
+                    "Accounts": [
+                        { "Name": "family", "ImmichServerUrl": "http://immich.local", "ApiKey": "key1" },
+                        { "Name": "Family", "ImmichServerUrl": "http://immich.local", "ApiKey": "key2" },
+                        { "Name": "holidays", "ImmichServerUrl": "http://immich.local", "ApiKey": "key3" }
+                    ]
+                }
+                """);
+
+            var service = CreateService();
+            await service.InitializeAsync();
+
+            Assert.That(service.Current.Accounts.Select(a => (a.ApiKey, a.Name)), Is.EqualTo(new (string, string?)[]
+            {
+                ("key1", null),
+                ("key2", null),
+                ("key3", "holidays")
+            }));
+        }
+
+        [Test]
         public async Task UpdateAsync_InvalidSettings_ThrowsAndKeepsCurrent()
         {
             WriteSettingsJson(ValidV2Json);

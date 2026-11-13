@@ -35,6 +35,9 @@
 
 	let textValue = $derived((target[field.key] as string | null) ?? '');
 	let dateValue = $derived(textValue.substring(0, 10));
+	let patternInvalid = $derived(
+		!!field.pattern && textValue.trim() !== '' && !field.pattern.test(textValue.trim())
+	);
 
 	function updateList(text: string) {
 		listText = text;
@@ -54,7 +57,7 @@
 	}
 </script>
 
-<Field label={field.label} invalid={invalidGuids.length > 0}>
+<Field label={field.label} invalid={invalidGuids.length > 0 || patternInvalid}>
 	{#if field.type === 'checkbox'}
 		<Checkbox
 			checked={target[field.key] === true}
@@ -89,6 +92,8 @@
 
 	{#if invalidGuids.length}
 		<HelperText color="danger">Not a valid ID: {invalidGuids.join(', ')}</HelperText>
+	{:else if patternInvalid}
+		<HelperText color="danger">{field.patternMessage}</HelperText>
 	{:else if field.help}
 		<HelperText>{field.help}</HelperText>
 	{/if}

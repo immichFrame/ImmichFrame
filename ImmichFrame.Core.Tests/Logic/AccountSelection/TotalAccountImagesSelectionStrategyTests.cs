@@ -3,6 +3,7 @@ using NUnit.Framework;
 using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.Core.Logic.AccountSelection;
+using ImmichFrame.Core.Models;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace ImmichFrame.Core.Tests.Logic.AccountSelection
@@ -110,6 +111,30 @@ namespace ImmichFrame.Core.Tests.Logic.AccountSelection
             Assert.That(result, Is.Not.Null);
             Assert.That(result!.Value.Item2.Id, Is.EqualTo(asset.Id));
             _mockTracker.Verify(t => t.RecordAssetLocation(account.Object, asset.Id), Times.Once);
+        }
+
+        [Test]
+        public async Task GetAssets_ForAccount_PassesSelectionAndRecordsLocations()
+        {
+            var assets = Enumerable.Range(0, 3).Select(_ => CreateAsset()).ToList();
+            var selection = new AssetSelection("family", [Guid.NewGuid()]);
+            var account = CreateAccount(10, Enumerable.Empty<AssetResponseDto>());
+            account.Setup(a => a.GetAssets(selection)).ReturnsAsync(assets);
+            var other = CreateAccount(10, Enumerable.Empty<AssetResponseDto>());
+            var strategy = CreateStrategy(account.Object, other.Object);
+
+            var result = (await strategy.GetAssets(account.Object, selection)).ToList();
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.Select(t => t.Item2), Is.EquivalentTo(assets));
+                Assert.That(result.All(t => ReferenceEquals(t.Item1, account.Object)), Is.True);
+            });
+            other.Verify(a => a.GetAssets(), Times.Never);
+            foreach (var asset in assets)
+            {
+                _mockTracker.Verify(t => t.RecordAssetLocation(account.Object, asset.Id), Times.Once);
+            }
         }
     }
 }

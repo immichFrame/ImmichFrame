@@ -126,6 +126,8 @@ Accounts:
     # Exactly one of ApiKey or ApiKeyFile must be set.
     ApiKey: "super-secret-api-key"
     # ApiKeyFile: "/path/to/api.key"
+    # Show only this account with `?account=<Name>` in the frame URL. Must be unique; use only a-z, A-Z, 0-9, '-' and '_'.
+    Name: null # string
     # Show images after date. Overwrites the `ImagesFromDays`-Setting
     ImagesFromDate: null # Date
     # If this is set, memories are displayed.
@@ -214,6 +216,14 @@ Events will always contain a `Name`, `ClientIdentifier` and a `DateTime` to diff
 ImmichFrame can be configured to access multiple Immich accounts, on the same or different servers.
 
 Images will be drawn from each account proportionally based on the total number of images present in each account (not included filtering, this is not yet implemented).
+
+### Selecting an Account via URL
+
+Give an account a `Name` and add `?account=MyAccount` to your ImmichFrame-URL to show only this account. The name is not case-sensitive. Without the parameter, all accounts are shown.
+
+Together with `account`, `albums` replaces the albums of that account with a comma-separated list of album UUIDs, e.g. `?account=MyAccount&albums=UUID1,UUID2`. All other settings of the account still apply. Without `account`, `albums` is ignored.
+
+Unlike `?client=`, these parameters are not persisted. Note that anyone who can open your ImmichFrame can use `albums` to show any album the account's API key has access to.
 
 ### API Key Permissions
 

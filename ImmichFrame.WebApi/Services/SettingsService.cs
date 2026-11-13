@@ -285,6 +285,20 @@ public class SettingsService : ISettingsProvider
             }
         }
 
+        // A bad name must not cost the account its photos, so only the name is dropped.
+        var unusableNames = validAccounts
+            .Where(account => account.Name != null)
+            .GroupBy(account => account.Name!, StringComparer.OrdinalIgnoreCase)
+            .Where(group => group.Count() > 1 || !ServerSettings.IsValidAccountName(group.Key));
+        foreach (var group in unusableNames)
+        {
+            _logger.LogCritical("Ignoring account name '{name}': it is invalid or used more than once", group.Key);
+            foreach (var account in group)
+            {
+                account.Name = null;
+            }
+        }
+
         safe.AccountsImpl = validAccounts;
         return safe;
     }
