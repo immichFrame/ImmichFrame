@@ -1856,10 +1856,93 @@
         },
         "additionalProperties": false
       },
+      "PeopleUserResponseDto": {
+        "required": [
+          "avatarColor",
+          "email",
+          "id",
+          "name",
+          "profileChangedAt",
+          "profileImagePath",
+          "role"
+        ],
+        "type": "object",
+        "properties": {
+          "avatarColor": {
+            "$ref": "#/components/schemas/UserAvatarColor"
+          },
+          "email": {
+            "pattern": "^[\\p{L}\\p{M}\\p{N}.!#$%&'*+/=?^_`{|}~-]+@[\\p{L}\\p{N}](?:[\\p{L}\\p{M}\\p{N}-]{0,61}[\\p{L}\\p{M}\\p{N}])?(?:\\.[\\p{L}\\p{N}](?:[\\p{L}\\p{M}\\p{N}-]{0,61}[\\p{L}\\p{M}\\p{N}])?)*$",
+            "type": "string"
+          },
+          "id": {
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$",
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "profileChangedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "profileImagePath": {
+            "type": "string"
+          },
+          "role": {
+            "$ref": "#/components/schemas/PersonUserRole"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "nullable": true
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PersonOtherResponseDto": {
+        "required": [
+          "name",
+          "role",
+          "sharedById"
+        ],
+        "type": "object",
+        "properties": {
+          "birthDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "$ref": "#/components/schemas/PersonUserRole"
+          },
+          "sharedById": {
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string",
+            "format": "uuid"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "nullable": true
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "PersonResponseDto": {
         "required": [
           "id",
           "name",
+          "otherPeople",
+          "sharedBy",
+          "sharedWith",
           "thumbnailPath"
         ],
         "type": "object",
@@ -1888,6 +1971,24 @@
           "name": {
             "type": "string"
           },
+          "otherPeople": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonOtherResponseDto"
+            }
+          },
+          "sharedBy": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PeopleUserResponseDto"
+            }
+          },
+          "sharedWith": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PeopleUserResponseDto"
+            }
+          },
           "thumbnailPath": {
             "type": "string"
           },
@@ -1905,6 +2006,14 @@
           }
         },
         "additionalProperties": false
+      },
+      "PersonUserRole": {
+        "enum": [
+          "read",
+          "write",
+          "admin"
+        ],
+        "type": "string"
       },
       "ProblemDetails": {
         "type": "object",
@@ -1953,6 +2062,12 @@
             "nullable": true
           },
           "showMemories": {
+            "type": "boolean"
+          },
+          "showOnThisDayMemories": {
+            "type": "boolean"
+          },
+          "showBirthdayMemories": {
             "type": "boolean"
           },
           "showFavorites": {
@@ -2132,7 +2247,7 @@
             "$ref": "#/components/schemas/UserAvatarColor"
           },
           "email": {
-            "pattern": "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$",
+            "pattern": "^[\\p{L}\\p{M}\\p{N}.!#$%&'*+/=?^_`{|}~-]+@[\\p{L}\\p{N}](?:[\\p{L}\\p{M}\\p{N}-]{0,61}[\\p{L}\\p{M}\\p{N}])?(?:\\.[\\p{L}\\p{N}](?:[\\p{L}\\p{M}\\p{N}-]{0,61}[\\p{L}\\p{M}\\p{N}])?)*$",
             "type": "string"
           },
           "id": {

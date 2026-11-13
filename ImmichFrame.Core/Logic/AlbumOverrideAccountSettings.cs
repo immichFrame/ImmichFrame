@@ -9,6 +9,8 @@ public class AlbumOverrideAccountSettings(IAccountSettings inner, IEnumerable<Gu
     public string ApiKey => inner.ApiKey;
     public string? ApiKeyFile => inner.ApiKeyFile;
     public bool ShowMemories => inner.ShowMemories;
+    public bool ShowOnThisDayMemories => inner.ShowOnThisDayMemories;
+    public bool ShowBirthdayMemories => inner.ShowBirthdayMemories;
     public bool ShowFavorites => inner.ShowFavorites;
     public bool ShowArchived => inner.ShowArchived;
     public bool ShowVideos => inner.ShowVideos;

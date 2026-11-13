@@ -27,8 +27,11 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic, IDisposable
         _immichApi = new ImmichApi(accountSettings.ImmichServerUrl, httpClient);
 
         _apiCache = new ApiCache(RefreshInterval(generalSettings.RefreshAlbumPeopleInterval));
+        // With every memory type switched off, treat memories as off rather than as an empty source.
+        var showMemories = accountSettings.ShowMemories
+            && (accountSettings.ShowOnThisDayMemories || accountSettings.ShowBirthdayMemories);
         // Built once and shared, so per-request album overrides do not reload the daily memories.
-        _memoryPool = accountSettings.ShowMemories ? new MemoryAssetsPool(_immichApi, accountSettings) : null;
+        _memoryPool = showMemories ? new MemoryAssetsPool(_immichApi, accountSettings) : null;
         _pool = BuildPool(accountSettings);
     }
 
@@ -47,7 +50,7 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic, IDisposable
         var pools = new List<IAssetPool>();
 
         // Memories-only skips the library search. Every other case needs it.
-        if (!accountSettings.ShowMemories || hasSource)
+        if (_memoryPool == null || hasSource)
         {
             pools.Add(new AccountSearchPool(_apiCache, _immichApi, accountSettings));
         }

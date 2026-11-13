@@ -15,6 +15,8 @@
         public string ApiKey { get; }
         public string? ApiKeyFile { get; }
         public bool ShowMemories { get; }
+        public bool ShowOnThisDayMemories { get; }
+        public bool ShowBirthdayMemories { get; }
         public bool ShowFavorites { get; }
         public bool ShowArchived { get; }
         public bool ShowVideos { get; }

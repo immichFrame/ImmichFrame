@@ -73,6 +73,8 @@ export type ServerAccountSettings = {
     apiKey?: string | null;
     apiKeyFile?: string | null;
     showMemories?: boolean;
+    showOnThisDayMemories?: boolean;
+    showBirthdayMemories?: boolean;
     showFavorites?: boolean;
     showArchived?: boolean;
     showVideos?: boolean;
@@ -132,6 +134,27 @@ export type UserResponseDto = {
         [key: string]: any | null;
     } | null;
 };
+export type PersonOtherResponseDto = {
+    birthDate?: string | null;
+    name: string;
+    role: PersonUserRole;
+    sharedById: string;
+    additionalProperties?: {
+        [key: string]: any | null;
+    } | null;
+};
+export type PeopleUserResponseDto = {
+    avatarColor: UserAvatarColor;
+    email: string;
+    id: string;
+    name: string;
+    profileChangedAt: string;
+    profileImagePath: string;
+    role: PersonUserRole;
+    additionalProperties?: {
+        [key: string]: any | null;
+    } | null;
+};
 export type PersonResponseDto = {
     birthDate?: string | null;
     color?: string | null;
@@ -139,6 +162,9 @@ export type PersonResponseDto = {
     isFavorite?: boolean | null;
     isHidden?: boolean;
     name: string;
+    otherPeople: PersonOtherResponseDto[];
+    sharedBy: PeopleUserResponseDto[];
+    sharedWith: PeopleUserResponseDto[];
     thumbnailPath: string;
     updatedAt?: string | null;
     additionalProperties?: {
@@ -530,6 +556,12 @@ export const UserAvatarColor = {
     Amber: "amber"
 } as const;
 export type UserAvatarColor = (typeof UserAvatarColor)[keyof typeof UserAvatarColor];
+export const PersonUserRole = {
+    Read: "read",
+    Write: "write",
+    Admin: "admin"
+} as const;
+export type PersonUserRole = (typeof PersonUserRole)[keyof typeof PersonUserRole];
 export const AssetTypeEnum = {
     Image: "image",
     Video: "video",
