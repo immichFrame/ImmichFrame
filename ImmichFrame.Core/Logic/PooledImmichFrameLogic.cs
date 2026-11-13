@@ -138,7 +138,9 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic, IDisposable
             }
         }
 
-        var data = await _immichApi.ViewAssetAsync(null, id, string.Empty, AssetMediaSize.Preview, null);
+        // edited: true returns the version with Immich's crop or rotation applied (#680). Immich
+        // falls back to the original when an asset has no edits.
+        var data = await _immichApi.ViewAssetAsync(true, id, string.Empty, AssetMediaSize.Preview, null);
 
         if (data == null)
             throw new AssetNotFoundException($"Asset {id} was not found!");

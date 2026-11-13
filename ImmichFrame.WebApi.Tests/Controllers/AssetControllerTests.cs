@@ -150,6 +150,16 @@ namespace ImmichFrame.WebApi.Tests.Controllers
             // For now, we'll just check if the response is not empty.
             // A more robust check would be to deserialize the response and check the asset ID.
             Assert.That(content, Is.Not.Empty);
+
+            // The preview is requested with Immich's edits (crop, rotation) applied (#680).
+            _mockHttpMessageHandler.Protected().Verify(
+                "SendAsync",
+                Times.AtLeastOnce(),
+                ItExpr.Is<HttpRequestMessage>(req =>
+                    req.RequestUri!.AbsolutePath.EndsWith("/thumbnail") &&
+                    req.RequestUri.Query.Contains("edited=true") &&
+                    req.RequestUri.Query.Contains("size=preview")),
+                ItExpr.IsAny<CancellationToken>());
         }
 
         // Builds a valid AssetResponseDto from the generated client types. Only the
