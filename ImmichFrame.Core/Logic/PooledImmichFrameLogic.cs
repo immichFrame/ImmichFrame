@@ -41,15 +41,19 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic, IDisposable
             || (accountSettings.People?.Any() ?? false)
             || (accountSettings.Tags?.Any() ?? false);
 
+        // With every memory type switched off, treat memories as off rather than as an empty source.
+        var showMemories = accountSettings.ShowMemories
+            && (accountSettings.ShowOnThisDayMemories || accountSettings.ShowBirthdayMemories);
+
         var pools = new List<IAssetPool>();
 
         // Memories-only skips the library search. Every other case needs it.
-        if (!accountSettings.ShowMemories || hasSource)
+        if (!showMemories || hasSource)
         {
             pools.Add(new AccountSearchPool(_apiCache, _immichApi, accountSettings));
         }
 
-        if (accountSettings.ShowMemories)
+        if (showMemories)
         {
             pools.Add(new MemoryAssetsPool(_immichApi, accountSettings));
         }
