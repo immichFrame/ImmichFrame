@@ -65,8 +65,19 @@ General:
   WeatherApiKey: "" # string
   # Imperial or metric system (Fahrenheit or Celsius)
   UnitSystem: "imperial" # 'imperial' | 'metric'
-  # Set the weather location with lat/lon.
+  # Set the weather location with lat/lon when no city selection or ID is set.
   WeatherLatLong: "40.730610,-73.935242" # string
+  # Optional positive OpenWeather city ID. Takes precedence over WeatherLatLong.
+  WeatherCityId: null # int, e.g. 2950159 for Berlin, Germany
+  # Optional city selection. Takes precedence over WeatherCityId and WeatherLatLong.
+  # Weather is fetched at these coordinates and displayed with this name.
+  WeatherLocation: null
+  # WeatherLocation:
+  #   Id: 2643743
+  #   Name: London
+  #   Country: GB
+  #   Latitude: 51.5085
+  #   Longitude: -0.1257
   # 2 digit ISO code, sets the language of the weather description.
   Language: "en" # string
   # Webhook URL to be notified e.g. http://example.com/notify
@@ -183,6 +194,22 @@ For tags, use the full hierarchical path (the `value` field) as it appears in Im
 ### Weather
 
 Weather is enabled by entering an API key. Get yours free from [OpenWeatherMap][openweathermap-url]
+
+In the admin UI, open **Weather & Calendar**, enter your OpenWeatherMap API key, and use
+**Weather city**. Select a result, checking its country and coordinates when names
+match, then click **Save**. The search also works with a newly entered API key before saving.
+
+Selecting a city in the **Weather city** combobox stores its name, country, coordinates,
+and provider ID in `WeatherLocation`. The selected name and ID remain visible after saving.
+Weather is fetched by the selected coordinates and displayed with the selected name:
+OpenWeather search IDs can refer to a surrounding district instead of the named town.
+Check the country and coordinates when multiple places share a name.
+
+You can also set `WeatherLocation` in JSON or YAML as shown above. It takes precedence over
+`WeatherCityId`, which remains available for manual configuration, and `WeatherLatLong`.
+Clearing the combobox clears the selection and any legacy ID, restoring the original
+`WeatherLatLong`. The coordinates below the combobox are kept when selecting a city.
+Changes apply only after **Save**.
 
 ### Calendar
 

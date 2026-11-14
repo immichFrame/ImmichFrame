@@ -32,6 +32,10 @@ export function testAccount(account: ServerAccountSettings) {
 	return api.testAccount(account, authOpts());
 }
 
+export function searchWeatherCities(query: string, apiKey: string, signal?: AbortSignal) {
+	return api.searchWeatherCities({ query, apiKey }, { ...authOpts(), signal });
+}
+
 // Drop empty values so the server falls back to its defaults instead of
 // receiving empty strings / nulls for unset fields. The PUT replaces the whole
 // document, so an omitted key deserialises to the C# default.

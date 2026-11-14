@@ -169,6 +169,48 @@ namespace ImmichFrame.WebApi.Tests.Services
         }
 
         [Test]
+        public async Task UpdateAsync_WeatherLocation_SurvivesRestartAndCanBeCleared()
+        {
+            var service = CreateService();
+            await service.InitializeAsync();
+            var settings = service.GetRawSettings();
+            var location = new ImmichFrame.Core.Models.WeatherCity(2643743, "London", "GB", 51.5085, -0.1257);
+            settings.GeneralSettingsImpl!.WeatherLocation = location;
+            await service.UpdateAsync(settings);
+
+            Assert.That(new LiveGeneralSettings(service).WeatherLocation, Is.EqualTo(location));
+            var restarted = CreateService();
+            await restarted.InitializeAsync();
+            Assert.That(restarted.Current.GeneralSettings.WeatherLocation, Is.EqualTo(location));
+            settings = restarted.GetRawSettings();
+            settings.GeneralSettingsImpl!.WeatherLocation = null;
+            await restarted.UpdateAsync(settings);
+            Assert.That(restarted.Current.GeneralSettings.WeatherLocation, Is.Null);
+        }
+
+        [Test]
+        public async Task UpdateAsync_WeatherCityId_PersistsAndUpdatesLiveSettings()
+        {
+            var service = CreateService();
+            await service.InitializeAsync();
+            var live = new LiveGeneralSettings(service);
+            var settings = service.GetRawSettings();
+            settings.GeneralSettingsImpl!.WeatherCityId = 2950159;
+
+            await service.UpdateAsync(settings);
+
+            Assert.That(live.WeatherCityId, Is.EqualTo(2950159));
+            var restarted = CreateService();
+            await restarted.InitializeAsync();
+            Assert.That(restarted.Current.GeneralSettings.WeatherCityId, Is.EqualTo(2950159));
+
+            settings = service.GetRawSettings();
+            settings.GeneralSettingsImpl!.WeatherCityId = null;
+            await service.UpdateAsync(settings);
+            Assert.That(live.WeatherCityId, Is.Null);
+        }
+
+        [Test]
         public async Task UpdateAsync_GeneralOnlyChange_DoesNotFlagAccounts()
         {
             WriteSettingsJson(ValidV2Json);

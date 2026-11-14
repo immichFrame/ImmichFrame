@@ -29,6 +29,13 @@ export type ProblemDetails = {
     instance?: string | null;
     [key: string]: any;
 };
+export type WeatherCity = {
+    id?: number;
+    name?: string | null;
+    country?: string | null;
+    latitude?: number;
+    longitude?: number;
+};
 export type GeneralSettings = {
     downloadImages?: boolean;
     language?: string | null;
@@ -63,6 +70,8 @@ export type GeneralSettings = {
     weatherApiKey?: string | null;
     unitSystem?: string | null;
     weatherLatLong?: string | null;
+    weatherCityId?: number | null;
+    weatherLocation?: WeatherCity;
     webhook?: string | null;
     authenticationSecret?: string | null;
     adminPassword?: string | null;
@@ -329,6 +338,10 @@ export type IWeather = {
     description?: string | null;
     iconId?: string | null;
 };
+export type WeatherCitySearchRequest = {
+    query: string;
+    apiKey?: string | null;
+};
 export function getAdminStatus(opts?: Oazapfts.RequestOpts) {
     return oazapfts.fetchJson<{
         status: 200;
@@ -528,6 +541,25 @@ export function getWeather({ clientIdentifier }: {
     }))}`, {
         ...opts
     });
+}
+export function searchWeatherCities(weatherCitySearchRequest?: WeatherCitySearchRequest, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.fetchJson<{
+        status: 200;
+        data: WeatherCity[];
+    } | {
+        status: 400;
+        data: ProblemDetails;
+    } | {
+        status: 401;
+        data: string;
+    } | {
+        status: 502;
+        data: ProblemDetails;
+    }>("/api/Admin/Weather/SearchCities", oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: weatherCitySearchRequest
+    }));
 }
 export const AdminUiState = {
     Setup: "setup",
