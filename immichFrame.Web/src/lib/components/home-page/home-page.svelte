@@ -430,9 +430,15 @@
 		window.addEventListener('mousemove', showCursor);
 		window.addEventListener('click', showCursor);
 
-		// 30 second reload on error
+		// Try queued assets before reloading after an individual asset failure.
 		refreshInterval = window.setInterval(() => {
-			if (error) window.location.reload();
+			if (error || (assetsState.error && !assetBacklog.length)) {
+				window.location.reload();
+			} else if (assetsState.error) {
+				handleDone(false, true).catch(() => {
+					error = true;
+				});
+			}
 		}, RELOAD_ON_ERROR_MS);
 
 		unsubscribeRestart = restartProgress.subscribe((value) => {
