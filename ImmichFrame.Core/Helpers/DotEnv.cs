@@ -18,6 +18,12 @@ namespace ImmichFrame.Core.Helpers
                 var variable = line.Substring(0, index);
                 var value = line.Substring(index + 1);
 
+                // Container env and tests set these before startup. Do not clobber them.
+                if (Environment.GetEnvironmentVariable(variable) != null)
+                {
+                    continue;
+                }
+
                 Environment.SetEnvironmentVariable(variable, value);
             }
         }

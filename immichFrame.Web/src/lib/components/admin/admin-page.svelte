@@ -25,7 +25,7 @@
 	import SettingField from './setting-field.svelte';
 	import AccountEditor from './account-editor.svelte';
 
-	type PageState = 'loading' | 'setup' | 'disabled' | 'login' | 'editor' | 'error';
+	type PageState = 'loading' | 'setup' | 'disabled' | 'file' | 'login' | 'editor' | 'error';
 
 	let pageState: PageState = $state('loading');
 	let settings: ServerSettings = $state({ General: {}, Accounts: [] });
@@ -54,6 +54,10 @@
 			}
 			if (res.data.state === AdminUiState.Disabled) {
 				pageState = 'disabled';
+				return;
+			}
+			if (res.data.state === AdminUiState.File) {
+				pageState = 'file';
 				return;
 			}
 			if (get(adminPasswordStore)) {
@@ -191,6 +195,17 @@
 						This instance is already configured but has no admin password. Set the
 						<Code>IMMICHFRAME_ADMIN_PASSWORD</Code> environment variable and restart the container to
 						get in.
+					</Text>
+				</CardBody>
+			</Card>
+		{:else if pageState === 'file'}
+			<Card class="mx-auto mt-24 max-w-lg">
+				<CardBody class="text-center">
+					<Heading size="large" class="mb-4">Settings come from a config file</Heading>
+					<Text color="muted">
+						This instance is configured declaratively. The admin UI is disabled. Edit
+						<Code>Settings.yml</Code> or <Code>Settings.json</Code> and restart ImmichFrame to apply
+						changes.
 					</Text>
 				</CardBody>
 			</Card>

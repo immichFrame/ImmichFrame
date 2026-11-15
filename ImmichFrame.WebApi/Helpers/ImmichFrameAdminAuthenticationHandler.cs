@@ -26,6 +26,14 @@ public class ImmichFrameAdminAuthenticationHandler : AuthenticationHandler<Authe
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         var endpoint = Context.GetEndpoint();
+        // Before AllowAnonymous: file mode turns the admin API off, including Setup.
+        // GetStatus is the only endpoint marked to stay reachable.
+        if (_adminAuthService.State == AdminUiState.File
+            && endpoint?.Metadata?.GetMetadata<AllowWhenFileManagedAttribute>() == null)
+        {
+            return Task.FromResult(AuthenticateResult.Fail(AdminAuthService.FileManagedMessage));
+        }
+
         if (endpoint?.Metadata?.GetMetadata<IAllowAnonymous>() != null)
         {
             return Task.FromResult(AuthenticateResult.Success(CreateTicket("anonymous")));

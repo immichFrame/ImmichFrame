@@ -16,9 +16,9 @@ For most users, the `Settings.yml` setup is easier to read and modify.
 
 Example configuration files:
 
-- [`Settings.yml` example][example-yaml] — imported once on first start
-- [`Settings.json` example][example-json] — imported once on first start
-- [`.env` example][example-env] — admin password, config path and log level
+- [`Settings.yml` example][example-yaml] — imported once on first start, unless file mode is on
+- [`Settings.json` example][example-json] — imported once on first start, unless file mode is on
+- [`.env` example][example-env] — admin password, config path, config source and log level
 
 Starting without a settings file is fine: open the [admin UI](../admin-ui.md) at `/admin`,
 pick an admin password on the setup screen and configure everything there. Setting
@@ -46,6 +46,27 @@ services:
     environment:
       TZ: "Europe/Berlin"
       IMMICHFRAME_ADMIN_PASSWORD: "CHANGE_ME"
+```
+
+### Read-only config file
+
+To keep editing `Settings.yml` (or `Settings.json`) as the source of truth — and to mount
+the config directory read-only — set `IMMICHFRAME_CONFIG_SOURCE=file`. The admin UI is
+disabled and a restart is required to apply changes. See
+[declarative file config](../configuration.md#declarative-file-config).
+
+```yaml
+services:
+  immichframe:
+    image: ghcr.io/immichframe/immichframe:latest
+    restart: on-failure
+    volumes:
+      - PATH/TO/CONFIG:/app/Config:ro
+    ports:
+      - "8080:8080"
+    environment:
+      TZ: "Europe/Berlin"
+      IMMICHFRAME_CONFIG_SOURCE: file
 ```
 
 [github-root]: https://github.com/immichframe/ImmichFrame/blob/main

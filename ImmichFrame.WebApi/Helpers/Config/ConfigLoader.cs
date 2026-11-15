@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using ImmichFrame.Core.Exceptions;
 using ImmichFrame.WebApi.Models;
 using YamlDotNet.Serialization;
@@ -6,51 +7,85 @@ using YamlDotNet.Serialization;
 namespace ImmichFrame.WebApi.Helpers.Config;
 
 /// <summary>
-/// Reads an existing configuration file so it can be imported into the database once.
-/// The database is the source of truth afterwards; see <see cref="Services.SettingsService"/>.
+/// Reads Settings.json / Settings.yml / Settings.yaml for <see cref="Services.SettingsService"/>.
+/// Database mode imports the first file once and ignores unknown keys. File mode requires
+/// exactly one file and rejects unknown keys.
 /// </summary>
 public class ConfigLoader(ILogger<ConfigLoader> _logger)
 {
-    private string FindConfigFile(string dir, params string[] fileNames)
+    internal static readonly string[] SettingsFileNames = ["Settings.json", "Settings.yml", "Settings.yaml"];
+
+    /// <summary>
+    /// Settings files in the config directory, in priority order. Case-insensitive, but not
+    /// in filesystem enumeration order: json, then yml, then yaml.
+    /// </summary>
+    internal IReadOnlyList<string> ListSettingsFiles(string configPath)
     {
-        if (!Directory.Exists(dir))
+        if (!Directory.Exists(configPath))
         {
-            return Path.Combine(dir, fileNames.First());
+            return [];
         }
 
-        return Directory.EnumerateFiles(dir, "*", SearchOption.TopDirectoryOnly)
-            .FirstOrDefault(f => fileNames.Any(name => string.Equals(Path.GetFileName(f), name, StringComparison.OrdinalIgnoreCase)))
-            ?? Path.Combine(dir, fileNames.First());
+        return Directory.EnumerateFiles(configPath, "*", SearchOption.TopDirectoryOnly)
+            .Select(path => (path, name: Path.GetFileName(path)))
+            .Where(file => SettingsFileNames.Any(expected =>
+                string.Equals(file.name, expected, StringComparison.OrdinalIgnoreCase)))
+            .OrderBy(file => Array.FindIndex(SettingsFileNames, expected =>
+                string.Equals(file.name, expected, StringComparison.OrdinalIgnoreCase)))
+            .ThenBy(file => file.name, StringComparer.Ordinal)
+            .Select(file => file.path)
+            .ToList();
     }
 
+    /// <summary>
+    /// Lenient load for the one-time database import. The first file wins; unknown keys are ignored.
+    /// </summary>
     internal ServerSettings LoadConfigRaw(string configPath)
     {
-        var jsonConfigPath = FindConfigFile(configPath, "Settings.json");
-        if (File.Exists(jsonConfigPath))
+        var files = ListSettingsFiles(configPath);
+        if (files.Count == 0)
         {
-            _logger.LogInformation("Loading configuration from {path}", jsonConfigPath);
-            return LoadConfigJson<ServerSettings>(jsonConfigPath);
+            throw new ImmichFrameException("Failed to load configuration");
         }
 
-        var ymlConfigPath = FindConfigFile(configPath, "Settings.yml", "Settings.yaml");
-        if (File.Exists(ymlConfigPath))
+        if (files.Count > 1)
         {
-            _logger.LogInformation("Loading configuration from {path}", ymlConfigPath);
-            return LoadConfigYaml<ServerSettings>(ymlConfigPath);
+            _logger.LogWarning(
+                "Multiple settings files found in {path}: {files}. Importing {chosen}; the others are ignored.",
+                configPath,
+                string.Join(", ", files.Select(Path.GetFileName)),
+                Path.GetFileName(files[0]));
         }
 
-        throw new ImmichFrameException("Failed to load configuration");
+        _logger.LogInformation("Loading configuration from {path}", files[0]);
+        return LoadSettingsFile(files[0], strict: false);
     }
 
-    internal T LoadConfigJson<T>(string configPath) where T : new()
+    internal ServerSettings LoadSettingsFile(string path, bool strict)
+    {
+        if (path.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+        {
+            return LoadConfigJson<ServerSettings>(path, strict);
+        }
+
+        return LoadConfigYaml<ServerSettings>(path, strict);
+    }
+
+    internal T LoadConfigJson<T>(string configPath, bool strict = false) where T : new()
     {
         try
         {
             if (File.Exists(configPath))
             {
                 var json = File.ReadAllText(configPath);
-                var doc = JsonDocument.Parse(json);
-                return doc.Deserialize<T>() ?? throw new FileLoadException("Failed to load config file", configPath);
+                using var doc = JsonDocument.Parse(json);
+                var options = new JsonSerializerOptions
+                {
+                    UnmappedMemberHandling = strict
+                        ? JsonUnmappedMemberHandling.Disallow
+                        : JsonUnmappedMemberHandling.Skip
+                };
+                return doc.Deserialize<T>(options) ?? throw new FileLoadException("Failed to load config file", configPath);
             }
 
             throw new FileNotFoundException(configPath);
@@ -61,17 +96,20 @@ public class ConfigLoader(ILogger<ConfigLoader> _logger)
         }
     }
 
-    internal T LoadConfigYaml<T>(string configPath) where T : new()
+    internal T LoadConfigYaml<T>(string configPath, bool strict = false) where T : new()
     {
         try
         {
             if (File.Exists(configPath))
             {
                 var yml = File.ReadAllText(configPath);
-                var deserializer = new DeserializerBuilder()
-                    .IgnoreUnmatchedProperties()
-                    .Build();
-                return deserializer.Deserialize<T>(yml) ?? throw new FileLoadException("Failed to load config file", configPath);
+                var builder = new DeserializerBuilder();
+                if (!strict)
+                {
+                    builder.IgnoreUnmatchedProperties();
+                }
+
+                return builder.Build().Deserialize<T>(yml) ?? throw new FileLoadException("Failed to load config file", configPath);
             }
 
             throw new FileNotFoundException(configPath);
