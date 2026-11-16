@@ -54,6 +54,7 @@ Accounts:
       - UUID
     ExcludedAlbums:
       - UUID
+    HideAssetsInOtherAlbums: false
     People:
       - UUID
     Tags:

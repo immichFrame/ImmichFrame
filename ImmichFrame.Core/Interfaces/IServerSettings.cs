@@ -24,6 +24,7 @@
         public DateTime? ImagesUntilDate { get; }
         public List<Guid> Albums { get; }
         public List<Guid> ExcludedAlbums { get; }
+        public bool HideAssetsInOtherAlbums { get; }
         public List<Guid> People { get; }
         public List<string> Tags { get; }
         public int? Rating { get; }

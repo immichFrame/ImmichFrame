@@ -59,6 +59,7 @@
       "ExcludedAlbums": [
         "00000000-0000-0000-0000-000000000001"
       ],
+      "HideAssetsInOtherAlbums": true,
       "People": [
         "00000000-0000-0000-0000-000000000001"
       ],
@@ -86,6 +87,7 @@
       "ExcludedAlbums": [
         "00000000-0000-0000-0000-000000000001"
       ],
+      "HideAssetsInOtherAlbums": true,
       "People": [
         "00000000-0000-0000-0000-000000000001"
       ],

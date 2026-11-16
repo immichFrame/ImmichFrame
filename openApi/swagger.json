@@ -2073,6 +2073,9 @@
             },
             "nullable": true
           },
+          "hideAssetsInOtherAlbums": {
+            "type": "boolean"
+          },
           "people": {
             "type": "array",
             "items": {

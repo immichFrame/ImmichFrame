@@ -82,6 +82,7 @@ export type ServerAccountSettings = {
     imagesUntilDate?: string | null;
     albums?: string[] | null;
     excludedAlbums?: string[] | null;
+    hideAssetsInOtherAlbums?: boolean;
     people?: string[] | null;
     tags?: string[] | null;
     rating?: number | null;
