@@ -38,7 +38,7 @@ settings database once on first start; after that, manage your settings in the a
 ### Declarative file config
 
 Set `IMMICHFRAME_CONFIG_SOURCE=file` to make `Settings.json`, `Settings.yml` or
-`Settings.yaml` the only source of truth. This is the mode for NixOS, Ansible and other
+`Settings.yaml` the only source of truth. This is useful for NixOS, Ansible and other
 tools that provision a config file and expect later edits to that file to apply.
 
 - The file is read **once at startup**. Changes apply on restart, not live. There is no file watcher.
