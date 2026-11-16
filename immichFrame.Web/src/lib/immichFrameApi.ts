@@ -532,7 +532,8 @@ export function getWeather({ clientIdentifier }: {
 export const AdminUiState = {
     Setup: "setup",
     Login: "login",
-    Disabled: "disabled"
+    Disabled: "disabled",
+    File: "file"
 } as const;
 export type AdminUiState = (typeof AdminUiState)[keyof typeof AdminUiState];
 export const UserAvatarColor = {

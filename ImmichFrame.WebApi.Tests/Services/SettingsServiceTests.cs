@@ -58,6 +58,50 @@ namespace ImmichFrame.WebApi.Tests.Services
             """;
 
         [Test]
+        public async Task InitializeAsync_PrefersYmlOverYaml()
+        {
+            await File.WriteAllTextAsync(Path.Combine(_configDir, "Settings.yaml"), """
+                General:
+                  Interval: 99
+                Accounts:
+                  - ImmichServerUrl: http://immich.local
+                    ApiKey: from-yaml
+                """);
+            await File.WriteAllTextAsync(Path.Combine(_configDir, "Settings.yml"), """
+                General:
+                  Interval: 17
+                Accounts:
+                  - ImmichServerUrl: http://immich.local
+                    ApiKey: from-yml
+                """);
+
+            var service = CreateService();
+            await service.InitializeAsync();
+
+            Assert.That(service.Current.Accounts.Single().ApiKey, Is.EqualTo("from-yml"));
+        }
+
+        [Test]
+        public async Task InitializeAsync_ImportsUnknownKeysLeniently()
+        {
+            WriteSettingsJson("""
+                {
+                    "General": { "Interval": 10, "NotARealSetting": true },
+                    "Accounts": [ { "ImmichServerUrl": "http://immich.local", "ApiKey": "key123", "AlsoUnknown": 1 } ]
+                }
+                """);
+
+            var service = CreateService();
+            await service.InitializeAsync();
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(service.Current.GeneralSettings.Interval, Is.EqualTo(10));
+                Assert.That(service.Current.Accounts.Single().ApiKey, Is.EqualTo("key123"));
+            });
+        }
+
+        [Test]
         public async Task InitializeAsync_ImportsFileConfigOnFirstRun()
         {
             WriteSettingsJson(ValidV2Json);
