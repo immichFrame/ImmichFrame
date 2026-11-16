@@ -106,6 +106,10 @@ public class ConfigLoaderTest
                 case var t when t == typeof(DateTime):
                     Assert.That(value, Is.Not.EqualTo(DateTime.MinValue), prop.Name);
                     break;
+                case var t when t == typeof(ImmichFrame.Core.Models.WeatherCity):
+                    Assert.That(value, Is.Not.Null, prop.Name);
+                    VerifyProperties(value!, prefix + prop.Name + ".");
+                    break;
                 default:
                     throw new NotImplementedException($"Not implemented for {prop.Name} as type ${type}");
             }

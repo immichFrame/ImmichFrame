@@ -12,6 +12,8 @@
     "WeatherApiKey": "",
     "UnitSystem": "imperial",
     "WeatherLatLong": "40.730610,-73.935242",
+    "WeatherCityId": null,
+    "WeatherLocation": null,
     "Webhook": null,
     "Language": "en",
     "Interval": 45,

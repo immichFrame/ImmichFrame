@@ -79,6 +79,73 @@ namespace ImmichFrame.WebApi.Tests.Controllers
             """)!;
 
         [Test]
+        public async Task WeatherCityId_RoundTripsAndCanBeCleared()
+        {
+            var client = CreateAdminClient();
+            var settings = ValidSettingsBody();
+            settings["General"]!["WeatherCityId"] = 2950159;
+
+            var saved = await client.PutAsJsonAsync("/api/Admin/Settings", settings);
+            saved.EnsureSuccessStatusCode();
+            var current = JsonNode.Parse(await client.GetStringAsync("/api/Admin/Settings"))!;
+            Assert.That((int?)current["General"]!["weatherCityId"], Is.EqualTo(2950159));
+
+            current["General"]!["weatherCityId"] = null;
+            var cleared = await client.PutAsJsonAsync("/api/Admin/Settings", current);
+            cleared.EnsureSuccessStatusCode();
+            current = JsonNode.Parse(await client.GetStringAsync("/api/Admin/Settings"))!;
+            Assert.That(current["General"]!["weatherCityId"], Is.Null);
+        }
+
+        [Test]
+        public async Task WeatherLocation_RoundTripsThroughAdminApiAndCanBeCleared()
+        {
+            var client = CreateAdminClient();
+            var settings = ValidSettingsBody();
+            settings["General"]!["WeatherLocation"] = new JsonObject
+            {
+                ["Id"] = 2643743, ["Name"] = "London", ["Country"] = "GB",
+                ["Latitude"] = 51.5085, ["Longitude"] = -0.1257
+            };
+            (await client.PutAsJsonAsync("/api/Admin/Settings", settings)).EnsureSuccessStatusCode();
+            var current = JsonNode.Parse(await client.GetStringAsync("/api/Admin/Settings"))!;
+            Assert.That((string?)current["General"]!["weatherLocation"]!["name"], Is.EqualTo("London"));
+            Assert.That((double?)current["General"]!["weatherLocation"]!["longitude"], Is.EqualTo(-0.1257));
+            current["General"]!["weatherLocation"] = null;
+            (await client.PutAsJsonAsync("/api/Admin/Settings", current)).EnsureSuccessStatusCode();
+            current = JsonNode.Parse(await client.GetStringAsync("/api/Admin/Settings"))!;
+            Assert.That(current["General"]!["weatherLocation"], Is.Null);
+        }
+
+        [TestCase(91, 0)]
+        [TestCase(0, 181)]
+        public async Task WeatherLocation_InvalidCoordinates_Return400(double latitude, double longitude)
+        {
+            var client = CreateAdminClient();
+            var settings = ValidSettingsBody();
+            settings["General"]!["WeatherLocation"] = new JsonObject
+            {
+                ["Id"] = 2643743, ["Name"] = "London", ["Country"] = "GB",
+                ["Latitude"] = latitude, ["Longitude"] = longitude
+            };
+            var response = await client.PutAsJsonAsync("/api/Admin/Settings", settings);
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+        }
+
+        [TestCase(0)]
+        [TestCase(-1)]
+        public async Task WeatherCityId_NonPositiveValue_Returns400(int cityId)
+        {
+            var client = CreateAdminClient();
+            var settings = ValidSettingsBody();
+            settings["General"]!["WeatherCityId"] = cityId;
+
+            var response = await client.PutAsJsonAsync("/api/Admin/Settings", settings);
+
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+        }
+
+        [Test]
         public async Task GetStatus_IsAnonymousAndReportsSetupDone()
         {
             var client = _factory.CreateClient(); // no auth header

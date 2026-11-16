@@ -106,6 +106,9 @@ builder.Services.AddSingleton<IAssetAccountTracker, BloomFilterAssetAccountTrack
 builder.Services.AddSingleton<Func<IList<IAccountImmichFrameLogic>, IAccountSelectionStrategy>>(srv =>
     accounts => ActivatorUtilities.CreateInstance<TotalAccountImagesSelectionStrategy>(srv, accounts));
 builder.Services.AddHttpClient(); // Ensures IHttpClientFactory is available
+// OpenWeather puts the API key in the query string; never log its request URLs.
+builder.Services.AddHttpClient(OpenWeatherMapService.HttpClientName,
+    client => client.Timeout = TimeSpan.FromSeconds(15)).RemoveAllLoggers();
 builder.Services.AddImmichApiHttpClient(); // Client carrying the Immich API key; must not follow redirects
 
 builder.Services.AddTransient<Func<IAccountSettings, IAccountImmichFrameLogic>>(srv =>

@@ -10,6 +10,8 @@ General:
   WeatherApiKey: ''
   UnitSystem: imperial
   WeatherLatLong: '40.730610,-73.935242'
+  WeatherCityId: null # Optional manual city ID; takes precedence over WeatherLatLong.
+  WeatherLocation: null # Optional { Id, Name, Country, Latitude, Longitude }; overrides ID and coordinates.
   Webhook: null
   Language: en
   Interval: 45

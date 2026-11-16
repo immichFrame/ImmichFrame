@@ -54,6 +54,8 @@ namespace ImmichFrame.WebApi.Tests.Controllers
                 // Server-only values that must never surface in the client config:
                 WeatherApiKey = "secret-weather-key",
                 WeatherLatLong = "1.23,4.56",
+                WeatherCityId = 2950159,
+                WeatherLocation = new ImmichFrame.Core.Models.WeatherCity(2643743, "London", "GB", 51.5085, -0.1257),
                 UnitSystem = "metric",
                 Webhook = "https://webhook.example.com/secret-hook",
                 AuthenticationSecret = "secret-auth-token",
@@ -137,6 +139,8 @@ namespace ImmichFrame.WebApi.Tests.Controllers
                 Assert.That(json, Does.Not.Contain("authenticationSecret"));
                 Assert.That(json, Does.Not.Contain("adminPassword"));
                 Assert.That(json, Does.Not.Contain("weatherApiKey"));
+                Assert.That(json, Does.Not.Contain("weatherCityId"));
+                Assert.That(json, Does.Not.Contain("weatherLocation"));
                 Assert.That(json, Does.Not.Contain("apiKey"));
                 Assert.That(json, Does.Not.Contain("webhook"));
                 Assert.That(json, Does.Not.Contain("webcalendars"));

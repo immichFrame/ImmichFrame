@@ -51,6 +51,8 @@ public class LiveGeneralSettings(ISettingsProvider _provider) : IGeneralSettings
     public int RefreshAlbumPeopleInterval => Current.RefreshAlbumPeopleInterval;
     public string? WeatherApiKey => Current.WeatherApiKey;
     public string? WeatherLatLong => Current.WeatherLatLong;
+    public int? WeatherCityId => Current.WeatherCityId;
+    public ImmichFrame.Core.Models.WeatherCity? WeatherLocation => Current.WeatherLocation;
     public string? UnitSystem => Current.UnitSystem;
     public string? Webhook => Current.Webhook;
     public string? AuthenticationSecret => Current.AuthenticationSecret;

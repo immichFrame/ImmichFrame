@@ -24,6 +24,7 @@
 	import SettingsSection from './settings-section.svelte';
 	import SettingField from './setting-field.svelte';
 	import AccountEditor from './account-editor.svelte';
+	import WeatherCitySearch from './weather-city-search.svelte';
 
 	type PageState = 'loading' | 'setup' | 'disabled' | 'file' | 'login' | 'editor' | 'error';
 
@@ -236,6 +237,11 @@
 							<div class="grid gap-x-8 sm:grid-cols-2">
 								{#each section.fields as field (field.key)}
 									<SettingField {field} target={settings.General ?? {}} />
+									{#if field.key === 'weatherApiKey'}
+										<div class="sm:col-span-2">
+											<WeatherCitySearch settings={settings.General ?? {}} />
+										</div>
+									{/if}
 								{/each}
 							</div>
 						</SettingsSection>

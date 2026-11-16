@@ -13,6 +13,8 @@
     "WeatherApiKey": "WeatherApiKey_TEST",
     "UnitSystem": "UnitSystem_TEST",
     "WeatherLatLong": "WeatherLatLong_TEST",
+    "WeatherCityId": 7,
+    "WeatherLocation": { "Id": 7, "Name": "WeatherLocation.Name_TEST", "Country": "WeatherLocation.Country_TEST", "Latitude": 7.7, "Longitude": 7.7 },
     "Language": "Language_TEST",
     "Webhook": "Webhook_TEST",
     "Interval": 7,

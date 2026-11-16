@@ -6,6 +6,8 @@ namespace ImmichFrame.Core.Interfaces
         public int RefreshAlbumPeopleInterval { get; }
         public string? WeatherApiKey { get; }
         public string? WeatherLatLong { get; }
+        public int? WeatherCityId { get; }
+        public ImmichFrame.Core.Models.WeatherCity? WeatherLocation { get; }
         public string? UnitSystem { get; }
         public string? Webhook { get; }
         public string? AuthenticationSecret { get; }

@@ -69,11 +69,27 @@ public class GeneralSettings : IGeneralSettings
     public string? WeatherApiKey { get; set; } = string.Empty;
     public string? UnitSystem { get; set; } = "imperial";
     public string? WeatherLatLong { get; set; } = "40.7128,74.0060";
+    public int? WeatherCityId { get; set; }
+    public ImmichFrame.Core.Models.WeatherCity? WeatherLocation { get; set; }
     public string? Webhook { get; set; }
     public string? AuthenticationSecret { get; set; }
     public string? AdminPassword { get; set; }
 
-    public void Validate() { }
+    public void Validate()
+    {
+        if (WeatherLocation is { } location &&
+            (location.Id <= 0 || string.IsNullOrWhiteSpace(location.Name) || location.Name.Length > 100
+             || string.IsNullOrWhiteSpace(location.Country) || location.Country.Length > 3
+             || !double.IsFinite(location.Latitude) || location.Latitude is < -90 or > 90
+             || !double.IsFinite(location.Longitude) || location.Longitude is < -180 or > 180))
+        {
+            throw new InvalidOperationException("WeatherLocation requires a city ID, name, country, and valid coordinates.");
+        }
+        if (WeatherCityId is <= 0)
+        {
+            throw new InvalidOperationException("WeatherCityId must be a positive OpenWeather city ID, or empty to use coordinates.");
+        }
+    }
 }
 
 public class ServerAccountSettings : IAccountSettings
