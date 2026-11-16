@@ -1,4 +1,4 @@
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace ImmichFrame.WebApi.Helpers;
@@ -11,14 +11,18 @@ namespace ImmichFrame.WebApi.Helpers;
 /// </summary>
 public class NoReadOnlySchemaFilter : ISchemaFilter
 {
-    public void Apply(OpenApiSchema schema, SchemaFilterContext context)
+    public void Apply(IOpenApiSchema schema, SchemaFilterContext context)
     {
         if (context.Type != typeof(Models.ClientSettingsDto))
             return;
 
-        foreach (var property in schema.Properties.Values)
+        if (schema is not OpenApiSchema openApiSchema || openApiSchema.Properties is null)
+            return;
+
+        foreach (var property in openApiSchema.Properties.Values)
         {
-            property.ReadOnly = false;
+            if (property is OpenApiSchema propertySchema)
+                propertySchema.ReadOnly = false;
         }
     }
 }

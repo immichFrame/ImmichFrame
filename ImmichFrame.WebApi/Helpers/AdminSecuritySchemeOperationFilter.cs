@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace ImmichFrame.WebApi.Helpers;
@@ -28,26 +28,21 @@ public class AdminSecuritySchemeOperationFilter : IOperationFilter
         if (!usesAdminScheme || allowsAnonymous)
             return;
 
+        operation.Security ??= [];
         operation.Security.Add(new OpenApiSecurityRequirement
         {
-            [new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = ImmichFrameAdminAuthenticationHandler.SchemeName
-                }
-            }] = Array.Empty<string>()
+            [new OpenApiSecuritySchemeReference(ImmichFrameAdminAuthenticationHandler.SchemeName, context.Document)] = []
         });
 
         // CustomAuthenticationMiddleware answers a failed admin authentication with the
         // plain-text reason, not a ProblemDetails body.
+        operation.Responses ??= [];
         operation.Responses.TryAdd(StatusCodes.Status401Unauthorized.ToString(), new OpenApiResponse
         {
             Description = "Unauthorized",
             Content = new Dictionary<string, OpenApiMediaType>
             {
-                ["text/plain"] = new() { Schema = new OpenApiSchema { Type = "string" } }
+                ["text/plain"] = new() { Schema = new OpenApiSchema { Type = JsonSchemaType.String } }
             }
         });
     }

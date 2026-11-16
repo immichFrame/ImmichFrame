@@ -15,7 +15,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: '10.0.x'
     - name: Run Core tests
       run: dotnet test ImmichFrame.Core.Tests/ImmichFrame.Core.Tests.csproj
     - name: Run WebApi tests
