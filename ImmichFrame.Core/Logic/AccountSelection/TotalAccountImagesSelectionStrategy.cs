@@ -1,6 +1,7 @@
 using ImmichFrame.Core.Api;
 using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
+using ImmichFrame.Core.Models;
 using Microsoft.Extensions.Logging;
 
 namespace ImmichFrame.Core.Logic.AccountSelection;
@@ -95,6 +96,20 @@ public class TotalAccountImagesSelectionStrategy(
         _logger.LogDebug("Returning {count} asset(s)", assets.Count);
 
         return assets;
+    }
+
+    public async Task<IEnumerable<(IAccountImmichFrameLogic, AssetResponseDto)>> GetAssets(IAccountImmichFrameLogic account, AssetSelection selection)
+    {
+        var assets = (await account.GetAssets(selection)).ToList();
+
+        foreach (var asset in assets)
+        {
+            await _tracker.RecordAssetLocation(account, asset.Id);
+        }
+
+        _logger.LogDebug("Returning {count} asset(s) for account [{account}]", assets.Count, account);
+
+        return assets.Select(asset => (account, asset));
     }
 
     public T ForAsset<T>(Guid assetId, Func<IAccountImmichFrameLogic, T> f)

@@ -20,6 +20,8 @@ export interface FieldDef<T = GeneralSettings> {
 	step?: string;
 	min?: number;
 	max?: number;
+	pattern?: RegExp;
+	patternMessage?: string;
 }
 
 // What setting-field.svelte accepts: any concrete FieldDef widens to this,
@@ -150,6 +152,15 @@ export const generalSections: SectionDef[] = [
 ];
 
 export const accountFields: FieldDef<ServerAccountSettings>[] = [
+	{
+		key: 'name',
+		label: 'Name',
+		type: 'text',
+		placeholder: 'family',
+		pattern: /^[A-Za-z0-9_-]+$/,
+		patternMessage: "Not a valid name: use only a-z, A-Z, 0-9, '-' and '_'.",
+		help: 'Add ?account=<name> to the frame URL to show only this account.'
+	},
 	{
 		key: 'immichServerUrl',
 		label: 'Immich server URL',

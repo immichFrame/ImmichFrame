@@ -33,6 +33,21 @@ public class MultiImmichFrameLogicDelegate : IImmichFrameLogic, IDisposable
     public async Task<IEnumerable<AssetResponseDto>> GetAssets()
         => (await _accountSelectionStrategy.GetAssets()).Shuffle().Select(it => it.ToAsset());
 
+    public async Task<IEnumerable<AssetResponseDto>> GetAssets(AssetSelection selection)
+    {
+        var account = _accountToDelegate
+            .FirstOrDefault(entry => string.Equals(entry.Key.Name, selection.AccountName, StringComparison.OrdinalIgnoreCase))
+            .Value;
+
+        if (account == null)
+        {
+            _logger.LogWarning("No account named '{account}' is configured; returning no assets", selection.AccountName.SanitizeString());
+            return [];
+        }
+
+        return (await _accountSelectionStrategy.GetAssets(account, selection)).Shuffle().Select(it => it.ToAsset());
+    }
+
 
     public Task<AssetResponseDto> GetAssetInfoById(Guid assetId)
         => _accountSelectionStrategy.ForAsset(assetId, async logic => (await logic.GetAssetInfoById(assetId)).WithAccount(logic));

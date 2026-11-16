@@ -35,11 +35,30 @@ namespace ImmichFrame.WebApi.Controllers
         }
 
         [HttpGet(Name = "GetAssets")]
-        public async Task<List<AssetResponseDto>> GetAssets(string clientIdentifier = "")
+        [ProducesResponseType(typeof(List<AssetResponseDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<List<AssetResponseDto>>> GetAssets(string clientIdentifier = "", string? accountName = null, string? albumIds = null)
         {
             var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
             _logger.LogDebug("Assets requested by '{sanitizedClientIdentifier}'", sanitizedClientIdentifier);
-            return (await _logic.GetAssets()).ToList();
+
+            if (string.IsNullOrWhiteSpace(accountName))
+            {
+                return (await _logic.GetAssets()).ToList();
+            }
+
+            var albums = new List<Guid>();
+            foreach (var albumId in albumIds?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [])
+            {
+                if (!Guid.TryParse(albumId, out var album))
+                {
+                    return Problem(detail: $"Album ID '{albumId}' is invalid.", statusCode: StatusCodes.Status400BadRequest);
+                }
+
+                albums.Add(album);
+            }
+
+            return (await _logic.GetAssets(new AssetSelection(accountName.Trim(), albums))).ToList();
         }
 
         [HttpGet("{id}/AssetInfo", Name = "GetAssetInfo")]

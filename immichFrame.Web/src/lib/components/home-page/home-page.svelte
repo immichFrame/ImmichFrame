@@ -3,6 +3,7 @@
 	import ProgressBar from '$lib/components/elements/progress-bar.svelte';
 	import { slideshowStore } from '$lib/stores/slideshow.store';
 	import { clientIdentifierStore, authSecretStore } from '$lib/stores/persist.store';
+	import { assetSelectionStore } from '$lib/stores/asset-selection.store';
 	import { onDestroy, onMount, setContext, tick } from 'svelte';
 	import OverlayControls from '../elements/overlay-controls.svelte';
 	import AssetComponent from '../elements/asset-component.svelte';
@@ -133,11 +134,17 @@
 
 	async function loadAssets() {
 		try {
-			let assetRequest = await api.getAssets({ clientIdentifier: $clientIdentifierStore });
+			let assetRequest = await api.getAssets({
+				clientIdentifier: $clientIdentifierStore,
+				...$assetSelectionStore
+			});
 
 			if (assetRequest.status != 200) {
-				if (assetRequest.status == 401) {
+				// 401 is not part of the generated response types, but the auth handler sends it.
+				if ((assetRequest.status as number) == 401) {
 					authError = true;
+				} else if (assetRequest.status == 400 && assetRequest.data.detail) {
+					errorMessage = assetRequest.data.detail;
 				}
 				error = true;
 				return;

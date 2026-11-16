@@ -39,6 +39,7 @@
   },
   "Accounts": [
     {
+      "Name": "family",
       "ImmichServerUrl": "REQUIRED",
       "ApiKey": "super-secret-api-key",
       "ApiKeyFile": "/path/to/api.key",

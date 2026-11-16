@@ -10,6 +10,7 @@
 
     public interface IAccountSettings
     {
+        public string? Name { get; }
         public string ImmichServerUrl { get; }
         public string ApiKey { get; }
         public string? ApiKeyFile { get; }
