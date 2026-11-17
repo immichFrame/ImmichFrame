@@ -51,6 +51,7 @@ namespace ImmichFrame.WebApi.Controllers
 
         [HttpGet("Status", Name = "GetAdminStatus")]
         [AllowAnonymous]
+        [AllowWhenFileManaged]
         public AdminStatusDto GetStatus()
         {
             return new AdminStatusDto { State = _adminAuthService.State };

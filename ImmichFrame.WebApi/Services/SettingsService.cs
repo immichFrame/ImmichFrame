@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ImmichFrame.WebApi.Services;
 
-public record SettingsServiceOptions(string ConfigPath);
+public record SettingsServiceOptions(string ConfigPath, SettingsSource Source = SettingsSource.Database);
 
 /// <summary>Outcome of an anonymous onboarding attempt.</summary>
 public enum SetupResult
@@ -22,14 +22,15 @@ public enum SetupResult
 }
 
 /// <summary>
-/// Owns the runtime settings. The SQLite database is the source of truth; an existing
-/// file config is imported once on first run. <see cref="Current"/> always holds a
+/// Owns the runtime settings. In database mode the SQLite database is the source of truth
+/// and an existing file config is imported once on first run. In file mode the config file
+/// is the source of truth, read once at startup. <see cref="Current"/> always holds a
 /// validated, immutable-after-publication snapshot; updates swap the reference and raise
 /// <see cref="SettingsChanged"/>.
 /// </summary>
 public class SettingsService : ISettingsProvider
 {
-    private readonly IDbContextFactory<SettingsDbContext> _dbFactory;
+    private readonly IDbContextFactory<SettingsDbContext>? _dbFactory;
     private readonly ConfigLoader _configLoader;
     private readonly ILogger<SettingsService> _logger;
     private readonly SettingsServiceOptions _options;
@@ -50,7 +51,10 @@ public class SettingsService : ISettingsProvider
     /// </summary>
     public bool IsUnconfigured => _isUnconfigured;
 
-    public SettingsService(IDbContextFactory<SettingsDbContext> dbFactory, ConfigLoader configLoader,
+    /// <summary>Config file is the source of truth. No database is registered.</summary>
+    public bool IsFileManaged => _options.Source == SettingsSource.File;
+
+    public SettingsService(IDbContextFactory<SettingsDbContext>? dbFactory, ConfigLoader configLoader,
         ILogger<SettingsService> logger, SettingsServiceOptions options)
     {
         _dbFactory = dbFactory;
@@ -64,6 +68,12 @@ public class SettingsService : ISettingsProvider
 
     public async Task InitializeAsync()
     {
+        if (IsFileManaged)
+        {
+            LoadFromFile();
+            return;
+        }
+
         try
         {
             Directory.CreateDirectory(_options.ConfigPath);
@@ -73,7 +83,7 @@ public class SettingsService : ISettingsProvider
             throw ConfigPathNotWritable(ex);
         }
 
-        await using var db = await _dbFactory.CreateDbContextAsync();
+        await using var db = await RequireDbFactory().CreateDbContextAsync();
         try
         {
             await db.Database.MigrateAsync();
@@ -97,12 +107,90 @@ public class SettingsService : ISettingsProvider
         await ImportOrBootstrap(db);
     }
 
+    /// <summary>
+    /// Read the config file and stop. No directory creation, no database, no
+    /// <see cref="SettingsChanged"/> — a file change needs a restart.
+    /// </summary>
+    private void LoadFromFile()
+    {
+        var dbPath = Path.Combine(_options.ConfigPath, "immichframe.db");
+        if (File.Exists(dbPath))
+        {
+            _logger.LogWarning(
+                "Ignoring {db}: {env}=file makes the config file the source of truth. Switching back to database mode will use this database again and ignore the file.",
+                dbPath, SettingsSourceParser.EnvVar);
+        }
+
+        var files = _configLoader.ListSettingsFiles(_options.ConfigPath);
+        if (files.Count == 0)
+        {
+            throw new ImmichFrameException(
+                $"{SettingsSourceParser.EnvVar}=file requires a readable Settings.json, Settings.yml or Settings.yaml in '{_options.ConfigPath}'.");
+        }
+
+        if (files.Count > 1)
+        {
+            throw new ImmichFrameException(
+                $"{SettingsSourceParser.EnvVar}=file allows exactly one settings file in '{_options.ConfigPath}', found: {string.Join(", ", files.Select(Path.GetFileName))}.");
+        }
+
+        var file = files[0];
+        ServerSettings raw;
+        try
+        {
+            raw = _configLoader.LoadSettingsFile(file, strict: true);
+        }
+        catch (Exception ex)
+        {
+            throw InvalidFile(file, ex);
+        }
+
+        Normalize(raw);
+        var validated = Clone(raw);
+        try
+        {
+            validated.Validate();
+        }
+        catch (Exception ex)
+        {
+            throw InvalidFile(file, ex);
+        }
+
+        _raw = raw;
+        _current = validated;
+        _logger.LogInformation(
+            "Loaded settings from {file}. The file is the source of truth; the admin UI is disabled. Restart to apply changes.",
+            file);
+    }
+
+    private static ImmichFrameException InvalidFile(string file, Exception ex)
+    {
+        return new ImmichFrameException(
+            $"Configuration in '{file}' is invalid: {ex.Message}. Fix the file and restart.",
+            ex);
+    }
+
+    private void EnsureMutable()
+    {
+        if (IsFileManaged)
+        {
+            throw new InvalidOperationException("Settings are managed by the configuration file.");
+        }
+    }
+
+    private IDbContextFactory<SettingsDbContext> RequireDbFactory()
+    {
+        return _dbFactory ?? throw new InvalidOperationException(
+            $"{SettingsSourceParser.EnvVar}=file does not register a settings database.");
+    }
+
     private ImmichFrameException ConfigPathNotWritable(Exception inner)
     {
         var message = $"Cannot open the settings database in '{_options.ConfigPath}'. " +
             "The config directory has to exist and be writable by the user ImmichFrame runs as " +
             "(uid 1000 in the official Docker image). For a bind mount, fix it on the host with " +
-            "'chown -R 1000:1000 /path/to/config'; a read-only mount does not work.";
+            "'chown -R 1000:1000 /path/to/config'. A read-only mount does not work in database mode. " +
+            $"Set {SettingsSourceParser.EnvVar}=file to keep the config file as the source of truth instead.";
         _logger.LogError(inner, "{message}", message);
         return new ImmichFrameException(message, inner);
     }
@@ -153,12 +241,15 @@ public class SettingsService : ISettingsProvider
         _raw = raw;
         _current = validated;
         var source = DetectImportSource();
-        _logger.LogInformation("Imported existing configuration ({source}) into the database. The database is now the source of truth; changes to the old config are ignored.", source);
-        _logger.LogWarning("DEPRECATED: configuring ImmichFrame via {source} will be removed in a future version. The import above runs once — manage your settings in the admin UI at /admin from now on.", source);
+        _logger.LogInformation("Imported existing configuration ({source}) into the database. The database is now the source of truth; later changes to the file are ignored.", source);
+        _logger.LogInformation(
+            "To keep {source} as the source of truth and disable the admin UI, set {env}=file and restart. The config directory can then be read-only.",
+            source, SettingsSourceParser.EnvVar);
     }
 
     public async Task<IServerSettings> UpdateAsync(ServerSettings raw)
     {
+        EnsureMutable();
         var validated = NormalizeAndValidate(raw);
 
         await _updateLock.WaitAsync();
@@ -180,6 +271,7 @@ public class SettingsService : ISettingsProvider
     /// </summary>
     public async Task<SetupResult> TryClaimSetupAsync(string adminPassword, Func<bool> setupRequired)
     {
+        EnsureMutable();
         await _updateLock.WaitAsync();
         try
         {
@@ -221,7 +313,7 @@ public class SettingsService : ISettingsProvider
     /// <summary>Writes the settings and publishes them. Caller must hold <see cref="_updateLock"/>.</summary>
     private async Task<IServerSettings> PersistAsync(ServerSettings raw, ServerSettings validated)
     {
-        await using var db = await _dbFactory.CreateDbContextAsync();
+        await using var db = await RequireDbFactory().CreateDbContextAsync();
         var row = await db.SettingsDocuments.FindAsync(1);
         if (row == null)
         {
@@ -291,21 +383,21 @@ public class SettingsService : ISettingsProvider
 
     private void LogIgnoredFileConfig()
     {
-        var ignored = new[] { "Settings.json", "Settings.yml", "Settings.yaml" }
-            .Where(f => File.Exists(Path.Combine(_options.ConfigPath, f)))
+        var ignored = _configLoader.ListSettingsFiles(_options.ConfigPath)
+            .Select(Path.GetFileName)
             .ToList();
         if (ignored.Any())
         {
-            _logger.LogInformation("Config file(s) {files} exist but are ignored: settings were already imported into the database, which is the source of truth. Use the admin UI to change settings.", string.Join(", ", ignored));
+            _logger.LogInformation(
+                "Config file(s) {files} exist but are ignored: settings were already imported into the database, which is the source of truth. Use the admin UI to change settings, or set {env}=file to make the file the source of truth instead.",
+                string.Join(", ", ignored), SettingsSourceParser.EnvVar);
         }
     }
 
     private string DetectImportSource()
     {
-        if (File.Exists(Path.Combine(_options.ConfigPath, "Settings.json"))) return "Settings.json";
-        if (File.Exists(Path.Combine(_options.ConfigPath, "Settings.yml"))) return "Settings.yml";
-        if (File.Exists(Path.Combine(_options.ConfigPath, "Settings.yaml"))) return "Settings.yaml";
-        return "an unknown source";
+        var file = _configLoader.ListSettingsFiles(_options.ConfigPath).FirstOrDefault();
+        return file == null ? "an unknown source" : Path.GetFileName(file);
     }
 
     private static ServerSettings EmptySettings() => new()

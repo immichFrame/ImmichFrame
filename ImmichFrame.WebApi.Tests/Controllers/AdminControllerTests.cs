@@ -2,6 +2,10 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json.Nodes;
+using ImmichFrame.WebApi.Database;
+using ImmichFrame.WebApi.Services;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using ImmichFrame.WebApi.Tests.Mocks;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -30,6 +34,8 @@ namespace ImmichFrame.WebApi.Tests.Controllers
             Directory.CreateDirectory(_configDir);
             Environment.SetEnvironmentVariable("IMMICHFRAME_CONFIG_PATH", _configDir);
             Environment.SetEnvironmentVariable("IMMICHFRAME_ADMIN_PASSWORD", AdminPassword);
+            // Pin database so a local docker/.env with file cannot flip the suite.
+            Environment.SetEnvironmentVariable(SettingsSourceParser.EnvVar, "database");
 
             var versionHandler = new Mock<HttpMessageHandler>().WithServerVersion();
             _factory = new WebApplicationFactory<Program>()
@@ -42,9 +48,12 @@ namespace ImmichFrame.WebApi.Tests.Controllers
         [TearDown]
         public void TearDown()
         {
+            // Pin before disposing the unused factory: host build reads these variables.
+            // "database", not unset — DotEnv must not be able to replace it with file.
+            Environment.SetEnvironmentVariable(SettingsSourceParser.EnvVar, "database");
+            Environment.SetEnvironmentVariable("IMMICHFRAME_ADMIN_PASSWORD", null);
             _factory.Dispose();
             Environment.SetEnvironmentVariable("IMMICHFRAME_CONFIG_PATH", null);
-            Environment.SetEnvironmentVariable("IMMICHFRAME_ADMIN_PASSWORD", null);
             if (Directory.Exists(_configDir))
             {
                 Directory.Delete(_configDir, true);
@@ -240,6 +249,45 @@ namespace ImmichFrame.WebApi.Tests.Controllers
 
             var after = JsonNode.Parse(await configClient.GetStringAsync("/api/Config"))!;
             Assert.That((int)after["interval"]!, Is.EqualTo(42));
+        }
+
+        [Test]
+        public async Task FileSource_DisablesAdminAndDoesNotTouchDatabase()
+        {
+            await File.WriteAllTextAsync(Path.Combine(_configDir, "Settings.json"), """
+                {
+                    "General": { "Interval": 17 },
+                    "Accounts": [ { "ImmichServerUrl": "http://mock-immich-server.com", "ApiKey": "key123" } ]
+                }
+                """);
+            var dbPath = Path.Combine(_configDir, "immichframe.db");
+            var original = new byte[] { 1, 2, 3, 4 };
+            await File.WriteAllBytesAsync(dbPath, original);
+
+            Environment.SetEnvironmentVariable(SettingsSourceParser.EnvVar, "file");
+            using var factory = new WebApplicationFactory<Program>()
+                .WithWebHostBuilder(builder => builder.ConfigureTestServices(
+                    services => services.UseMockHandler(new Mock<HttpMessageHandler>().WithServerVersion())));
+            var client = factory.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", AdminPassword);
+
+            var status = await client.GetAsync("/api/Admin/Status");
+            var statusJson = JsonNode.Parse(await status.Content.ReadAsStringAsync())!;
+            var get = await client.GetAsync("/api/Admin/Settings");
+            var put = await client.PutAsJsonAsync("/api/Admin/Settings", ValidSettingsBody());
+            var setup = await client.PostAsJsonAsync("/api/Admin/Setup", new { AdminPassword = "hijack" });
+            var config = JsonNode.Parse(await client.GetStringAsync("/api/Config"))!;
+
+            Assert.Multiple(() =>
+            {
+                Assert.That((string)statusJson["state"]!, Is.EqualTo("file"));
+                Assert.That(get.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
+                Assert.That(put.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
+                Assert.That(setup.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
+                Assert.That((int)config["interval"]!, Is.EqualTo(17));
+                Assert.That(File.ReadAllBytes(dbPath), Is.EqualTo(original));
+                Assert.That(factory.Services.GetService<IDbContextFactory<SettingsDbContext>>(), Is.Null);
+            });
         }
 
         [Test]

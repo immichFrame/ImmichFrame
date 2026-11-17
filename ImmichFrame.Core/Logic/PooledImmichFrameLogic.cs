@@ -41,15 +41,19 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic, IDisposable
             || (accountSettings.People?.Any() ?? false)
             || (accountSettings.Tags?.Any() ?? false);
 
+        // With every memory type switched off, treat memories as off rather than as an empty source.
+        var showMemories = accountSettings.ShowMemories
+            && (accountSettings.ShowOnThisDayMemories || accountSettings.ShowBirthdayMemories);
+
         var pools = new List<IAssetPool>();
 
         // Memories-only skips the library search. Every other case needs it.
-        if (!accountSettings.ShowMemories || hasSource)
+        if (!showMemories || hasSource)
         {
             pools.Add(new AccountSearchPool(_apiCache, _immichApi, accountSettings));
         }
 
-        if (accountSettings.ShowMemories)
+        if (showMemories)
         {
             pools.Add(new MemoryAssetsPool(_immichApi, accountSettings));
         }
@@ -134,7 +138,9 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic, IDisposable
             }
         }
 
-        var data = await _immichApi.ViewAssetAsync(null, id, string.Empty, AssetMediaSize.Preview, null);
+        // edited: true returns the version with Immich's crop or rotation applied (#680). Immich
+        // falls back to the original when an asset has no edits.
+        var data = await _immichApi.ViewAssetAsync(true, id, string.Empty, AssetMediaSize.Preview, null);
 
         if (data == null)
             throw new AssetNotFoundException($"Asset {id} was not found!");

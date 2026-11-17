@@ -12,9 +12,17 @@ using ImmichFrame.WebApi.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
+if (builder.Environment.IsDevelopment())
+{
+    // Before LOG_LEVEL, IMMICHFRAME_CONFIG_PATH and IMMICHFRAME_CONFIG_SOURCE are read.
+    // Does not override variables already set, so tests keep their own values.
+    var dotenv = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "docker", ".env"));
+    DotEnv.Load(dotenv);
+}
+
 //log the version number
 var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
 Console.WriteLine($@"
@@ -64,11 +72,25 @@ var configPath = Environment.GetEnvironmentVariable("IMMICHFRAME_CONFIG_PATH") ?
         ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config");
 builder.Services.AddTransient<ConfigLoader>();
 
-// Settings live in a SQLite db in the config directory; file/env config is imported on first run
-builder.Services.AddDbContextFactory<SettingsDbContext>(options =>
-    options.UseSqlite($"Data Source={Path.Combine(configPath, "immichframe.db")}"));
-builder.Services.AddSingleton(new SettingsServiceOptions(configPath));
-builder.Services.AddSingleton<SettingsService>();
+var settingsSource = SettingsSourceParser.FromEnvironment();
+Console.WriteLine($"Settings source: {settingsSource.ToString().ToLowerInvariant()}");
+
+builder.Services.AddSingleton(new SettingsServiceOptions(configPath, settingsSource));
+if (settingsSource == SettingsSource.File)
+{
+    // No SQLite registration. Resolving IDbContextFactory<SettingsDbContext> fails.
+    builder.Services.AddSingleton(sp => new SettingsService(
+        null,
+        sp.GetRequiredService<ConfigLoader>(),
+        sp.GetRequiredService<ILogger<SettingsService>>(),
+        sp.GetRequiredService<SettingsServiceOptions>()));
+}
+else
+{
+    builder.Services.AddDbContextFactory<SettingsDbContext>(options =>
+        options.UseSqlite($"Data Source={Path.Combine(configPath, "immichframe.db")}"));
+    builder.Services.AddSingleton<SettingsService>();
+}
 builder.Services.AddSingleton<ISettingsProvider>(srv => srv.GetRequiredService<SettingsService>());
 
 // Register settings as live facades over the provider so config changes apply without restart
@@ -135,15 +157,6 @@ if (app.Environment.IsProduction())
     app.UseDefaultFiles();
 }
 
-if (app.Environment.IsDevelopment())
-{
-    var root = Directory.GetCurrentDirectory();
-    var dotenv = Path.Combine(root, "..", "docker", ".env");
-
-    dotenv = Path.GetFullPath(dotenv);
-    DotEnv.Load(dotenv);
-}
-
 // app.UseHttpsRedirection();
 app.UseMiddleware<CustomAuthenticationMiddleware>();
 
@@ -169,7 +182,10 @@ _ = Task.Run(async () =>
         var immichServersOk = await ImmichServerVersionChecker.CheckServerVersions(app.Services, app.Logger);
         if (!immichServersOk)
         {
-            app.Logger.LogCritical("One or more Immich servers are unreachable or unsupported (see log above). The slideshow may not work — fix the account settings via the admin UI at /admin.");
+            var hint = settingsSource == SettingsSource.File
+                ? "fix the config file and restart"
+                : "fix the account settings via the admin UI at /admin";
+            app.Logger.LogCritical("One or more Immich servers are unreachable or unsupported (see log above). The slideshow may not work — {hint}.", hint);
         }
     }
     catch (Exception ex)

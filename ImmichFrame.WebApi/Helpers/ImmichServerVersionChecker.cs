@@ -14,7 +14,7 @@ namespace ImmichFrame.WebApi.Helpers
         /// The minimum Immich server version supported by this version of ImmichFrame.
         /// </summary>
         public const int MinimumSupportedMajorVersion = 3;
-        public const int MinimumSupportedMinorVersion = 2;
+        public const int MinimumSupportedMinorVersion = 3;
         public const int MinimumSupportedPatchVersion = 0;
 
         public static readonly Version MinimumSupportedVersion = new(

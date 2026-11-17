@@ -7,7 +7,8 @@ sidebar_position: 2
 :::tip Admin UI
 Settings can also be managed from the built-in [admin UI](./admin-ui.md) at `/admin`.
 Note that once ImmichFrame has started for the first time, the settings database becomes
-the source of truth and later changes to config files are ignored.
+the source of truth and later changes to config files are ignored — unless you opt into
+[declarative file config](#declarative-file-config).
 :::
 
 ImmichFrame looks for a configuration directory in the following places:
@@ -16,21 +17,56 @@ ImmichFrame looks for a configuration directory in the following places:
 2. A `Config` directory relative to the ImmichFrame executable.
 3. A `Config` directory relative to the current working directory.
 
-Inside the configuration directory, ImmichFrame loads the first of these files:
+Inside the configuration directory, database mode loads the first of these files:
 
 1. `Settings.json`
 2. `Settings.yml`
 3. `Settings.yaml`
 
-If none of these files are found, ImmichFrame starts with defaults and you configure
-it in the [admin UI](./admin-ui.md).
+If none of these files are found and `IMMICHFRAME_CONFIG_SOURCE` is not `file`, ImmichFrame
+starts with defaults and you configure it in the [admin UI](./admin-ui.md). In
+[file mode](#declarative-file-config) a missing file stops startup.
 
 :::info Configuring via environment variables was removed
-Settings are no longer read from environment variables. A configuration file is
-imported into the settings database once on first start; after that, manage your
-settings in the admin UI. `IMMICHFRAME_ADMIN_PASSWORD`, `IMMICHFRAME_CONFIG_PATH`,
+Settings are no longer read from environment variables. Unless
+`IMMICHFRAME_CONFIG_SOURCE=file` is set, a configuration file is imported into the
+settings database once on first start; after that, manage your settings in the admin UI.
+`IMMICHFRAME_ADMIN_PASSWORD`, `IMMICHFRAME_CONFIG_PATH`, `IMMICHFRAME_CONFIG_SOURCE`,
 `LOG_LEVEL` and `TZ` are still read from the environment.
 :::
+
+### Declarative file config
+
+Set `IMMICHFRAME_CONFIG_SOURCE=file` to make `Settings.json`, `Settings.yml` or
+`Settings.yaml` the only source of truth. This is useful for NixOS, Ansible and other
+tools that provision a config file and expect later edits to that file to apply.
+
+- The file is read **once at startup**. Changes apply on restart, not live. There is no file watcher.
+- Exactly one of `Settings.json`, `Settings.yml` or `Settings.yaml`. More than one stops startup.
+  The file order above applies only to the database import.
+- Unknown keys stop startup. A typo does not fall back to the default. The database import
+  still ignores unknown keys.
+- The [admin UI](./admin-ui.md) is disabled, including when `IMMICHFRAME_ADMIN_PASSWORD` or
+  `AdminPassword` is set. `/admin` only explains that settings come from the file.
+- ImmichFrame does not create `immichframe.db` and does not need a writable config directory.
+  A read-only mount (`:ro`) works.
+- A missing or invalid file **stops startup**. There is no admin UI to fix it.
+- An existing `immichframe.db` next to the file is ignored and left untouched. Unsetting the
+  variable (or setting it back to `database`) makes that database the source of truth again.
+  If the database already has settings, the file is then ignored.
+
+`DownloadImages` still writes a cache under the application directory (`ImageCache`), not
+the config directory. A read-only config mount does not cover that cache.
+
+```yaml title="docker-compose.yml"
+services:
+  immichframe:
+    image: ghcr.io/immichframe/immichframe:latest
+    environment:
+      IMMICHFRAME_CONFIG_SOURCE: file
+    volumes:
+      - ./config:/app/Config:ro
+```
 
 ### Full configuration reference:
 
@@ -130,6 +166,10 @@ Accounts:
     ImagesFromDate: null # Date
     # If this is set, memories are displayed.
     ShowMemories: false # boolean
+    # Memory types to include when ShowMemories is set.
+    ShowOnThisDayMemories: true # boolean
+    # Birthday memories need Immich v3.3+ and a birth date on the person.
+    ShowBirthdayMemories: true # boolean
     # If this is set, favorites are displayed.
     ShowFavorites: false # boolean
     # If this is set, assets marked archived are displayed.

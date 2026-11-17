@@ -49,6 +49,4 @@ public static class CollectionExtensionMethods
 
         return default;
     }
-    
-    public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source) => source.OrderBy(_ => _random.Next());
 }

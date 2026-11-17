@@ -165,6 +165,18 @@ export const accountFields: FieldDef<ServerAccountSettings>[] = [
 		help: 'Alternative to the API key.'
 	},
 	{ key: 'showMemories', label: 'Memories', type: 'checkbox' },
+	{
+		key: 'showOnThisDayMemories',
+		label: 'On this day memories',
+		type: 'checkbox',
+		help: 'Only used when Memories is on.'
+	},
+	{
+		key: 'showBirthdayMemories',
+		label: 'Birthday memories',
+		type: 'checkbox',
+		help: 'Only used when Memories is on. Immich creates these for people with a birth date set.'
+	},
 	{ key: 'showFavorites', label: 'Favorites', type: 'checkbox' },
 	{ key: 'showArchived', label: 'Archived', type: 'checkbox' },
 	{ key: 'showVideos', label: 'Videos', type: 'checkbox' },

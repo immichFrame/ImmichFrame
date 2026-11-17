@@ -16,20 +16,35 @@ public enum AdminUiState
     /// Configured, but no admin password: the instance is already somebody's, so
     /// onboarding stays shut. Only the environment variable gets you back in.
     /// </summary>
-    Disabled
+    Disabled,
+
+    /// <summary>
+    /// Settings come from a config file. The admin UI cannot view or change them,
+    /// even if a password is set.
+    /// </summary>
+    File
 }
 
 /// <summary>
 /// Resolves the admin password. The environment variable always wins so a lockout
 /// (wrong password saved via the UI) can be recovered without touching the database.
 /// If neither source is set, the admin interface is disabled.
+/// File mode disables the admin UI entirely, password or not.
 /// </summary>
 public class AdminAuthService(SettingsService _settingsService)
 {
     public const string AdminPasswordEnvVar = "IMMICHFRAME_ADMIN_PASSWORD";
 
+    public const string FileManagedMessage =
+        "Settings are managed by the configuration file. The admin UI is disabled.";
+
     public string? GetAdminPassword()
     {
+        if (_settingsService.IsFileManaged)
+        {
+            return null;
+        }
+
         var fromEnv = Environment.GetEnvironmentVariable(AdminPasswordEnvVar);
         if (!string.IsNullOrWhiteSpace(fromEnv))
         {
@@ -49,9 +64,11 @@ public class AdminAuthService(SettingsService _settingsService)
     /// </summary>
     public bool SetupRequired => GetAdminPassword() == null && _settingsService.IsUnconfigured;
 
-    public AdminUiState State => AdminEnabled
-        ? AdminUiState.Login
-        : SetupRequired ? AdminUiState.Setup : AdminUiState.Disabled;
+    public AdminUiState State => _settingsService.IsFileManaged
+        ? AdminUiState.File
+        : AdminEnabled
+            ? AdminUiState.Login
+            : SetupRequired ? AdminUiState.Setup : AdminUiState.Disabled;
 
     public bool ValidatePassword(string candidate)
     {
