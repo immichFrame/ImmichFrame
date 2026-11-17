@@ -35,7 +35,10 @@
     "ImagePan": false,
     "ImageFill": false,
     "PlayAudio": false,
-    "Layout": "splitview"
+    "Layout": "splitview",
+    "EventHostEnabled": false,
+    "EventPollingIntervalSeconds": 2,
+    "EventDefaultTimeoutMs": 15000
   },
   "Accounts": [
     {

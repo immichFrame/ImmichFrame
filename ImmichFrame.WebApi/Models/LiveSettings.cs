@@ -55,6 +55,9 @@ public class LiveGeneralSettings(ISettingsProvider _provider) : IGeneralSettings
     public string? Webhook => Current.Webhook;
     public string? AuthenticationSecret => Current.AuthenticationSecret;
     public string? AdminPassword => Current.AdminPassword;
+    public bool EventHostEnabled => Current.EventHostEnabled;
+    public int EventPollingIntervalSeconds => Current.EventPollingIntervalSeconds;
+    public int EventDefaultTimeoutMs => Current.EventDefaultTimeoutMs;
 
     public void Validate() => Current.Validate();
 }

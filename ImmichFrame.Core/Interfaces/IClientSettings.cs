@@ -30,5 +30,8 @@ namespace ImmichFrame.Core.Interfaces
         public bool PlayAudio { get; }
         public string Layout { get; }
         public string Language { get; }
+        public bool EventHostEnabled { get; }
+        public int EventPollingIntervalSeconds { get; }
+        public int EventDefaultTimeoutMs { get; }
     }
 }

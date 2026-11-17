@@ -32,4 +32,7 @@ public class ClientSettingsDto(IClientSettings settings) : IClientSettings
     public bool PlayAudio => settings.PlayAudio;
     public string Layout => settings.Layout;
     public string Language => settings.Language;
+    public bool EventHostEnabled => settings.EventHostEnabled;
+    public int EventPollingIntervalSeconds => settings.EventPollingIntervalSeconds;
+    public int EventDefaultTimeoutMs => settings.EventDefaultTimeoutMs;
 }
