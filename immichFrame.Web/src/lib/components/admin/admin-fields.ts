@@ -8,6 +8,7 @@ export type FieldType =
 	| 'select'
 	| 'list'
 	| 'date'
+	| 'format'
 	| 'guid-list';
 
 export interface FieldDef<T = GeneralSettings> {
@@ -20,6 +21,10 @@ export interface FieldDef<T = GeneralSettings> {
 	step?: string;
 	min?: number;
 	max?: number;
+	/** For 'format' fields: date-fns patterns offered as examples, plus a Custom option. */
+	presets?: string[];
+	/** For 'format' fields: render examples in the configured language (the slideshow does for dates). */
+	localized?: boolean;
 }
 
 // What setting-field.svelte accepts: any concrete FieldDef widens to this,
@@ -64,19 +69,33 @@ export const generalSections: SectionDef[] = [
 		title: 'Clock & Metadata',
 		fields: [
 			{ key: 'showClock', label: 'Show clock', type: 'checkbox' },
-			{ key: 'clockFormat', label: 'Clock format', type: 'text', placeholder: 'hh:mm' },
+			{
+				key: 'clockFormat',
+				label: 'Clock format',
+				type: 'format',
+				presets: ['HH:mm', 'HH:mm:ss', 'h:mm a', 'hh:mm']
+			},
 			{
 				key: 'clockDateFormat',
 				label: 'Clock date format',
-				type: 'text',
-				placeholder: 'eee, MMM d'
+				type: 'format',
+				localized: true,
+				presets: [
+					'eee, MMM d',
+					'eee, d MMM',
+					'EEEE, MMMM d',
+					'EEEE, d MMMM',
+					'dd/MM/yyyy',
+					'yyyy-MM-dd'
+				]
 			},
 			{ key: 'showPhotoDate', label: 'Show photo date', type: 'checkbox' },
 			{
 				key: 'photoDateFormat',
 				label: 'Photo date format',
-				type: 'text',
-				placeholder: 'MM/dd/yyyy'
+				type: 'format',
+				localized: true,
+				presets: ['MM/dd/yyyy', 'dd/MM/yyyy', 'dd.MM.yyyy', 'yyyy-MM-dd', 'd MMM yyyy', 'MMMM yyyy']
 			},
 			{ key: 'showImageDesc', label: 'Show image description', type: 'checkbox' },
 			{ key: 'showPeopleDesc', label: 'Show people', type: 'checkbox' },
