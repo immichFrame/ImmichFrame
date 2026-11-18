@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import type { AnyFieldDef } from './admin-fields';
+	import { CUSTOM_FORMAT, formatExample } from './format-presets';
 	import {
 		Checkbox,
 		Field,
@@ -49,6 +50,30 @@
 		target[field.key] = lines;
 	}
 
+	// 'format' fields: a list of examples, or a pattern typed by hand. Starts in Custom when
+	// the saved pattern isn't one of the presets, so a hand-written value is never replaced.
+	let presets = $derived(field.presets ?? []);
+	let customFormat = $state(
+		untrack(() => field.type === 'format' && !presets.includes((target[field.key] as string) ?? ''))
+	);
+	let formatOptions = $derived([
+		...presets.map((pattern) => ({
+			value: pattern,
+			label: `${formatExample(pattern, target.language, field.localized === true) ?? pattern}  (${pattern})`
+		})),
+		{ value: CUSTOM_FORMAT, label: 'Custom…' }
+	]);
+	let formatPreview = $derived(
+		textValue === '' ? '' : formatExample(textValue, target.language, field.localized === true)
+	);
+
+	function selectFormat(value: string) {
+		customFormat = value === CUSTOM_FORMAT;
+		if (!customFormat) {
+			target[field.key] = value;
+		}
+	}
+
 	function updateDate(raw: string) {
 		target[field.key] = raw === '' ? null : new Date(raw).toISOString();
 	}
@@ -77,6 +102,31 @@
 		/>
 	{:else if field.type === 'date'}
 		<Input type="date" value={dateValue} oninput={(e) => updateDate(e.currentTarget.value)} />
+	{:else if field.type === 'format'}
+		<Select
+			options={formatOptions}
+			value={customFormat ? CUSTOM_FORMAT : textValue}
+			onChange={selectFormat}
+		/>
+		{#if customFormat}
+			<div class="mt-2">
+				<Field label="Custom pattern" invalid={formatPreview === null}>
+					<Input
+						placeholder={presets[0] ?? ''}
+						value={textValue}
+						oninput={(e) => (target[field.key] = e.currentTarget.value)}
+					/>
+					{#if formatPreview === null}
+						<HelperText color="danger">Not a valid date-fns pattern.</HelperText>
+					{:else}
+						<HelperText>
+							{formatPreview ? `Shows as: ${formatPreview}. ` : ''}Patterns follow date-fns
+							(date-fns.org/docs/format).
+						</HelperText>
+					{/if}
+				</Field>
+			</div>
+		{/if}
 	{:else if field.type === 'list' || field.type === 'guid-list'}
 		<Textarea rows={3} value={listText} oninput={(e) => updateList(e.currentTarget.value)} />
 	{:else}
