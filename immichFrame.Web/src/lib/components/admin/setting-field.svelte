@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import type { AnyFieldDef } from './admin-fields';
-	import { CUSTOM_FORMAT, formatExample, invalidFormats } from './format-presets';
+	import { CUSTOM_FORMAT, formatDrafts, formatExample, invalidFormats } from './format-presets';
 	import {
 		Checkbox,
 		Field,
@@ -61,12 +61,21 @@
 
 	// Re-derive the mode whenever the settings document is replaced (e.g. a reload), but not
 	// while typing: a typed pattern that happens to match a preset keeps Custom open.
+	// On mount, an unfinished draft (kept while a section was collapsed) comes back as it was.
+	let mounted = false;
 	$effect.pre(() => {
 		const doc = target;
 		untrack(() => {
-			const saved = (doc[field.key] as string | null) ?? '';
-			customDraft = saved;
-			customFormat = field.type === 'format' && !presets.includes(saved);
+			const draft = formatDrafts.get(field.key);
+			if (!mounted && draft !== undefined) {
+				customDraft = draft;
+				customFormat = true;
+			} else {
+				const saved = (doc[field.key] as string | null) ?? '';
+				customDraft = saved;
+				customFormat = field.type === 'format' && !presets.includes(saved);
+			}
+			mounted = true;
 		});
 	});
 
@@ -81,11 +90,18 @@
 		customDraft === '' ? '' : formatExample(customDraft, target.language, field.localized === true)
 	);
 
+	// No cleanup on unmount: an invalid draft keeps Save blocked until it's fixed, a preset is
+	// picked, or the settings are reloaded (clearFormatDrafts).
 	$effect(() => {
 		const key = field.key;
-		if (customFormat && formatPreview === null) invalidFormats.add(key);
-		else invalidFormats.delete(key);
-		return () => invalidFormats.delete(key);
+		if (field.type !== 'format') return;
+		if (customFormat && formatPreview === null) {
+			invalidFormats.add(key);
+			formatDrafts.set(key, customDraft);
+		} else {
+			invalidFormats.delete(key);
+			formatDrafts.delete(key);
+		}
 	});
 
 	function selectFormat(value: string) {
