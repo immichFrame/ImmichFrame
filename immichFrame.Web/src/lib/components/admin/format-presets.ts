@@ -1,10 +1,17 @@
 import { format } from 'date-fns';
 import * as locales from 'date-fns/locale';
+import { SvelteSet } from 'svelte/reactivity';
 
 // A fixed sample moment: day 12 and month 8 can't be confused, and 14:30 shows 12h vs 24h.
 export const SAMPLE_DATE = new Date(2025, 7, 12, 14, 30, 5);
 
 export const CUSTOM_FORMAT = '__custom__';
+
+/**
+ * Keys of format fields whose Custom box holds an invalid pattern. Save is blocked while it's
+ * not empty: the settings keep the last valid value, which may be a half-typed prefix (H of HC).
+ */
+export const invalidFormats = new SvelteSet<string>();
 
 /**
  * Renders a date-fns pattern the way the frame will, or returns null when the pattern is invalid.

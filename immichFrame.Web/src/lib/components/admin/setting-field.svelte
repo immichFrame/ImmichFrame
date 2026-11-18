@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import type { AnyFieldDef } from './admin-fields';
-	import { CUSTOM_FORMAT, formatExample } from './format-presets';
+	import { CUSTOM_FORMAT, formatExample, invalidFormats } from './format-presets';
 	import {
 		Checkbox,
 		Field,
@@ -80,6 +80,13 @@
 	let formatPreview = $derived(
 		customDraft === '' ? '' : formatExample(customDraft, target.language, field.localized === true)
 	);
+
+	$effect(() => {
+		const key = field.key;
+		if (customFormat && formatPreview === null) invalidFormats.add(key);
+		else invalidFormats.delete(key);
+		return () => invalidFormats.delete(key);
+	});
 
 	function selectFormat(value: string) {
 		customFormat = value === CUSTOM_FORMAT;

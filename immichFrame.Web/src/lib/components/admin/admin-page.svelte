@@ -23,6 +23,7 @@
 	import AdminSetup from './admin-setup.svelte';
 	import SettingsSection from './settings-section.svelte';
 	import SettingField from './setting-field.svelte';
+	import { invalidFormats } from './format-presets';
 	import AccountEditor from './account-editor.svelte';
 
 	type PageState = 'loading' | 'setup' | 'disabled' | 'file' | 'login' | 'editor' | 'error';
@@ -126,6 +127,7 @@
 	}
 
 	async function save() {
+		if (invalidFormats.size > 0) return;
 		saving = true;
 		saveError = '';
 		saveSuccess = false;
@@ -162,7 +164,15 @@
 					<AdminBrand subtitle="Server settings" />
 
 					<div class="flex items-center gap-2">
-						<Button leadingIcon={mdiContentSave} loading={saving} onclick={save}>
+						<Button
+							leadingIcon={mdiContentSave}
+							loading={saving}
+							disabled={invalidFormats.size > 0}
+							title={invalidFormats.size > 0
+								? 'Fix the invalid date or clock pattern first'
+								: undefined}
+							onclick={save}
+						>
 							{saving ? 'Saving…' : 'Save'}
 						</Button>
 						<IconButton
