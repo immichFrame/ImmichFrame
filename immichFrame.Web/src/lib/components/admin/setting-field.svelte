@@ -10,6 +10,7 @@
 		NumberInput,
 		PasswordInput,
 		Select,
+		Text,
 		Textarea
 	} from '@immich/ui';
 
@@ -50,12 +51,25 @@
 		target[field.key] = lines;
 	}
 
-	// 'format' fields: a list of examples, or a pattern typed by hand. Starts in Custom when
-	// the saved pattern isn't one of the presets, so a hand-written value is never replaced.
+	// 'format' fields: a list of examples, or a pattern typed by hand. Custom holds its own
+	// draft: the settings only receive a pattern date-fns can format, so an invalid draft stays
+	// on screen for correcting but can never be saved and break the frame's clock or date.
+	const uid = $props.id();
 	let presets = $derived(field.presets ?? []);
-	let customFormat = $state(
-		untrack(() => field.type === 'format' && !presets.includes((target[field.key] as string) ?? ''))
-	);
+	let customFormat = $state(false);
+	let customDraft = $state('');
+
+	// Re-derive the mode whenever the settings document is replaced (e.g. a reload), but not
+	// while typing: a typed pattern that happens to match a preset keeps Custom open.
+	$effect.pre(() => {
+		const doc = target;
+		untrack(() => {
+			const saved = (doc[field.key] as string | null) ?? '';
+			customDraft = saved;
+			customFormat = field.type === 'format' && !presets.includes(saved);
+		});
+	});
+
 	let formatOptions = $derived([
 		...presets.map((pattern) => ({
 			value: pattern,
@@ -64,12 +78,21 @@
 		{ value: CUSTOM_FORMAT, label: 'Custom…' }
 	]);
 	let formatPreview = $derived(
-		textValue === '' ? '' : formatExample(textValue, target.language, field.localized === true)
+		customDraft === '' ? '' : formatExample(customDraft, target.language, field.localized === true)
 	);
 
 	function selectFormat(value: string) {
 		customFormat = value === CUSTOM_FORMAT;
-		if (!customFormat) {
+		if (customFormat) {
+			customDraft = textValue;
+		} else {
+			target[field.key] = value;
+		}
+	}
+
+	function updateCustom(value: string) {
+		customDraft = value;
+		if (value === '' || formatExample(value, target.language, field.localized === true) !== null) {
 			target[field.key] = value;
 		}
 	}
@@ -113,17 +136,24 @@
 				<Field label="Custom pattern" invalid={formatPreview === null}>
 					<Input
 						placeholder={presets[0] ?? ''}
-						value={textValue}
-						oninput={(e) => (target[field.key] = e.currentTarget.value)}
+						value={customDraft}
+						aria-invalid={formatPreview === null}
+						aria-describedby="{uid}-format-help"
+						oninput={(e) => updateCustom(e.currentTarget.value)}
 					/>
-					{#if formatPreview === null}
-						<HelperText color="danger">Not a valid date-fns pattern.</HelperText>
-					{:else}
-						<HelperText>
-							{formatPreview ? `Shows as: ${formatPreview}. ` : ''}Patterns follow date-fns
-							(date-fns.org/docs/format).
-						</HelperText>
-					{/if}
+					<!-- Text, not HelperText: HelperText renders in the Field's slot, outside this live region. -->
+					<div id="{uid}-format-help" aria-live="polite">
+						{#if formatPreview === null}
+							<Text color="danger" size="small" class="pt-1">
+								Not a valid date-fns pattern. It isn't saved until it's valid.
+							</Text>
+						{:else}
+							<Text color="muted" size="small" class="pt-1">
+								{formatPreview ? `Shows as: ${formatPreview}. ` : ''}Patterns follow date-fns
+								(date-fns.org/docs/format).
+							</Text>
+						{/if}
+					</div>
 				</Field>
 			</div>
 		{/if}
