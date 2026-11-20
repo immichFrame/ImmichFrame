@@ -51,7 +51,7 @@ public class IcalCalendarService : ICalendarService
             {
                 var calendar = Calendar.Load(ical);
 
-                appointments.AddRange(calendar.GetOccurrences(DateTime.Today, DateTime.Today.AddDays(1)).Select(x => x.ToAppointment()));
+                appointments.AddRange(calendar.GetAppointmentsForDay(DateTime.Today, TimeZoneInfo.Local));
             }
 
             return appointments;
