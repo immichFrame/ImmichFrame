@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { type AlbumResponseDto, type AssetResponseDto } from '$lib/immichFrameApi';
 	import { format } from 'date-fns';
+	import { TZDate } from '@date-fns/tz';
 	import * as locale from 'date-fns/locale';
 	import { configStore } from '$lib/stores/config.store';
 	import Icon from './icon.svelte';
@@ -46,17 +47,32 @@
 
 		return Array.from(locationParts).join(', ');
 	}
-	let assetDate = $derived(asset.exifInfo?.dateTimeOriginal);
+	function parseExifTimeZone(timeZone: string) {
+		try {
+			Intl.DateTimeFormat(undefined, { timeZone });
+			return timeZone;
+		} catch {
+			const match = timeZone?.match(/^UTC([+-])(\d{1,2})(:\d{2})?$/i);
+			if (match) {
+				const [, sign, hours, minutes = ''] = match;
+				const paddedHours = hours.padStart(2, '0');
+				return `${sign}${paddedHours}${minutes}`;
+			}
+		}
+		return 'UTC';
+	}
 	let desc = $derived(asset.exifInfo?.description ?? '');
-	let time = $derived(assetDate ? new Date(assetDate) : null);
+	let time = $derived(
+		asset.exifInfo?.dateTimeOriginal && asset.exifInfo?.timeZone
+			? new TZDate(asset.exifInfo.dateTimeOriginal, parseExifTimeZone(asset.exifInfo.timeZone))
+			: new TZDate(asset.localDateTime, 'UTC')
+	);
 	const selectedLocale = $configStore.language;
 
 	const localeToUse =
 		(selectedLocale && locale[selectedLocale as keyof typeof locale]) || locale.enUS;
 	let formattedDate = $derived(
-		time
-			? format(time, $configStore.photoDateFormat ?? 'dd.MM.yyyy', { locale: localeToUse })
-			: null
+		format(time, $configStore.photoDateFormat ?? 'dd.MM.yyyy', { locale: localeToUse })
 	);
 	let location = $derived(
 		formatLocation(
