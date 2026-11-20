@@ -47,12 +47,10 @@
 
 		return Array.from(locationParts).join(', ');
 	}
-	function parseExifTimeZone(timeZone?: string | null) {
+	function parseExifTimeZone(timeZone: string) {
 		try {
-			if (timeZone) {
-				Intl.DateTimeFormat(undefined, { timeZone });
-				return timeZone;
-			}
+			Intl.DateTimeFormat(undefined, { timeZone });
+			return timeZone;
 		} catch {
 			const match = timeZone?.match(/^UTC([+-])(\d{1,2})(:\d{2})?$/i);
 			if (match) {
@@ -63,18 +61,18 @@
 		}
 		return 'UTC';
 	}
-	let assetDate = $derived(asset.exifInfo?.dateTimeOriginal);
-	let assetTimeZone = $derived(asset.exifInfo?.timeZone);
 	let desc = $derived(asset.exifInfo?.description ?? '');
-	let time = $derived(assetDate ? new TZDate(assetDate, parseExifTimeZone(assetTimeZone)) : null);
+	let time = $derived(
+		asset.exifInfo?.dateTimeOriginal && asset.exifInfo?.timeZone
+			? new TZDate(asset.exifInfo.dateTimeOriginal, parseExifTimeZone(asset.exifInfo.timeZone))
+			: new TZDate(asset.localDateTime, 'UTC')
+	);
 	const selectedLocale = $configStore.language;
 
 	const localeToUse =
 		(selectedLocale && locale[selectedLocale as keyof typeof locale]) || locale.enUS;
 	let formattedDate = $derived(
-		time
-			? format(time, $configStore.photoDateFormat ?? 'dd.MM.yyyy', { locale: localeToUse })
-			: null
+		format(time, $configStore.photoDateFormat ?? 'dd.MM.yyyy', { locale: localeToUse })
 	);
 	let location = $derived(
 		formatLocation(
