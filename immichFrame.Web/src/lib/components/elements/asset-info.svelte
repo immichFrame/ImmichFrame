@@ -47,23 +47,21 @@
 
 		return Array.from(locationParts).join(', ');
 	}
-	function isValidTimeZone(timeZone: string) {
+	function parseExifTimeZone(timeZone?: string | null) {
 		try {
-			Intl.DateTimeFormat(undefined, { timeZone });
-			return true;
+			if (timeZone) {
+				Intl.DateTimeFormat(undefined, { timeZone });
+				return timeZone;
+			}
 		} catch {
-			return false;
+			const match = timeZone?.match(/^UTC([+-])(\d{1,2})(:\d{2})?$/i);
+			if (match) {
+				const [, sign, hours, minutes = ''] = match;
+				const paddedHours = hours.padStart(2, '0');
+				return `${sign}${paddedHours}${minutes}`;
+			}
 		}
-	}
-	function parseExifTimeZone(exifTz?: string | null) {
-		const match = exifTz?.match(/^UTC([+-])(\d{1,2})(?::(\d{2}))?$/i);
-		if (match) {
-			const [, sign, hours, minutes = '00'] = match;
-			const paddedHours = hours.padStart(2, '0');
-			exifTz = `${sign}${paddedHours}:${minutes}`;
-		}
-		
-		return exifTz && isValidTimeZone(exifTz) ? exifTz : 'UTC';
+		return 'UTC';
 	}
 	let assetDate = $derived(asset.exifInfo?.dateTimeOriginal);
 	let assetTimeZone = $derived(asset.exifInfo?.timeZone);
