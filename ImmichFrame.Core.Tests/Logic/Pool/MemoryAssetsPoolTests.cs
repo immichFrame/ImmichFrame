@@ -357,4 +357,93 @@ public class MemoryAssetsPoolTests
             });
         }
     }
+
+    private List<MemoryResponseDto> CreateDatedImageMemory(int memoryYear, bool withExif = true)
+    {
+        var memories = CreateSampleImageMemories(1, 1, withExif, memoryYear);
+        memories[0].Assets.First().FileCreatedAt = new DateTimeOffset(new DateTime(memoryYear, 6, 1));
+        return memories;
+    }
+
+    private void SetupMemories(List<MemoryResponseDto> memories)
+    {
+        _mockImmichApi.Setup(x => x.SearchMemoriesAsync(It.IsAny<DateTimeOffset>(), null, null, null, null, null, null, null, MemoryType.On_this_day, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(memories);
+    }
+
+    [Test]
+    public async Task LoadAssets_ExcludesMemoriesBeforeImagesFromDate()
+    {
+        var currentYear = DateTime.Now.Year;
+        var memories = CreateDatedImageMemory(currentYear - 15);
+        memories.AddRange(CreateDatedImageMemory(currentYear - 3));
+        SetupMemories(memories);
+        _mockAccountSettings.Setup(x => x.ImagesFromDate).Returns(new DateTime(currentYear - 5, 1, 1));
+
+        var assets = (await _memoryAssetsPool.GetAssets(10, CancellationToken.None)).ToList();
+
+        Assert.That(assets, Has.Count.EqualTo(1));
+        Assert.That(assets[0].ExifInfo.Description, Is.EqualTo("3 years ago"));
+    }
+
+    [Test]
+    public async Task LoadAssets_ExcludesMemoriesAfterImagesUntilDate()
+    {
+        var currentYear = DateTime.Now.Year;
+        var memories = CreateDatedImageMemory(currentYear - 15);
+        memories.AddRange(CreateDatedImageMemory(currentYear - 3));
+        SetupMemories(memories);
+        _mockAccountSettings.Setup(x => x.ImagesUntilDate).Returns(new DateTime(currentYear - 5, 1, 1));
+
+        var assets = (await _memoryAssetsPool.GetAssets(10, CancellationToken.None)).ToList();
+
+        Assert.That(assets, Has.Count.EqualTo(1));
+        Assert.That(assets[0].ExifInfo.Description, Is.EqualTo("15 years ago"));
+    }
+
+    [Test]
+    public async Task LoadAssets_ExcludesMemoriesOlderThanImagesFromDays()
+    {
+        var currentYear = DateTime.Now.Year;
+        var memories = CreateDatedImageMemory(currentYear - 15);
+        memories.AddRange(CreateDatedImageMemory(currentYear - 3));
+        SetupMemories(memories);
+        _mockAccountSettings.Setup(x => x.ImagesFromDays).Returns(365 * 5);
+
+        var assets = (await _memoryAssetsPool.GetAssets(10, CancellationToken.None)).ToList();
+
+        Assert.That(assets, Has.Count.EqualTo(1));
+        Assert.That(assets[0].ExifInfo.Description, Is.EqualTo("3 years ago"));
+    }
+
+    [Test]
+    public async Task LoadAssets_ImagesFromDateTakesPrecedenceOverImagesFromDays()
+    {
+        // Same precedence as the search filter: ImagesFromDate wins when both are set.
+        var currentYear = DateTime.Now.Year;
+        var memories = CreateDatedImageMemory(currentYear - 15);
+        memories.AddRange(CreateDatedImageMemory(currentYear - 3));
+        SetupMemories(memories);
+        _mockAccountSettings.Setup(x => x.ImagesFromDate).Returns(new DateTime(currentYear - 20, 1, 1));
+        _mockAccountSettings.Setup(x => x.ImagesFromDays).Returns(365 * 5);
+
+        var assets = (await _memoryAssetsPool.GetAssets(10, CancellationToken.None)).ToList();
+
+        Assert.That(assets, Has.Count.EqualTo(2));
+    }
+
+    [Test]
+    public async Task LoadAssets_DoesNotFetchAssetInfo_ForMemoriesOutsideDateWindow()
+    {
+        var currentYear = DateTime.Now.Year;
+        var memories = CreateDatedImageMemory(currentYear - 15, withExif: false);
+        var excludedId = memories[0].Assets.First().Id;
+        SetupMemories(memories);
+        _mockAccountSettings.Setup(x => x.ImagesFromDate).Returns(new DateTime(currentYear - 5, 1, 1));
+
+        var assets = (await _memoryAssetsPool.GetAssets(10, CancellationToken.None)).ToList();
+
+        Assert.That(assets, Is.Empty);
+        _mockImmichApi.Verify(x => x.GetAssetInfoAsync(excludedId, null, null, It.IsAny<CancellationToken>()), Times.Never);
+    }
 }

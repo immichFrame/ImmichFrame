@@ -97,16 +97,15 @@ public static class SearchFilters
 
     private static DateFilter? TakenAt(IAccountSettings settings)
     {
+        var (from, until) = TakenAtWindow(settings);
         var takenAt = new DateFilter();
         var hasTakenFilter = false;
-        if (settings.ImagesUntilDate is DateTime until)
+        if (until is DateTime before)
         {
-            takenAt.Lt = until;
+            takenAt.Lt = before;
             hasTakenFilter = true;
         }
 
-        DateTime? from = settings.ImagesFromDate
-            ?? (settings.ImagesFromDays is int days ? DateTime.Today.AddDays(-days) : null);
         if (from is DateTime after)
         {
             takenAt.Gt = after;
@@ -114,6 +113,29 @@ public static class SearchFilters
         }
 
         return hasTakenFilter ? takenAt : null;
+    }
+
+    /// <summary>
+    /// The capture-date window configured for an account (ImagesFromDate, or else
+    /// ImagesFromDays; and ImagesUntilDate). Both bounds are exclusive, matching the
+    /// Gt/Lt filter sent to the Immich search.
+    /// </summary>
+    public static (DateTime? From, DateTime? Until) TakenAtWindow(IAccountSettings settings)
+    {
+        DateTime? from = settings.ImagesFromDate
+            ?? (settings.ImagesFromDays is int days ? DateTime.Today.AddDays(-days) : null);
+        return (from, settings.ImagesUntilDate);
+    }
+
+    /// <summary>
+    /// Client-side equivalent of the search's TakenAt filter, for asset sources that
+    /// do not go through the search endpoint (memories).
+    /// </summary>
+    public static bool IsWithinTakenAtWindow(IAccountSettings settings, DateTimeOffset takenAt)
+    {
+        var (from, until) = TakenAtWindow(settings);
+        return (from is not DateTime after || takenAt > after)
+            && (until is not DateTime before || takenAt < before);
     }
 
     private static NumberFilterNullable? Rating(IAccountSettings settings) =>
