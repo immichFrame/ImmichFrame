@@ -13,6 +13,8 @@ public static class ImageContentTypes
         ["image/webp"] = "webp",
         ["image/gif"] = "gif",
         ["image/avif"] = "avif",
+        ["image/bmp"] = "bmp",
+        ["image/apng"] = "apng",
         ["image/heic"] = "heic",
         ["image/heif"] = "heif",
         ["image/jxl"] = "jxl",
@@ -22,10 +24,11 @@ public static class ImageContentTypes
     private static readonly Dictionary<string, string> ContentTypes =
         Extensions.ToDictionary(pair => pair.Value, pair => pair.Key, StringComparer.OrdinalIgnoreCase);
 
-    // Same list as Immich's isWebSupportedImage: the originals Immich itself serves as "fullsize".
+    // Same list as Immich's webSupportedImage (server/src/utils/mime-types.ts, v3.3.5): the
+    // originals Immich itself serves as "fullsize".
     private static readonly HashSet<string> WebSupported = new(StringComparer.OrdinalIgnoreCase)
     {
-        "image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"
+        "image/jpeg", "image/png", "image/apng", "image/webp", "image/gif", "image/avif", "image/bmp"
     };
 
     public static string ToExtension(string? contentType)

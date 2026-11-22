@@ -12,6 +12,7 @@ public class ImageContentTypesTests
     [TestCase("IMAGE/HEIC", "heic")]
     [TestCase("image/png; charset=binary", "png")]
     [TestCase("image/x-adobe-dng", "dng")]
+    [TestCase("image/bmp", "bmp")]
     [TestCase("image/x-nikon-nef", "nikon-nef")]
     [TestCase("", "bin")]
     [TestCase(null, "bin")]
@@ -27,6 +28,8 @@ public class ImageContentTypesTests
 
     [TestCase("image/jpeg", true)]
     [TestCase("image/avif", true)]
+    [TestCase("image/bmp", true)]
+    [TestCase("image/apng", true)]
     [TestCase("image/png; charset=binary", true)]
     [TestCase("image/heic", false)]
     [TestCase("image/x-adobe-dng", false)]

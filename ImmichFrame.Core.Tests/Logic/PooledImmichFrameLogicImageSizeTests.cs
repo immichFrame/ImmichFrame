@@ -83,12 +83,13 @@ public class PooledImmichFrameLogicImageSizeTests
         });
     }
 
-    [Test]
-    public async Task Fullsize_WebSupportedOriginal_DownloadsTheOriginal()
+    [TestCase("image/jpeg", "jpeg")]
+    [TestCase("image/bmp", "bmp")]
+    public async Task Fullsize_WebSupportedOriginal_DownloadsTheOriginal(string mimeType, string extension)
     {
         var logic = CreateLogic("fullsize", request => request.RequestUri!.AbsolutePath == $"/api/assets/{_id}"
-            ? AssetInfo("image/jpeg")
-            : ImageFile("image/jpeg"));
+            ? AssetInfo(mimeType)
+            : ImageFile(mimeType));
 
         var result = await logic.GetAsset(_id, AssetTypeEnum.IMAGE);
 
@@ -96,8 +97,8 @@ public class PooledImmichFrameLogicImageSizeTests
         {
             Assert.That(_handler.Requests.Select(r => r.AbsolutePath),
                 Is.EqualTo(new[] { $"/api/assets/{_id}", $"/api/assets/{_id}/original" }));
-            Assert.That(result.ContentType, Is.EqualTo("image/jpeg"));
-            Assert.That(result.FileName, Is.EqualTo($"{_id}_fullsize.jpeg"));
+            Assert.That(result.ContentType, Is.EqualTo(mimeType));
+            Assert.That(result.FileName, Is.EqualTo($"{_id}_fullsize.{extension}"));
         });
     }
 
