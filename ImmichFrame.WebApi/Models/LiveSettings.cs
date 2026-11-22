@@ -46,6 +46,7 @@ public class LiveGeneralSettings(ISettingsProvider _provider) : IGeneralSettings
     public bool ImageFill => Current.ImageFill;
     public bool PlayAudio => Current.PlayAudio;
     public string Layout => Current.Layout;
+    public string ImageSize => Current.ImageSize;
     public string Language => Current.Language;
     public List<string> Webcalendars => Current.Webcalendars;
     public int RefreshAlbumPeopleInterval => Current.RefreshAlbumPeopleInterval;

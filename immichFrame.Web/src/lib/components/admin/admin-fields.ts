@@ -125,6 +125,13 @@ export const generalSections: SectionDef[] = [
 	{
 		title: 'Server',
 		fields: [
+			{
+				key: 'imageSize',
+				label: 'Image size',
+				type: 'select',
+				options: ['preview', 'fullsize', 'original'],
+				help: "preview: Immich's preview (1440 px on the short side by default). fullsize: the original when a browser can show it (JPEG, PNG, WebP, GIF, AVIF), otherwise Immich's full-size image if Immich generates it, otherwise the preview. original: always the original file — HEIC and RAW may not display in a browser."
+			},
 			{ key: 'downloadImages', label: 'Download images (cache on disk)', type: 'checkbox' },
 			{ key: 'renewImagesDuration', label: 'Renew cached images after (days)', type: 'number' },
 			{

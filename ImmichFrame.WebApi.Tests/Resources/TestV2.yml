@@ -36,6 +36,7 @@ General:
   ImageFill: true
   PlayAudio: true
   Layout: Layout_TEST
+  ImageSize: ImageSize_TEST
 Accounts:
 - ImmichServerUrl: Account1.ImmichServerUrl_TEST
   ApiKey: Account1.ApiKey_TEST

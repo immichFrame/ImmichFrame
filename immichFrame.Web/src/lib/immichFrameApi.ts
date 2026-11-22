@@ -57,6 +57,7 @@ export type GeneralSettings = {
     imageFill?: boolean;
     playAudio?: boolean;
     layout?: string | null;
+    imageSize?: string | null;
     renewImagesDuration?: number;
     webcalendars?: string[] | null;
     refreshAlbumPeopleInterval?: number;
