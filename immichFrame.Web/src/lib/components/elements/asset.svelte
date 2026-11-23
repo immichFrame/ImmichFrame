@@ -10,6 +10,7 @@
 	import { thumbHashToDataURL } from 'thumbhash';
 	import AssetInfo from '$lib/components/elements/asset-info.svelte';
 	import ImageOverlay from '$lib/components/elements/imageoverlay/image-overlay.svelte';
+	import { faceCropPosition } from './face-crop';
 
 	interface Props {
 		asset: [
@@ -86,6 +87,14 @@
 	let panDirection = $derived(panEffect());
 	const enableZoom = $derived(imageZoom && !isVideo);
 	const enablePan = $derived(imagePan && !isVideo);
+	let paneWidth = $state(0);
+	let paneHeight = $state(0);
+	let imageAspect = $state(0);
+	const cropPosition = $derived(
+		imageFill && !isVideo && paneWidth && paneHeight
+			? faceCropPosition(asset[2], imageAspect, paneWidth / paneHeight)
+			: undefined
+	);
 
 	const thumbhashUrl = $derived(getThumbhashUrl());
 
@@ -204,7 +213,13 @@
 	<ImageOverlay asset={asset[1]} albums={asset[3]} />
 {/if}
 
-<div class="immichframe_image relative place-self-center overflow-hidden">
+<div
+	class="immichframe_image overflow-hidden {imageFill
+		? 'absolute inset-0'
+		: 'relative place-self-center'}"
+	bind:clientWidth={paneWidth}
+	bind:clientHeight={paneHeight}
+>
 	<!-- Container with zoom-effect -->
 	<div
 		class="relative w-full h-full {enableZoom ? 'zoom' : ''} {enablePan ? 'pan' : ''}"
@@ -241,7 +256,7 @@
 			<video
 				bind:this={videoElement}
 				class="{imageFill
-					? 'w-screen max-h-screen h-dvh-safe object-cover'
+					? 'object-cover'
 					: 'max-h-screen h-dvh-safe max-w-full object-contain'} w-full h-full"
 				src={asset[0]}
 				autoplay={!playAudio}
@@ -270,10 +285,16 @@
 		{:else}
 			<img
 				class="{imageFill
-					? 'w-screen max-h-screen h-dvh-safe object-cover'
+					? 'object-cover'
 					: 'max-h-screen h-dvh-safe max-w-full object-contain'} w-full h-full"
+				style:object-position={cropPosition}
 				src={asset[0]}
 				alt="data"
+				onload={({ currentTarget }) => {
+					if (currentTarget instanceof HTMLImageElement && currentTarget.naturalHeight) {
+						imageAspect = currentTarget.naturalWidth / currentTarget.naturalHeight;
+					}
+				}}
 				onerror={() => {
 					console.error('Image failed to load:', asset[0]);
 					onAssetError();
