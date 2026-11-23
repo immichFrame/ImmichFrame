@@ -33,8 +33,8 @@
 	const CURSOR_HIDE_MS = 2000;
 	const RELOAD_ON_ERROR_MS = 30000;
 
-	let assetHistory: api.AssetResponseDto[] = $state([]);
-	let assetBacklog: api.AssetResponseDto[] = $state([]);
+	let slideHistory: api.AssetResponseDto[][] = $state([]);
+	let slideBacklog: api.AssetResponseDto[][] = $state([]);
 
 	let displayingAssets: api.AssetResponseDto[] = $state([]);
 
@@ -102,6 +102,7 @@
 	};
 
 	async function updateAssetPromises() {
+		const assetBacklog = slideBacklog.flat();
 		for (let asset of displayingAssets) {
 			if (!(asset.id in assetPromisesDict)) {
 				assetPromisesDict[asset.id] = loadAsset(asset);
@@ -144,8 +145,8 @@
 			}
 
 			error = false;
-			assetBacklog = assetRequest.data.filter(
-				(asset) => isImageAsset(asset) || isVideoAsset(asset)
+			slideBacklog = groupSlides(
+				assetRequest.data.filter((asset) => isImageAsset(asset) || isVideoAsset(asset))
 			);
 		} catch {
 			error = true;
@@ -216,25 +217,24 @@
 	};
 
 	async function getNextAssets() {
-		if (!assetBacklog.length) {
+		if (!slideBacklog.length) {
 			await loadAssets();
 		}
 
-		if (!error && !assetBacklog.length) {
+		if (!error && !slideBacklog.length) {
 			error = true;
 			errorMessage = 'No assets were found! Check your configuration.';
 			return;
 		}
 
-		const useSplit = shouldUseSplitView(assetBacklog);
-		const next = assetBacklog.splice(0, useSplit ? 2 : 1);
+		const next = slideBacklog.shift() ?? [];
 
 		if (displayingAssets.length) {
-			assetHistory.push(...displayingAssets);
+			slideHistory.push(displayingAssets);
 		}
 
-		if (assetHistory.length > 250) {
-			assetHistory = assetHistory.slice(-250);
+		if (slideHistory.length > 250) {
+			slideHistory = slideHistory.slice(-250);
 		}
 
 		displayingAssets = next;
@@ -243,15 +243,13 @@
 	}
 
 	async function getPreviousAssets() {
-		if (!assetHistory.length) {
+		const next = slideHistory.pop();
+		if (!next) {
 			return;
 		}
 
-		const useSplit = shouldUseSplitView(assetHistory.slice(-2));
-		const next = assetHistory.splice(useSplit ? -2 : -1);
-
 		if (displayingAssets.length) {
-			assetBacklog.unshift(...displayingAssets);
+			slideBacklog.unshift(displayingAssets);
 		}
 
 		displayingAssets = next;
@@ -273,15 +271,32 @@
 		return assetHeight > assetWidth;
 	}
 
-	function shouldUseSplitView(assets: api.AssetResponseDto[]): boolean {
-		return (
-			$configStore.layout?.trim().toLowerCase() === 'splitview' &&
-			assets.length > 1 &&
-			isImageAsset(assets[0]) &&
-			isImageAsset(assets[1]) &&
-			isPortrait(assets[0]) &&
-			isPortrait(assets[1])
-		);
+	function groupSlides(assets: api.AssetResponseDto[]): api.AssetResponseDto[][] {
+		if ($configStore.layout?.trim().toLowerCase() !== 'splitview') {
+			return assets.map((asset) => [asset]);
+		}
+
+		const slides: api.AssetResponseDto[][] = [];
+		let waitingPortrait: api.AssetResponseDto[] | undefined;
+
+		for (const asset of assets) {
+			if (!isImageAsset(asset) || !isPortrait(asset)) {
+				slides.push([asset]);
+				continue;
+			}
+
+			if (waitingPortrait && waitingPortrait[0].id !== asset.id) {
+				waitingPortrait.push(asset);
+				waitingPortrait = undefined;
+				continue;
+			}
+
+			const slide = [asset];
+			slides.push(slide);
+			waitingPortrait ??= slide;
+		}
+
+		return slides;
 	}
 
 	function hasBirthday(assets: api.AssetResponseDto[]) {
