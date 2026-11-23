@@ -1,7 +1,6 @@
 using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
-using ImmichFrame.WebApi.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,7 +8,6 @@ namespace ImmichFrame.WebApi.Controllers;
 
 [ApiController]
 [Route("api/controls")]
-[Authorize(AuthenticationSchemes = ImmichFrameAdminAuthenticationHandler.SchemeName)]
 public sealed class FrameControlsController(IHttpClientFactory clients, IConfiguration configuration) : ControllerBase
 {
     private static readonly SemaphoreSlim ScanGate = new(1);
@@ -52,6 +50,7 @@ public sealed class FrameControlsController(IHttpClientFactory clients, IConfigu
         catch (OperationCanceledException) when (!ct.IsCancellationRequested) { return false; }
     }
 
+    [AllowAnonymous]
     [HttpPost("scan")]
     public async Task<IActionResult> Scan(CancellationToken ct)
     {
@@ -77,6 +76,7 @@ public sealed class FrameControlsController(IHttpClientFactory clients, IConfigu
 
     public record FrameCommand(string Device, string Command, decimal? Value);
 
+    [Authorize]
     [HttpPost("command")]
     public async Task<IActionResult> Send(FrameCommand request, CancellationToken ct)
     {

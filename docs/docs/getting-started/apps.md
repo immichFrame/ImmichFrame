@@ -61,11 +61,11 @@ See also: [ImmichFrame Android repository][github-android-repo]
     then re-do the above steps for any other device you want to change the screensaver to immichframe on another android tv device
 
 ### Remote Control
-Open `/controls` on your ImmichFrame server, or choose **Controls** in the admin header. Sign in with the server admin password, choose **Scan LAN**, and select your Android frame. The browser remembers the selected address for your next visit. Use **Frame on** and **Frame off** to wake or dim the display, and **Reset** to restore Android's system brightness.
+Open `/controls` on your ImmichFrame server, or choose **Controls** in the admin header. Anyone who can reach the server can discover frames. Choose **Scan LAN**, and select your Android frame. The browser remembers the selected address for your next visit. Use **Frame on** and **Frame off** to wake or dim the display, and **Reset** to restore Android's system brightness.
 
 ![Frame controls with a selected Android device](/img/frame-controls.png)
 
-Discovery runs inside the server container. It checks TCP port 53287 on the private IPv4 /24 of the connecting client. If you use a reverse proxy, a different subnet, or Docker networking that hides client addresses, set the container environment variable `FRAME_CONTROL_NETWORK` to the frame's LAN (for example `192.168.1.0/24`). The container must be able to reach that LAN. File-managed installations disable admin authentication and cannot use the controls page.
+Discovery runs inside the server container. It checks TCP port 53287 on the private IPv4 /24 of the connecting client. If you use a reverse proxy, a different subnet, or Docker networking that hides client addresses, set the container environment variable `FRAME_CONTROL_NETWORK` to the frame's LAN (for example `192.168.1.0/24`). The container must be able to reach that LAN. Sending commands uses the same optional authentication secret as the slideshow.
 
 The Android app runs a small local HTTP server on port 53287 that accepts commands `dim`, `undim`, `next`, `previous`, `pause`, `settings`, `brightness?value=x`.  
 Brightness value must be a float between 0.00 and 1.00, or -1.00 to use the system default.   
