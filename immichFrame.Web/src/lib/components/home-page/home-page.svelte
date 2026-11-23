@@ -392,11 +392,18 @@
 		}
 
 		let faces: api.AssetFaceResponseDto[] = [];
-		if (!isVideoAsset(assetResponse) && ($configStore.imageZoom || $configStore.imagePan)) {
-			const facesRequest = await api.getAssetFaces(assetResponse.id, {
-				clientIdentifier: $clientIdentifierStore
-			});
-			faces = facesRequest.data;
+		if (
+			isImageAsset(assetResponse) &&
+			($configStore.imageFill || $configStore.imageZoom || $configStore.imagePan)
+		) {
+			try {
+				const facesRequest = await api.getAssetFaces(assetResponse.id, {
+					clientIdentifier: $clientIdentifierStore
+				});
+				faces = facesRequest.data ?? [];
+			} catch {
+				// A photo can still display when face metadata is unavailable.
+			}
 		}
 
 		return [assetUrl, assetResponse, faces, album] as [
