@@ -32,6 +32,7 @@
 	const VIDEO_STALL_MS = 15000;
 	const CURSOR_HIDE_MS = 2000;
 	const RELOAD_ON_ERROR_MS = 30000;
+	const FACE_REQUEST_TIMEOUT_MS = 3000;
 
 	let assetHistory: api.AssetResponseDto[] = $state([]);
 	let assetBacklog: api.AssetResponseDto[] = $state([]);
@@ -396,13 +397,21 @@
 			isImageAsset(assetResponse) &&
 			($configStore.imageFill || $configStore.imageZoom || $configStore.imagePan)
 		) {
+			const controller = new AbortController();
+			const timeout = setTimeout(() => controller.abort(), FACE_REQUEST_TIMEOUT_MS);
 			try {
-				const facesRequest = await api.getAssetFaces(assetResponse.id, {
-					clientIdentifier: $clientIdentifierStore
-				});
-				faces = facesRequest.data ?? [];
+				const facesRequest = await api.getAssetFaces(
+					assetResponse.id,
+					{ clientIdentifier: $clientIdentifierStore },
+					{ signal: controller.signal }
+				);
+				if (facesRequest.status === 200 && Array.isArray(facesRequest.data)) {
+					faces = facesRequest.data;
+				}
 			} catch {
 				// A photo can still display when face metadata is unavailable.
+			} finally {
+				clearTimeout(timeout);
 			}
 		}
 
