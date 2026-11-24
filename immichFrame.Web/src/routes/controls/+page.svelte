@@ -11,6 +11,7 @@
 		mdiRestore,
 		mdiCog
 	} from '@mdi/js';
+	import AlbumQueue from '$lib/components/controls/album-queue.svelte';
 	import AdminBrand from '$lib/components/admin/admin-brand.svelte';
 
 	import { authSecretStore } from '$lib/stores/persist.store';
@@ -207,6 +208,7 @@
 			</div>
 		</fieldset>
 		<p role="status" class="text-sm">{message}</p>
+        {#key device + ($authSecretStore ?? '')}<AlbumQueue {device} onauth={()=>needsSecret=true}/>{/key}
 	</main>
 </TooltipProvider>
 

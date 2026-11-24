@@ -1,14 +1,17 @@
 
 import { writable } from 'svelte/store';
 
-function persistStore(key: string, defaultValue: string | null) {
-    const storedValue = localStorage?.getItem(key);
-    const initialValue: string = storedValue ? JSON.parse(storedValue) : defaultValue;
-
+function persistStore(key: string, defaultValue: string) {
+    let initialValue = defaultValue;
+    try {
+        const stored = localStorage.getItem(key);
+        const value = stored && JSON.parse(stored);
+        if (typeof value === "string" && value) initialValue = value;
+    } catch { /* Use an in-memory store when storage is unavailable. */ }
     const store = writable(initialValue);
-
     store.subscribe((value) => {
-        localStorage?.setItem(key, JSON.stringify(value));
+        try { localStorage.setItem(key, JSON.stringify(value)); }
+        catch { /* The in-memory value still updates. */ }
     });
 
     return store;
@@ -23,4 +26,4 @@ function generateGUID() {
 }
 
 export const clientIdentifierStore = persistStore('clientIdentifier', generateGUID());
-export const authSecretStore = persistStore('authSecret', null);
+export const authSecretStore = persistStore('authSecret', '');

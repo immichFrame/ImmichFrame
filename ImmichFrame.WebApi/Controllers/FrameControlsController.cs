@@ -74,7 +74,7 @@ public sealed class FrameControlsController(IHttpClientFactory clients, IConfigu
         finally { ScanGate.Release(); }
     }
 
-    public record FrameCommand(string Device, string Command, decimal? Value);
+    public record FrameCommand(string Device, string Command, decimal? Value, string? Key = null);
 
     [Authorize]
     [HttpPost("command")]
@@ -85,6 +85,9 @@ public sealed class FrameControlsController(IHttpClientFactory clients, IConfigu
             return BadRequest("Select a frame on the configured LAN.");
         var path = request.Command switch
         {
+            "status" => "playback-status",
+            "goto" when request.Key?.Split('/') is { Length: 3 } parts && parts.All(p => Guid.TryParseExact(p, "D", out _)) =>
+                "goto?value=" + Uri.EscapeDataString(request.Key),
             "dim" or "undim" or "next" or "previous" or "pause" or "settings" => request.Command,
             "brightness" when request.Value is -1 or (>= 0 and <= 1) =>
                 "brightness?value=" + request.Value.Value.ToString(CultureInfo.InvariantCulture),
@@ -96,6 +99,17 @@ public sealed class FrameControlsController(IHttpClientFactory clients, IConfigu
         try
         {
             using var response = await client.GetAsync($"http://{address}:53287/{path}", ct);
+            if (request.Command == "status")
+            {
+                if (response.StatusCode == HttpStatusCode.NotFound) return Ok(new { supported = false });
+                if (response.IsSuccessStatusCode)
+                {
+                    var status = await response.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>(ct);
+                    if (status.TryGetProperty("frame", out var id) && id.TryGetGuid(out var frame))
+                        return Ok(new { supported = true, frame, current = status.GetProperty("current").GetString() });
+                }
+                return StatusCode(502, "Invalid playback status.");
+            }
             return response.IsSuccessStatusCode ? NoContent() : StatusCode(502, "Frame rejected the command.");
         }
         catch (HttpRequestException) { return StatusCode(502, "Frame connection failed."); }

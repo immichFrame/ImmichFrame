@@ -24,6 +24,11 @@ public class FrameControlsControllerTests
         }
     }
 
+    [TestCase("192.168.1.8", "brightness", 0.375, 204, "/brightness?value=0.375")]
+    [TestCase("192.168.1.8", "brightness", 0, 204, "/brightness?value=0")]
+    [TestCase("192.168.1.8", "brightness", 1, 204, "/brightness?value=1")]
+    [TestCase("192.168.1.8", "brightness", -0.1, 400, null)]
+    [TestCase("192.168.1.8", "brightness", 1.01, 400, null)]
     [TestCase("192.168.1.8", "brightness", -1, 204, "/brightness?value=-1")]
     [TestCase("192.168.1.8", "dim", 0, 204, "/dim")]
     [TestCase("192.168.1.8", "undim", 0, 204, "/undim")]
@@ -32,7 +37,7 @@ public class FrameControlsControllerTests
     [TestCase("192.168.1.8", "brightness", 2, 400, null)]
     [TestCase("192.168.1.8", "other", 0, 400, null)]
     [TestCase("192.168.1.8", "next", 0, 502, null)]
-    public async Task SendValidatesTargetAndCommand(string device, string command, int value, int status, string? expectedPath)
+    public async Task SendValidatesTargetAndCommand(string device, string command, decimal value, int status, string? expectedPath)
     {
         using var handler = new FrameHandler { RespondAsFrame = status != 502 };
         using var client = new HttpClient(handler);

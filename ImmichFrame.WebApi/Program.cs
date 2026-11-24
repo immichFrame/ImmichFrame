@@ -106,6 +106,7 @@ builder.Services.AddSingleton<IAssetAccountTracker, BloomFilterAssetAccountTrack
 builder.Services.AddSingleton<Func<IList<IAccountImmichFrameLogic>, IAccountSelectionStrategy>>(srv =>
     accounts => ActivatorUtilities.CreateInstance<TotalAccountImagesSelectionStrategy>(srv, accounts));
 builder.Services.AddHttpClient(); // Ensures IHttpClientFactory is available
+builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient("FrameRemote", client =>
 {
     client.Timeout = TimeSpan.FromSeconds(1.5);
