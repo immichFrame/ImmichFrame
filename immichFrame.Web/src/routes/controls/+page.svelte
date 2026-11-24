@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Button, Card, CardBody, themeManager, TooltipProvider } from '@immich/ui';
 	import {
 		mdiWifi,
 		mdiChevronLeft,
@@ -12,7 +11,7 @@
 		mdiCog
 	} from '@mdi/js';
 	import AlbumQueue from '$lib/components/controls/album-queue.svelte';
-	import AdminBrand from '$lib/components/admin/admin-brand.svelte';
+	import Icon from '$lib/components/elements/icon.svelte';
 
 	import { authSecretStore } from '$lib/stores/persist.store';
 
@@ -27,7 +26,6 @@
 	let secret = $state('');
 
 	onMount(() => {
-		themeManager.setPreference(themeManager.preference);
 		try {
 			device = localStorage.getItem(storageKey) ?? '';
 			if (device) devices = [device];
@@ -99,120 +97,155 @@
 </script>
 
 <svelte:head><title>Frame controls · ImmichFrame</title></svelte:head>
-<TooltipProvider>
-	<main class="mx-auto flex min-h-screen max-w-2xl flex-col gap-4 px-4 py-8 sm:py-12">
-		<header class="mb-3 flex items-center justify-between">
-			<AdminBrand subtitle="Frame controls" />
-			<a href="/admin" class="text-sm underline">Server settings</a>
-		</header>
 
-		<Card
-			><CardBody>
-				<h2>Target device</h2>
-				<div class="flex flex-wrap items-center gap-3">
-					<select
-						aria-label="Target device"
-						class="min-h-11 min-w-36 flex-1 rounded-lg border px-3"
-						value={device}
-						disabled={busy || !devices.length}
-						onchange={(e) => selectDevice(e.currentTarget.value)}
-					>
-						<option value="">Select a frame</option>
-						{#each devices as address (address)}<option value={address}>{address}</option>{/each}
-					</select>
-					<Button leadingIcon={mdiWifi} disabled={busy} onclick={scan}>Scan LAN</Button>
-				</div>
-			</CardBody></Card
-		>
-		{#if needsSecret}
-			<form
-				class="flex flex-wrap items-center gap-2"
-				onsubmit={(event) => {
-					event.preventDefault();
-					authSecretStore.set(secret);
-					secret = '';
-					needsSecret = false;
-					message = 'Secret saved. Select a command to continue.';
-				}}
-			>
-				<label for="frame-secret">Slideshow secret</label>
-				<input
-					id="frame-secret"
-					type="password"
-					required
-					bind:value={secret}
-					class="rounded border p-2"
-				/>
-				<Button type="submit">Save</Button>
-			</form>
-		{/if}
-		<fieldset
-			disabled={busy || !device}
-			class="flex min-w-0 flex-col gap-4 disabled:opacity-60"
-			aria-label="Frame controls"
-		>
-			<Card
-				><CardBody>
-					<h2>Playback</h2>
-					<div class="playback grid grid-cols-3 gap-2">
-						<Button leadingIcon={mdiChevronLeft} variant="outline" onclick={() => send('previous')}
-							>Previous</Button
-						>
-						<Button leadingIcon={mdiPlayPause} onclick={() => send('pause')}>Play / pause</Button>
-						<Button leadingIcon={mdiChevronRight} variant="outline" onclick={() => send('next')}
-							>Next</Button
-						>
-					</div>
-				</CardBody></Card
-			>
-			<Card
-				><CardBody>
-					<h2>Display</h2>
-					<div class="flex flex-wrap gap-2">
-						<Button leadingIcon={mdiPower} variant="outline" onclick={() => send('undim')}
-							>Frame on</Button
-						>
-						<Button leadingIcon={mdiPowerSleep} variant="outline" onclick={() => send('dim')}
-							>Frame off</Button
-						>
-					</div>
-					<div class="mt-6 flex items-baseline justify-between">
-						<label for="brightness">Brightness</label><output for="brightness" class="text-sm"
-							>{brightnessLabel}</output
-						>
-					</div>
-					<div class="mt-2 flex items-center gap-4">
-						<input
-							id="brightness"
-							class="min-w-0 flex-1"
-							type="range"
-							min="0"
-							max="1"
-							step="0.01"
-							bind:value={brightness}
-							oninput={(e) => (brightnessLabel = Math.round(+e.currentTarget.value * 100) + '%')}
-							onchange={() => send('brightness', brightness)}
-						/>
-						<Button
-							leadingIcon={mdiRestore}
-							variant="outline"
-							onclick={() => send('brightness', -1)}>Reset</Button
-						>
-					</div>
-				</CardBody></Card
-			>
+<main class="mx-auto flex min-h-screen max-w-2xl flex-col gap-4 px-4 py-8 sm:py-12">
+	<header class="mb-3 flex items-center justify-between">
+		<div class="flex items-center gap-3">
+			<img src="/logo.svg" alt="" class="h-9 w-9" />
 			<div>
-				<Button leadingIcon={mdiCog} variant="outline" onclick={() => send('settings')}
-					>Open frame settings</Button
+				<h1>ImmichFrame</h1>
+				<p>Frame controls</p>
+			</div>
+		</div>
+		<a href="/admin" class="text-sm underline">Server settings</a>
+	</header>
+
+	<section class="panel">
+		<h2>Target device</h2>
+		<div class="flex flex-wrap items-center gap-3">
+			<select
+				aria-label="Target device"
+				class="min-h-11 min-w-36 flex-1 rounded-lg border px-3"
+				value={device}
+				disabled={busy || !devices.length}
+				onchange={(e) => selectDevice(e.currentTarget.value)}
+			>
+				<option value="">Select a frame</option>
+				{#each devices as address (address)}<option value={address}>{address}</option>{/each}
+			</select>
+			<button class="control-button" disabled={busy} onclick={scan}
+				><Icon path={mdiWifi} ariaHidden={true} />Scan LAN</button
+			>
+		</div>
+	</section>
+	{#if needsSecret}
+		<form
+			class="flex flex-wrap items-center gap-2"
+			onsubmit={(event) => {
+				event.preventDefault();
+				authSecretStore.set(secret);
+				secret = '';
+				needsSecret = false;
+				message = 'Secret saved. Select a command to continue.';
+			}}
+		>
+			<label for="frame-secret">Slideshow secret</label>
+			<input
+				id="frame-secret"
+				type="password"
+				required
+				bind:value={secret}
+				class="rounded border p-2"
+			/>
+			<button class="control-button" type="submit">Save</button>
+		</form>
+	{/if}
+	<fieldset
+		disabled={busy || !device}
+		class="flex min-w-0 flex-col gap-4 disabled:opacity-60"
+		aria-label="Frame controls"
+	>
+		<section class="panel">
+			<h2>Playback</h2>
+			<div class="playback grid grid-cols-3 gap-2">
+				<button class="control-button" onclick={() => send('previous')}
+					><Icon path={mdiChevronLeft} ariaHidden={true} />Previous</button
+				>
+				<button class="control-button" onclick={() => send('pause')}
+					><Icon path={mdiPlayPause} ariaHidden={true} />Play / pause</button
+				>
+				<button class="control-button" onclick={() => send('next')}
+					><Icon path={mdiChevronRight} ariaHidden={true} />Next</button
 				>
 			</div>
-		</fieldset>
-		<p role="status" class="text-sm">{message}</p>
-        {#key device + ($authSecretStore ?? '')}<AlbumQueue {device} onauth={()=>needsSecret=true}/>{/key}
-	</main>
-</TooltipProvider>
+		</section>
+		<section class="panel">
+			<h2>Display</h2>
+			<div class="flex flex-wrap gap-2">
+				<button class="control-button" onclick={() => send('undim')}
+					><Icon path={mdiPower} ariaHidden={true} />Frame on</button
+				>
+				<button class="control-button" onclick={() => send('dim')}
+					><Icon path={mdiPowerSleep} ariaHidden={true} />Frame off</button
+				>
+			</div>
+			<div class="mt-6 flex items-baseline justify-between">
+				<label for="brightness">Brightness</label><output for="brightness" class="text-sm"
+					>{brightnessLabel}</output
+				>
+			</div>
+			<div class="mt-2 flex items-center gap-4">
+				<input
+					id="brightness"
+					class="min-w-0 flex-1"
+					type="range"
+					min="0"
+					max="1"
+					step="0.01"
+					bind:value={brightness}
+					oninput={(e) => (brightnessLabel = Math.round(+e.currentTarget.value * 100) + '%')}
+					onchange={() => send('brightness', brightness)}
+				/>
+				<button class="control-button" onclick={() => send('brightness', -1)}
+					><Icon path={mdiRestore} ariaHidden={true} />Reset</button
+				>
+			</div>
+		</section>
+		<div>
+			<button class="control-button" onclick={() => send('settings')}
+				><Icon path={mdiCog} ariaHidden={true} />Open frame settings</button
+			>
+		</div>
+	</fieldset>
+	<p role="status" class="text-sm">{message}</p>
+	{#key device + ($authSecretStore ?? '')}<AlbumQueue
+			{device}
+			onauth={() => (needsSecret = true)}
+		/>{/key}
+</main>
 
 <style>
+	main {
+		color: CanvasText;
+		background: Canvas;
+	}
+	h1 {
+		font-size: 1.3rem;
+		font-weight: 650;
+	}
+	.panel {
+		border: 1px solid color-mix(in srgb, CanvasText 20%, Canvas);
+		border-radius: 1rem;
+		padding: 1rem;
+	}
+	.control-button {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.45rem;
+		border: 1px solid currentColor;
+		border-radius: 0.75rem;
+		min-height: 2.75rem;
+		padding: 0.5rem 0.85rem;
+		color: light-dark(#344294, #accbfa);
+	}
+	.control-button:disabled {
+		opacity: 0.6;
+	}
+	.control-button:hover:enabled {
+		background: color-mix(in srgb, currentColor 12%, Canvas);
+	}
+
 	h2 {
 		font-size: 1.125rem;
 		font-weight: 600;
