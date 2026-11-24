@@ -207,7 +207,7 @@
 	);
 </script>
 
-<section class="space-y-3 rounded-xl border p-4">
+<section class="min-w-0 space-y-3 rounded-xl border p-4">
 	<h2>Now showing</h2>
 	{#if current}{#key current.key}
 			<img class="max-h-52 rounded" alt={current.name} use:thumbnail={current.key} />
@@ -268,6 +268,7 @@
 	</select>
 	<input
 		aria-label="Upload images"
+        class="block w-full min-w-0 max-w-full"
 		disabled={!target || working}
 		type="file"
 		multiple
