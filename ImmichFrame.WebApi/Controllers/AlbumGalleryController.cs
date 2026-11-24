@@ -19,7 +19,9 @@ public sealed class AlbumGalleryController(IServerSettings settings, IHttpClient
     IMemoryCache cache, SettingsServiceOptions options, IDataProtectionProvider protection) : Controller
 {
     public record Asset(Guid Id, string Type, string OriginalFileName, DateTimeOffset FileCreatedAt);
-    public record Album(string AlbumName, string? Order, Asset[] Assets);
+    public record Album(string AlbumName, string? Order, Asset[]? Assets);
+    public record Bucket(string TimeBucket);
+    public record BucketPhotos(Guid[] Id, bool[] IsImage, bool[] IsTrashed, DateTimeOffset[] FileCreatedAt);
     public record Photo(string Key, string Name);
     public record Transform(double X, double Y, double Width, double Height, int Turns, bool FlipX, bool FlipY);
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
@@ -46,14 +48,29 @@ public sealed class AlbumGalleryController(IServerSettings settings, IHttpClient
         {
             entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(5);
             using var client = Client(a);
-            return await client.GetFromJsonAsync<Album>($"albums/{album}", ct);
+            var info = await client.GetFromJsonAsync<Album>($"albums/{album}", ct);
+            if (info == null || info.Assets != null) return info;
+            var buckets = await client.GetFromJsonAsync<Bucket[]>($"timeline/buckets?albumId={album}", ct) ?? [];
+            var photos = new List<Asset>();
+            foreach (var bucket in buckets)
+            {
+                var rows = await client.GetFromJsonAsync<BucketPhotos>(
+                    $"timeline/bucket?albumId={album}&timeBucket={Uri.EscapeDataString(bucket.TimeBucket)}", ct);
+                if (rows == null || rows.Id.Length != rows.IsImage.Length ||
+                    rows.Id.Length != rows.IsTrashed.Length || rows.Id.Length != rows.FileCreatedAt.Length)
+                    throw new BadHttpRequestException("Invalid album timeline response.", 502);
+                for (int i = 0; i < rows.Id.Length; i++)
+                    if (rows.IsImage[i] && !rows.IsTrashed[i])
+                        photos.Add(new(rows.Id[i], "IMAGE", $"Photo {photos.Count + 1}", rows.FileCreatedAt[i]));
+            }
+            return info with { Assets = photos.ToArray() };
         })) ?? throw new BadHttpRequestException("Invalid album response.", 502);
     }
 
     private async Task RequirePhoto(string account, Guid album, Guid asset, CancellationToken ct)
     {
         var info = await ReadAlbum(account, album, ct);
-        if (!info.Assets.Any(item => item.Id == asset && item.Type.Equals("IMAGE", StringComparison.OrdinalIgnoreCase)))
+        if (info.Assets?.Any(item => item.Id == asset && item.Type.Equals("IMAGE", StringComparison.OrdinalIgnoreCase)) != true)
             throw new BadHttpRequestException("Photo is outside the selected album.", 404);
     }
 
@@ -85,8 +102,9 @@ public sealed class AlbumGalleryController(IServerSettings settings, IHttpClient
         {
             var info = await ReadAlbum(account, album, ct);
             albums.Add(new { account, album, name = info.AlbumName });
+            var assets = info.Assets ?? [];
             var ordered = string.Equals(info.Order, "asc", StringComparison.OrdinalIgnoreCase)
-                ? info.Assets.OrderBy(a => a.FileCreatedAt) : info.Assets.OrderByDescending(a => a.FileCreatedAt);
+                ? assets.OrderBy(a => a.FileCreatedAt) : assets.OrderByDescending(a => a.FileCreatedAt);
             foreach (var item in ordered.ThenBy(a => a.Id))
                 if (item.Type.Equals("IMAGE", StringComparison.OrdinalIgnoreCase) && seen.Add((account, item.Id)))
                     photos.Add(new($"{account}/{album}/{item.Id}", item.OriginalFileName));
