@@ -162,6 +162,7 @@
 					<AdminBrand subtitle="Server settings" />
 
 					<div class="flex items-center gap-2">
+						<a href="/controls" class="underline">Controls</a>
 						<Button leadingIcon={mdiContentSave} loading={saving} onclick={save}>
 							{saving ? 'Saving…' : 'Save'}
 						</Button>

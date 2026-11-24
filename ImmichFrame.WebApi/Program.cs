@@ -106,6 +106,15 @@ builder.Services.AddSingleton<IAssetAccountTracker, BloomFilterAssetAccountTrack
 builder.Services.AddSingleton<Func<IList<IAccountImmichFrameLogic>, IAccountSelectionStrategy>>(srv =>
     accounts => ActivatorUtilities.CreateInstance<TotalAccountImagesSelectionStrategy>(srv, accounts));
 builder.Services.AddHttpClient(); // Ensures IHttpClientFactory is available
+builder.Services.AddMemoryCache();
+builder.Services.AddHttpClient("FrameRemote", client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(1.5);
+    client.MaxResponseContentBufferSize = 1024;
+}).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+{
+    AllowAutoRedirect = false, UseProxy = false, UseCookies = false
+});
 builder.Services.AddImmichApiHttpClient(); // Client carrying the Immich API key; must not follow redirects
 
 builder.Services.AddTransient<Func<IAccountSettings, IAccountImmichFrameLogic>>(srv =>

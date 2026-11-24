@@ -61,6 +61,22 @@ See also: [ImmichFrame Android repository][github-android-repo]
     then re-do the above steps for any other device you want to change the screensaver to immichframe on another android tv device
 
 ### Remote Control
+Open `/controls` on your ImmichFrame server, or choose **Controls** in the admin header. Anyone who can reach the server can discover frames. Choose **Scan LAN**, and select your Android frame. The browser remembers the selected address for your next visit. Use **Frame on** and **Frame off** to wake or dim the display, and **Reset** to restore Android's system brightness.
+
+![Frame controls with a selected Android device](/img/frame-controls.png)
+
+#### Album gallery
+
+Select a frame and save a name and a portrait ratio such as `10:16`. Choose **Portrait** or **Landscape** under **Crop orientation**. The browser remembers the choice, and the crop editor uses `10:16` or `16:10` respectively. The setting controls the crop outline. The device rotates its display automatically.
+
+The gallery uses the albums configured in the server's Immich accounts. Select a thumbnail to show that photo, or open its pencil button to crop, rotate, or flip it for the selected frame. The editor supports a device-ratio preview, drag to pan, and navigation to the next or previous photo. **Apply last crop** reuses the saved framing on another photo.
+
+Exact photo selection and frame-specific crops require a compatible Android app in native mode. Tap the photo on the frame to reveal **Previous** and **Next**. The buttons hide after five seconds of inactivity.
+
+The gallery uses `album.read`, `asset.read`, and `asset.view`. Multi-file upload to a configured album also requires `asset.upload`, `albumAsset.create`, and permission to contribute to the album. Frame-specific edits need no additional Immich API permissions.
+
+Discovery runs inside the server container. It checks TCP port 53287 on the private IPv4 /24 of the connecting client. If you use a reverse proxy, a different subnet, or Docker networking that hides client addresses, set the container environment variable `FRAME_CONTROL_NETWORK` to the frame's LAN (for example `192.168.1.0/24`). The container must be able to reach that LAN. Commands, gallery access, uploads and crop changes use the same optional authentication secret as the slideshow.
+
 The Android app runs a small local HTTP server on port 53287 that accepts commands `dim`, `undim`, `next`, `previous`, `pause`, `settings`, `brightness?value=x`.  
 Brightness value must be a float between 0.00 and 1.00, or -1.00 to use the system default.   
 Examples:  
