@@ -37,6 +37,7 @@
 	} | null>(null);
 	let nextOffset = $state(0);
 	let loadingPage = $state(false);
+	let resetRequest = $state<Promise<void> | undefined>();
 	let pageRequest: Promise<void> | undefined;
 	let listRevision = 0;
 	let pollRevision = 0;
@@ -80,7 +81,15 @@
 		photos = offset ? [...photos, ...unique] : unique;
 		if (albums.length === 1) target = albums[0].account + '/' + albums[0].album;
 	}
+	function resetGallery() {
+		const reset = list().finally(() => {
+			if (resetRequest === reset) resetRequest = undefined;
+		});
+		resetRequest = reset;
+		return reset;
+	}
 	function loadMore() {
+		if (resetRequest) return resetRequest;
 		if (pageRequest) return pageRequest;
 		loadingPage = true;
 		pageRequest = list(nextOffset).finally(() => {
@@ -125,7 +134,7 @@
 		untrack(() => void poll(address));
 	});
 	onMount(() => {
-		void list().catch((e) => (message = String(e)));
+		void resetGallery().catch((e) => (message = String(e)));
 		let timer: ReturnType<typeof setTimeout>;
 		async function tick() {
 			await poll();
@@ -189,16 +198,17 @@
 	}
 	let editIndex = $derived(edit ? photos.findIndex((photo) => photo.key === edit?.photo.key) : -1);
 	async function navigate(step: number) {
-		if (editorBusy || editIndex < 0) return;
+		if (editorBusy || resetRequest || editIndex < 0) return;
+		const revision = listRevision;
 		const index = editIndex + step;
 		editorBusy = true;
 		try {
 			while (index === photos.length && nextOffset < total) {
 				const offset = nextOffset;
 				await loadMore();
-				if (nextOffset <= offset) break;
+				if (revision !== listRevision || nextOffset <= offset) break;
 			}
-			if (photos[index]) await loadEditor(photos[index]);
+			if (revision === listRevision && photos[index]) await loadEditor(photos[index]);
 		} catch (error) {
 			editorError = String(error);
 		} finally {
@@ -241,7 +251,7 @@
 		});
 		row.status = 'In album';
 		row.receipt = undefined;
-		await list();
+		await resetGallery();
 	}
 	async function upload(files: File[]) {
 		working = true;
@@ -325,7 +335,7 @@
 				name={edit.photo.name}
 				{frameRatio}
 				{lastCrop}
-				loading={editorBusy}
+				loading={editorBusy || !!resetRequest}
 				navigationError={editorError}
 				canPrevious={editIndex > 0}
 				canNext={editIndex >= 0 && editIndex + 1 < total}
@@ -368,7 +378,7 @@
 		{/each}
 	</div>
 	{#if nextOffset < total}<button
-			disabled={working || loadingPage}
+			disabled={working || loadingPage || !!resetRequest}
 			onclick={async () => {
 				try {
 					await loadMore();

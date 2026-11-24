@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
@@ -44,38 +43,60 @@ public sealed class AlbumGalleryController(IServerSettings settings, IHttpClient
 
     private record CachedAlbum(string Name, string? Order, Asset[] Photos, HashSet<Guid> PhotoIds);
 
-    private static readonly ConcurrentDictionary<(IMemoryCache Cache, string Key), Lazy<Task<CachedAlbum>>> AlbumLoads = new();
+    private sealed class AlbumLoad
+    {
+        public AlbumLoad(Func<AlbumLoad, Task<CachedAlbum>> read) => Snapshot = new(() => read(this));
+        public Lazy<Task<CachedAlbum>> Snapshot { get; }
+    }
+
+    private static readonly object AlbumCacheLock = new();
+    private static readonly Dictionary<(IMemoryCache Cache, string Key), AlbumLoad> AlbumLoads = new();
 
     private Task<CachedAlbum> ReadAlbum(string account, Guid album, CancellationToken ct)
     {
         var source = Account(account, album);
         var key = $"gallery:{account}/{album}";
-        if (cache.TryGetValue<CachedAlbum>(key, out var cached) && cached != null)
-            return Task.FromResult(cached);
-
-        // A caller can cancel its wait without cancelling the shared Immich request.
-        var load = AlbumLoads.GetOrAdd((cache, key), _ => new(() => LoadAlbum(key, source, album)));
-        return load.Value.WaitAsync(ct);
-    }
-
-    private async Task<CachedAlbum> LoadAlbum(string key, IAccountSettings source, Guid album)
-    {
-        try
+        AlbumLoad load;
+        lock (AlbumCacheLock)
         {
             if (cache.TryGetValue<CachedAlbum>(key, out var cached) && cached != null)
-                return cached;
+                return Task.FromResult(cached);
 
+            var loadKey = (cache, key);
+            if (!AlbumLoads.TryGetValue(loadKey, out load!))
+                AlbumLoads[loadKey] = load = new(entry => LoadAlbum(key, source, album, entry));
+        }
+
+        // A caller can cancel its wait without cancelling the shared Immich request.
+        return load.Snapshot.Value.WaitAsync(ct);
+    }
+
+    private async Task<CachedAlbum> LoadAlbum(string key, IAccountSettings source, Guid album, AlbumLoad load)
+    {
+        CachedAlbum? result = null;
+        try
+        {
             using var client = Client(source);
             var info = await client.GetFromJsonAsync<Album>($"albums/{album}")
                 ?? throw new BadHttpRequestException("Invalid album response.", 502);
             var photos = info.Assets?.Where(asset => asset.Type.Equals("IMAGE", StringComparison.OrdinalIgnoreCase)).ToArray()
                 ?? await ReadTimeline(client, album);
-            var result = new CachedAlbum(info.AlbumName, info.Order, photos, photos.Select(photo => photo.Id).ToHashSet());
-            return cache.Set(key, result, TimeSpan.FromSeconds(5));
+            result = new CachedAlbum(info.AlbumName, info.Order, photos, photos.Select(photo => photo.Id).ToHashSet());
+            return result;
         }
         finally
         {
-            AlbumLoads.TryRemove((cache, key), out _);
+            lock (AlbumCacheLock)
+            {
+                var loadKey = (cache, key);
+                // An attachment can retire this load while its HTTP request is still in flight.
+                if (AlbumLoads.TryGetValue(loadKey, out var active) && ReferenceEquals(active, load))
+                {
+                    if (result != null)
+                        cache.Set(key, result, TimeSpan.FromSeconds(5));
+                    AlbumLoads.Remove(loadKey);
+                }
+            }
         }
     }
 
@@ -233,7 +254,12 @@ public sealed class AlbumGalleryController(IServerSettings settings, IHttpClient
         if (rows is not {Length:1} || (!rows[0].GetProperty("success").GetBoolean() &&
             !(rows[0].TryGetProperty("error", out var error) && error.GetString() == "duplicate")))
             return StatusCode(409,"Uploaded. Adding to the album failed.");
-        cache.Remove($"gallery:{account}/{album}");
+        lock (AlbumCacheLock)
+        {
+            var key = $"gallery:{account}/{album}";
+            AlbumLoads.Remove((cache, key));
+            cache.Remove(key);
+        }
         return NoContent();
     }
 }
