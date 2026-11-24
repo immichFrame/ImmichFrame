@@ -16,6 +16,9 @@
 	import { authSecretStore } from '$lib/stores/persist.store';
 
 	const storageKey = 'immichframe.controls.device';
+	const namesKey = 'immichframe.controls.deviceNames';
+	let names = $state<Record<string, string>>({});
+	let frameName = $state('');
 	let devices = $state<string[]>([]);
 	let device = $state('');
 	let busy = $state(false);
@@ -28,7 +31,15 @@
 	onMount(() => {
 		try {
 			device = localStorage.getItem(storageKey) ?? '';
-			if (device) devices = [device];
+			const stored = JSON.parse(localStorage.getItem(namesKey) ?? '{}');
+			names = Object.fromEntries(
+				Object.entries(stored ?? {}).filter(
+					([address, name]) =>
+						/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(address) && typeof name === 'string'
+				)
+			) as Record<string, string>;
+			devices = [...new Set([...Object.keys(names), ...(device ? [device] : [])])];
+			frameName = names[device] ?? '';
 		} catch {
 			/* Storage may be unavailable in private browsing. */
 		}
@@ -36,12 +47,28 @@
 
 	function selectDevice(address: string) {
 		device = address;
+		frameName = names[address] ?? '';
 		brightnessLabel = 'Unknown';
 		brightness = 0.5;
 		try {
 			if (address) localStorage.setItem(storageKey, address);
+			else localStorage.removeItem(storageKey);
 		} catch {
 			/* Selection still works for this session. */
+		}
+	}
+
+	function saveName(event: SubmitEvent) {
+		event.preventDefault();
+		const name = frameName.trim();
+		if (!device || !name) return;
+		names[device] = name;
+		frameName = name;
+		try {
+			localStorage.setItem(namesKey, JSON.stringify(names));
+			message = 'Frame name saved.';
+		} catch {
+			message = 'Frame name saved for this session.';
 		}
 	}
 
@@ -68,9 +95,10 @@
 		busy = true;
 		message = 'Searching the frame LAN…';
 		try {
-			devices = await (await request('scan')).json();
-			if (!devices.includes(device)) selectDevice(devices.length === 1 ? devices[0] : '');
-			message = devices.length
+			const found: string[] = await (await request('scan')).json();
+			devices = [...new Set([...Object.keys(names), ...found, ...(device ? [device] : [])])];
+			if (!device && found.length === 1) selectDevice(found[0]);
+			message = found.length
 				? ''
 				: 'No frames found. Check the frame is running and the server can reach its LAN.';
 		} catch (error) {
@@ -115,18 +143,34 @@
 		<div class="flex flex-wrap items-center gap-3">
 			<select
 				aria-label="Target device"
-				class="min-h-11 min-w-36 flex-1 rounded-lg border px-3"
+				class="min-h-11 min-w-36 max-w-full flex-1 rounded-lg border px-3"
 				value={device}
 				disabled={busy || !devices.length}
 				onchange={(e) => selectDevice(e.currentTarget.value)}
 			>
 				<option value="">Select a frame</option>
-				{#each devices as address (address)}<option value={address}>{address}</option>{/each}
+				{#each devices as address (address)}<option value={address}
+						>{names[address] ? names[address] + ' (' + address + ')' : address}</option
+					>{/each}
 			</select>
 			<button class="control-button" disabled={busy} onclick={scan}
 				><Icon path={mdiWifi} ariaHidden={true} />Scan LAN</button
 			>
 		</div>
+		{#if device}
+			<form class="mt-3 flex flex-wrap items-end gap-2" onsubmit={saveName}>
+				<label class="flex min-w-0 flex-1 flex-col gap-1">
+					Frame name
+					<input
+						class="rounded-lg border px-3 py-2"
+						maxlength="48"
+						bind:value={frameName}
+						placeholder="Living room"
+					/>
+				</label>
+				<button class="control-button" disabled={!frameName.trim() || busy}>Save name</button>
+			</form>
+		{/if}
 	</section>
 	{#if needsSecret}
 		<form

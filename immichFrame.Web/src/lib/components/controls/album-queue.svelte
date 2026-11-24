@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { mdiPencil, mdiUpload } from '@mdi/js';
+	import Icon from '$lib/components/elements/icon.svelte';
 	import { authSecretStore } from '$lib/stores/persist.store';
 	import Editor from './crop-editor.svelte';
 	type Photo = { key: string; name: string };
@@ -29,6 +31,7 @@
 		working = $state(false);
 	const controller = new AbortController();
 	let alive = true;
+	let filePicker: HTMLInputElement;
 	function auth() {
 		return $authSecretStore
 			? { Authorization: 'Bearer ' + $authSecretStore }
@@ -210,8 +213,17 @@
 <section class="min-w-0 space-y-3 rounded-xl border p-4">
 	<h2>Now showing</h2>
 	{#if current}{#key current.key}
-			<img class="max-h-52 rounded" alt={current.name} use:thumbnail={current.key} />
-			<button onclick={() => openEditor(current!)}>Edit frame crop</button>
+			<div class="relative w-fit">
+				<img class="max-h-52 max-w-full rounded" alt={current.name} use:thumbnail={current.key} />
+				<button
+					class="photo-edit"
+					aria-label="Edit current photo"
+					title="Edit frame crop"
+					onclick={() => openEditor(current!)}
+				>
+					<Icon path={mdiPencil} ariaHidden={true} />
+				</button>
+			</div>
 		{/key}{:else}<p>
 			{frameMessage ||
 				(device
@@ -230,7 +242,7 @@
 		</p>{/if}
 	<div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
 		{#each photos as p (p.key)}
-			<div class="min-w-0 rounded border p-1" class:current={p.key === status.current}>
+			<div class="relative min-w-0 rounded border p-1" class:current={p.key === status.current}>
 				<button
 					class="w-full"
 					disabled={!status.supported}
@@ -243,7 +255,15 @@
 						use:thumbnail={p.key}
 					/>
 				</button>
-				<button disabled={!status.supported} onclick={() => openEditor(p)}>Edit crop</button>
+				<button
+					class="photo-edit"
+					disabled={!status.supported}
+					aria-label={'Edit ' + p.name}
+					title="Edit frame crop"
+					onclick={() => openEditor(p)}
+				>
+					<Icon path={mdiPencil} ariaHidden={true} />
+				</button>
 			</div>
 		{/each}
 	</div>
@@ -266,9 +286,13 @@
 				value={a.account + '/' + a.album}>{a.name}</option
 			>{/each}
 	</select>
+	<button class="upload-button" disabled={!target || working} onclick={() => filePicker.click()}>
+		<Icon path={mdiUpload} ariaHidden={true} /> Choose files
+	</button>
 	<input
 		aria-label="Upload images"
-        class="block w-full min-w-0 max-w-full"
+		bind:this={filePicker}
+		hidden
 		disabled={!target || working}
 		type="file"
 		multiple
@@ -289,6 +313,27 @@
 </section>
 
 <style>
+	.photo-edit {
+		position: absolute;
+		top: 0.45rem;
+		right: 0.45rem;
+		display: grid;
+		place-items: center;
+		min-width: 2.5rem;
+		min-height: 2.5rem;
+		border-radius: 0.65rem;
+		background: rgb(0 0 0 / 75%);
+		color: white;
+	}
+	.upload-button {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		padding: 0.55rem 0.85rem;
+		border: 1px solid currentColor;
+		border-radius: 0.65rem;
+	}
+
 	h2 {
 		font-size: 1.15rem;
 		font-weight: 600;

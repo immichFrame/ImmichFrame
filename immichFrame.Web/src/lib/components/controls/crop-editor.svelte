@@ -35,7 +35,20 @@
 			img = new Image();
 		img.onload = () => {
 			source = img;
-			ratio = ((crop.width * dimensions[0]) / (crop.height * dimensions[1])).toFixed(4) + ':1';
+			const width = crop.width * dimensions[0];
+			const height = crop.height * dimensions[1];
+			const aspect = width / height;
+			if (Math.abs(aspect - 10 / 16) < 0.00001) {
+				ratio = '10:16';
+			} else {
+				const scale = Math.min(1, 100000 / Math.max(width, height));
+				const w = Math.max(1, Math.round(width * scale));
+				const h = Math.max(1, Math.round(height * scale));
+				let a = w,
+					b = h;
+				while (b) [a, b] = [b, a % b];
+				ratio = w / a + ':' + h / a;
+			}
 		};
 		img.onerror = () => (error = 'Could not decode this image.');
 		img.src = url;
@@ -46,8 +59,8 @@
 	});
 	function fit() {
 		const [w, h] = ratio.split(':').map(Number);
-		if (!(w > 0 && h > 0 && Number.isFinite(w / h))) {
-			error = 'Enter a ratio such as 10:16.';
+		if (!/^\s*\d{1,5}\s*:\s*\d{1,5}\s*$/.test(ratio) || w < 1 || h < 1) {
+			error = 'Enter two whole numbers, such as 10:16.';
 			return;
 		}
 		error = '';
@@ -119,7 +132,14 @@
 		></canvas>
 	</div>
 	<div class="flex flex-wrap items-center gap-3">
-		<label>Ratio <input class="w-24 border" bind:value={ratio} onchange={fit} /></label>
+		<label
+			>Ratio <input
+				class="w-28 border"
+				placeholder="10:16"
+				bind:value={ratio}
+				onchange={fit}
+			/></label
+		>
 		<label
 			>Zoom <input
 				type="range"
