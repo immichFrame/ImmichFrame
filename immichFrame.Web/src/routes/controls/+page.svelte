@@ -16,6 +16,9 @@
 	import { authSecretStore } from '$lib/stores/persist.store';
 
 	const storageKey = 'immichframe.controls.device';
+	const ratiosKey = 'immichframe.controls.deviceRatios';
+	let ratios = $state<Record<string, string>>({});
+	let portraitRatio = $state('10:16');
 	const namesKey = 'immichframe.controls.deviceNames';
 	let names = $state<Record<string, string>>({});
 	let frameName = $state('');
@@ -40,6 +43,14 @@
 			) as Record<string, string>;
 			devices = [...new Set([...Object.keys(names), ...(device ? [device] : [])])];
 			frameName = names[device] ?? '';
+			const savedRatios = JSON.parse(localStorage.getItem(ratiosKey) ?? '{}');
+			ratios = Object.fromEntries(
+				Object.entries(savedRatios ?? {}).filter(
+					([address, value]) =>
+						devices.includes(address) && typeof value === 'string' && validPortrait(value)
+				)
+			) as Record<string, string>;
+			portraitRatio = ratios[device] ?? '10:16';
 		} catch {
 			/* Storage may be unavailable in private browsing. */
 		}
@@ -48,6 +59,7 @@
 	function selectDevice(address: string) {
 		device = address;
 		frameName = names[address] ?? '';
+		portraitRatio = ratios[address] ?? '10:16';
 		brightnessLabel = 'Unknown';
 		brightness = 0.5;
 		try {
@@ -58,17 +70,30 @@
 		}
 	}
 
+	function validPortrait(value: string) {
+		const [width, height] = value.split(':').map(Number);
+		return /^\d{1,5}:\d{1,5}$/.test(value) && width > 0 && width <= height;
+	}
+
 	function saveName(event: SubmitEvent) {
 		event.preventDefault();
 		const name = frameName.trim();
 		if (!device || !name) return;
+		const ratio = portraitRatio.replace(/\s/g, '');
+		if (!validPortrait(ratio)) {
+			message = 'Enter a portrait ratio such as 10:16, with width no greater than height.';
+			return;
+		}
+		ratios[device] = ratio;
+		portraitRatio = ratio;
 		names[device] = name;
 		frameName = name;
 		try {
 			localStorage.setItem(namesKey, JSON.stringify(names));
-			message = 'Frame name saved.';
+			localStorage.setItem(ratiosKey, JSON.stringify(ratios));
+			message = 'Frame settings saved.';
 		} catch {
-			message = 'Frame name saved for this session.';
+			message = 'Frame settings saved for this session.';
 		}
 	}
 
@@ -168,7 +193,16 @@
 						placeholder="Living room"
 					/>
 				</label>
-				<button class="control-button" disabled={!frameName.trim() || busy}>Save name</button>
+				<label class="flex flex-col gap-1">
+					Portrait ratio
+					<input
+						class="w-28 rounded-lg border px-3 py-2"
+						maxlength="11"
+						bind:value={portraitRatio}
+						placeholder="10:16"
+					/>
+				</label>
+				<button class="control-button" disabled={!frameName.trim() || busy}>Save frame</button>
 			</form>
 		{/if}
 	</section>
@@ -253,6 +287,7 @@
 	</fieldset>
 	<p role="status" class="text-sm">{message}</p>
 	{#key device + ($authSecretStore ?? '')}<AlbumQueue
+			portraitRatio={ratios[device] ?? '10:16'}
 			{device}
 			onauth={() => (needsSecret = true)}
 		/>{/key}

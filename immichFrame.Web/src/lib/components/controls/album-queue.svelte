@@ -16,7 +16,11 @@
 		flipY: boolean;
 	};
 	type Upload = { name: string; status: string; target: string; asset?: string; receipt?: string };
-	let { device, onauth }: { device: string; onauth: () => void } = $props();
+	let {
+		device,
+		portraitRatio,
+		onauth
+	}: { device: string; portraitRatio: string; onauth: () => void } = $props();
 	let albums = $state<Album[]>([]),
 		photos = $state<Photo[]>([]),
 		total = $state(0),
@@ -24,6 +28,9 @@
 	let status = $state<{ supported: boolean; frame?: string; current?: string }>({
 		supported: false
 	});
+	let lastCrop = $state<Crop | null>(null);
+	let editorBusy = $state(false);
+	let editorError = $state('');
 	let edit = $state<{ photo: Photo; image: Blob; crop: Crop } | null>(null);
 	let message = $state(''),
 		frameMessage = $state(''),
@@ -96,6 +103,9 @@
 		}
 	}
 	async function openEditor(p: Photo) {
+		if (editorBusy) return;
+		editorBusy = true;
+		editorError = '';
 		try {
 			const base = '/api/gallery/' + p.key;
 			const [image, crop] = await Promise.all([
@@ -104,7 +114,10 @@
 			]);
 			edit = { photo: p, image, crop };
 		} catch (e) {
-			message = String(e);
+			editorError = String(e);
+			if (!edit) message = editorError;
+		} finally {
+			editorBusy = false;
 		}
 	}
 	async function save(crop: Crop) {
@@ -117,8 +130,24 @@
 		});
 		await poll();
 		if (status.current === key) await remote('goto', key);
+		lastCrop = crop;
 		message = 'Frame crop saved.';
 	}
+	let editIndex = $derived(edit ? photos.findIndex((photo) => photo.key === edit?.photo.key) : -1);
+	async function navigate(step: number) {
+		if (editIndex < 0) return;
+		const index = editIndex + step;
+		if (index === photos.length && photos.length < total) {
+			try {
+				await list(photos.length);
+			} catch (error) {
+				editorError = String(error);
+				return;
+			}
+		}
+		if (photos[index]) await openEditor(photos[index]);
+	}
+
 	function thumbnail(node: HTMLImageElement, key: string) {
 		let url = '',
 			active = true;
@@ -230,12 +259,25 @@
 					? 'Waiting for playback confirmation…'
 					: 'Select a frame to see its current photo.')}
 		</p>{/if}
-	{#if edit}<Editor
-			image={edit.image}
-			initial={edit.crop}
-			onsave={save}
-			onclose={() => (edit = null)}
-		/>{/if}
+	{#if edit}
+		{#key edit.photo.key}
+			<Editor
+				image={edit.image}
+				initial={edit.crop}
+				name={edit.photo.name}
+				{portraitRatio}
+				{lastCrop}
+				loading={editorBusy}
+				navigationError={editorError}
+				canPrevious={editIndex > 0}
+				canNext={editIndex >= 0 && editIndex + 1 < total}
+				onprevious={() => navigate(-1)}
+				onnext={() => navigate(1)}
+				onsave={save}
+				onclose={() => (edit = null)}
+			/>
+		{/key}
+	{/if}
 	<h2>Up next <small>({total})</small></h2>
 	{#if !albums.length}<p>
 			Choose albums in the server account settings to populate this gallery.
