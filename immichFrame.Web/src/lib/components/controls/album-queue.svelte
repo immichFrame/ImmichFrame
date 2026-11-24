@@ -16,11 +16,8 @@
 		flipY: boolean;
 	};
 	type Upload = { name: string; status: string; target: string; asset?: string; receipt?: string };
-	let {
-		device,
-		portraitRatio,
-		onauth
-	}: { device: string; portraitRatio: string; onauth: () => void } = $props();
+	let { device, frameRatio, onauth }: { device: string; frameRatio: string; onauth: () => void } =
+		$props();
 	let albums = $state<Album[]>([]),
 		photos = $state<Photo[]>([]),
 		total = $state(0),
@@ -326,7 +323,7 @@
 				image={edit.image}
 				initial={edit.crop}
 				name={edit.photo.name}
-				{portraitRatio}
+				{frameRatio}
 				{lastCrop}
 				loading={editorBusy}
 				navigationError={editorError}

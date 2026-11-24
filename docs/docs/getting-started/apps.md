@@ -67,7 +67,7 @@ Open `/controls` on your ImmichFrame server, or choose **Controls** in the admin
 
 #### Album gallery
 
-Select a frame and save a name and a portrait ratio such as `10:16`. The browser remembers these settings, and the crop editor uses `16:10` for landscape photos.
+Select a frame and save a name and a portrait ratio such as `10:16`. Choose **Portrait** or **Landscape** under **Crop orientation**. The browser remembers the choice, and the crop editor uses `10:16` or `16:10` respectively. The setting controls the crop outline. The device rotates its display automatically.
 
 The gallery uses the albums configured in the server's Immich accounts. Select a thumbnail to show that photo, or open its pencil button to crop, rotate, or flip it for the selected frame. The editor supports a device-ratio preview, drag to pan, and navigation to the next or previous photo. **Apply last crop** reuses the saved framing on another photo.
 

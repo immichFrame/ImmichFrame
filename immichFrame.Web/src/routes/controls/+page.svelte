@@ -17,6 +17,10 @@
 
 	const storageKey = 'immichframe.controls.device';
 	const ratiosKey = 'immichframe.controls.deviceRatios';
+	const orientationsKey = 'immichframe.controls.cropOrientations';
+	type Orientation = 'portrait' | 'landscape';
+	let orientations = $state<Record<string, Orientation>>({});
+
 	let ratios = $state<Record<string, string>>({});
 	let portraitRatio = $state('10:16');
 	const namesKey = 'immichframe.controls.deviceNames';
@@ -30,6 +34,13 @@
 	let brightnessLabel = $state('Unknown');
 	let needsSecret = $state(false);
 	let secret = $state('');
+
+	let cropOrientation = $derived(orientations[device] ?? 'portrait');
+	let frameRatio = $derived(
+		cropOrientation === 'landscape'
+			? (ratios[device] ?? '10:16').split(':').reverse().join(':')
+			: (ratios[device] ?? '10:16')
+	);
 
 	onMount(() => {
 		try {
@@ -51,10 +62,28 @@
 				)
 			) as Record<string, string>;
 			portraitRatio = ratios[device] ?? '10:16';
+			const savedOrientations = JSON.parse(localStorage.getItem(orientationsKey) ?? '{}');
+			orientations = Object.fromEntries(
+				Object.entries(savedOrientations ?? {}).filter(
+					([address, value]) =>
+						/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(address) &&
+						(value === 'portrait' || value === 'landscape')
+				)
+			) as Record<string, Orientation>;
 		} catch {
 			/* Storage may be unavailable in private browsing. */
 		}
 	});
+
+	function setOrientation(orientation: Orientation) {
+		if (!device) return;
+		orientations[device] = orientation;
+		try {
+			localStorage.setItem(orientationsKey, JSON.stringify(orientations));
+		} catch {
+			/* The selected orientation still applies for this session. */
+		}
+	}
 
 	function selectDevice(address: string) {
 		device = address;
@@ -183,6 +212,24 @@
 			>
 		</div>
 		{#if device}
+			<div
+				class="mt-4 flex flex-wrap items-center gap-2"
+				role="group"
+				aria-label="Crop orientation"
+			>
+				<span class="mr-1 text-sm">Crop orientation</span>
+				<button
+					class="control-button"
+					aria-pressed={cropOrientation === 'portrait'}
+					onclick={() => setOrientation('portrait')}>Portrait</button
+				>
+				<button
+					class="control-button"
+					aria-pressed={cropOrientation === 'landscape'}
+					onclick={() => setOrientation('landscape')}>Landscape</button
+				>
+				<span aria-live="polite">{frameRatio}</span>
+			</div>
 			<form class="mt-3 flex flex-wrap items-end gap-2" onsubmit={saveName}>
 				<label class="flex min-w-0 flex-1 flex-col gap-1">
 					Frame name
@@ -287,7 +334,7 @@
 	</fieldset>
 	<p role="status" class="text-sm">{message}</p>
 	{#key device + ($authSecretStore ?? '')}<AlbumQueue
-			portraitRatio={ratios[device] ?? '10:16'}
+			{frameRatio}
 			{device}
 			onauth={() => (needsSecret = true)}
 		/>{/key}
@@ -317,6 +364,10 @@
 		min-height: 2.75rem;
 		padding: 0.5rem 0.85rem;
 		color: light-dark(#344294, #accbfa);
+	}
+	.control-button[aria-pressed='true'] {
+		background: color-mix(in srgb, currentColor 20%, Canvas);
+		font-weight: 650;
 	}
 	.control-button:disabled {
 		opacity: 0.6;

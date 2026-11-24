@@ -13,7 +13,7 @@
 		image,
 		initial,
 		name,
-		portraitRatio,
+		frameRatio,
 		lastCrop,
 		loading,
 		navigationError,
@@ -27,7 +27,7 @@
 		image: Blob;
 		initial: Crop;
 		name: string;
-		portraitRatio: string;
+		frameRatio: string;
 		lastCrop: Crop | null;
 		loading: boolean;
 		navigationError: string;
@@ -58,9 +58,7 @@
 				: [source.naturalWidth, source.naturalHeight]
 			: [1, 1]
 	);
-	let frameRatio = $derived(
-		dimensions[0] > dimensions[1] ? portraitRatio.split(':').reverse().join(':') : portraitRatio
-	);
+
 	function changed() {
 		dirty = true;
 		saved = false;
