@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import { mdiPencil, mdiUpload } from '@mdi/js';
 	import Icon from '$lib/components/elements/icon.svelte';
 	import { authSecretStore } from '$lib/stores/persist.store';
@@ -31,7 +31,18 @@
 	let lastCrop = $state<Crop | null>(null);
 	let editorBusy = $state(false);
 	let editorError = $state('');
-	let edit = $state<{ photo: Photo; image: Blob; crop: Crop } | null>(null);
+	let edit = $state<{
+		photo: Photo;
+		image: Blob;
+		crop: Crop;
+		frame: string;
+		device: string;
+	} | null>(null);
+	let nextOffset = $state(0);
+	let loadingPage = $state(false);
+	let pageRequest: Promise<void> | undefined;
+	let listRevision = 0;
+	let pollRevision = 0;
 	let message = $state(''),
 		frameMessage = $state(''),
 		uploads = $state<Upload[]>([]),
@@ -55,31 +66,67 @@
 		return r;
 	}
 	async function list(offset = 0) {
-		const data = await (await api('/api/gallery?offset=' + offset)).json();
+		const revision = offset ? listRevision : ++listRevision;
+		const data: { albums: Album[]; photos: Photo[]; total: number } = await (
+			await api('/api/gallery?offset=' + offset)
+		).json();
+		if (revision !== listRevision) return;
 		albums = data.albums;
 		total = data.total;
-		photos = offset ? [...photos, ...data.photos] : data.photos;
+		nextOffset = offset + data.photos.length;
+		const seen = new Set(offset ? photos.map((photo) => photo.key) : []);
+		const unique = data.photos.filter((photo) => {
+			if (seen.has(photo.key)) return false;
+			seen.add(photo.key);
+			return true;
+		});
+		photos = offset ? [...photos, ...unique] : unique;
 		if (albums.length === 1) target = albums[0].account + '/' + albums[0].album;
 	}
-	function remote(command: string, key?: string) {
+	function loadMore() {
+		if (pageRequest) return pageRequest;
+		loadingPage = true;
+		pageRequest = list(nextOffset).finally(() => {
+			pageRequest = undefined;
+			loadingPage = false;
+		});
+		return pageRequest;
+	}
+	function remote(command: string, key?: string, address = device) {
 		return api('/api/controls/command', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ device, command, key })
+			body: JSON.stringify({ device: address, command, key })
 		});
 	}
-	async function poll() {
-		if (!device) return;
+	async function poll(address = device) {
+		const revision = ++pollRevision;
+		if (!address) {
+			status = { supported: false };
+			frameMessage = '';
+			return;
+		}
 		try {
-			status = await (await remote('status')).json();
+			const nextStatus = await (await remote('status', undefined, address)).json();
+			if (!alive || address !== device || revision !== pollRevision) return;
+			status = nextStatus;
 			frameMessage = status.supported
 				? ''
 				: 'Install the gallery test app on this frame to select and crop photos.';
 		} catch (e) {
+			if (!alive || address !== device || revision !== pollRevision) return;
 			status = { supported: false };
 			frameMessage = String(e);
 		}
 	}
+	$effect(() => {
+		const address = device;
+		status = { supported: false };
+		frameMessage = '';
+		edit = null;
+		lastCrop = null;
+		untrack(() => void poll(address));
+	});
 	onMount(() => {
 		void list().catch((e) => (message = String(e)));
 		let timer: ReturnType<typeof setTimeout>;
@@ -87,7 +134,7 @@
 			await poll();
 			if (alive) timer = setTimeout(tick, 3000);
 		}
-		void tick();
+		timer = setTimeout(tick, 3000);
 		return () => {
 			alive = false;
 			clearTimeout(timer);
@@ -103,49 +150,63 @@
 		}
 	}
 	async function openEditor(p: Photo) {
-		if (editorBusy) return;
+		if (editorBusy || !status.frame) return;
 		editorBusy = true;
+		try {
+			await loadEditor(p);
+		} finally {
+			editorBusy = false;
+		}
+	}
+	async function loadEditor(p: Photo) {
+		const frame = status.frame;
+		const address = device;
+		if (!frame) return;
 		editorError = '';
 		try {
 			const base = '/api/gallery/' + p.key;
 			const [image, crop] = await Promise.all([
 				api(base + '/image').then((r) => r.blob()),
-				api(base + '/crop/' + status.frame).then((r) => r.json())
+				api(base + '/crop/' + frame).then((r) => r.json())
 			]);
-			edit = { photo: p, image, crop };
+			if (alive && device === address && status.frame === frame)
+				edit = { photo: p, image, crop, frame, device: address };
 		} catch (e) {
 			editorError = String(e);
 			if (!edit) message = editorError;
-		} finally {
-			editorBusy = false;
 		}
 	}
 	async function save(crop: Crop) {
-		if (!edit) return;
-		const key = edit.photo.key;
-		await api('/api/gallery/' + key + '/crop/' + status.frame, {
+		if (!edit || edit.device !== device) throw Error('Select the frame and reopen the editor.');
+		const { photo, frame, device: address } = edit;
+		await api('/api/gallery/' + photo.key + '/crop/' + frame, {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(crop)
 		});
-		await poll();
-		if (status.current === key) await remote('goto', key);
+		await poll(address);
+		if (device === address && status.frame === frame && status.current === photo.key)
+			await remote('goto', photo.key, address);
 		lastCrop = crop;
 		message = 'Frame crop saved.';
 	}
 	let editIndex = $derived(edit ? photos.findIndex((photo) => photo.key === edit?.photo.key) : -1);
 	async function navigate(step: number) {
-		if (editIndex < 0) return;
+		if (editorBusy || editIndex < 0) return;
 		const index = editIndex + step;
-		if (index === photos.length && photos.length < total) {
-			try {
-				await list(photos.length);
-			} catch (error) {
-				editorError = String(error);
-				return;
+		editorBusy = true;
+		try {
+			while (index === photos.length && nextOffset < total) {
+				const offset = nextOffset;
+				await loadMore();
+				if (nextOffset <= offset) break;
 			}
+			if (photos[index]) await loadEditor(photos[index]);
+		} catch (error) {
+			editorError = String(error);
+		} finally {
+			editorBusy = false;
 		}
-		if (photos[index]) await openEditor(photos[index]);
 	}
 
 	function thumbnail(node: HTMLImageElement, key: string) {
@@ -309,16 +370,13 @@
 			</div>
 		{/each}
 	</div>
-	{#if photos.length < total}<button
-			disabled={working}
+	{#if nextOffset < total}<button
+			disabled={working || loadingPage}
 			onclick={async () => {
-				working = true;
 				try {
-					await list(photos.length);
+					await loadMore();
 				} catch (e) {
 					message = String(e);
-				} finally {
-					working = false;
 				}
 			}}>Load more</button
 		>{/if}

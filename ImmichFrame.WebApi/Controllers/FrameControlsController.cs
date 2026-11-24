@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.Json;
 using System.Net;
 using System.Net.Sockets;
 using Microsoft.AspNetCore.Authorization;
@@ -104,9 +105,19 @@ public sealed class FrameControlsController(IHttpClientFactory clients, IConfigu
                 if (response.StatusCode == HttpStatusCode.NotFound) return Ok(new { supported = false });
                 if (response.IsSuccessStatusCode)
                 {
-                    var status = await response.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>(ct);
-                    if (status.TryGetProperty("frame", out var id) && id.TryGetGuid(out var frame))
-                        return Ok(new { supported = true, frame, current = status.GetProperty("current").GetString() });
+                    try
+                    {
+                        var status = await response.Content.ReadFromJsonAsync<JsonElement>(ct);
+                        if (status.ValueKind == JsonValueKind.Object &&
+                            status.TryGetProperty("frame", out var id) && id.ValueKind == JsonValueKind.String &&
+                            id.TryGetGuid(out var frame) && status.TryGetProperty("current", out var current) &&
+                            current.ValueKind is JsonValueKind.String or JsonValueKind.Null)
+                            return Ok(new { supported = true, frame, current = current.GetString() });
+                    }
+                    catch (JsonException)
+                    {
+                        return StatusCode(502, "Invalid playback status.");
+                    }
                 }
                 return StatusCode(502, "Invalid playback status.");
             }

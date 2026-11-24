@@ -202,15 +202,17 @@
 		last = { x: e.clientX, y: e.clientY };
 		changed();
 	}
+	let saveError = $state('');
 	async function save(advance?: () => void) {
 		busy = true;
+		saveError = '';
 		try {
 			await onsave({ ...crop });
 			dirty = false;
 			saved = true;
 			advance?.();
 		} catch (e) {
-			error = String(e);
+			saveError = String(e);
 		} finally {
 			busy = false;
 		}
@@ -290,11 +292,19 @@
 				else fit();
 			}}>↷ Right</button
 		>
-		<button aria-pressed={crop.flipX} onclick={() => (crop.flipX = !crop.flipX)}
-			>↔ Flip horizontal</button
+		<button
+			aria-pressed={crop.flipX}
+			onclick={() => {
+				crop.flipX = !crop.flipX;
+				changed();
+			}}>↔ Flip horizontal</button
 		>
-		<button aria-pressed={crop.flipY} onclick={() => (crop.flipY = !crop.flipY)}
-			>↕ Flip vertical</button
+		<button
+			aria-pressed={crop.flipY}
+			onclick={() => {
+				crop.flipY = !crop.flipY;
+				changed();
+			}}>↕ Flip vertical</button
 		>
 		<button
 			onclick={() => {
@@ -336,7 +346,9 @@
 		</button>
 	</div>
 	{#if saved}<p role="status">Frame crop saved.</p>{/if}
-	{#if navigationError || error}<p role="alert">{navigationError || error}</p>{/if}
+	{#if navigationError || error || saveError}<p role="alert">
+			{error || saveError || navigationError}
+		</p>{/if}
 </dialog>
 
 <style>

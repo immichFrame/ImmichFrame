@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
@@ -41,36 +42,65 @@ public sealed class AlbumGalleryController(IServerSettings settings, IHttpClient
         return client;
     }
 
-    private async Task<Album> ReadAlbum(string account, Guid album, CancellationToken ct)
+    private record CachedAlbum(string Name, string? Order, Asset[] Photos, HashSet<Guid> PhotoIds);
+
+    private static readonly ConcurrentDictionary<(IMemoryCache Cache, string Key), Lazy<Task<CachedAlbum>>> AlbumLoads = new();
+
+    private Task<CachedAlbum> ReadAlbum(string account, Guid album, CancellationToken ct)
     {
-        var a = Account(account, album);
-        return (await cache.GetOrCreateAsync($"gallery:{account}/{album}", async entry =>
+        var source = Account(account, album);
+        var key = $"gallery:{account}/{album}";
+        if (cache.TryGetValue<CachedAlbum>(key, out var cached) && cached != null)
+            return Task.FromResult(cached);
+
+        // A caller can cancel its wait without cancelling the shared Immich request.
+        var load = AlbumLoads.GetOrAdd((cache, key), _ => new(() => LoadAlbum(key, source, album)));
+        return load.Value.WaitAsync(ct);
+    }
+
+    private async Task<CachedAlbum> LoadAlbum(string key, IAccountSettings source, Guid album)
+    {
+        try
         {
-            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(5);
-            using var client = Client(a);
-            var info = await client.GetFromJsonAsync<Album>($"albums/{album}", ct);
-            if (info == null || info.Assets != null) return info;
-            var buckets = await client.GetFromJsonAsync<Bucket[]>($"timeline/buckets?albumId={album}", ct) ?? [];
-            var photos = new List<Asset>();
-            foreach (var bucket in buckets)
-            {
-                var rows = await client.GetFromJsonAsync<BucketPhotos>(
-                    $"timeline/bucket?albumId={album}&timeBucket={Uri.EscapeDataString(bucket.TimeBucket)}", ct);
-                if (rows == null || rows.Id.Length != rows.IsImage.Length ||
-                    rows.Id.Length != rows.IsTrashed.Length || rows.Id.Length != rows.FileCreatedAt.Length)
-                    throw new BadHttpRequestException("Invalid album timeline response.", 502);
-                for (int i = 0; i < rows.Id.Length; i++)
-                    if (rows.IsImage[i] && !rows.IsTrashed[i])
-                        photos.Add(new(rows.Id[i], "IMAGE", $"Photo {photos.Count + 1}", rows.FileCreatedAt[i]));
-            }
-            return info with { Assets = photos.ToArray() };
-        })) ?? throw new BadHttpRequestException("Invalid album response.", 502);
+            if (cache.TryGetValue<CachedAlbum>(key, out var cached) && cached != null)
+                return cached;
+
+            using var client = Client(source);
+            var info = await client.GetFromJsonAsync<Album>($"albums/{album}")
+                ?? throw new BadHttpRequestException("Invalid album response.", 502);
+            var photos = info.Assets?.Where(asset => asset.Type.Equals("IMAGE", StringComparison.OrdinalIgnoreCase)).ToArray()
+                ?? await ReadTimeline(client, album);
+            var result = new CachedAlbum(info.AlbumName, info.Order, photos, photos.Select(photo => photo.Id).ToHashSet());
+            return cache.Set(key, result, TimeSpan.FromSeconds(5));
+        }
+        finally
+        {
+            AlbumLoads.TryRemove((cache, key), out _);
+        }
+    }
+
+    private static async Task<Asset[]> ReadTimeline(HttpClient client, Guid album)
+    {
+        var buckets = await client.GetFromJsonAsync<Bucket[]>($"timeline/buckets?albumId={album}") ?? [];
+        var photos = new List<Asset>();
+        foreach (var bucket in buckets)
+        {
+            var rows = await client.GetFromJsonAsync<BucketPhotos>(
+                $"timeline/bucket?albumId={album}&timeBucket={Uri.EscapeDataString(bucket.TimeBucket)}");
+            if (rows == null || rows.Id.Length != rows.IsImage.Length ||
+                rows.Id.Length != rows.IsTrashed.Length || rows.Id.Length != rows.FileCreatedAt.Length)
+                throw new BadHttpRequestException("Invalid album timeline response.", 502);
+            for (int i = 0; i < rows.Id.Length; i++)
+                if (rows.IsImage[i] && !rows.IsTrashed[i])
+                    photos.Add(new(rows.Id[i], "IMAGE", $"Photo {photos.Count + 1}", rows.FileCreatedAt[i]));
+        }
+        return photos.ToArray();
     }
 
     private async Task RequirePhoto(string account, Guid album, Guid asset, CancellationToken ct)
     {
         var info = await ReadAlbum(account, album, ct);
-        if (info.Assets?.Any(item => item.Id == asset && item.Type.Equals("IMAGE", StringComparison.OrdinalIgnoreCase)) != true)
+        if (!info.PhotoIds.Contains(asset))
             throw new BadHttpRequestException("Photo is outside the selected album.", 404);
     }
 
@@ -101,12 +131,11 @@ public sealed class AlbumGalleryController(IServerSettings settings, IHttpClient
         foreach (var album in source.Albums.Distinct())
         {
             var info = await ReadAlbum(account, album, ct);
-            albums.Add(new { account, album, name = info.AlbumName });
-            var assets = info.Assets ?? [];
+            albums.Add(new { account, album, name = info.Name });
             var ordered = string.Equals(info.Order, "asc", StringComparison.OrdinalIgnoreCase)
-                ? assets.OrderBy(a => a.FileCreatedAt) : assets.OrderByDescending(a => a.FileCreatedAt);
+                ? info.Photos.OrderBy(a => a.FileCreatedAt) : info.Photos.OrderByDescending(a => a.FileCreatedAt);
             foreach (var item in ordered.ThenBy(a => a.Id))
-                if (item.Type.Equals("IMAGE", StringComparison.OrdinalIgnoreCase) && seen.Add((account, item.Id)))
+                if (seen.Add((account, item.Id)))
                     photos.Add(new($"{account}/{album}/{item.Id}", item.OriginalFileName));
         }
         if (from != null)

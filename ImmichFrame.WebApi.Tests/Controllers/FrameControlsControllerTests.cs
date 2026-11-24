@@ -12,11 +12,19 @@ public class FrameControlsControllerTests
     private sealed class FrameHandler : HttpMessageHandler
     {
         public List<string> Paths { get; } = [];
+        public string? PlaybackStatus { get; set; }
+        public bool LegacyFrame { get; set; }
         public bool RespondAsFrame { get; set; } = true;
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
         {
             Paths.Add(request.RequestUri!.PathAndQuery);
+            if (request.RequestUri.AbsolutePath == "/playback-status")
+                return Task.FromResult(new HttpResponseMessage(LegacyFrame ? HttpStatusCode.NotFound : HttpStatusCode.OK)
+                {
+                    Content = new StringContent(PlaybackStatus ?? "", System.Text.Encoding.UTF8, "application/json")
+                });
+
             return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new StringContent(RespondAsFrame ? "Brightness parameter missing or invalid" : "Unknown service")
@@ -51,5 +59,28 @@ public class FrameControlsControllerTests
         Assert.That(actual, Is.EqualTo(status));
         string[] expected = expectedPath != null ? ["/brightness", expectedPath] : status == 502 ? ["/brightness"] : [];
         Assert.That(handler.Paths, Is.EqualTo(expected));
+    }
+    [TestCase("", false, 502)]
+    [TestCase("[]", false, 502)]
+    [TestCase("{\"frame\":\"e50d68e3-1b99-4ed7-a1ab-7e0044806f5f\"}", false, 502)]
+    [TestCase("{\"frame\":\"e50d68e3-1b99-4ed7-a1ab-7e0044806f5f\",\"current\":123}", false, 502)]
+    [TestCase("{\"frame\":\"e50d68e3-1b99-4ed7-a1ab-7e0044806f5f\",\"current\":null}", false, 200)]
+    [TestCase("{\"frame\":\"e50d68e3-1b99-4ed7-a1ab-7e0044806f5f\",\"current\":\"photo\"}", false, 200)]
+    [TestCase("", true, 200)]
+    public async Task PlaybackStatusValidatesJsonAndSupportsLegacyFrames(string payload, bool legacy, int status)
+    {
+        using var handler = new FrameHandler { PlaybackStatus = payload, LegacyFrame = legacy };
+        using var client = new HttpClient(handler);
+        var factory = new Mock<IHttpClientFactory>();
+        factory.Setup(f => f.CreateClient("FrameRemote")).Returns(client);
+        var config = new ConfigurationBuilder().AddInMemoryCollection(
+            new Dictionary<string, string?> { ["FRAME_CONTROL_NETWORK"] = "192.168.1.0/24" }).Build();
+        var controller = new FrameControlsController(factory.Object, config);
+
+        var result = (ObjectResult)await controller.Send(new("192.168.1.8", "status", null), CancellationToken.None);
+
+        Assert.That(result.StatusCode, Is.EqualTo(status));
+        if (status == 502) Assert.That(result.Value, Is.EqualTo("Invalid playback status."));
+        if (legacy) Assert.That(System.Text.Json.JsonSerializer.Serialize(result.Value), Is.EqualTo("{\"supported\":false}"));
     }
 }
